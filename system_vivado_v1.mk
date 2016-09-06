@@ -20,8 +20,8 @@ export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
 export VIVADO_PROJECT   = $(PROJECT)_project
 export VIVADO_DEPEND    = $(OUT_DIR)/$(PROJECT)_project.xpr
-ifndef VIVADO_BUILD_DIR
-export VIVADO_BUILD_DIR = $(TOP_DIR)/$(MODULES)/StdLib/build
+ifndef RUCKUS_DIR
+export RUCKUS_DIR = $(TOP_DIR)/$(MODULES)/ruckus
 endif
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
@@ -36,7 +36,7 @@ export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
 export SDK_ELF = $(abspath $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).elf)
 
 ifndef SDK_LIB
-export SDK_LIB  =  $(TOP_DIR)/modules/StdLib/sdk/common
+export SDK_LIB  =  $(TOP_DIR)/$(MODULES)/surf/xilinx/general/sdk/common
 endif
 
 # Core Directories (IP cores that exist external of the project must have a physical path, not a logical path)
@@ -95,7 +95,7 @@ test:
 	@echo IMAGES_DIR: $(IMAGES_DIR)
 	@echo IMPL_DIR: $(IMPL_DIR)
 	@echo VIVADO_DIR: $(VIVADO_DIR)
-	@echo VIVADO_BUILD_DIR: $(VIVADO_BUILD_DIR)
+	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo MODULE_DIRS: $(MODULE_DIRS)
@@ -170,29 +170,29 @@ $(VIVADO_DEPEND) :
 	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
 	@cd $(OUT_DIR); rm -f firmware
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_project_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_project_v1.tcl
 
 ###############################################################
 #### Vivado Sources ###########################################
 ###############################################################
 $(SOURCE_DEPEND) : $(CORE_LISTS) $(SRC_LISTS) $(XDC_LISTS) $(SIM_LISTS) $(YAML_LISTS) $(BD_LISTS) $(VIVADO_DEPEND)
 	$(call ACTION_HEADER,"Vivado Source Setup")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_sources_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sources_v1.tcl
 
 ###############################################################
 #### Vivado Batch #############################################
 ###############################################################
 $(IMPL_DIR)/$(PROJECT).bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_build_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_v1.tcl
 #### Vivado Batch (Partial Reconfiguration: Static) ###########
 $(IMPL_DIR)/$(PROJECT)_static.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build (Partial Reconfiguration: Static)")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_build_static_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_static_v1.tcl
 #### Vivado Batch (Partial Reconfiguration: Dynamic) ##########
 $(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build (Partial Reconfiguration: Dynamic)")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_build_dynamic_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_dynamic_v1.tcl
 
 ###############################################################
 #### Bitfile Copy #############################################
@@ -230,7 +230,7 @@ $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dyn
 .PHONY : interactive
 interactive : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Interactive")
-	@cd $(OUT_DIR); vivado -mode tcl -source $(VIVADO_BUILD_DIR)/vivado_env_var_v1.tcl
+	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado_env_var_v1.tcl
 
 ###############################################################
 #### Vivado Gui ###############################################
@@ -238,7 +238,7 @@ interactive : $(SOURCE_DEPEND)
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado GUI")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_gui_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_gui_v1.tcl
 
 ###############################################################
 #### Vivado VCS ###############################################
@@ -246,7 +246,7 @@ gui : $(SOURCE_DEPEND)
 .PHONY : vcs
 vcs : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado VCS")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_vcs_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_vcs_v1.tcl
 
 ###############################################################
 #### Vivado Sythnesis Only ####################################
@@ -254,7 +254,7 @@ vcs : $(SOURCE_DEPEND)
 .PHONY : syn
 syn : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis Only")
-	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_build_v1.tcl
+	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_v1.tcl
 
 ###############################################################
 #### Vivado Sythnesis DCP  ####################################
@@ -262,14 +262,14 @@ syn : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 .PHONY : dcp
 dcp : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis DCP")
-	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_build_v1.tcl
+	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_v1.tcl
 
 ###############################################################
 #### Prom #####################################################
 ###############################################################
 $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs: $(IMPL_DIR)/$(PROJECT).bit
 	$(call ACTION_HEADER,"PROM Generate")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_promgen_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen_v1.tcl
 	@echo ""
 	@echo "Prom file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image is stable!"
@@ -306,7 +306,7 @@ sdk : $(SOURCE_DEPEND)
 .PHONY : elf
 elf : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado SDK .ELF generation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_sdk_bit_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sdk_bit_v1.tcl
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).bit"
 	@echo "Don't forget to 'svn commit' when the image is stable!"  
@@ -317,7 +317,7 @@ elf : $(SOURCE_DEPEND)
 .PHONY : yaml
 yaml : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring YAML.tar.gz file")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_BUILD_DIR)/vivado_yaml_v1.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_yaml_v1.tcl
 
 ###############################################################
 #### Makefile Targets #########################################
