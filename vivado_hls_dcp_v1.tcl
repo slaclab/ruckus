@@ -9,9 +9,9 @@
 ##############################################################################
 
 ## Get variables and Custom Procedures
-set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-source  -quiet ${VIVADO_BUILD_DIR}/vivado_hls_env_var_v1.tcl
-source  -quiet ${VIVADO_BUILD_DIR}/vivado_hls_proc_v1.tcl 
+set RUCKUS_DIR $::env(RUCKUS_DIR)
+source  -quiet ${RUCKUS_DIR}/vivado_hls_env_var_v1.tcl
+source  -quiet ${RUCKUS_DIR}/vivado_hls_proc_v1.tcl 
 
 ## Get the file name and path of the new .dcp file
 set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]

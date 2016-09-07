@@ -102,9 +102,9 @@ proc sleep {N} {
 
 proc BuildIpCores { } {
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
 
    # Check if the target project has IP cores
    if { [get_ips] != "" } {
@@ -155,9 +155,9 @@ proc BuildIpCores { } {
 # Copies all defined cores.txt IP cores from the build tree to source tree
 proc CopyIpCores { } {
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl   
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
    
    # Make sure the IP Cores have been built
    BuildIpCores
@@ -188,9 +188,9 @@ proc CopyIpCores { } {
 # Copies all source code defined cores.txt IP cores from the build tree to source tree
 proc CopyIpCoresDebug { } {
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl   
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
    
    # Make sure the IP Cores have been built
    BuildIpCores
@@ -217,9 +217,9 @@ proc CopyIpCoresDebug { } {
 # Copies all defined block_design.txt IP cores from the build tree to source tree
 proc CopyBdCores { } {
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl   
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
    
    # Check if the target project has IP cores
    if { [get_bd_designs] != "" } {
@@ -242,9 +242,9 @@ proc CopyBdCores { } {
 # Copies all source code defined block_design.txt IP cores from the build tree to source tree
 proc CopyBdCoresDebug { } {
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl   
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
    
    # Check if the target project has IP cores
    if { [get_bd_designs] != "" } {
@@ -267,27 +267,27 @@ proc CopyBdCoresDebug { } {
 
 proc CreateYamlTarGz { } {   
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
    #########################################################
    ## Check if need to include YAML files with the .BIT file
    #########################################################
    if { [file exists ${PROJ_DIR}/yaml.txt] == 1 } {
-      source ${VIVADO_BUILD_DIR}/vivado_yaml_v1.tcl
+      source ${RUCKUS_DIR}/vivado_yaml_v1.tcl
    }
 }
 
 proc CreatePromMcs { } {   
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
    #########################################################
    ## Check if promgen.tcl exist
    #########################################################
    if { [file exists ${PROJ_DIR}/vivado/promgen.tcl] == 1 } {
-      source ${VIVADO_BUILD_DIR}/vivado_promgen_v1.tcl
+      source ${RUCKUS_DIR}/vivado_promgen_v1.tcl
    }
 }   
    
@@ -470,9 +470,9 @@ proc GenPartialReconfigDcp {rtlName} {
    puts "\n\nGenerating ${rtlName} RTL ... \n\n"
 
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
   
    # Get a list of all runs  
    set LIST_RUNS [get_runs]   
@@ -512,10 +512,10 @@ proc GenPartialReconfigDcp {rtlName} {
 proc InsertStaticReconfigDcp { } {
 
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
    set RECONFIG_NAME    $::env(RECONFIG_NAME)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
    
    # Set common variables
    set SYNTH_DIR ${OUT_DIR}/${PROJECT}_project.runs/synth_1
@@ -590,9 +590,9 @@ proc InsertStaticReconfigDcp { } {
 proc ExportStaticReconfigDcp { } {
 
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
    
    # Set common variables
    set IMPL_DIR ${OUT_DIR}/${PROJECT}_project.runs/impl_1
@@ -610,10 +610,10 @@ proc ExportStaticReconfigDcp { } {
 proc ImportStaticReconfigDcp { } {
 
    # Get variables
-   set VIVADO_BUILD_DIR    $::env(VIVADO_BUILD_DIR)
+   set RUCKUS_DIR    $::env(RUCKUS_DIR)
    set RECONFIG_CHECKPOINT $::env(RECONFIG_CHECKPOINT)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
    
    # Set common variables
    set SYNTH_DIR ${OUT_DIR}/${PROJECT}_project.runs/synth_1
@@ -653,9 +653,9 @@ proc ImportStaticReconfigDcp { } {
 proc ExportPartialReconfigBit { } {
 
    # Get variables
-   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   set RUCKUS_DIR $::env(RUCKUS_DIR)
+   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
    
    # Set common variables
    set IMPL_DIR ${OUT_DIR}/${PROJECT}_project.runs/impl_1

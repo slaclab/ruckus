@@ -13,9 +13,9 @@
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-source -quiet ${VIVADO_BUILD_DIR}/vivado_proc_v1.tcl
+set RUCKUS_DIR $::env(RUCKUS_DIR)
+source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
 
 ########################################################
 ## Check for a blank RECONFIG_NAME variable
@@ -30,10 +30,10 @@ if { [CheckForReconfigName] != true } {
 open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
-source -quiet ${VIVADO_BUILD_DIR}/vivado_properties_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_properties_v1.tcl
 
 # Setup project messaging
-source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
 
 ########################################################
 ## Update the complie order
@@ -73,7 +73,7 @@ BuildIpCores
 ########################################################
 ## Target Pre synthesis script
 ########################################################
-source ${VIVADO_BUILD_DIR}/vivado_pre_synthesis_v1.tcl
+source ${RUCKUS_DIR}/vivado_pre_synthesis_v1.tcl
 
 ########################################################
 ## Synthesize
@@ -93,7 +93,7 @@ VivadoRefresh ${VIVADO_PROJECT}
 ########################################################
 ## Target post synthesis script
 ########################################################
-source ${VIVADO_BUILD_DIR}/vivado_post_synthesis_v1.tcl
+source ${RUCKUS_DIR}/vivado_post_synthesis_v1.tcl
 
 ########################################################
 ## Check that the Synthesize is completed
@@ -122,7 +122,7 @@ if { [CheckImpl] != true } {
 ########################################################
 ## Target post route script
 ########################################################
-source ${VIVADO_BUILD_DIR}/vivado_post_route_v1.tcl
+source ${RUCKUS_DIR}/vivado_post_route_v1.tcl
 
 ########################################################
 ## Check that the Implement is completed

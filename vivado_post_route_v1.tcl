@@ -13,9 +13,9 @@
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-source -quiet ${VIVADO_BUILD_DIR}/vivado_proc_v1.tcl
+set RUCKUS_DIR $::env(RUCKUS_DIR)
+source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
 
 ########################################################
 ## Check if passed timing
@@ -34,7 +34,7 @@ if { [CheckTiming false] == true } {
    ## Check if need to include YAML files with the .BIT file
    #########################################################
    if { [file exists ${PROJ_DIR}/yaml.txt] == 1 } {
-      source ${VIVADO_BUILD_DIR}/vivado_yaml_v1.tcl
+      source ${RUCKUS_DIR}/vivado_yaml_v1.tcl
    }
    
    #########################################################
@@ -47,7 +47,7 @@ if { [CheckTiming false] == true } {
       } else {
          set SDK_PRJ_RDY false
          while { ${SDK_PRJ_RDY} != true } {
-            set src_rc [catch {exec xsdk -batch -source ${VIVADO_BUILD_DIR}/vivado_sdk_prj_v1.tcl >@stdout}]       
+            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_prj_v1.tcl >@stdout}]       
             if {$src_rc} {
                puts "Retrying to build SDK project"
                exec rm -rf ${SDK_PRJ}
@@ -58,9 +58,9 @@ if { [CheckTiming false] == true } {
          # Try to build the .ELF file
          catch { 
             # Generate .ELF
-            set src_rc [catch {exec xsdk -batch -source ${VIVADO_BUILD_DIR}/vivado_sdk_elf_v1.tcl >@stdout}]    
+            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf_v1.tcl >@stdout}]    
             # Add .ELF to the .bit file
-            source ${VIVADO_BUILD_DIR}/vivado_sdk_bit_v1.tcl       
+            source ${RUCKUS_DIR}/vivado_sdk_bit_v1.tcl       
          }
       }
    }

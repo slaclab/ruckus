@@ -9,9 +9,9 @@
 ##############################################################################
 
 # Get variables and Custom Procedures
-set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-source -quiet ${VIVADO_BUILD_DIR}/vivado_proc_v1.tcl
+set RUCKUS_DIR $::env(RUCKUS_DIR)
+source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
 
 # Open the project (in case not already opened)
 open_project -quiet ${VIVADO_PROJECT}
@@ -22,7 +22,7 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
 } else {
 
    # Generate .ELF
-   exec xsdk -batch -source ${VIVADO_BUILD_DIR}/vivado_sdk_elf_v1.tcl >@stdout
+   exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf_v1.tcl >@stdout
 
    # Add .ELF to the .bit file properties
    add_files -norecurse ${SDK_ELF}  
