@@ -30,6 +30,9 @@ set_msg_config -suppress -id {Synth 8-4472};# SYNTH: Detected and applied attrib
 set_msg_config -suppress -id {Synth 8-4480};# SYNTH: BRAM: Providing additional output register may help in improving timing
 set_msg_config -suppress -id {Synth 8-3331};# SYNTH: Unconnected port 
 set_msg_config -suppress -id {Synth 8-3332};# SYNTH: Sequential element is unused and will be removed from module 
+set_msg_config -suppress -id {Synth 8-5544};# SYNTH: ROM wont be mapped to block ram
+set_msg_config -suppress -id {Synth 8-5545};# SYNTH: ROM wont be mapped to block ram
+set_msg_config -suppress -id {Synth 8-5546};# SYNTH: ROM wont be mapped to block ram
 
 set_msg_config -suppress -id {HDL 9-1061};  # SIM: Parsing VHDL file 
 set_msg_config -suppress -id {Runs 36-5};   # SIM: Copied auxiliary file
