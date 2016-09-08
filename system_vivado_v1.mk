@@ -8,7 +8,7 @@ ifndef TOP_DIR
 export TOP_DIR  = $(abspath $(PROJ_DIR)/../..)
 endif
 ifndef MODULES
-export MODULES = modules
+export MODULES = $(TOP_DIR)/modules
 endif
 
 # Project Build Directory
@@ -21,7 +21,7 @@ export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
 export VIVADO_PROJECT   = $(PROJECT)_project
 export VIVADO_DEPEND    = $(OUT_DIR)/$(PROJECT)_project.xpr
 ifndef RUCKUS_DIR
-export RUCKUS_DIR = $(TOP_DIR)/$(MODULES)/ruckus
+export RUCKUS_DIR = $(MODULES)/ruckus
 endif
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
@@ -36,7 +36,7 @@ export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
 export SDK_ELF = $(abspath $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).elf)
 
 ifndef SDK_LIB
-export SDK_LIB  =  $(TOP_DIR)/$(MODULES)/surf/xilinx/general/sdk/common
+export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
 endif
 
 # Core Directories (IP cores that exist external of the project must have a physical path, not a logical path)
