@@ -1,6 +1,8 @@
 
 # Detect project name
+ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
+endif
 
 # Top level directories
 export PROJ_DIR = $(abspath $(PWD))
