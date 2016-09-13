@@ -5,10 +5,14 @@ export PROJECT = $(notdir $(PWD))
 endif
 
 # Top level directories
+ifndef PROJ_DIR
 export PROJ_DIR = $(abspath $(PWD))
+endif
+
 ifndef TOP_DIR
 export TOP_DIR  = $(abspath $(PROJ_DIR)/../..)
 endif
+
 ifndef MODULES
 export MODULES = $(TOP_DIR)/modules
 endif
