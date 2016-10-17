@@ -23,22 +23,22 @@ proc VivadoRefresh { vivadoProject } {
 # Achieve a Vivado Project
 proc ArchiveProject { } {
    ## Make a copy of the TCL configurations
-   set SYNTH_PRE     [get_property {STEPS.SYNTH_DESIGN.TCL.PRE}                [get_runs synth_1]]
-   set SYNTH_POST    [get_property {STEPS.SYNTH_DESIGN.TCL.POST}               [get_runs synth_1]]
-   set OPT_PRE       [get_property {STEPS.OPT_DESIGN.TCL.PRE}                  [get_runs impl_1]]
-   set OPT_POST      [get_property {STEPS.OPT_DESIGN.TCL.POST}                 [get_runs impl_1]]
-   set PWR_PRE       [get_property {STEPS.POWER_OPT_DESIGN.TCL.PRE}            [get_runs impl_1]]
-   set PWR_POST      [get_property {STEPS.POWER_OPT_DESIGN.TCL.POST}           [get_runs impl_1]]
-   set PLACE_PRE     [get_property {STEPS.PLACE_DESIGN.TCL.PRE}                [get_runs impl_1]]
-   set PLACE_POST    [get_property {STEPS.PLACE_DESIGN.TCL.POST}               [get_runs impl_1]]
-   set PWR_OPT_PRE   [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE} [get_runs impl_1]]
-   set PWR_OPT_POST  [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST}[get_runs impl_1]]
-   set PHYS_OPT_PRE  [get_property {STEPS.PHYS_OPT_DESIGN.TCL.PRE}             [get_runs impl_1]]
-   set PHYS_OPT_POST [get_property {STEPS.PHYS_OPT_DESIGN.TCL.POST}            [get_runs impl_1]]
-   set ROUTE_PRE     [get_property {STEPS.ROUTE_DESIGN.TCL.PRE}                [get_runs impl_1]]
-   set ROUTE_POST    [get_property {STEPS.ROUTE_DESIGN.TCL.POST}               [get_runs impl_1]]
-   set WRITE_PRE     [get_property {STEPS.WRITE_BITSTREAM.TCL.PRE}             [get_runs impl_1]]
-   set WRITE_POST    [get_property {STEPS.WRITE_BITSTREAM.TCL.POST}            [get_runs impl_1]]
+   set SYNTH_PRE     [get_property {STEPS.SYNTH_DESIGN.TCL.PRE}                 [get_runs synth_1]]
+   set SYNTH_POST    [get_property {STEPS.SYNTH_DESIGN.TCL.POST}                [get_runs synth_1]]
+   set OPT_PRE       [get_property {STEPS.OPT_DESIGN.TCL.PRE}                   [get_runs impl_1]]
+   set OPT_POST      [get_property {STEPS.OPT_DESIGN.TCL.POST}                  [get_runs impl_1]]
+   set PWR_PRE       [get_property {STEPS.POWER_OPT_DESIGN.TCL.PRE}             [get_runs impl_1]]
+   set PWR_POST      [get_property {STEPS.POWER_OPT_DESIGN.TCL.POST}            [get_runs impl_1]]
+   set PLACE_PRE     [get_property {STEPS.PLACE_DESIGN.TCL.PRE}                 [get_runs impl_1]]
+   set PLACE_POST    [get_property {STEPS.PLACE_DESIGN.TCL.POST}                [get_runs impl_1]]
+   set PWR_OPT_PRE   [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE}  [get_runs impl_1]]
+   set PWR_OPT_POST  [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST} [get_runs impl_1]]
+   set PHYS_OPT_PRE  [get_property {STEPS.PHYS_OPT_DESIGN.TCL.PRE}              [get_runs impl_1]]
+   set PHYS_OPT_POST [get_property {STEPS.PHYS_OPT_DESIGN.TCL.POST}             [get_runs impl_1]]
+   set ROUTE_PRE     [get_property {STEPS.ROUTE_DESIGN.TCL.PRE}                 [get_runs impl_1]]
+   set ROUTE_POST    [get_property {STEPS.ROUTE_DESIGN.TCL.POST}                [get_runs impl_1]]
+   set WRITE_PRE     [get_property {STEPS.WRITE_BITSTREAM.TCL.PRE}              [get_runs impl_1]]
+   set WRITE_POST    [get_property {STEPS.WRITE_BITSTREAM.TCL.POST}             [get_runs impl_1]]
 
    ## Remove the TCL configurations
    set_property STEPS.SYNTH_DESIGN.TCL.PRE                 "" [get_runs synth_1]
@@ -62,22 +62,22 @@ proc ArchiveProject { } {
    archive_project $::env(IMAGES_DIR)/$::env(PROJECT)_project.xpr.zip -force -include_config_settings
    
    ## Restore the TCL configurations
-   set_property STEPS.SYNTH_DESIGN.TCL.PRE                 ${SYNTH_PRE}    [get_runs synth_1]
-   set_property STEPS.SYNTH_DESIGN.TCL.POST                ${SYNTH_POST}   [get_runs synth_1]
-   set_property STEPS.OPT_DESIGN.TCL.PRE                   ${OPT_PRE}      [get_runs impl_1]
-   set_property STEPS.OPT_DESIGN.TCL.POST                  ${OPT_POST}     [get_runs impl_1]
-   set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             ${PWR_PRE}      [get_runs impl_1]
-   set_property STEPS.POWER_OPT_DESIGN.TCL.POST            ${PWR_POST}     [get_runs impl_1]
-   set_property STEPS.PLACE_DESIGN.TCL.PRE                 ${PLACE_PRE}    [get_runs impl_1]
-   set_property STEPS.PLACE_DESIGN.TCL.POST                ${PLACE_POST}   [get_runs impl_1]
-   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${PWR_OPT_PRE}  [get_runs impl_1]
-   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${PWR_OPT_POST} [get_runs impl_1]
-   set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE              ${PHYS_OPT_PRE} [get_runs impl_1]
-   set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             ${PHYS_OPT_POST}[get_runs impl_1]
-   set_property STEPS.ROUTE_DESIGN.TCL.PRE                 ${ROUTE_PRE}    [get_runs impl_1]
-   set_property STEPS.ROUTE_DESIGN.TCL.POST                ${ROUTE_POST}   [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              ${WRITE_PRE}    [get_runs impl_1]   
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}   [get_runs impl_1]     
+   set_property STEPS.SYNTH_DESIGN.TCL.PRE                 ${SYNTH_PRE}     [get_runs synth_1]
+   set_property STEPS.SYNTH_DESIGN.TCL.POST                ${SYNTH_POST}    [get_runs synth_1]
+   set_property STEPS.OPT_DESIGN.TCL.PRE                   ${OPT_PRE}       [get_runs impl_1]
+   set_property STEPS.OPT_DESIGN.TCL.POST                  ${OPT_POST}      [get_runs impl_1]
+   set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             ${PWR_PRE}       [get_runs impl_1]
+   set_property STEPS.POWER_OPT_DESIGN.TCL.POST            ${PWR_POST}      [get_runs impl_1]
+   set_property STEPS.PLACE_DESIGN.TCL.PRE                 ${PLACE_PRE}     [get_runs impl_1]
+   set_property STEPS.PLACE_DESIGN.TCL.POST                ${PLACE_POST}    [get_runs impl_1]
+   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${PWR_OPT_PRE}   [get_runs impl_1]
+   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${PWR_OPT_POST}  [get_runs impl_1]
+   set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE              ${PHYS_OPT_PRE}  [get_runs impl_1]
+   set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             ${PHYS_OPT_POST} [get_runs impl_1]
+   set_property STEPS.ROUTE_DESIGN.TCL.PRE                 ${ROUTE_PRE}     [get_runs impl_1]
+   set_property STEPS.ROUTE_DESIGN.TCL.POST                ${ROUTE_POST}    [get_runs impl_1]
+   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              ${WRITE_PRE}     [get_runs impl_1]   
+   set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}    [get_runs impl_1]     
 }
 
 # Custom TLC source function
@@ -264,6 +264,18 @@ proc CopyBdCoresDebug { } {
       }
    }
 } 
+
+proc CreateFpgaBit { } {   
+   # Get variables
+   set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
+   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
+   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   #########################################################
+   ## Check if need to include YAML files with the .BIT file
+   #########################################################
+   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.bit
+   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.bit.gz
+}
 
 proc CreateYamlTarGz { } {   
    # Get variables
