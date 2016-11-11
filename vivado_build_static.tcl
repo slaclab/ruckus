@@ -14,8 +14,8 @@
 ## Get variables and Custom Procedures
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 ########################################################
 ## Check for a blank RECONFIG_NAME variable
@@ -30,10 +30,10 @@ if { [CheckForReconfigName] != true } {
 open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
-source -quiet ${RUCKUS_DIR}/vivado_properties_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_properties.tcl
 
 # Setup project messaging
-source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
 
 ########################################################
 ## Update the complie order
@@ -73,7 +73,7 @@ BuildIpCores
 ########################################################
 ## Target Pre synthesis script
 ########################################################
-source ${RUCKUS_DIR}/vivado_pre_synthesis_v1.tcl
+source ${RUCKUS_DIR}/vivado_pre_synthesis.tcl
 
 ########################################################
 ## Synthesize
@@ -93,7 +93,7 @@ VivadoRefresh ${VIVADO_PROJECT}
 ########################################################
 ## Target post synthesis script
 ########################################################
-source ${RUCKUS_DIR}/vivado_post_synthesis_v1.tcl
+source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
 
 ########################################################
 ## Check that the Synthesize is completed
@@ -122,7 +122,7 @@ if { [CheckImpl] != true } {
 ########################################################
 ## Target post route script
 ########################################################
-source ${RUCKUS_DIR}/vivado_post_route_v1.tcl
+source ${RUCKUS_DIR}/vivado_post_route.tcl
 
 ########################################################
 ## Check that the Implement is completed

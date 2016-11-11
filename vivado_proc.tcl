@@ -10,6 +10,8 @@
 
 # Custom Procedure Script
 
+package require cmdline
+
 ###############################################################
 #### General Functions ########################################
 ###############################################################
@@ -90,6 +92,10 @@ proc SourceTclFile { filePath } {
    }
 }
 
+proc getFpgaFamily { } {
+   return [get_property FAMILY [get_property {PART} [current_project]]]
+}
+
 # Get the number of CPUs available on the Linux box
 proc GetCpuNumber { } {
    return [exec cat /proc/cpuinfo | grep processor | wc -l]
@@ -103,8 +109,8 @@ proc sleep {N} {
 proc BuildIpCores { } {
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
 
    # Check if the target project has IP cores
    if { [get_ips] != "" } {
@@ -156,8 +162,8 @@ proc BuildIpCores { } {
 proc CopyIpCores { } {
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl   
    
    # Make sure the IP Cores have been built
    BuildIpCores
@@ -189,8 +195,8 @@ proc CopyIpCores { } {
 proc CopyIpCoresDebug { } {
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl   
    
    # Make sure the IP Cores have been built
    BuildIpCores
@@ -218,8 +224,8 @@ proc CopyIpCoresDebug { } {
 proc CopyBdCores { } {
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl   
    
    # Check if the target project has IP cores
    if { [get_bd_designs] != "" } {
@@ -243,8 +249,8 @@ proc CopyBdCores { } {
 proc CopyBdCoresDebug { } {
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl   
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl   
    
    # Check if the target project has IP cores
    if { [get_bd_designs] != "" } {
@@ -268,8 +274,8 @@ proc CopyBdCoresDebug { } {
 proc CreateFpgaBit { } {   
    # Get variables
    set VIVADO_BUILD_DIR $::env(VIVADO_BUILD_DIR)
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages_v1.tcl
+   source -quiet ${VIVADO_BUILD_DIR}/vivado_env_var.tcl
+   source -quiet ${VIVADO_BUILD_DIR}/vivado_messages.tcl
    #########################################################
    ## Check if need to include YAML files with the .BIT file
    #########################################################
@@ -280,26 +286,26 @@ proc CreateFpgaBit { } {
 proc CreateYamlTarGz { } {   
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
    #########################################################
    ## Check if need to include YAML files with the .BIT file
    #########################################################
    if { [file exists ${PROJ_DIR}/yaml.txt] == 1 } {
-      source ${RUCKUS_DIR}/vivado_yaml_v1.tcl
+      source ${RUCKUS_DIR}/vivado_yaml.tcl
    }
 }
 
 proc CreatePromMcs { } {   
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
    #########################################################
    ## Check if promgen.tcl exist
    #########################################################
    if { [file exists ${PROJ_DIR}/vivado/promgen.tcl] == 1 } {
-      source ${RUCKUS_DIR}/vivado_promgen_v1.tcl
+      source ${RUCKUS_DIR}/vivado_promgen.tcl
    }
 }   
    
@@ -483,8 +489,8 @@ proc GenPartialReconfigDcp {rtlName} {
 
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
   
    # Get a list of all runs  
    set LIST_RUNS [get_runs]   
@@ -526,8 +532,8 @@ proc InsertStaticReconfigDcp { } {
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
    set RECONFIG_NAME    $::env(RECONFIG_NAME)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
    
    # Set common variables
    set SYNTH_DIR ${OUT_DIR}/${PROJECT}_project.runs/synth_1
@@ -603,8 +609,8 @@ proc ExportStaticReconfigDcp { } {
 
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
    
    # Set common variables
    set IMPL_DIR ${OUT_DIR}/${PROJECT}_project.runs/impl_1
@@ -624,8 +630,8 @@ proc ImportStaticReconfigDcp { } {
    # Get variables
    set RUCKUS_DIR    $::env(RUCKUS_DIR)
    set RECONFIG_CHECKPOINT $::env(RECONFIG_CHECKPOINT)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
    
    # Set common variables
    set SYNTH_DIR ${OUT_DIR}/${PROJECT}_project.runs/synth_1
@@ -666,8 +672,8 @@ proc ExportPartialReconfigBit { } {
 
    # Get variables
    set RUCKUS_DIR $::env(RUCKUS_DIR)
-   source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-   source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+   source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
    
    # Set common variables
    set IMPL_DIR ${OUT_DIR}/${PROJECT}_project.runs/impl_1
@@ -745,3 +751,160 @@ proc WriteDebugProbes {ilaName filePath} {
    # Write the port map file
    write_debug_probes -force ${filePath}
 }
+
+###############################################################
+#### Loading Source Code Functions ############################
+###############################################################
+
+# Open ruckus.tcl file
+proc loadRuckusTcl { filePath } {
+   puts "loadRuckusTcl: ${filePath}"
+   # Make a local copy of global variable
+   set LOC_PATH $::DIR_PATH
+   # Make a local copy of global variable
+   set ::DIR_PATH ${filePath}
+   # Open the TCL file
+   if { [file exists ${filePath}] == 1 } {
+      source -quiet ${filePath}/ruckus.tcl
+   }
+   # Revert the global variable back to orginal value
+   set ::DIR_PATH ${LOC_PATH}
+}
+
+# Function to load RTL files
+proc loadSource args {
+   set options {
+      {sim_only    "flag for tagging simulation file(s)"}
+      {path.arg "" "path to a single file"}
+      {dir.arg  "" "path to a directory of file(s)"}
+   }
+   set usage ": loadSource \[options] ...\noptions:"
+   array set params [::cmdline::getoptions args $options $usage]
+   set has_path [expr {[string length $params(path)] > 0}]
+   set has_dir  [expr {[string length $params(dir)] > 0}]
+   if { $params(sim_only) } { 
+      set fileset "sim_1" 
+   } else {
+      set fileset "sources_1" 
+   }
+   # Check for error state
+   if {${has_path} && ${has_dir}} {
+      return -code error "Cannot specify both -path and -dir"
+   # Load a single file
+   } elseif {$has_path} {
+      # Add the RTL Files
+      add_files -quiet -fileset ${fileset} $params(path)
+      # Force Absolute Path (not relative to project)
+      set_property PATH_MODE AbsoluteFirst [get_files $params(path)]   
+   # Load all files from a directory
+   } elseif {$has_dir} {
+      # Get a list of all RTL files
+      set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.xci *.dcp]
+      # Load all the RTL files
+      if { ${list} != "" } {
+         foreach pntr ${list} {
+            # Add the RTL Files
+            add_files -quiet -fileset ${fileset} ${pntr}
+            # Force Absolute Path (not relative to project)
+            set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
+         }
+      }
+   }
+} 
+
+# Function to load IP core files
+proc loadIpCore args {
+   set options {
+      {path.arg "" "path to a single file"}
+      {dir.arg  "" "path to a directory of files"}
+   }
+   set usage ": loadIpCore \[options] ...\noptions:"
+   array set params [::cmdline::getoptions args $options $usage]
+   set has_path [expr {[string length $params(path)] > 0}]
+   set has_dir  [expr {[string length $params(dir)] > 0}]
+   # Check for error state
+   if {${has_path} && ${has_dir}} {
+      return -code error "Cannot specify both -path and -dir"
+   # Load a single file
+   } elseif {$has_path} {
+      # Add the IP core file
+      import_ip -quiet -srcset sources_1 $params(path)
+   # Load all files from a directory
+   } elseif {$has_dir} {
+      # Get a list of all IP core files
+      set list [glob -directory $params(dir) *.xci]
+      # Load all the IP core files
+      if { ${list} != "" } {
+         foreach pntr ${list} {
+            # Add the IP core file
+            import_ip -quiet -srcset sources_1 ${pntr}
+         }
+      }
+   }
+} 
+
+# Function to load block design files
+proc loadBlockDesign args {
+   set options {
+      {path.arg "" "path to a single file"}
+      {dir.arg  "" "path to a directory of files"}
+   }
+   set usage ": loadBlockDesign \[options] ...\noptions:"
+   array set params [::cmdline::getoptions args $options $usage]
+   set has_path [expr {[string length $params(path)] > 0}]
+   set has_dir  [expr {[string length $params(dir)] > 0}]
+   # Check for error state
+   if {${has_path} && ${has_dir}} {
+      return -code error "Cannot specify both -path and -dir"
+   # Load a single file
+   } elseif {$has_path} {
+      # Add block design file
+      set locPath [import_files -force -norecurse $params(path)]
+      export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet   
+   # Load all files from a directory
+   } elseif {$has_dir} {
+      # Get a list of all block design files
+      set list [glob -directory $params(dir) *.bd]
+      # Load all the block design files
+      if { ${list} != "" } {
+         foreach pntr ${list} {
+            # Add block design file
+            set locPath [import_files -force -norecurse ${pntr}]
+            export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet        
+         }
+      }
+   }
+}
+
+# Function to load constraint files
+proc loadConstraints args {
+   set options {
+      {path.arg "" "path to a single file"}
+      {dir.arg  "" "path to a directory of files"}
+   }
+   set usage ": loadConstraints \[options] ...\noptions:"
+   array set params [::cmdline::getoptions args $options $usage]
+   set has_path [expr {[string length $params(path)] > 0}]
+   set has_dir  [expr {[string length $params(dir)] > 0}]
+   # Check for error state
+   if {${has_path} && ${has_dir}} {
+      return -code error "Cannot specify both -path and -dir"
+   # Load a single file
+   } elseif {$has_path} {
+      # Add the constraint Files
+      add_files -quiet -fileset constrs_1 $params(path)
+      # Force Absolute Path (not relative to project)
+      set_property PATH_MODE AbsoluteFirst [get_files $params(path)]     
+   # Load all files from a directory
+   } elseif {$has_dir} {
+      # Get a list of all constraint files
+      set list [glob -directory $params(dir) *.xdc *.tcl]
+      # Load all the constraint files
+      foreach pntr ${list} {
+         # Add the RTL Files
+         add_files -quiet -fileset constrs_1 ${pntr}
+         # Force Absolute Path (not relative to project)
+         set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
+      }
+   }
+} 

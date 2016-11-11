@@ -12,8 +12,8 @@
 ## Get variables and Custom Procedures
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 # Common Variable
 set ProjYamlDir "${OUT_DIR}/${PROJECT}_project.yaml"

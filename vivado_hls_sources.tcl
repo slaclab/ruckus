@@ -10,8 +10,8 @@
 
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source ${RUCKUS_DIR}/vivado_hls_env_var_v1.tcl
-source ${RUCKUS_DIR}/vivado_hls_proc_v1.tcl
+source ${RUCKUS_DIR}/vivado_hls_env_var.tcl
+source ${RUCKUS_DIR}/vivado_hls_proc.tcl
 
 ## Create a Project
 open_project ${PROJECT}_project

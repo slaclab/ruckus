@@ -18,8 +18,8 @@
 ## Get variables
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 ########################################################
 ## Open the project
@@ -72,7 +72,7 @@ if { ${VIVADO_VERSION} <= 2016.2 } {
 ################################################   
 } else {
    compile_simlib -directory ${simLibOutDir} \
-                  -family [get_property FAMILY [get_property  {PART} [current_project]]] \
+                  -family [getFpgaFamily] \
                   -simulator vcs_mx \
                   -no_ip_compile \
                   -library axi_bfm \

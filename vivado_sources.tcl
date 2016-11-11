@@ -14,8 +14,8 @@
 ## Get variables and Custom Procedures
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 # Check that the MODULE_DIRS paths all exist
 foreach dir ${MODULE_DIRS} {
@@ -28,67 +28,17 @@ foreach dir ${MODULE_DIRS} {
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
-# Add RTL Source Files
-foreach rtlPntr ${RTL_FILES} {
-   # Add the RTL Files
-   add_files -quiet -fileset sources_1 ${rtlPntr}
-   # Force Absolute Path (not relative to project)
-   set_property PATH_MODE AbsoluteFirst [get_files ${rtlPntr}]
+# Init the global variable
+set ::DIR_PATH ""
+
+# Load all the ruckus.tcl files
+foreach dir ${MODULE_DIRS} {
+   loadRuckusTcl ${dir}
 }
 
-# Add Simulation Source Files
-if { ${SIM_FILES} != "" } {
-   foreach simPntr ${SIM_FILES} {
-      # Add the Simulation Files
-      add_files -quiet -fileset sim_1 ${simPntr} 
-      # Force Absolute Path (not relative to project)
-      set_property PATH_MODE AbsoluteFirst [get_files ${simPntr}]
-   }
-}
-
-# Add Core Files
-if { ${CORE_FILES} != "" } {
-   foreach corePntr ${CORE_FILES} {
-      if { [file extension ${corePntr}] == ".ngc" } {
-         add_files -quiet -fileset sources_1 ${corePntr}
-      } else {
-         import_ip -quiet -srcset sources_1 ${corePntr}
-      }
-   }
-}
-
-# Add block design Files
-if { ${BD_FILES} != "" } {
-   foreach bdPntr ${BD_FILES} {
-      if { [get_files -quiet [file tail ${bdPntr}]] == ""} {
-         set locPath [import_files -force -norecurse ${bdPntr}]
-         export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
-      }
-   }
-}
-
-# Add XDC FILES
-if { ${XDC_FILES} != "" } {
-   foreach xdcPntr ${XDC_FILES} {
-      # Add the Constraint Files
-      add_files -quiet -fileset constrs_1 ${xdcPntr}
-      # Force Absolute Path (not relative to project)
-      set_property PATH_MODE AbsoluteFirst [get_files ${xdcPntr}]
-   }   
-}  
-
-# Add TCL files 
-if { ${TCL_FILES} != "" } {
-   foreach tclPntr ${TCL_FILES} {
-      # Add the Constraint Files
-      add_files -quiet -fileset constrs_1 ${tclPntr}
-      # Force Absolute Path (not relative to project)
-      set_property PATH_MODE AbsoluteFirst [get_files ${tclPntr}]
-   }   
-}
-
-# Set the Top Level 
+# By default, set the Top Level file same as project name
 set_property top ${PROJECT} [current_fileset]
+set_property top "glbl"     [get_filesets sim_1]
 
 # Check if SDK_SRC_PATH is a valid path
 if { [CheckSdkSrcPath] != true } {
@@ -100,9 +50,9 @@ if { [CheckSdkSrcPath] != true } {
 VivadoRefresh ${VIVADO_PROJECT}
 
 # Check if we can upgrade IP cores
-if { ${CORE_FILES} != "" } {
+if { [get_ips] != "" } {
    foreach ipPntr [get_ips] {
-      foreach coreFilePntr ${CORE_FILES} {
+      foreach coreFilePntr [get_ips] {
          if { [file extension ${coreFilePntr}] == ".xci" } {
             if { [ string match *${ipPntr}* ${coreFilePntr} ] } {
                generate_target all [get_ips ${ipPntr}]
@@ -125,8 +75,10 @@ if { ${CORE_FILES} != "" } {
 VivadoRefresh ${VIVADO_PROJECT}
 SourceTclFile ${VIVADO_DIR}/sources.tcl
 
-# Touch dependency file
-exec touch ${PROJECT}_sources.txt
+# Remove all unused code
+if { [expr [info exists ::env(KEEP_UNUSED_CODE)]] != 1 } {
+   RemoveUnsuedCode
+}
 
 # Close the project
 close_project

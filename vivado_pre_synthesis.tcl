@@ -8,17 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Project GUI Run Script
+# Pre-Synthesis Build Script
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-# Open the project
-open_project -quiet ${VIVADO_PROJECT}
-
-# Start the GUI
-start_gui
+# Target specific pre_synthesis script
+SourceTclFile ${VIVADO_DIR}/pre_synthesis.tcl

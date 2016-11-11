@@ -14,7 +14,7 @@
 ## Get build system variables 
 #############################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+source ${RUCKUS_DIR}/vivado_env_var.tcl
 set EmptyApp "Empty Application"
 
 # Check if project already exists

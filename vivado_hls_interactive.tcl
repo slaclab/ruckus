@@ -10,23 +10,5 @@
 
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source  -quiet ${RUCKUS_DIR}/vivado_hls_env_var_v1.tcl
-source  -quiet ${RUCKUS_DIR}/vivado_hls_proc_v1.tcl 
-
-## Get the file name and path of the new .dcp file
-set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]
-
-## Open the check point
-open_checkpoint ${filename}
-
-## Delete all timing constraint for importing into a target vivado project
-reset_timing
-
-## Overwrite the checkpoint   
-write_checkpoint -force ${filename}
-
-## Print Build complete reminder
-PrintBuildComplete ${filename}
-
-## IP is ready for use in target firmware project
-exit 0
+source ${RUCKUS_DIR}/vivado_hls_env_var.tcl
+source ${RUCKUS_DIR}/vivado_hls_proc.tcl 

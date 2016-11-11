@@ -30,4 +30,4 @@ clean:
 
 # Build targets
 build:
-	@tclsh $(BUILD_SCRIPT_DIR)/system_build_all_v1.tcl
+	@tclsh $(BUILD_SCRIPT_DIR)/system_build_all.tcl

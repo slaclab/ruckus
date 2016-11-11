@@ -8,27 +8,25 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Project Batch-Mode Build Script
-
-########################################################
 ## Get variables and Custom Procedures
-########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source  -quiet ${RUCKUS_DIR}/vivado_hls_env_var.tcl
+source  -quiet ${RUCKUS_DIR}/vivado_hls_proc.tcl 
 
-# Create a Project
-create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
+## Get the file name and path of the new .dcp file
+set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]
 
-# Message Filtering Script
-source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+## Open the check point
+open_checkpoint ${filename}
 
-# Setup project properties
-source ${RUCKUS_DIR}/vivado_properties_v1.tcl
+## Delete all timing constraint for importing into a target vivado project
+reset_timing
 
-# Target specific project setup script
-VivadoRefresh ${VIVADO_PROJECT}
-SourceTclFile ${VIVADO_DIR}/project_setup.tcl
+## Overwrite the checkpoint   
+write_checkpoint -force ${filename}
 
-# Close the project
-close_project
+## Print Build complete reminder
+PrintBuildComplete ${filename}
+
+## IP is ready for use in target firmware project
+exit 0

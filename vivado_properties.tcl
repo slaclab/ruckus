@@ -14,8 +14,8 @@
 ## Get variables and Custom Procedures
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 # Set VHDL as preferred language
 set_property target_language VHDL [current_project]
@@ -30,17 +30,17 @@ set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 VivadoRefresh ${VIVADO_PROJECT}
 
 # Setup pre and post scripts for synthesis
-set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_pre_synth_run_v1.tcl [get_runs synth_1]
-set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado_post_synth_run_v1.tcl [get_runs synth_1]
+set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_pre_synth_run.tcl [get_runs synth_1]
+set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado_post_synth_run.tcl [get_runs synth_1]
 
 # Setup pre and post scripts for implementation
-set_property STEPS.OPT_DESIGN.TCL.PRE                  ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
-set_property STEPS.POWER_OPT_DESIGN.TCL.PRE            ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
-set_property STEPS.PLACE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
-set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
-set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE             ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
-set_property STEPS.ROUTE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
-set_property STEPS.WRITE_BITSTREAM.TCL.PRE             ${RUCKUS_DIR}/vivado_messages_v1.tcl [get_runs impl_1]
+set_property STEPS.OPT_DESIGN.TCL.PRE                  ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.POWER_OPT_DESIGN.TCL.PRE            ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.PLACE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE             ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.ROUTE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.WRITE_BITSTREAM.TCL.PRE             ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 
 # Set the messaging limit
 set_param messaging.defaultLimit 10000

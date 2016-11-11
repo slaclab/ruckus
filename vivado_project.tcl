@@ -8,10 +8,27 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## Get variables and Custom Procedures
-set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl 
+# Project Batch-Mode Build Script
 
-## Check for unsupported Vivado_HLS versions
-exit [HlsVersionCheck]
+########################################################
+## Get variables and Custom Procedures
+########################################################
+set RUCKUS_DIR $::env(RUCKUS_DIR)
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
+
+# Create a Project
+create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
+
+# Message Filtering Script
+source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
+
+# Setup project properties
+source ${RUCKUS_DIR}/vivado_properties.tcl
+
+# Target specific project setup script
+VivadoRefresh ${VIVADO_PROJECT}
+SourceTclFile ${VIVADO_DIR}/project_setup.tcl
+
+# Close the project
+close_project

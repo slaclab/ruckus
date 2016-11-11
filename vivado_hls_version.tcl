@@ -8,19 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Post-Synthesis Run Script
-
-########################################################
 ## Get variables and Custom Procedures
-########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl 
 
-# GUI Related:
-# Disable a refresh due to the changes 
-# in the Version.vhd file during synthesis 
-set_property NEEDS_REFRESH false [current_run]
-
-# Target specific post_synthesis script
-SourceTclFile ${VIVADO_DIR}/post_synth_run.tcl
+## Check for unsupported Vivado_HLS versions
+exit [HlsVersionCheck]

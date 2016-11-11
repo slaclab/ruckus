@@ -8,25 +8,17 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Project SDK Run Script
+# Project GUI Run Script
 
-#############################
-## Get build system variables 
-#############################
+########################################################
+## Get variables and Custom Procedures
+########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source ${RUCKUS_DIR}/vivado_env_var_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-# Check the Vivado version (Refer to AR#66629)
-if { ${VIVADO_VERSION} < 2016.1 } {
-   # Generate .ELF for Vivado 2015.4 (or earlier) ....  Refer to AR#66629
-   sdk set_workspace ${SDK_PRJ}
-   sdk build_project  -type all
-} else {
-   # Generate .ELF for Vivado 2016.1 (or later) ....  Refer to AR#66629
-   sdk setws ${SDK_PRJ}
-   sdk projects -build  -type all
-}   
+# Open the project
+open_project -quiet ${VIVADO_PROJECT}
 
-# Copy over .ELF file to image directory
-exec cp -f ${SDK_PRJ}/app_0/Release/app_0.elf ${SDK_ELF} 
-exec chmod 664 ${SDK_ELF} 
+# Start the GUI
+start_gui

@@ -8,21 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## Project Batch-Mode Run Script (Partial Reconfiguration: Dynamic)
+## Project Batch-Mode Run Script
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var_v1.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc_v1.tcl
-
-########################################################
-## Check for a blank RECONFIG_NAME variable
-########################################################
-if { [CheckForReconfigCheckPoint] != true } {
-   exit -1
-}
+source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 ########################################################
 ## Open the project
@@ -30,10 +23,10 @@ if { [CheckForReconfigCheckPoint] != true } {
 open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
-source -quiet ${RUCKUS_DIR}/vivado_properties_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_properties.tcl
 
 # Setup project messaging
-source -quiet ${RUCKUS_DIR}/vivado_messages_v1.tcl
+source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
 
 ########################################################
 ## Update the complie order
@@ -56,13 +49,6 @@ if { [CheckSynth] != true } {
 }
 
 ########################################################
-## Prevents I/O insertion for synthesis and downstream tools
-## Note:  To synthesis in GUI (debuggin only, this property 
-##        should also be set in the project's vivado/project_setup.tcl file
-########################################################
-set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
-
-########################################################
 ## Check if we re-synthesis any of the IP cores
 ########################################################
 BuildIpCores
@@ -70,16 +56,21 @@ BuildIpCores
 ########################################################
 ## Target Pre synthesis script
 ########################################################
-source ${RUCKUS_DIR}/vivado_pre_synthesis_v1.tcl
+source ${RUCKUS_DIR}/vivado_pre_synthesis.tcl
 
 ########################################################
 ## Synthesize
 ########################################################
 if { [CheckSynth] != true } {
+   ## Check for DCP only synthesis run
+   if { [info exists ::env(SYNTH_DCP)] } {
+      set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
+   }
+   ## Launch the run
    launch_runs synth_1
    set src_rc [catch { 
       wait_on_run synth_1 
-   } _RESULT]  
+   } _RESULT]     
 }
 
 ########################################################
@@ -90,7 +81,7 @@ VivadoRefresh ${VIVADO_PROJECT}
 ########################################################
 ## Target post synthesis script
 ########################################################
-source ${RUCKUS_DIR}/vivado_post_synthesis_v1.tcl
+source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
 
 ########################################################
 ## Check that the Synthesize is completed
@@ -101,14 +92,29 @@ if { [CheckSynth] != true } {
 }
 
 ########################################################
-## Import static checkpoint
+## Check if only doing Synthesize
 ########################################################
-ImportStaticReconfigDcp
+if { [info exists ::env(SYNTH_ONLY)] } {
+   close_project
+   exit 0
+}
+
+########################################################
+## Check if Synthesizen DCP Output
+########################################################
+if { [info exists ::env(SYNTH_DCP)] } {
+   source ${RUCKUS_DIR}/vivado_dcp.tcl
+   close_project
+   exit 0
+}
 
 ########################################################
 ## Implement
 ########################################################
 if { [CheckImpl] != true } {
+   if { [file exists ${OUT_DIR}/IncrementalBuild.dcp] == 1 } {
+      set_property incremental_checkpoint ${OUT_DIR}/IncrementalBuild.dcp [get_runs impl_1]
+   }
    launch_runs -to_step write_bitstream impl_1
    set src_rc [catch { 
       wait_on_run impl_1 
@@ -118,7 +124,7 @@ if { [CheckImpl] != true } {
 ########################################################
 ## Target post route script
 ########################################################
-source ${RUCKUS_DIR}/vivado_post_route_v1.tcl
+source ${RUCKUS_DIR}/vivado_post_route.tcl
 
 ########################################################
 ## Check that the Implement is completed
@@ -138,12 +144,8 @@ if { [CheckTiming] != true } {
 }
 
 ########################################################
-## Export partial configuration bit file
-########################################################
-ExportPartialReconfigBit
-
-########################################################
 ## Close the project and return sucessful flag
 ########################################################
+
 close_project
 exit 0
