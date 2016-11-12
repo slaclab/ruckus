@@ -12,13 +12,6 @@
 ## Set Common Environmental variables
 ########################################################
 set MODULE_DIRS      $::env(MODULE_DIRS)
-set XDC_FILES        $::env(XDC_FILES)
-set TCL_FILES        $::env(TCL_FILES)
-set RTL_FILES        $::env(RTL_FILES)
-set SIM_FILES        $::env(SIM_FILES)
-set CORE_FILES       $::env(CORE_FILES)
-set BD_FILES         $::env(BD_FILES)
-set YAML_FILES       $::env(YAML_FILES)
 set PRJ_PART         $::env(PRJ_PART)
 set PROJECT          $::env(PROJECT)
 set PRJ_VERSION      $::env(PRJ_VERSION)

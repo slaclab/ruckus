@@ -45,36 +45,6 @@ ifndef SDK_LIB
 export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
 endif
 
-# Core Directories (IP cores that exist external of the project must have a physical path, not a logical path)
-export CORE_LISTS = $(abspath $(foreach ARG,$(MODULE_DIRS),$(wildcard $(ARG)/cores.txt)))
-export CORE_FILES = $(abspath $(foreach A1,$(CORE_LISTS),$(foreach A2,$(shell grep -v "\#" $(A1)),$(dir $(A1))/$(A2))))
-
-# Source Files
-export SRC_LISTS   = $(abspath $(foreach ARG,$(MODULE_DIRS),$(wildcard $(ARG)/sources.txt)))
-export RTL_FILES   = $(abspath $(foreach ARG,$(SRC_LISTS),$(shell grep -v "\#" $(ARG) | sed 's|\(\S\+\)\(\s\+\)\(\S\+\)\(\s\+\)\(\S\+\).*|$(dir $(ARG))/\5|')))
-
-# XDC and TCL Files
-export XDC_LIST = $(PROJ_DIR)/constraints.txt))
-ifneq ($(wildcard $(PROJ_DIR)/constraints.txt ),) 
-   export XDC_FILES   = $(abspath $(foreach ARG,$(shell grep -v "\#" $(PROJ_DIR)/constraints.txt | grep "\.xdc"), $(PROJ_DIR)/$(ARG)))
-   export TCL_FILES   = $(abspath $(foreach ARG,$(shell grep -v "\#" $(PROJ_DIR)/constraints.txt | grep "\.tcl"), $(PROJ_DIR)/$(ARG)))
-else
-   export XDC_FILES   = 
-   export TCL_FILES   = 
-endif
-
-# Block design files
-export BD_LISTS = $(abspath $(foreach ARG,$(MODULE_DIRS),$(wildcard $(ARG)/block_design.txt)))
-export BD_FILES = $(abspath $(foreach A1,$(BD_LISTS),$(foreach A2,$(shell grep -v "\#" $(A1)),$(dir $(A1))/$(A2))))
-
-# Simulation Files
-export SIM_LISTS = $(abspath $(foreach ARG,$(MODULE_DIRS),$(wildcard $(ARG)/sim.txt)))
-export SIM_FILES = $(abspath $(foreach ARG,$(SIM_LISTS),$(shell grep -v "\#" $(ARG) | sed 's|\(\S\+\)\(\s\+\)\(\S\+\)\(\s\+\)\(\S\+\).*|$(dir $(ARG))/\5|')))
-
-# YAML Files
-export YAML_LISTS = $(abspath $(foreach ARG,$(MODULE_DIRS),$(wildcard $(ARG)/yaml.txt)))
-export YAML_FILES = $(abspath $(foreach ARG,$(YAML_LISTS),$(shell grep -v "\#" $(ARG) | sed 's|\(\S\+\)\(\s\+\)\(\S\+\).*|$(dir $(ARG))/\3|')))
-
 define ACTION_HEADER
 @echo 
 @echo    "============================================================================="
@@ -105,57 +75,12 @@ test:
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo MODULE_DIRS: $(MODULE_DIRS)
-	@echo CORE_LISTS: $(CORE_LISTS)
-	@echo CORE_FILES:
-	@echo -e "$(foreach ARG,$(CORE_FILES), $(ARG)\n)"
-	@echo XDC_LISTS: $(XDC_LISTS)
-	@echo XDC_FILES: 
-	@echo -e "$(foreach ARG,$(XDC_FILES),  $(ARG)\n)"
-	@echo TCL_FILES: 
-	@echo -e "$(foreach ARG,$(TCL_FILES),  $(ARG)\n)"
-	@echo SRC_LISTS: $(SRC_LISTS)
-	@echo RTL_FILES: 
-	@echo -e "$(foreach ARG,$(RTL_FILES),  $(ARG)\n)"
-	@echo SIM_LISTS: $(SIM_LISTS)
-	@echo SIM_FILES: 
-	@echo -e "$(foreach ARG,$(SIM_FILES),  $(ARG)\n)"  
-	@echo BD_LISTS: $(BD_LISTS)
-	@echo BD_FILES: 
-	@echo -e "$(foreach ARG,$(BD_FILES),  $(ARG)\n)"  
-	@echo YAML_LISTS: $(YAML_LISTS)
-	@echo YAML_FILES: 
-	@echo -e "$(foreach ARG,$(YAML_FILES),  $(ARG)\n)"     
 
 ###############################################################
 #### Build Location ###########################################
 ###############################################################
 .PHONY : dir
 dir:
-
-###############################################################
-#### Check Source Files #######################################
-###############################################################
-
-%.vhd : 
-	@test -d $*.vhd || echo "$*.vhd does not exist"; false;
-
-%.v : 
-	@test -d $*.v || echo "$*.v does not exist"; false;
-
-%.xdc : 
-	@test -d $*.xdc || echo "$*.xdc does not exist"; false;
-
-%.tcl : 
-	@test -d $*.tcl || echo "$*.tcl does not exist"; false;
-
-%.xci : 
-	@test -d $*.xci || echo "$*.xci does not exist"; false;
-
-%.ngc : 
-	@test -d $*.ngc || echo "$*.ngc does not exist"; false;
-
-%.dcp : 
-	@test -d $*.dcp || echo "$*.dcp does not exist"; false;
 
 ###############################################################
 #### Vivado Project ###########################################
@@ -181,14 +106,14 @@ $(VIVADO_DEPEND) :
 ###############################################################
 #### Vivado Sources ###########################################
 ###############################################################
-$(SOURCE_DEPEND) : $(CORE_LISTS) $(SRC_LISTS) $(XDC_LISTS) $(SIM_LISTS) $(YAML_LISTS) $(BD_LISTS) $(VIVADO_DEPEND)
+$(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 	$(call ACTION_HEADER,"Vivado Source Setup")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sources.tcl
 
 ###############################################################
 #### Vivado Batch #############################################
 ###############################################################
-$(IMPL_DIR)/$(PROJECT).bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
+$(IMPL_DIR)/$(PROJECT).bit : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 #### Vivado Batch (Partial Reconfiguration: Static) ###########
@@ -258,7 +183,7 @@ vcs : $(SOURCE_DEPEND)
 #### Vivado Sythnesis Only ####################################
 ###############################################################
 .PHONY : syn
-syn : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
+syn : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis Only")
 	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 
@@ -266,7 +191,7 @@ syn : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
 #### Vivado Sythnesis DCP  ####################################
 ###############################################################
 .PHONY : dcp
-dcp : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
+dcp : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis DCP")
 	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 
