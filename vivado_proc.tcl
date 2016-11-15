@@ -764,8 +764,10 @@ proc loadRuckusTcl { filePath } {
    # Make a local copy of global variable
    set ::DIR_PATH ${filePath}
    # Open the TCL file
-   if { [file exists ${filePath}] == 1 } {
-      source -quiet ${filePath}/ruckus.tcl
+   if { [file exists ${filePath}/ruckus.tcl] == 1 } {
+      source ${filePath}/ruckus.tcl
+   } else {
+      return -code error "loadRuckusTcl: ${filePath}/ruckus.tcl doesn't exist"
    }
    # Revert the global variable back to orginal value
    set ::DIR_PATH ${LOC_PATH}
@@ -789,24 +791,34 @@ proc loadSource args {
    }
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "Cannot specify both -path and -dir"
+      return -code error "loadSource: Cannot specify both -path and -dir"
    # Load a single file
    } elseif {$has_path} {
-      # Add the RTL Files
-      add_files -quiet -fileset ${fileset} $params(path)
-      # Force Absolute Path (not relative to project)
-      set_property PATH_MODE AbsoluteFirst [get_files $params(path)]   
+      # Check if file doesn't exist
+      if { [file exists $params(path)] != 1 } {   
+         return -code error "loadSource: $params(path) doesn't exist"
+      } else {
+         # Add the RTL Files
+         add_files -quiet -fileset ${fileset} $params(path)
+         # Force Absolute Path (not relative to project)
+         set_property PATH_MODE AbsoluteFirst [get_files $params(path)]   
+      }
    # Load all files from a directory
    } elseif {$has_dir} {
-      # Get a list of all RTL files
-      set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.xci *.dcp]
-      # Load all the RTL files
-      if { ${list} != "" } {
-         foreach pntr ${list} {
-            # Add the RTL Files
-            add_files -quiet -fileset ${fileset} ${pntr}
-            # Force Absolute Path (not relative to project)
-            set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
+      # Check if directory doesn't exist
+      if { [file exists $params(dir)] != 1 } {   
+         return -code error "loadSource: $params(dir) doesn't exist"
+      } else {  
+         # Get a list of all RTL files
+         set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.xci *.dcp]
+         # Load all the RTL files
+         if { ${list} != "" } {
+            foreach pntr ${list} {
+               # Add the RTL Files
+               add_files -quiet -fileset ${fileset} ${pntr}
+               # Force Absolute Path (not relative to project)
+               set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
+            }
          }
       }
    }
@@ -824,20 +836,30 @@ proc loadIpCore args {
    set has_dir  [expr {[string length $params(dir)] > 0}]
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "Cannot specify both -path and -dir"
+      return -code error "loadIpCore: Cannot specify both -path and -dir"
    # Load a single file
    } elseif {$has_path} {
-      # Add the IP core file
-      import_ip -quiet -srcset sources_1 $params(path)
+      # Check if file doesn't exist
+      if { [file exists $params(path)] != 1 } {   
+         return -code error "loadIpCore: $params(path) doesn't exist"
+      } else {
+         # Add the IP core file
+         import_ip -quiet -srcset sources_1 $params(path)
+      }
    # Load all files from a directory
    } elseif {$has_dir} {
-      # Get a list of all IP core files
-      set list [glob -directory $params(dir) *.xci]
-      # Load all the IP core files
-      if { ${list} != "" } {
-         foreach pntr ${list} {
-            # Add the IP core file
-            import_ip -quiet -srcset sources_1 ${pntr}
+      # Check if directory doesn't exist
+      if { [file exists $params(dir)] != 1 } {   
+         return -code error "loadIpCore: $params(dir) doesn't exist"
+      } else {  
+         # Get a list of all IP core files
+         set list [glob -directory $params(dir) *.xci]
+         # Load all the IP core files
+         if { ${list} != "" } {
+            foreach pntr ${list} {
+               # Add the IP core file
+               import_ip -quiet -srcset sources_1 ${pntr}
+            }
          }
       }
    }
@@ -855,22 +877,32 @@ proc loadBlockDesign args {
    set has_dir  [expr {[string length $params(dir)] > 0}]
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "Cannot specify both -path and -dir"
+      return -code error "loadBlockDesign: Cannot specify both -path and -dir"
    # Load a single file
    } elseif {$has_path} {
-      # Add block design file
-      set locPath [import_files -force -norecurse $params(path)]
-      export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet   
+      # Check if file doesn't exist
+      if { [file exists $params(path)] != 1 } {   
+         return -code error "loadBlockDesign: $params(path) doesn't exist"
+      } else {
+         # Add block design file
+         set locPath [import_files -force -norecurse $params(path)]
+         export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet   
+      }
    # Load all files from a directory
    } elseif {$has_dir} {
-      # Get a list of all block design files
-      set list [glob -directory $params(dir) *.bd]
-      # Load all the block design files
-      if { ${list} != "" } {
-         foreach pntr ${list} {
-            # Add block design file
-            set locPath [import_files -force -norecurse ${pntr}]
-            export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet        
+      # Check if directory doesn't exist
+      if { [file exists $params(dir)] != 1 } {   
+         return -code error "loadBlockDesign: $params(dir) doesn't exist"
+      } else {  
+         # Get a list of all block design files
+         set list [glob -directory $params(dir) *.bd]
+         # Load all the block design files
+         if { ${list} != "" } {
+            foreach pntr ${list} {
+               # Add block design file
+               set locPath [import_files -force -norecurse ${pntr}]
+               export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet        
+            }
          }
       }
    }
@@ -888,23 +920,33 @@ proc loadConstraints args {
    set has_dir  [expr {[string length $params(dir)] > 0}]
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "Cannot specify both -path and -dir"
+      return -code error "loadConstraints: Cannot specify both -path and -dir"
    # Load a single file
    } elseif {$has_path} {
-      # Add the constraint Files
-      add_files -quiet -fileset constrs_1 $params(path)
-      # Force Absolute Path (not relative to project)
-      set_property PATH_MODE AbsoluteFirst [get_files $params(path)]     
+      # Check if file doesn't exist
+      if { [file exists $params(path)] != 1 } {   
+         return -code error "loadConstraints: $params(path) doesn't exist"
+      } else {
+         # Add the constraint Files
+         add_files -quiet -fileset constrs_1 $params(path)
+         # Force Absolute Path (not relative to project)
+         set_property PATH_MODE AbsoluteFirst [get_files $params(path)]     
+      }
    # Load all files from a directory
    } elseif {$has_dir} {
-      # Get a list of all constraint files
-      set list [glob -directory $params(dir) *.xdc *.tcl]
-      # Load all the constraint files
-      foreach pntr ${list} {
-         # Add the RTL Files
-         add_files -quiet -fileset constrs_1 ${pntr}
-         # Force Absolute Path (not relative to project)
-         set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
+      # Check if directory doesn't exist
+      if { [file exists $params(dir)] != 1 } {   
+         return -code error "loadConstraints: $params(dir) doesn't exist"
+      } else {   
+         # Get a list of all constraint files
+         set list [glob -directory $params(dir) *.xdc *.tcl]
+         # Load all the constraint files
+         foreach pntr ${list} {
+            # Add the RTL Files
+            add_files -quiet -fileset constrs_1 ${pntr}
+            # Force Absolute Path (not relative to project)
+            set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
+         }
       }
    }
 } 
