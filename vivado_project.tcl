@@ -32,3 +32,8 @@ SourceTclFile ${VIVADO_DIR}/project_setup.tcl
 
 # Close the project
 close_project
+
+# Check if image directory doesn't exist
+if { [file exists ${IMAGES_DIR}] != 1 } {   
+   exec mkdir ${IMAGES_DIR}
+}
