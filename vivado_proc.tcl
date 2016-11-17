@@ -884,9 +884,12 @@ proc loadBlockDesign args {
       if { [file exists $params(path)] != 1 } {   
          return -code error "loadBlockDesign: $params(path) doesn't exist"
       } else {
-         # Add block design file
-         set locPath [import_files -force -norecurse $params(path)]
-         export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet   
+         # Check if the block design file has already been loaded
+         if { [get_files -quiet [file tail $params(path)]] == ""} {
+            # Add block design file
+            set locPath [import_files -force -norecurse $params(path)]
+            export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet   
+         }
       }
    # Load all files from a directory
    } elseif {$has_dir} {
@@ -899,9 +902,12 @@ proc loadBlockDesign args {
          # Load all the block design files
          if { ${list} != "" } {
             foreach pntr ${list} {
-               # Add block design file
-               set locPath [import_files -force -norecurse ${pntr}]
-               export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet        
+               # Check if the block design file has already been loaded
+               if { [get_files -quiet [file tail ${pntr}]] == ""} {            
+                  # Add block design file
+                  set locPath [import_files -force -norecurse ${pntr}]
+                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet        
+               }
             }
          }
       }
