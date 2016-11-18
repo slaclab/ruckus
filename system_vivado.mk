@@ -74,7 +74,6 @@ test:
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
-	@echo MODULE_DIRS: $(MODULE_DIRS)
 
 ###############################################################
 #### Build Location ###########################################

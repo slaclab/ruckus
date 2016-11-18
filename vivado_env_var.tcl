@@ -11,7 +11,6 @@
 ########################################################
 ## Set Common Environmental variables
 ########################################################
-set MODULE_DIRS      $::env(MODULE_DIRS)
 set PRJ_PART         $::env(PRJ_PART)
 set PROJECT          $::env(PROJECT)
 set PRJ_VERSION      $::env(PRJ_VERSION)

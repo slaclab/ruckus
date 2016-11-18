@@ -17,24 +17,14 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-# Check that the MODULE_DIRS paths all exist
-foreach dir ${MODULE_DIRS} {
-   if { [file exists ${dir}] != 1 } {
-      puts "\n ${dir} doesn't exist!"
-      exit -1
-   }
-}
-
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
 # Init the global variable
 set ::DIR_PATH ""
 
-# Load all the ruckus.tcl files
-foreach dir ${MODULE_DIRS} {
-   loadRuckusTcl ${dir}
-}
+# Load the top-level ruckus.tcl file
+loadRuckusTcl ${PROJ_DIR}
 
 # By default, set the Top Level file same as project name
 set_property top ${PROJECT} [current_fileset]
