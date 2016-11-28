@@ -13,7 +13,6 @@
 ########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 # Common Variable
 set ProjYamlDir "${OUT_DIR}/${PROJECT}_project.yaml"
@@ -36,3 +35,4 @@ exec cp -f ${RUCKUS_DIR}/../LICENSE.txt ${ProjYamlDir}/.
 
 # Compress the project's YAML directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
+puts "${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.tar.gz"
