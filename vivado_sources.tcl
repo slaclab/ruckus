@@ -20,15 +20,15 @@ source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
+# By default, set the Top Level file same as project name
+set_property top ${PROJECT} [current_fileset]
+set_property top "glbl"     [get_filesets sim_1]
+
 # Init the global variable
 set ::DIR_PATH ""
 
 # Load the top-level ruckus.tcl file
 loadRuckusTcl ${PROJ_DIR}
-
-# By default, set the Top Level file same as project name
-set_property top ${PROJECT} [current_fileset]
-set_property top "glbl"     [get_filesets sim_1]
 
 # Check if SDK_SRC_PATH is a valid path
 if { [CheckSdkSrcPath] != true } {
