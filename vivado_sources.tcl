@@ -42,21 +42,15 @@ VivadoRefresh ${VIVADO_PROJECT}
 # Check if we can upgrade IP cores
 if { [get_ips] != "" } {
    foreach ipPntr [get_ips] {
-      foreach coreFilePntr [get_ips] {
-         if { [file extension ${coreFilePntr}] == ".xci" } {
-            if { [ string match *${ipPntr}* ${coreFilePntr} ] } {
-               generate_target all [get_ips ${ipPntr}]
-               # Build the IP Core
-               puts "\nUpgrading ${corePntr}.xci IP Core ..."
-               upgrade_ip [get_ips ${ipPntr}]
-               puts "... Upgrade Complete!\n"
-               # Check if we need to create the IP_run
-               set ipSynthRun ${ipPntr}_synth_1
-               if { [get_runs ${ipSynthRun}] != ${ipSynthRun}} {
-                  create_ip_run [get_ips ${ipPntr}]      
-               }
-            }
-         }
+      generate_target all [get_ips ${ipPntr}]
+      # Build the IP Core
+      puts "\nUpgrading ${ipPntr}.xci IP Core ..."
+      upgrade_ip [get_ips ${ipPntr}]
+      puts "... Upgrade Complete!\n"
+      # Check if we need to create the IP_run
+      set ipSynthRun ${ipPntr}_synth_1
+      if { [get_runs ${ipSynthRun}] != ${ipSynthRun}} {
+         create_ip_run [get_ips ${ipPntr}]      
       }
    }
 }
