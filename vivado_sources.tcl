@@ -26,6 +26,7 @@ set_property top "glbl"     [get_filesets sim_1]
 
 # Init the global variable
 set ::DIR_PATH ""
+set ::IP_LIST  ""
 
 # Load the top-level ruckus.tcl file
 loadRuckusTcl ${PROJ_DIR}
@@ -40,9 +41,8 @@ if { [CheckSdkSrcPath] != true } {
 VivadoRefresh ${VIVADO_PROJECT}
 
 # Check if we can upgrade IP cores
-set ipList [get_ips]
-if { ${ipList} != "" } {
-   foreach ipPntr ${ipList} {
+if { $::IP_LIST != "" } {
+   foreach ipPntr $::IP_LIST {
       generate_target all [get_ips ${ipPntr}]
       # Build the IP Core
       puts "\nUpgrading ${ipPntr}.xci IP Core ..."
@@ -63,7 +63,7 @@ SourceTclFile ${VIVADO_DIR}/sources.tcl
 # Remove all unused code
 update_compile_order -quiet -fileset sources_1
 update_compile_order -quiet -fileset sim_1
-if { [expr [info exists ::env(KEEP_UNUSED_CODE)]] != 1 } {
+if { [expr [info exists ::env(REMOVE_UNUSED_CODE)]] == 1 } {
    RemoveUnsuedCode
 }
 

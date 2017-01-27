@@ -845,6 +845,9 @@ proc loadIpCore args {
       } else {
          # Add the IP core file
          import_ip -quiet -srcset sources_1 $params(path)
+         # Update the global list
+         set strip [file rootname [file tail $params(path)]]
+         set ::IP_LIST "$::IP_LIST ${strip}"         
       }
    # Load all files from a directory
    } elseif {$has_dir} {
@@ -859,6 +862,9 @@ proc loadIpCore args {
             foreach pntr ${list} {
                # Add the IP core file
                import_ip -quiet -srcset sources_1 ${pntr}
+               # Update the global list
+               set strip [file rootname [file tail ${pntr}]]
+               set ::IP_LIST "$::IP_LIST ${strip}"
             }
          }
       }
