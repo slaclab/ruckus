@@ -40,8 +40,9 @@ if { [CheckSdkSrcPath] != true } {
 VivadoRefresh ${VIVADO_PROJECT}
 
 # Check if we can upgrade IP cores
-if { [get_ips] != "" } {
-   foreach ipPntr [get_ips] {
+set ipList [get_ips]
+if { ${ipList} != "" } {
+   foreach ipPntr ${ipList} {
       generate_target all [get_ips ${ipPntr}]
       # Build the IP Core
       puts "\nUpgrading ${ipPntr}.xci IP Core ..."
@@ -54,7 +55,7 @@ if { [get_ips] != "" } {
       }
    }
 }
-      
+
 # Target specific source setup script
 VivadoRefresh ${VIVADO_PROJECT}
 SourceTclFile ${VIVADO_DIR}/sources.tcl
