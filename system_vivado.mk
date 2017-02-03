@@ -30,6 +30,14 @@ endif
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
 export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 
+# Check for /u1 drive
+U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
+ifeq ($(U1_EXIST), 1)
+   export TMP_DIR=/u1/$(USER)/build
+else    
+   export TMP_DIR=/tmp/build
+endif
+
 # Synthesis Variables
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
@@ -104,7 +112,7 @@ $(VIVADO_DEPEND) :
 			 echo "   mkdir $(TOP_DIR)/build"; \
 			 echo ""; \
 			 echo "Or by creating a symbolic link to a directory on another disk:"; \
-			 echo "   ln -s /tmp/build $(TOP_DIR)/build"; \
+			 echo "   ln -s $(TMP_DIR) $(TOP_DIR)/build"; \
 			 echo ""; false; }
 	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
 	@cd $(OUT_DIR); rm -f firmware
