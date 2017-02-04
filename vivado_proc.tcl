@@ -757,15 +757,19 @@ proc WriteDebugProbes {ilaName filePath} {
 ###############################################################
 
 # Open ruckus.tcl file
-proc loadRuckusTcl { filePath } {
-   puts "loadRuckusTcl: ${filePath}"
+proc loadRuckusTcl { filePath {flags ""} } {
+   puts "loadRuckusTcl: ${filePath} ${flags}"
    # Make a local copy of global variable
    set LOC_PATH $::DIR_PATH
    # Make a local copy of global variable
    set ::DIR_PATH ${filePath}
    # Open the TCL file
    if { [file exists ${filePath}/ruckus.tcl] == 1 } {
-      source ${filePath}/ruckus.tcl
+      if { ${flags} == "" } {
+         source ${filePath}/ruckus.tcl
+      } else {
+         source -quiet ${filePath}/ruckus.tcl
+      }
    } else {
       return -code error "loadRuckusTcl: ${filePath}/ruckus.tcl doesn't exist"
    }
