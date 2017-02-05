@@ -21,12 +21,12 @@
 # Here's an example of what this script outputs after reading in this Vivado file:
 #        U_Core : entity work.DcpCore
 #          port map (
-#            \dataIn[1][tData]\ =>     dataIn.(1).tData ,
-#            \dataIn[0][tData]\ =>     dataIn.(0).tData ,
-#            \dataout[1][toggle]\ =>     dataout.(1).toggle ,
-#            \dataout[1][tData]\ =>     dataout.(1).tData ,
-#            \dataout[0][toggle]\ =>     dataout.(0).toggle ,
-#            \dataout[0][tData]\ =>     dataout.(0).tData ,
+#            \dataIn[1][tData]\ =>     dataIn(1).tData ,
+#            \dataIn[0][tData]\ =>     dataIn(0).tData ,
+#            \dataout[1][toggle]\ =>     dataout(1).toggle ,
+#            \dataout[1][tData]\ =>     dataout(1).tData ,
+#            \dataout[0][toggle]\ =>     dataout(0).toggle ,
+#            \dataout[0][tData]\ =>     dataout(0).tData ,
 #            led =>    led ,
 #            clkP =>    clkP ,
 #            clkN =>    clkN );
@@ -71,7 +71,7 @@ def proc(line):
             else: 
                 # Check if array index
                 if convt[i].isdigit():
-                    retVar += ('.('+convt[i]+')')
+                    retVar += ('('+convt[i]+')')
                 else: 
                     retVar += ('.'+convt[i])
     else:
