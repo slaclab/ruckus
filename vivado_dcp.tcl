@@ -22,12 +22,16 @@ set filename [exec ls [glob "${OUT_DIR}/${PROJECT}_project.runs/synth_1/*.dcp"]]
 ## Get the ouput file path and name
 set outputFile "${IMAGES_DIR}/${topName}_${PRJ_VERSION}.dcp"
 
+## Open the check point
+open_checkpoint ${filename}
+
+# Create synth_stub
+write_vhdl -force -mode synth_stub ${IMAGES_DIR}/${topName}_${PRJ_VERSION}.vhd
+
 ## Check if we need to remove the timing cosntraints
 set RemoveTimingConstraints [expr {[info exists ::env(DCP_REMOVE_TIMING_CONSTRAINT)] && [string is true -strict $::env(DCP_REMOVE_TIMING_CONSTRAINT)]}]  
 puts "RemoveTimingConstraints = ${RemoveTimingConstraints}"
 if { ${RemoveTimingConstraints} == 1 } {
-   ## Open the check point
-   open_checkpoint ${filename}
 
    ## Delete all timing constraint for importing into a target vivado project
    reset_timing
@@ -36,11 +40,20 @@ if { ${RemoveTimingConstraints} == 1 } {
    write_checkpoint -force ${filename}
 }
 
+## Close the checkpoint
+close_design
+
+## parse the synth_stub
+exec python ${RUCKUS_DIR}/write_vhd_synth_stub_parser.py ${IMAGES_DIR}/${topName}_${PRJ_VERSION}.vhd
+
 ## Copy the .dcp file from the run directory to images directory in the source tree
 file copy -force ${filename} ${outputFile}
 
 ## Print Build complete reminder
 DcpCompleteMessage ${outputFile}
+
+# Target specific dcp script
+SourceTclFile ${VIVADO_DIR}/dcp.tcl
 
 ## IP is ready for use in target firmware project
 exit 0

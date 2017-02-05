@@ -63,6 +63,9 @@ def proc(line):
         convt = convt.split("[")
         # loop through the array
         for i in range(len(convt)):
+            # strip off the space char
+            convt[i] = convt[i].replace(' ','')        
+            # Check for first element
             if (i==0):
                 retVar += convt[0]
             else: 
@@ -72,7 +75,7 @@ def proc(line):
                 else: 
                     retVar += ('.'+convt[i])
     else:
-        retVar = (port + "=>" + port)
+        retVar = (port + "=> " + port.replace(' ','') )
         
     # Check if last port mapping
     if re.search(r';', line):
@@ -88,7 +91,7 @@ def vho(arg):
     # common define
     entity  = ''
     line    = ''
-    fname = os.path.splitext(os.path.basename(arg))[0] +'.vho'
+    fname = arg.replace('.vhd','') + '.vho'
 
     # Open the input/output files
     ifd = open(arg)
@@ -119,8 +122,8 @@ def vho(arg):
     ifd.close()
     ofd.close()
     
-    # Print the output files
-    os.system('cat ' + fname)
+    # # Print the output files
+    # os.system('cat ' + fname)
     
 if __name__ == '__main__':
     vho(sys.argv[1])
