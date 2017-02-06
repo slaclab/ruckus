@@ -16,44 +16,37 @@ source  -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 ## Get the top level name
 set topName [get_property top [current_fileset]]
 
-## Get the file name and path of the new .dcp file
-set filename [exec ls [glob "${OUT_DIR}/${PROJECT}_project.runs/synth_1/*.dcp"]]
+## Get the ouput file path
+set filepath "${IMAGES_DIR}/${topName}_${PRJ_VERSION}"
 
-## Get the ouput file path and name
-set outputFile "${IMAGES_DIR}/${topName}_${PRJ_VERSION}.dcp"
-
-## Open the check point
-open_checkpoint ${filename}
-
-# Create synth_stub
-write_vhdl -force -mode synth_stub ${IMAGES_DIR}/${topName}_${PRJ_VERSION}.vhd
+## Open the synthesis design
+open_run synth_1 -name synth_1
 
 ## Check if we need to remove the timing cosntraints
 set RemoveTimingConstraints [expr {[info exists ::env(DCP_REMOVE_TIMING_CONSTRAINT)] && [string is true -strict $::env(DCP_REMOVE_TIMING_CONSTRAINT)]}]  
 puts "RemoveTimingConstraints = ${RemoveTimingConstraints}"
 if { ${RemoveTimingConstraints} == 1 } {
-
    ## Delete all timing constraint for importing into a target vivado project
    reset_timing
-
-   ## Overwrite the checkpoint   
-   write_checkpoint -force ${filename}
 }
+
+## Create synth_stub
+write_vhdl -force -mode synth_stub ${filepath}.vhd
+
+## Overwrite the checkpoint   
+write_checkpoint -force ${filepath}.dcp
 
 ## Close the checkpoint
 close_design
 
-## parse the synth_stub
-exec python ${RUCKUS_DIR}/write_vhd_synth_stub_parser.py ${IMAGES_DIR}/${topName}_${PRJ_VERSION}.vhd
-
-## Copy the .dcp file from the run directory to images directory in the source tree
-file copy -force ${filename} ${outputFile}
-
-## Print Build complete reminder
-DcpCompleteMessage ${outputFile}
+## Parse the synth_stub
+exec python ${RUCKUS_DIR}/write_vhd_synth_stub_parser.py ${filepath}.vhd
 
 # Target specific dcp script
 SourceTclFile ${VIVADO_DIR}/dcp.tcl
+
+## Print Build complete reminder
+DcpCompleteMessage ${filepath}.dcp
 
 ## IP is ready for use in target firmware project
 exit 0
