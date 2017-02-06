@@ -309,8 +309,14 @@ proc CreatePromMcs { } {
    }
 }   
    
+# Remove unused code   
 proc RemoveUnsuedCode { } { 
    remove_files [get_files -filter {IS_AUTO_DISABLED}]
+}
+
+# Get boolen value of environment variable
+proc GetEnvVarBool { envVar } {
+   return [expr {[info exists ::env(${envVar})] && [string is true -strict $::env(${envVar})]}]
 }
 
 # Checking Timing Function
