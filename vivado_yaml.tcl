@@ -8,12 +8,30 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-########################################################
-## Get variables and Custom Procedures
-########################################################
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
+source ${RUCKUS_DIR}/vivado_env_var.tcl
 
+proc ::findFiles { baseDir pattern } {
+  set dirs [ glob -nocomplain -type d [ file join $baseDir * ] ]
+  set files {}
+  foreach dir $dirs { 
+    lappend files {*}[ findFiles $dir $pattern ] 
+  }
+  lappend files {*}[ glob -nocomplain -type f [ file join $baseDir $pattern ] ] 
+  return $files
+}
+
+# Check for top level YAML file
+if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] != 1 } {
+   puts "\n\nERROR: ${PROJ_DIR}/yaml/000TopLevel.yaml does NOT exist\n\n"
+   exit -1
+} 
+   
+if { [info exists ::env(COMMON_FILE)] != 1 } {
+   puts "\n\nERROR: COMMON_FILE is not defined in $::env(PROJ_DIR)/Makefile\n\n"
+   exit -1
+}
+   
 # Common Variable
 set ProjYamlDir "${OUT_DIR}/${PROJECT}_project.yaml"
 
@@ -24,14 +42,27 @@ if [file exists ${ProjYamlDir}] {
    exec mkdir ${ProjYamlDir}
 }
 
-# Copy all the YAML files to the project's YAML directory 
-foreach yamlFile ${YAML_FILES} {
-   exec cp -f ${yamlFile} ${ProjYamlDir}/.
+# Copy all of the submodule yaml files
+set listFiles  [ findFiles ${TOP_DIR}/submodules "*.yaml" ]
+foreach filename ${listFiles} {  
+   exec cp -f ${filename} ${ProjYamlDir}/
+}     
+
+# Copy all of the comon directory's yaml files
+set listFiles  [ findFiles ${TOP_DIR}/common/$::env(COMMON_FILE) "*.yaml" ]
+foreach filename ${listFiles} {   
+   exec cp -f ${filename} ${ProjYamlDir}/
+}   
+
+# Copy all of the target yaml files
+set listFiles  [ findFiles ${PROJ_DIR} "*.yaml" ]
+foreach filename ${listFiles} {   
+   exec cp -f ${filename} ${ProjYamlDir}/
 }
 
 # Copy the Version.vhd and the LICENSE.txt to the project's YAML directory
-exec cp -f ${PROJ_DIR}/Version.vhd            ${ProjYamlDir}/.
-exec cp -f ${RUCKUS_DIR}/../LICENSE.txt ${ProjYamlDir}/.
+exec cp -f ${PROJ_DIR}/Version.vhd   ${ProjYamlDir}/.
+exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
 
 # Compress the project's YAML directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml

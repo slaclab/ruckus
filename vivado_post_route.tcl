@@ -34,7 +34,7 @@ if { [CheckTiming false] == true } {
    #########################################################
    ## Check if need to include YAML files with the .BIT file
    #########################################################
-   if { [file exists ${PROJ_DIR}/yaml.txt] == 1 } {
+   if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] == 1 } {
       source ${RUCKUS_DIR}/vivado_yaml.tcl
    }
    

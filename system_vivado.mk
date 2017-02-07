@@ -262,9 +262,9 @@ elf : $(SOURCE_DEPEND)
 #### Vivado YAML ##############################################
 ###############################################################
 .PHONY : yaml
-yaml : $(SOURCE_DEPEND)
+yaml : $(VIVADO_DEPEND)
 	$(call ACTION_HEADER,"Generaring YAML.tar.gz file")
-	@cd $(OUT_DIR); tclsh $(VIVADO_BUILD_DIR)/vivado_yaml_v1.tcl
+	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_yaml.tcl
 
 ###############################################################
 #### Makefile Targets #########################################
