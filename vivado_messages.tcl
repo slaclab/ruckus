@@ -58,20 +58,26 @@ set_msg_config -suppress -id {Pwropt 34-142};# Post-Place Power Opt: power_opt d
 set_msg_config -suppress -id {Common 17-1361};# The existing rule will be replaced.
 set_msg_config -suppress -id {Vivado 12-4430};# Overriding default DRC messaging
 set_msg_config -suppress -id {Vivado 12-1790};# IP core licensing warning
+set_msg_config -suppress -id {Project 1-486};# unresolve non-primitive black box cell when using DCP files
+set_msg_config -suppress -id {Project 1-560};# unresolve non-primitive black box cell when using DCP files
+set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/support/answers/54842.html
 
 ########################################################
 ## Modifying WARNING messaging
 ########################################################
-
+ 
 # Messages: Change from WARNING to INFO
-set_msg_config -id {Timing 38-3} -new_severity INFO; #User defined clocks are common and should be info, not warning.
+set_msg_config -id {Timing 38-3}   -new_severity INFO;# User defined clocks are common and should be info, not warning.
+set_msg_config -id {Synth 8-3848}  -new_severity INFO;# SYNTH: Signal does not have driver
+set_msg_config -id {Synth 8-3936}  -new_severity INFO;# SYNTH: BRAM byte write enable found unconnected
+set_msg_config -id {Synth 8-5733}  -new_severity INFO;# SYNTH: ignoring attributes on constant declaration STRING_ROM_C
+set_msg_config -id {Synth 8-5858}  -new_severity INFO;# SYNTH: Abstract Data Type (record/struct) for this pattern/configuration is not supported. This will most likely be implemented in registers 
 
 # Messages: Change from WARNING to ERROR
+set_msg_config -id {Synth 8-614}  -new_severity ERROR;# SYNTH: Signal not in the sensitivity list
 set_msg_config -id {Synth 8-3512} -new_severity ERROR;# SYNTH: Assigned value in logic is out of range 
 set_msg_config -id {Synth 8-327}  -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}  -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
-
-# set_msg_config -id {Synth 8-3848} -new_severity ERROR;# SYNTH: Input doesn't does not have driver
 
 ## Check for version 2015.3 (or older)
 if { ${VIVADO_VERSION} <= 2015.3 } {
@@ -80,9 +86,13 @@ if { ${VIVADO_VERSION} <= 2015.3 } {
 
 # Messages: Change from WARNING to CRITICAL_WARNING
 set_msg_config -id {Vivado 12-508} -new_severity "CRITICAL WARNING";# XDC: No pins matched 
+set_msg_config -id {Vivado 12-507} -new_severity "CRITICAL WARNING";# XDC: No netname matched 
+set_msg_config -id {Vivado 12-627} -new_severity "CRITICAL WARNING";# XDC: No clock matched
+set_msg_config -id {Project 1-498} -new_severity "CRITICAL WARNING";# XDC: One or more constraints failed evaluation while reading constraint file
 set_msg_config -id {Synth 8-3330}  -new_severity "CRITICAL WARNING";# SYNTH: an empty top module top detected
 set_msg_config -id {Synth 8-3919}  -new_severity "CRITICAL WARNING";# SYNTH: Null Assignment in logic
-set_msg_config -id {Synth 8-153}  -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
+set_msg_config -id {Synth 8-153}   -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
+set_msg_config -id {Synth 8-3295}  -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
 
 ########################################################
 ## Modifying CRITICAL_WARNING messaging
