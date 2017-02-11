@@ -11,6 +11,7 @@
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
+
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
@@ -67,11 +68,14 @@ set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/supp
 ########################################################
  
 # Messages: Change from WARNING to INFO
-set_msg_config -id {Timing 38-3}   -new_severity INFO;# User defined clocks are common and should be info, not warning.
-set_msg_config -id {Synth 8-3848}  -new_severity INFO;# SYNTH: Signal does not have driver
-set_msg_config -id {Synth 8-3936}  -new_severity INFO;# SYNTH: BRAM byte write enable found unconnected
-set_msg_config -id {Synth 8-5733}  -new_severity INFO;# SYNTH: ignoring attributes on constant declaration STRING_ROM_C
-set_msg_config -id {Synth 8-5858}  -new_severity INFO;# SYNTH: Abstract Data Type (record/struct) for this pattern/configuration is not supported. This will most likely be implemented in registers 
+set_msg_config -id {Timing 38-3}        -new_severity INFO;# User defined clocks are common and should be info, not warning.
+set_msg_config -id {Synth 8-3848}       -new_severity INFO;# SYNTH: Signal does not have driver
+set_msg_config -id {Synth 8-3936}       -new_severity INFO;# SYNTH: BRAM byte write enable found unconnected
+set_msg_config -id {Synth 8-5733}       -new_severity INFO;# SYNTH: ignoring attributes on constant declaration STRING_ROM_C
+set_msg_config -id {Synth 8-5858}       -new_severity INFO;# SYNTH: Abstract Data Type (record/struct) for this pattern/configuration is not supported. This will most likely be implemented in registers 
+set_msg_config -id {Constraints 18-550} -new_severity INFO;# Design Init: Could not drive constant because not directly connected to top level port
+set_msg_config -id {Vivado 12-1008}     -new_severity INFO;# Design Init: No clocks found for command 
+set_msg_config -id {Power 33-332}       -new_severity INFO;# Route: Found switching activity that implies high-fanout reset nets being asserted for excessive periods of time which may result in inaccurate power analysis.
 
 # Messages: Change from WARNING to ERROR
 set_msg_config -id {Synth 8-614}  -new_severity ERROR;# SYNTH: Signal not in the sensitivity list
@@ -128,6 +132,7 @@ set_property SEVERITY {Warning} [get_drc_checks {UCIO-1}];  # DRC: using the XAD
 ########################################################
 # Check if Multi-Driven Nets are allowed
 ########################################################
+
 if { ${AllowMultiDriven} == 1 } {
     set_msg_config -id {Synth 8-3352} -new_severity INFO;# SYNTH: multi-driven net
     set_msg_config -id {MDRV-1}       -new_severity INFO;# DRC: multi-driven net	
@@ -139,4 +144,5 @@ if { ${AllowMultiDriven} == 1 } {
 ########################################################
 # Target specific messages script
 ########################################################
+
 SourceTclFile ${VIVADO_DIR}/messages.tcl
