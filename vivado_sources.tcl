@@ -8,8 +8,6 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Sources Batch-Mode Build Script
-
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
@@ -17,8 +15,49 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
+# Check if PROJ_VERSION is defined and valid
+if { [CheckPrjVersion] != true } {
+   exit -1
+}
+
+# Check if SDK_SRC_PATH is a valid path
+if { [CheckSdkSrcPath] != true } {
+   exit -1
+}
+
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
+
+########################################################
+## Setup the top-level generics
+########################################################
+
+# Generate the build string 
+binary scan [encoding convertto ascii $::env(BUILD_STRING)] c* bstrAsic
+set buildString ""
+foreach decChar ${bstrAsic} {
+   set hexChar [format %02X ${decChar}]
+   set buildString ${buildString}${hexChar}
+}
+for {set n [string bytelength ${buildString}]} {$n < 512} {incr n} {
+   set padding "0"
+   set buildString ${buildString}${padding}
+}
+
+# Generate the Firmware Version string
+scan ${PRJ_VERSION} %x decVer
+set fwVersion [format %08X ${decVer}]
+
+# Generate the GIT SHA-1 string
+set gitHash $::env(GIT_HASH_LONG)
+
+# Set the top-level generic values
+set buildInfo "BUILD_INFO_G=2240'h${gitHash}${fwVersion}${buildString}"
+set_property generic ${buildInfo} -objects [current_fileset]
+
+########################################################
+## Load the source code
+########################################################
 
 # By default, set the Top Level file same as project name
 set_property top ${PROJECT} [current_fileset]
@@ -30,12 +69,6 @@ set ::IP_LIST  ""
 
 # Load the top-level ruckus.tcl file
 loadRuckusTcl ${PROJ_DIR}
-
-# Check if SDK_SRC_PATH is a valid path
-if { [CheckSdkSrcPath] != true } {
-   close_project
-   exit -1
-}
 
 # Close and reopen project
 VivadoRefresh ${VIVADO_PROJECT}

@@ -17,37 +17,13 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-# Multi-driven net checking
-set CheckMultiDriven [expr {[info exists ::env(CHECK_MULTI_DRIVEN)] && [string is true -strict $::env(CHECK_MULTI_DRIVEN)]}]  
-if { ${CheckMultiDriven} == 1 } {
-   # Get the number of errors and multi-driven nets during synthesis
-   open_run synth_1
-   set NumErr [llength [lsearch -all -regexp [split [read [open ${OUT_DIR}/${VIVADO_PROJECT}.runs/synth_1/runme.log]]] "^ERROR:"]]
-   set MDRV [report_drc -checks {MDRV-1}]
-   close_design
-   # Check for errors during synthesis
-   if { ${NumErr} != 0 } {
-      puts "\n\n\nErrors detected during synthesis!!!"
-      puts "\tOpen the GUI to review the error messages\n\n\n" 
-      close_project
-      exit 0   
-   }
-   # Check if Multi-Driven Nets are not allowed
-   set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]  
-   if { ${AllowMultiDriven} != 1 } {
-      # Check if any multi-driven nets during synthesis
-      if { ${MDRV} != 0 } {
-         puts "\n\n\nMulti-driven nets detected during synthesis!!!n\n\n"    
-         close_project
-         exit 0   
-      }
-   }
+# Check for errors during synthesis
+set NumErr [llength [lsearch -all -regexp [split [read [open ${SYN_DIR}/runme.log]]] "^ERROR:"]]
+if { ${NumErr} != 0 } {
+   puts "\n\n\nErrors detected during synthesis!!!"
+   puts "\tOpen the GUI to review the error messages\n\n\n" 
+   exit -1
 }
-
-# GUI Related:
-# Disable a refresh due to the changes 
-# in the Version.vhd file during synthesis 
-set_property NEEDS_REFRESH false [get_runs synth_1]
 
 # Target specific post_synthesis script
 SourceTclFile ${VIVADO_DIR}/post_synthesis.tcl

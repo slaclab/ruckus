@@ -115,6 +115,7 @@ set_msg_config -id {Vivado 12-1411} -new_severity ERROR;# SYNTH: Cannot set LOC 
 set_msg_config -id {HDL 9-806}      -new_severity ERROR;# SYNTH: Syntax error near *** (example: missing semicolon)
 set_msg_config -id {Opt 31-80}      -new_severity ERROR;# IMPL: Multi-driver net found in the design
 set_msg_config -id {Route 35-14}    -new_severity ERROR;# IMPL: Multi-driver net found in the design
+set_msg_config -id {AVAL-46}        -new_severity ERROR;# DRC: MMCM's (or PLL's) VCO frequency out of range
 
 ########################################################
 ## Modifying ERROR messaging

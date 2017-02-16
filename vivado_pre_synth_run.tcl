@@ -16,21 +16,6 @@
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
-
-# Setup build string
-set DATE [exec date]
-set USER [exec whoami]
-set MACHINE [exec uname -m]
-set BSTR "${PROJECT}: Vivado v${VIVADO_VERSION} (${MACHINE}) Built ${DATE} by ${USER}"
-set SEDS "s|\\(constant BUILD_STAMP_C : string := \\).*|\\1\"${BSTR}\";|"
-
-# Update the timestamp in Version.vhd
-exec sed ${SEDS} ${PROJ_DIR}/Version.vhd > ${PROJ_DIR}/Version.new
-
-# Move the file
-exec mv ${PROJ_DIR}/Version.new ${PROJ_DIR}/Version.vhd
-
-# Message Filtering Script
 source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
 
 # Refer to http://www.xilinx.com/support/answers/65415.html

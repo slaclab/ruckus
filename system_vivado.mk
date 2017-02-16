@@ -28,6 +28,7 @@ endif
 
 # Project Build Directory
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
+export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
 export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 
 # Check for /u1 drive
@@ -52,7 +53,26 @@ export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 
 # Get Project Version
-export PRJ_VERSION = $(shell grep FPGA_VERSION_C $(PROJ_DIR)/Version.vhd | sed 's|.*x"\(\S\+\)";.*|\1|')
+ifndef PRJ_VERSION
+export PRJ_VERSION = 
+endif
+
+# Generate build string
+export BUILD_SYS    = $(shell uname -m)
+export BUILD_DATE   = $(shell date)
+export BUILD_TIME   = $(shell date +%Y-%m-%d:%H:%M:%S)
+export BUILD_USER   = $(shell whoami)
+export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
+
+# Check the GIT status
+export GIT_STATUS     = $(shell git diff-index HEAD)
+ifeq ($(GIT_STATUS),)
+   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
+   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+else 
+   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
+   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+endif
 
 # SDK Variables
 export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
@@ -66,16 +86,21 @@ define ACTION_HEADER
 @echo 
 @echo    "============================================================================="
 @echo    $(1)
-@echo    "   Project = $(PROJECT)"
-@echo    "   Out Dir = $(OUT_DIR)"
-@echo    "   Version = $(PRJ_VERSION)"
-@echo -e "   Changed = $(foreach ARG,$?,$(ARG)\n            )"
+@echo    "   Project      = $(PROJECT)"
+@echo    "   Out Dir      = $(OUT_DIR)"
+@echo    "   Version      = $(PRJ_VERSION)"
+@echo    "   Build String = $(BUILD_STRING)"
+@echo    "   GIT Hash     = $(GIT_HASH_LONG)"
 @echo    "============================================================================="
 @echo 	
 endef
 
 .PHONY : all
 all: target
+
+###############################################################
+#### Printout Env. Variables ##################################
+###############################################################
 
 .PHONY : test
 test:
@@ -91,6 +116,8 @@ test:
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
+	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
+	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 
 ###############################################################
 #### Build Location ###########################################
@@ -144,27 +171,27 @@ $(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CO
 ###############################################################
 #### Bitfile Copy #############################################
 ###############################################################
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).bit : $(IMPL_DIR)/$(PROJECT).bit
+$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image is stable!"
 #### Bitfile Copy (Partial Reconfiguration: Static) ###########
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
+$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image is stable!"
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
+$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Checkpoint file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image and checkpoint is stable!" 
 #### Bitfile Copy (Partial Reconfiguration: Dynamic) ##########
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
+$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
@@ -214,28 +241,11 @@ dcp : $(SOURCE_DEPEND)
 ###############################################################
 #### Prom #####################################################
 ###############################################################
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs: $(IMPL_DIR)/$(PROJECT).bit
+$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).mcs: $(IMPL_DIR)/$(PROJECT).bit
 	$(call ACTION_HEADER,"PROM Generate")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen.tcl
 	@echo ""
 	@echo "Prom file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image is stable!"
-
-###############################################################
-#### BitBin ###################################################
-###############################################################
-$(IMPL_DIR)/$(PROJECT).bitbin : $(IMPL_DIR)/$(PROJECT).bit
-	$(call ACTION_HEADER,"Binary Bit file Generate")
-	@cd $(OUT_DIR); promgen -intstyle silent -p bin -data_width 32 -b -w -u 0x0 $(IMPL_DIR)/$(PROJECT).bit
-	@mv $(IMPL_DIR)/$(PROJECT).bin $(IMPL_DIR)/$(PROJECT).bitbin
-
-###############################################################
-#### BitBin Copy ##############################################
-###############################################################
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).bitbin : $(IMPL_DIR)/$(PROJECT).bitbin
-	@cp $< $@
-	@echo ""
-	@echo "Binary bit file generated at $@"
 	@echo "Don't forget to 'svn commit' when the image is stable!"
 
 ###############################################################
@@ -283,9 +293,6 @@ bit_static  : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_static.bit $(IMAGES_DIR)/$
 
 .PHONY      : bit_dynamic
 bit_dynamic : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_dynamic.bit
-
-.PHONY      : bitbin
-bitbin      : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).bitbin
 
 .PHONY      : prom
 prom        : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs

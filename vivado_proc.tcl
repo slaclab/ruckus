@@ -357,6 +357,21 @@ proc CheckTiming { {printTiming true} } {
    }
 }
 
+# Check if PROJ_VERSION is defined and valid
+proc CheckPrjVersion { } {
+   if { $::env(PRJ_VERSION) == "" } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "********************************************************"
+      puts "********************************************************"   
+      puts "Error: PRJ_VERSION is not defined in the Makefile"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "********************************************************\n\n\n\n\n"  
+      return false
+   }
+   return true
+}
+
 # Check if SDK_SRC_PATH exist, then it checks for a valid path 
 proc CheckSdkSrcPath { } {
    if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
@@ -364,7 +379,7 @@ proc CheckSdkSrcPath { } {
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
          puts "********************************************************"   
-         puts "SDK_SRC_PATH: $::env(SDK_SRC_PATH) does not exist"
+         puts "Error: SDK_SRC_PATH = $::env(SDK_SRC_PATH) does not exist"
          puts "********************************************************"
          puts "********************************************************"
          puts "********************************************************\n\n\n\n\n"  
