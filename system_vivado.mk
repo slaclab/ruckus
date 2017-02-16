@@ -60,7 +60,7 @@ endif
 # Generate build string
 export BUILD_SYS    = $(shell uname -m)
 export BUILD_DATE   = $(shell date)
-export BUILD_TIME   = $(shell date +%Y-%m-%d:%H:%M:%S)
+export BUILD_TIME   = $(shell date +%Y%m%d%H%M%S)
 export BUILD_USER   = $(shell whoami)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
 
@@ -74,6 +74,9 @@ else
    export GIT_HASH_LONG  = 
    export GIT_HASH_SHORT = 
 endif
+
+# Generate common filename
+export FILE_NAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
 
 # SDK Variables
 export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
@@ -119,6 +122,7 @@ test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
+	@echo FILE_NAME: $(FILE_NAME)
 
 ###############################################################
 #### Build Location ###########################################
@@ -172,27 +176,27 @@ $(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CO
 ###############################################################
 #### Bitfile Copy #############################################
 ###############################################################
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).bit : $(IMPL_DIR)/$(PROJECT).bit
+$(IMAGES_DIR)/$(FILE_NAME).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image is stable!"
 #### Bitfile Copy (Partial Reconfiguration: Static) ###########
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
+$(IMAGES_DIR)/$(FILE_NAME)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image is stable!"
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
+$(IMAGES_DIR)/$(FILE_NAME)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Checkpoint file copied to $@"
 	@echo "Don't forget to 'svn commit' when the image and checkpoint is stable!" 
 #### Bitfile Copy (Partial Reconfiguration: Dynamic) ##########
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
+$(IMAGES_DIR)/$(FILE_NAME)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
@@ -242,7 +246,7 @@ dcp : $(SOURCE_DEPEND)
 ###############################################################
 #### Prom #####################################################
 ###############################################################
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).mcs: $(IMPL_DIR)/$(PROJECT).bit
+$(IMAGES_DIR)/$(FILE_NAME).mcs: $(IMPL_DIR)/$(PROJECT).bit
 	$(call ACTION_HEADER,"PROM Generate")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen.tcl
 	@echo ""
@@ -287,19 +291,19 @@ depend      : $(VIVADO_DEPEND)
 sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
-bit         : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).bit 
+bit         : $(IMAGES_DIR)/$(FILE_NAME).bit 
 
 .PHONY      : bit_static
-bit_static  : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.dcp 
+bit_static  : $(IMAGES_DIR)/$(FILE_NAME)_static.bit $(IMAGES_DIR)/$(FILE_NAME)_static.dcp 
 
 .PHONY      : bit_dynamic
-bit_dynamic : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_dynamic.bit
+bit_dynamic : $(IMAGES_DIR)/$(FILE_NAME)_dynamic.bit
 
 .PHONY      : prom
-prom        : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).mcs
+prom        : bit $(IMAGES_DIR)/$(FILE_NAME).mcs
 
 .PHONY      : prom_static
-prom_static : bit_static $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).mcs
+prom_static : bit_static $(IMAGES_DIR)/$(FILE_NAME).mcs
 
 ###############################################################
 #### Clean ####################################################
