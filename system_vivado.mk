@@ -67,11 +67,12 @@ export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built
 # Check the GIT status
 export GIT_STATUS     = $(shell git diff-index HEAD)
 ifeq ($(GIT_STATUS),)
+
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 else 
-   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
-   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+   export GIT_HASH_LONG  = 
+   export GIT_HASH_SHORT = 
 endif
 
 # SDK Variables
@@ -286,19 +287,19 @@ depend      : $(VIVADO_DEPEND)
 sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
-bit         : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).bit 
+bit         : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).bit 
 
 .PHONY      : bit_static
-bit_static  : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_static.bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_static.dcp 
+bit_static  : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_static.dcp 
 
 .PHONY      : bit_dynamic
-bit_dynamic : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_dynamic.bit
+bit_dynamic : $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT)_dynamic.bit
 
 .PHONY      : prom
-prom        : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs
+prom        : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).mcs
 
 .PHONY      : prom_static
-prom_static : bit_static $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs
+prom_static : bit_static $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_$(GIT_HASH_SHORT).mcs
 
 ###############################################################
 #### Clean ####################################################
