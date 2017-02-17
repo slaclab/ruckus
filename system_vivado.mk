@@ -65,15 +65,20 @@ export BUILD_USER   = $(shell whoami)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Check the GIT status
-export GIT_STATUS     = $(shell git diff-index HEAD)
+export GIT_STATUS     = $(shell git diff-index HEAD --name-only)
 ifeq ($(GIT_STATUS),)
-
+   export GIT_TAG_MSG    = -m \"PROJECT: $(PROJECT)\" -m \"FW_VERSION: $(PRJ_VERSION)\" -m \"BUILD_STRING: $(BUILD_STRING)\"
+   export GIT_BUILD_TAG  = $(shell git tag -a build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME) $(GIT_TAG_MSG))
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 else 
    export GIT_HASH_LONG  = 
    export GIT_HASH_SHORT = 
 endif
+
+# export BUILD_INFO = $(shell $(foreach v, $(.VARIABLES), $(info $(v): $($(v)))) >> $(PROJ_DIR)/build.info)
+export BUILD_INFO = $(shell rm -f $(PROJ_DIR)/build.info))
+export BUILD_INFO = $(shell echo GIT_HASH_LONG: $(GIT_HASH_LONG) >> $(PROJ_DIR)/build.info))
 
 # Generate common filename
 export FILE_NAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
@@ -122,7 +127,9 @@ test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
-	@echo FILE_NAME: $(FILE_NAME)
+	@echo FILE_NAME: $(GIT_TAG_MSG)
+	@echo Untracked Files:
+	@echo -e "$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
 ###############################################################
 #### Build Location ###########################################
@@ -181,27 +188,27 @@ $(IMAGES_DIR)/$(FILE_NAME).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image is stable!"
+	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 #### Bitfile Copy (Partial Reconfiguration: Static) ###########
 $(IMAGES_DIR)/$(FILE_NAME)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image is stable!"
+	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 $(IMAGES_DIR)/$(FILE_NAME)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Checkpoint file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image and checkpoint is stable!" 
+	@echo "Don't forget to 'git commit and git push' the .dcp file when the image is stable!"
 #### Bitfile Copy (Partial Reconfiguration: Dynamic) ##########
 $(IMAGES_DIR)/$(FILE_NAME)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image is stable!"  
+	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!" 
 
 ###############################################################
 #### Vivado Interactive #######################################
@@ -251,7 +258,7 @@ $(IMAGES_DIR)/$(FILE_NAME).mcs: $(IMPL_DIR)/$(PROJECT).bit
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen.tcl
 	@echo ""
 	@echo "Prom file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image is stable!"
+	@echo "Don't forget to 'git commit and git push' the .mcs.gz file when the image is stable!" 
 
 ###############################################################
 #### Vivado SDK ###############################################
@@ -270,8 +277,8 @@ elf : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado SDK .ELF generation")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sdk_bit.tcl
 	@echo ""
-	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).bit"
-	@echo "Don't forget to 'svn commit' when the image is stable!"  
+	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(FILE_NAME).bit"
+	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"   
 
 ###############################################################
 #### Vivado YAML ##############################################

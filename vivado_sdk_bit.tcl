@@ -37,6 +37,7 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
    } _RESULT]  
 
    # Copy over .bit w/ .ELF file to image directory
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.bit
+   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(FILE_NAME).bit
+   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(FILE_NAME).bit.gz
    
 }

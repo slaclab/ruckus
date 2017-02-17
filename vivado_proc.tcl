@@ -273,8 +273,8 @@ proc CreateFpgaBit { } {
    #########################################################
    ## Check if need to include YAML files with the .BIT file
    #########################################################
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/${PROJECT}_${PRJ_VERSION}.bit.gz
+   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(FILE_NAME).bit
+   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(FILE_NAME).bit.gz
 }
 
 proc CreateYamlTarGz { } {   
@@ -349,8 +349,9 @@ proc CheckTiming { {printTiming true} } {
    }
 }
 
-# Check if PROJ_VERSION is defined and valid
-proc CheckPrjVersion { } {
+# Check project configuration for errors
+proc CheckPrjConfig { } {
+
    if { $::env(PRJ_VERSION) == "" } {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
@@ -361,11 +362,21 @@ proc CheckPrjVersion { } {
       puts "********************************************************\n\n\n\n\n"  
       return false
    }
-   return true
-}
 
-# Check if SDK_SRC_PATH exist, then it checks for a valid path 
-proc CheckSdkSrcPath { } {
+   if { $::env(GIT_HASH_LONG) == "" } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "********************************************************"
+      puts "********************************************************"   
+      puts "Error: The following files are not committed in GIT:"
+      foreach filePath $::env(GIT_STATUS) {
+         puts "\t${filePath}"
+      }
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "********************************************************\n\n\n\n\n"  
+      return false
+   }   
+   
    if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
       if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
          puts "\n\n\n\n\n********************************************************"
@@ -378,6 +389,8 @@ proc CheckSdkSrcPath { } {
          return false
       }      
    }
+   
+   # No errors detected
    return true
 }
 

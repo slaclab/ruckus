@@ -15,13 +15,8 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-# Check if PROJ_VERSION is defined and valid
-if { [CheckPrjVersion] != true } {
-   exit -1
-}
-
-# Check if SDK_SRC_PATH is a valid path
-if { [CheckSdkSrcPath] != true } {
+# Check project configuration for errors
+if { [CheckPrjConfig] != true } {
    exit -1
 }
 
