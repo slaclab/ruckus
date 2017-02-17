@@ -127,7 +127,7 @@ test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
-	@echo FILE_NAME: $(GIT_TAG_MSG)
+	@echo FILE_NAME: $(FILE_NAME)
 	@echo Untracked Files:
 	@echo -e "$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
