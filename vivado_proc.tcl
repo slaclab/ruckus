@@ -349,9 +349,27 @@ proc CheckTiming { {printTiming true} } {
    }
 }
 
+# Check if SDK_SRC_PATH exist, then it checks for a valid path 
+proc CheckSdkSrcPath { } {
+   if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
+      if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
+         puts "\n\n\n\n\n********************************************************"
+         puts "********************************************************"
+         puts "********************************************************"   
+         puts "SDK_SRC_PATH: $::env(SDK_SRC_PATH) does not exist"
+         puts "********************************************************"
+         puts "********************************************************"
+         puts "********************************************************\n\n\n\n\n"  
+         return false
+      }      
+   }
+   return true
+}
+
 # Check project configuration for errors
 proc CheckPrjConfig { } {
 
+   # Check for empty Firwmare Version string
    if { $::env(PRJ_VERSION) == "" } {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
@@ -363,6 +381,7 @@ proc CheckPrjConfig { } {
       return false
    }
 
+   # Check for empty GIT HASH string
    if { $::env(GIT_HASH_LONG) == "" } {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
@@ -377,21 +396,8 @@ proc CheckPrjConfig { } {
       return false
    }   
    
-   if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
-      if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
-         puts "\n\n\n\n\n********************************************************"
-         puts "********************************************************"
-         puts "********************************************************"   
-         puts "Error: SDK_SRC_PATH = $::env(SDK_SRC_PATH) does not exist"
-         puts "********************************************************"
-         puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"  
-         return false
-      }      
-   }
-   
-   # No errors detected
-   return true
+   # Check SDK
+   return [CheckSdkSrcPath]
 }
 
 # Check if the Synthesize is completed
