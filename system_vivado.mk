@@ -64,23 +64,31 @@ export BUILD_TIME   = $(shell date +%Y%m%d%H%M%S)
 export BUILD_USER   = $(shell whoami)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
 
-# Check the GIT status
-export GIT_STATUS = $(shell git diff-index HEAD --name-only)
-ifeq ($(GIT_STATUS),)
-   export GIT_TAG_NAME =  build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME)
-   export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
-   $(shell git tag -a $(GIT_TAG_NAME) $(GIT_TAG_MSG))
-   $(shell git show $(GIT_TAG_NAME) > build.info)
-   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
-   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+# Check if we are using GIT tagging
+ifndef GIT_BYPASS
+   # Check the GIT status
+   export GIT_STATUS = $(shell git diff-index HEAD --name-only)
+   ifeq ($(GIT_STATUS),)
+      export GIT_TAG_NAME =  build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME)
+      export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
+      $(shell git tag -a $(GIT_TAG_NAME) $(GIT_TAG_MSG))
+      $(shell git show $(GIT_TAG_NAME) > build.info)
+      export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
+      export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+   else 
+      export GIT_TAG_NAME   = Uncommitted code detected
+      export GIT_HASH_LONG  = 
+      export GIT_HASH_SHORT = 
+   endif
+   # Generate common filename
+   export IMAGENAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
 else 
-   export GIT_TAG_NAME   = Uncommitted code detected
-   export GIT_HASH_LONG  = 
-   export GIT_HASH_SHORT = 
+   export GIT_STATUS     =
+   export GIT_TAG_NAME   = Bypassing Build GIT Tagging
+   export GIT_HASH_LONG  = 0
+   export GIT_HASH_SHORT = 0
+   export IMAGENAME      = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)
 endif
-
-# Generate common filename
-export FILE_NAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
 
 # SDK Variables
 export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
@@ -127,7 +135,7 @@ test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
-	@echo FILE_NAME: $(GIT_TAG_CMD)
+	@echo IMAGENAME: $(GIT_TAG_CMD)
 	@echo Untracked Files:
 	@echo -e "$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
@@ -183,27 +191,27 @@ $(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CO
 ###############################################################
 #### Bitfile Copy #############################################
 ###############################################################
-$(IMAGES_DIR)/$(FILE_NAME).bit : $(IMPL_DIR)/$(PROJECT).bit
+$(IMAGES_DIR)/$(IMAGENAME).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 #### Bitfile Copy (Partial Reconfiguration: Static) ###########
-$(IMAGES_DIR)/$(FILE_NAME)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
+$(IMAGES_DIR)/$(IMAGENAME)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
-$(IMAGES_DIR)/$(FILE_NAME)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
+$(IMAGES_DIR)/$(IMAGENAME)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Checkpoint file copied to $@"
 	@echo "Don't forget to 'git commit and git push' the .dcp file when the image is stable!"
 #### Bitfile Copy (Partial Reconfiguration: Dynamic) ##########
-$(IMAGES_DIR)/$(FILE_NAME)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
+$(IMAGES_DIR)/$(IMAGENAME)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
 	@cp $< $@
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
@@ -253,7 +261,7 @@ dcp : $(SOURCE_DEPEND)
 ###############################################################
 #### Prom #####################################################
 ###############################################################
-$(IMAGES_DIR)/$(FILE_NAME).mcs: $(IMPL_DIR)/$(PROJECT).bit
+$(IMAGES_DIR)/$(IMAGENAME).mcs: $(IMPL_DIR)/$(PROJECT).bit
 	$(call ACTION_HEADER,"PROM Generate")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen.tcl
 	@echo ""
@@ -277,7 +285,7 @@ elf : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado SDK .ELF generation")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sdk_bit.tcl
 	@echo ""
-	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(FILE_NAME).bit"
+	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"   
 
 ###############################################################
@@ -298,19 +306,19 @@ depend      : $(VIVADO_DEPEND)
 sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
-bit         : $(IMAGES_DIR)/$(FILE_NAME).bit 
+bit         : $(IMAGES_DIR)/$(IMAGENAME).bit 
 
 .PHONY      : bit_static
-bit_static  : $(IMAGES_DIR)/$(FILE_NAME)_static.bit $(IMAGES_DIR)/$(FILE_NAME)_static.dcp 
+bit_static  : $(IMAGES_DIR)/$(IMAGENAME)_static.bit $(IMAGES_DIR)/$(IMAGENAME)_static.dcp 
 
 .PHONY      : bit_dynamic
-bit_dynamic : $(IMAGES_DIR)/$(FILE_NAME)_dynamic.bit
+bit_dynamic : $(IMAGES_DIR)/$(IMAGENAME)_dynamic.bit
 
 .PHONY      : prom
-prom        : bit $(IMAGES_DIR)/$(FILE_NAME).mcs
+prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
 
 .PHONY      : prom_static
-prom_static : bit_static $(IMAGES_DIR)/$(FILE_NAME).mcs
+prom_static : bit_static $(IMAGES_DIR)/$(IMAGENAME).mcs
 
 ###############################################################
 #### Clean ####################################################

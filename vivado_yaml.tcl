@@ -65,5 +65,5 @@ exec cp -f ${PROJ_DIR}/build.info   ${ProjYamlDir}/.
 exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
 
 # Compress the project's YAML directory to the target's image directory
-exec tar -zcvf  ${IMAGES_DIR}/$::env(FILE_NAME).tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
-puts "${IMAGES_DIR}/$::env(FILE_NAME).tar.gz"
+exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
+puts "${IMAGES_DIR}/$::env(IMAGENAME).tar.gz"

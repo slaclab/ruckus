@@ -273,8 +273,8 @@ proc CreateFpgaBit { } {
    #########################################################
    ## Check if need to include YAML files with the .BIT file
    #########################################################
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(FILE_NAME).bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(FILE_NAME).bit.gz
+   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(IMAGENAME).bit
+   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
 }
 
 proc CreateYamlTarGz { } {   
