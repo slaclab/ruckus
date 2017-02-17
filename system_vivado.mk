@@ -65,20 +65,18 @@ export BUILD_USER   = $(shell whoami)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Check the GIT status
-export GIT_STATUS     = $(shell git diff-index HEAD --name-only)
+export GIT_STATUS = $(shell git diff-index HEAD --name-only)
 ifeq ($(GIT_STATUS),)
-   export GIT_TAG_MSG    = -m \"PROJECT: $(PROJECT)\" -m \"FW_VERSION: $(PRJ_VERSION)\" -m \"BUILD_STRING: $(BUILD_STRING)\"
-   export GIT_BUILD_TAG  = $(shell git tag -a build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME) $(GIT_TAG_MSG))
+   export GIT_TAG_NAME =  build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME)
+   export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
+   $(shell git tag -a $(GIT_TAG_NAME) $(GIT_TAG_MSG))
+   $(shell git show $(GIT_TAG_NAME) > build.info)
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 else 
    export GIT_HASH_LONG  = 
    export GIT_HASH_SHORT = 
 endif
-
-# export BUILD_INFO = $(shell $(foreach v, $(.VARIABLES), $(info $(v): $($(v)))) >> $(PROJ_DIR)/build.info)
-export BUILD_INFO = $(shell rm -f $(PROJ_DIR)/build.info))
-export BUILD_INFO = $(shell echo GIT_HASH_LONG: $(GIT_HASH_LONG) >> $(PROJ_DIR)/build.info))
 
 # Generate common filename
 export FILE_NAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
@@ -127,7 +125,7 @@ test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
-	@echo FILE_NAME: $(FILE_NAME)
+	@echo FILE_NAME: $(GIT_TAG_CMD)
 	@echo Untracked Files:
 	@echo -e "$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
