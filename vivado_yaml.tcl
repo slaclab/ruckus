@@ -61,7 +61,7 @@ foreach filename ${listFiles} {
 }
 
 # Copy the Version.vhd and the LICENSE.txt to the project's YAML directory
-exec cp -f ${PROJ_DIR}/Version.vhd   ${ProjYamlDir}/.
+exec cp -f ${PROJ_DIR}/Build.info   ${ProjYamlDir}/. 
 exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
 
 # Compress the project's YAML directory to the target's image directory
