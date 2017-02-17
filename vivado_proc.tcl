@@ -836,7 +836,7 @@ proc loadSource args {
          return -code error "loadSource: $params(dir) doesn't exist"
       } else {  
          # Get a list of all RTL files
-         set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.xci *.dcp]
+         set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.dcp]
          # Load all the RTL files
          if { ${list} != "" } {
             foreach pntr ${list} {
