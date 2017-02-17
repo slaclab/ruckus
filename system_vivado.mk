@@ -74,6 +74,7 @@ ifeq ($(GIT_STATUS),)
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
 else 
+   export GIT_TAG_NAME   = Uncommitted code detected
    export GIT_HASH_LONG  = 
    export GIT_HASH_SHORT = 
 endif
@@ -97,6 +98,7 @@ define ACTION_HEADER
 @echo    "   Out Dir      = $(OUT_DIR)"
 @echo    "   Version      = $(PRJ_VERSION)"
 @echo    "   Build String = $(BUILD_STRING)"
+@echo    "   GIT Tag      = $(GIT_TAG_NAME)"
 @echo    "   GIT Hash     = $(GIT_HASH_LONG)"
 @echo    "============================================================================="
 @echo 	
