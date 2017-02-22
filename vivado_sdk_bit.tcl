@@ -26,7 +26,7 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
 
    # Add .ELF to the .bit file properties
    add_files -norecurse ${SDK_ELF}  
-   set_property SCOPED_TO_REF   [file rootname [file tail ${BD_FILES}]] [get_files ${SDK_ELF} ]
+   set_property SCOPED_TO_REF   [file rootname [file tail [get_files {*.bd}]]] [get_files ${SDK_ELF} ]
    set_property SCOPED_TO_CELLS { microblaze_0 }                        [get_files ${SDK_ELF} ]
 
    # Rebuild the .bit file with the .ELF file include
