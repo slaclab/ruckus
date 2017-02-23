@@ -25,7 +25,7 @@ if { ${AllowMultiDriven} != 1 } {
    set MDRV [report_drc -quiet -checks {MDRV-1}]
    # Check if any multi-driven nets during synthesis
    if { ${MDRV} != 0 } {
-      puts "\n\n\nMulti-driven nets detected during synthesis!!!n\n\n"    
+      puts "\n\n\nMulti-driven nets detected during synthesis!!!\n\n"    
       exit -1
    }
 }

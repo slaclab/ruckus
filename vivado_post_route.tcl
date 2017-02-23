@@ -58,13 +58,10 @@ if { [CheckTiming false] == true } {
                   set SDK_PRJ_RDY true
                }         
             }
-            # Try to build the .ELF file
-            catch { 
-               # Generate .ELF
-               set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf.tcl >@stdout}]    
-               # Add .ELF to the .bit file
-               source ${RUCKUS_DIR}/vivado_sdk_bit.tcl       
-            }
+            # Generate .ELF
+            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf.tcl >@stdout}]    
+            # Add .ELF to the .bit file
+            source ${RUCKUS_DIR}/vivado_sdk_bit.tcl       
          }
       }
    }

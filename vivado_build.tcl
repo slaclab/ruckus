@@ -86,7 +86,7 @@ source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
 ########################################################
 ## Check that the Synthesize is completed
 ########################################################
-if { [CheckSynth] != true } {
+if { [CheckSynth printMsg] != true } {  
    close_project
    exit -1
 }

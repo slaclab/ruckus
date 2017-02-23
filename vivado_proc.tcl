@@ -401,17 +401,24 @@ proc CheckPrjConfig { } {
 }
 
 # Check if the Synthesize is completed
-proc CheckSynth { } {
-
+proc CheckSynth { {flags ""} } {
    if { [get_property PROGRESS [get_runs synth_1]] != "100\%" } {
-      return false
+      set errmsg "\t\[get_property PROGRESS \[get_runs synth_1\]\] != 100\%\n"
    } elseif { [get_property NEEDS_REFRESH [get_runs synth_1]] == 1 } {
-      return false   
+      set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs synth_1\]\] == 1,\n"  
+      set errmsg "${errmsg}\twhich means the synthesis is now \"out-of-date\".\n"
+      set errmsg "${errmsg}\t\"out-of-date\" typically happens when editing\n"
+      set errmsg "${errmsg}\tsource code during synthesis process."        
    } elseif { [get_property STATUS [get_runs synth_1]] != "synth_design Complete!" } {
-      return false
+      set errmsg "\t\[get_property STATUS \[get_runs synth_1\]\] != \"synth_design Complete!\"\n"
    } else {
       return true
    }
+   if { ${flags} != "" } {
+      puts "\n\nSynthesize is incompleted due to the following:"
+      puts "${errmsg}\n\n"
+   }
+   return false
 }
 
 # Check if the Synthesize is completed

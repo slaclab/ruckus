@@ -38,16 +38,7 @@ if { [file exists ${SDK_PRJ}] != 1 } {
          set softLink ${SDK_PRJ}/app_0/${dirName}
          sdk get_build_config -app app_0 -add include-path ${sdkLib}
          exec ln -s ${sdkLib} ${softLink}
-      }       
-      # Configure the debug build
-      sdk get_build_config -app app_0 build-config debug
-      sdk get_build_config -app  app_0 -set compiler-optimization {Optimize for size (-Os)}      
-      foreach sdkLib ${SDK_LIB} {
-         set dirName  [file tail ${sdkLib}]
-         set softLink ${SDK_PRJ}/app_0/${dirName}
-         sdk get_build_config -app app_0 -add include-path ${sdkLib}
-         exec ln -s ${sdkLib} ${softLink}
-      }       
+      }             
    } else {
       # Make the project for Vivado 2016.1 (or later) ....  Refer to AR#66629
       file mkdir ${SDK_PRJ}
@@ -65,13 +56,7 @@ if { [file exists ${SDK_PRJ}] != 1 } {
          set softLink ${SDK_PRJ}/app_0/${dirName}
          exec ln -s ${sdkLib} ${softLink}
          sdk configapp -app app_0 -add include-path ${sdkLib}
-      }       
-      # Configure the debug build
-      sdk configapp -app app_0 build-config debug
-      sdk configapp -app  app_0 -set compiler-optimization {Optimize for size (-Os)}
-      foreach sdkLib ${SDK_LIB} {
-         sdk configapp -app app_0 -add include-path ${sdkLib}
-      }           
+      }              
    }       
 
 }
