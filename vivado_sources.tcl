@@ -61,6 +61,8 @@ set_property top "glbl"     [get_filesets sim_1]
 # Init the global variable
 set ::DIR_PATH ""
 set ::IP_LIST  ""
+set ::IP_FILES ""
+set ::BD_FILES ""
 
 # Load the top-level ruckus.tcl file
 loadRuckusTcl ${PROJ_DIR}
@@ -94,6 +96,26 @@ update_compile_order -quiet -fileset sim_1
 if { [expr [info exists ::env(REMOVE_UNUSED_CODE)]] == 1 } {
    RemoveUnsuedCode
 }
+
+# Write the IP list
+exec rm -f {${OUT_DIR}/ipList.txt}
+set ipList [open ${OUT_DIR}/ipList.txt  w]
+if { $::IP_FILES != "" } {
+   foreach ipPntr $::IP_FILES {
+      puts ${ipList} ${ipPntr}
+   }
+}
+close ${ipList}
+
+# Write the BD list
+exec rm -f {${OUT_DIR}/bdList.txt}
+set bdList [open ${OUT_DIR}/bdList.txt  w]
+if { $::BD_FILES != "" } {
+   foreach bdPntr $::BD_FILES {
+      puts ${bdList} ${bdPntr}
+   }
+}
+close ${bdList}
 
 # Close the project
 close_project

@@ -157,7 +157,7 @@ proc BuildIpCores { } {
    VivadoRefresh ${VIVADO_PROJECT}   
 }
 
-# Copies all defined cores.txt IP cores from the build tree to source tree
+# Copies all IP cores from the build tree to source tree
 proc CopyIpCores { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -166,12 +166,15 @@ proc CopyIpCores { } {
    # Make sure the IP Cores have been built
    BuildIpCores
    
+   # Get the IP list
+   set ipList [read [open ${OUT_DIR}/ipList.txt]]
+   
    # Check if the target project has IP cores
-   if { [get_ips] != "" } {
+   if { ${ipList} != "" } {
       # Loop through the IP cores
       foreach corePntr [get_ips] {
          # Create a copy of the IP Core in the source tree
-         foreach coreFilePntr ${CORE_FILES} {
+         foreach coreFilePntr ${ipList} {
             if { [ string match *${corePntr}* ${coreFilePntr} ] } { 
                # Overwrite the existing .xci file in the source tree
                set SRC [get_files ${corePntr}.xci]
@@ -189,7 +192,7 @@ proc CopyIpCores { } {
    }
 }  
 
-# Copies all source code defined cores.txt IP cores from the build tree to source tree
+# Copies all IP cores from the build tree to source tree (with source code)
 proc CopyIpCoresDebug { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -198,12 +201,15 @@ proc CopyIpCoresDebug { } {
    # Make sure the IP Cores have been built
    BuildIpCores
    
+   # Get the IP list
+   set ipList [read [open ${OUT_DIR}/ipList.txt]]
+   
    # Check if the target project has IP cores
-   if { [get_ips] != "" } {
+   if { ${ipList} != "" } {
       # Loop through the IP cores
       foreach corePntr [get_ips] {
-         # Copy source code from build tree to source tree
-         foreach coreFilePntr ${CORE_FILES} {
+         # Create a copy of the IP Core in the source tree
+         foreach coreFilePntr ${ipList} {
             if { [ string match *${corePntr}* ${coreFilePntr} ] } { 
                set SRC [get_files ${corePntr}.xci]
                set DST ${coreFilePntr}            
@@ -217,21 +223,25 @@ proc CopyIpCoresDebug { } {
    }
 }   
 
-# Copies all defined block_design.txt IP cores from the build tree to source tree
+# Copies all block designs from the build tree to source tree
 proc CopyBdCores { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl   
    
-   # Check if the target project has IP cores
-   if { [get_bd_designs] != "" } {
-      # Loop through the IP cores
-      foreach bdPntr [get_bd_designs] {
+   # Get the BD list
+   set bdList [read [open ${OUT_DIR}/bdList.txt]]   
+   
+   # Check if the target project has block designs
+   if { ${bdList} != "" } {
+      # Loop through the has block designs
+      foreach bdPntr [get_files {*.bd}] {
          # Create a copy of the IP Core in the source tree
-         foreach bdFilePntr ${BD_FILES} {
-            if { [ string match *${bdPntr}* ${bdFilePntr} ] } { 
+         foreach bdFilePntr ${bdList} {
+            set strip [file rootname [file tail ${bdPntr}]]
+            if { [ string match *${strip}.bd ${bdFilePntr} ] } { 
                # Overwrite the existing .bd file in the source tree
-               set SRC [get_files ${bdPntr}.bd]
+               set SRC ${bdPntr}
                set DST ${bdFilePntr}
                exec cp ${SRC} ${DST}
                puts "exec cp ${SRC} ${DST}"    
@@ -241,23 +251,27 @@ proc CopyBdCores { } {
    }
 } 
 
-# Copies all source code defined block_design.txt IP cores from the build tree to source tree
+# Copies all block designs from the build tree to source tree (with source code)
 proc CopyBdCoresDebug { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl   
    
-   # Check if the target project has IP cores
-   if { [get_bd_designs] != "" } {
-      # Loop through the IP cores
-      foreach bdPntr [get_bd_designs] {
-         # Copy source code from build tree to source tree
-         foreach bdFilePntr ${BD_FILES} {
-            if { [ string match *${bdPntr}* ${bdFilePntr} ] } { 
-               set SRC [get_files ${bdPntr}.bd]
-               set DST ${bdFilePntr}            
-               set SRC  [string trim ${SRC} ${bdPntr}.bd]
-               set DST  [string trim ${DST} ${bdPntr}.bd]
+   # Get the BD list
+   set bdList [read [open ${OUT_DIR}/bdList.txt]]   
+   
+   # Check if the target project has block designs
+   if { ${bdList} != "" } {
+      # Loop through the has block designs
+      foreach bdPntr [get_files {*.bd}] {
+         # Create a copy of the IP Core in the source tree
+         foreach bdFilePntr ${bdList} {
+            set strip [file rootname [file tail ${bdPntr}]]
+            if { [ string match *${strip}.bd ${bdFilePntr} ] } { 
+               set SRC ${bdPntr}
+               set DST ${bdFilePntr}         
+               set SRC  [string trim ${SRC} ${strip}.bd]
+               set DST  [string trim ${DST} ${strip}.bd]
                exec cp -rf ${SRC} ${DST}    
                puts "exec cp -rf ${SRC} ${DST}"    
             }
@@ -881,6 +895,7 @@ proc loadIpCore args {
          # Update the global list
          set strip [file rootname [file tail $params(path)]]
          set ::IP_LIST "$::IP_LIST ${strip}"         
+         set ::IP_FILES "$::IP_FILES $params(path)"
       }
    # Load all files from a directory
    } elseif {$has_dir} {
@@ -898,6 +913,7 @@ proc loadIpCore args {
                # Update the global list
                set strip [file rootname [file tail ${pntr}]]
                set ::IP_LIST "$::IP_LIST ${strip}"
+               set ::IP_FILES "$::IP_FILES ${pntr}"
             }
          }
       }
@@ -923,6 +939,8 @@ proc loadBlockDesign args {
       if { [file exists $params(path)] != 1 } {   
          return -code error "loadBlockDesign: $params(path) doesn't exist"
       } else {
+         # Update the global list
+         set ::BD_FILES "$::BD_FILES $params(path)"
          # Check if the block design file has already been loaded
          if { [get_files -quiet [file tail $params(path)]] == ""} {
             # Add block design file
@@ -941,11 +959,13 @@ proc loadBlockDesign args {
          # Load all the block design files
          if { ${list} != "" } {
             foreach pntr ${list} {
+               # Update the global list
+               set ::BD_FILES "$::BD_FILES ${pntr}"
                # Check if the block design file has already been loaded
                if { [get_files -quiet [file tail ${pntr}]] == ""} {            
                   # Add block design file
                   set locPath [import_files -force -norecurse ${pntr}]
-                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet        
+                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet      
                }
             }
          }
