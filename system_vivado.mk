@@ -72,7 +72,7 @@ ifndef GIT_BYPASS
       export GIT_TAG_NAME =  build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME)
       export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
       $(shell git tag -a $(GIT_TAG_NAME) $(GIT_TAG_MSG))
-      $(shell git show $(GIT_TAG_NAME) > build.info)
+      $(shell git show $(GIT_TAG_NAME) -- > build.info)
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
    else 
