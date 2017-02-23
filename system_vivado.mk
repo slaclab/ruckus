@@ -91,8 +91,9 @@ else
 endif
 
 # SDK Variables
-export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
-export SDK_ELF = $(abspath $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).elf)
+export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
+export SDK_ELF    = $(abspath $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).elf)
+export LD_PRELOAD = 
 
 ifndef SDK_LIB
 export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
