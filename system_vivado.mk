@@ -71,12 +71,11 @@ ifndef GIT_BYPASS
    ifeq ($(GIT_STATUS),)
       export GIT_TAG_NAME =  build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME)
       export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
-      $(shell git tag -a $(GIT_TAG_NAME) $(GIT_TAG_MSG))
-      $(shell git show $(GIT_TAG_NAME) -- > build.info)
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
    else 
       export GIT_TAG_NAME   = Uncommitted code detected
+      export GIT_TAG_MSG    = 
       export GIT_HASH_LONG  = 
       export GIT_HASH_SHORT = 
    endif
@@ -85,6 +84,7 @@ ifndef GIT_BYPASS
 else 
    export GIT_STATUS     =
    export GIT_TAG_NAME   = Bypassing Build GIT Tagging
+   export GIT_TAG_MSG    =
    export GIT_HASH_LONG  = 0
    export GIT_HASH_SHORT = 0
    export IMAGENAME      = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)

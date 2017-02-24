@@ -320,6 +320,14 @@ proc RemoveUnsuedCode { } {
    remove_files [get_files -filter {IS_AUTO_DISABLED}]
 }
 
+# GIT Build TAG   
+proc GitBuildTag { } { 
+   if { $::env(GIT_TAG_MSG) != "" } {
+      exec git tag -a $::env(GIT_TAG_NAME) $::env(GIT_TAG_MSG)
+      exec git show $::env(GIT_TAG_NAME) -- > $::(PROJ_DIR)/build.info
+   }
+}
+
 # Checking Timing Function
 proc CheckTiming { {printTiming true} } {
    # Check for timing and routing errors 

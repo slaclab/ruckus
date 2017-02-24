@@ -96,6 +96,7 @@ if { [CheckSynth printMsg] != true } {
 ########################################################
 if { [info exists ::env(SYNTH_ONLY)] } {
    close_project
+   GitBuildTag
    exit 0
 }
 
@@ -105,6 +106,7 @@ if { [info exists ::env(SYNTH_ONLY)] } {
 if { [info exists ::env(SYNTH_DCP)] } {
    source ${RUCKUS_DIR}/vivado_dcp.tcl
    close_project
+   GitBuildTag
    exit 0
 }
 
@@ -148,4 +150,5 @@ if { [CheckTiming] != true } {
 ########################################################
 
 close_project
+GitBuildTag
 exit 0
