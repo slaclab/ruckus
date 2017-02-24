@@ -323,8 +323,8 @@ proc RemoveUnsuedCode { } {
 # GIT Build TAG   
 proc GitBuildTag { } { 
    if { $::env(GIT_TAG_MSG) != "" } {
-      exec git tag -a $::env(GIT_TAG_NAME) $::env(GIT_TAG_MSG)
-      exec git show $::env(GIT_TAG_NAME) -- > $::(PROJ_DIR)/build.info
+      exec tcsh -e -c "cd $::(PROJ_DIR); git tag -a $::env(GIT_TAG_NAME) $::env(GIT_TAG_MSG)" >@stdout
+      exec tcsh -e -c "cd $::(PROJ_DIR); git show $::env(GIT_TAG_NAME) -- > $::(PROJ_DIR)/build.info" >@stdout
    }
 }
 
