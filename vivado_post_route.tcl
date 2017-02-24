@@ -21,6 +21,8 @@ set topLevel [get_property top [current_fileset]]
 ## Check if passed timing
 ########################################################
 if { [CheckTiming false] == true } {
+   # Make the GIT build tag
+   GitBuildTag
 
    ########################################################
    ## Make a copy of the routed .DCP file for future use 

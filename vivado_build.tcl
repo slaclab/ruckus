@@ -150,5 +150,4 @@ if { [CheckTiming] != true } {
 ########################################################
 
 close_project
-GitBuildTag
 exit 0
