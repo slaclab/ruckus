@@ -325,7 +325,7 @@ proc GitBuildTag { } {
    if { $::env(GIT_TAG_MSG) != "" } {
       set CMD "git tag -a $::env(GIT_TAG_NAME) $::env(GIT_TAG_MSG)"
       exec tcsh -e -c "${CMD}" >@stdout
-      set CMD "git show $::env(GIT_TAG_NAME) -- > $::(PROJ_DIR)/build.info"
+      set CMD "git show $::env(GIT_TAG_NAME) -- > $::env(PROJ_DIR)/build.info"
       exec tcsh -e -c "${CMD}" >@stdout
    }
 }
