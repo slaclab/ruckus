@@ -8,12 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Detect project name
 ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
 endif
 
-# Top level directories
 ifndef PROJ_DIR
 export PROJ_DIR = $(abspath $(PWD))
 endif
@@ -24,6 +22,14 @@ endif
 
 ifndef MODULES
 export MODULES = $(TOP_DIR)/submodules
+endif
+
+ifndef PRJ_VERSION
+export PRJ_VERSION = 
+endif
+
+ifndef REMOVE_UNUSED_CODE
+export REMOVE_UNUSED_CODE = 0
 endif
 
 # Project Build Directory
@@ -51,11 +57,6 @@ export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
-
-# Get Project Version
-ifndef PRJ_VERSION
-export PRJ_VERSION = 
-endif
 
 # Generate build string
 export BUILD_SYS    = $(shell uname -m)
