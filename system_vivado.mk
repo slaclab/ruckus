@@ -76,21 +76,25 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+      export GIT_HASH_MSG   = $(GIT_HASH_LONG)
    else 
       export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_TAG_MSG    = 
       export GIT_HASH_LONG  = 
       export GIT_HASH_SHORT = 
+      export GIT_HASH_MSG   = dirty
    endif
    # Generate common filename
    export IMAGENAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
+   
 else 
    export GIT_STATUS     =
    export GIT_TAG_NAME   = Bypassing Build GIT Tagging
    export GIT_TAG_MSG    =
    export GIT_HASH_LONG  = 0
    export GIT_HASH_SHORT = 0
-   export IMAGENAME      = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)
+   export GIT_HASH_MSG   = dirty
+   export IMAGENAME      = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)-dirty
 endif
 
 # SDK Variables
@@ -111,7 +115,7 @@ define ACTION_HEADER
 @echo    "   Version      = $(PRJ_VERSION)"
 @echo    "   Build String = $(BUILD_STRING)"
 @echo    "   GIT Tag      = $(GIT_TAG_NAME)"
-@echo    "   GIT Hash     = $(GIT_HASH_LONG)"
+@echo    "   GIT Hash     = $(GIT_HASH_MSG)"
 @echo    "============================================================================="
 @echo 	
 endef

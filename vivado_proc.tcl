@@ -858,8 +858,6 @@ proc loadSource args {
       } else {
          # Add the RTL Files
          add_files -quiet -fileset ${fileset} $params(path)
-         # Force Absolute Path (not relative to project)
-         set_property PATH_MODE AbsoluteFirst [get_files $params(path)]   
       }
    # Load all files from a directory
    } elseif {$has_dir} {
@@ -874,8 +872,6 @@ proc loadSource args {
             foreach pntr ${list} {
                # Add the RTL Files
                add_files -quiet -fileset ${fileset} ${pntr}
-               # Force Absolute Path (not relative to project)
-               set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
             }
          }
       }
@@ -1005,8 +1001,6 @@ proc loadConstraints args {
       } else {
          # Add the constraint Files
          add_files -quiet -fileset constrs_1 $params(path)
-         # Force Absolute Path (not relative to project)
-         set_property PATH_MODE AbsoluteFirst [get_files $params(path)]     
       }
    # Load all files from a directory
    } elseif {$has_dir} {
@@ -1020,8 +1014,6 @@ proc loadConstraints args {
          foreach pntr ${list} {
             # Add the RTL Files
             add_files -quiet -fileset constrs_1 ${pntr}
-            # Force Absolute Path (not relative to project)
-            set_property PATH_MODE AbsoluteFirst [get_files ${pntr}]
          }
       }
    }
