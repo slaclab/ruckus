@@ -66,6 +66,9 @@ export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built
 
 # Check if we are using GIT tagging
 ifndef GIT_BYPASS
+export GIT_BYPASS = 0
+endif
+ifeq ($(GIT_BYPASS), 0)
    # Check the GIT status
    export GIT_STATUS = $(shell git diff-index HEAD --name-only)
    ifeq ($(GIT_STATUS),)
