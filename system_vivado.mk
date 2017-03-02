@@ -73,7 +73,7 @@ ifeq ($(GIT_BYPASS), 0)
    # Check the GIT status
    export GIT_STATUS = $(shell git diff-index HEAD --name-only)
    ifeq ($(GIT_STATUS),)
-      export GIT_TAG_NAME =  build.$(PROJECT).$(PRJ_VERSION).$(BUILD_TIME)
+      export GIT_TAG_NAME =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
       export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
@@ -86,7 +86,7 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_MSG   = dirty
    endif
    # Generate common filename
-   export IMAGENAME = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)_$(GIT_HASH_SHORT)
+   export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
    
 else 
    export GIT_STATUS     =
@@ -95,7 +95,7 @@ else
    export GIT_HASH_LONG  = 0
    export GIT_HASH_SHORT = 0
    export GIT_HASH_MSG   = dirty
-   export IMAGENAME      = $(PROJECT)_$(PRJ_VERSION)_$(BUILD_TIME)-dirty
+   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
 endif
 
 # SDK Variables
