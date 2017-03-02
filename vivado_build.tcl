@@ -20,6 +20,13 @@ source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 ########################################################
 ## Open the project
 ########################################################
+
+# Check project configuration for errors
+if { [CheckPrjConfig] != true } {
+   exit -1
+}
+
+# Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties

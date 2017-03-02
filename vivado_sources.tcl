@@ -15,11 +15,6 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-# Check project configuration for errors
-if { [CheckPrjConfig] != true } {
-   exit -1
-}
-
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
