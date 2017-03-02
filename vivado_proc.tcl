@@ -421,6 +421,28 @@ proc CheckPrjConfig { } {
       return false
    }   
    
+   # Check for syntax errors
+   set syntaxReport [check_syntax -fileset sources_1 -return_string -quiet -verbose]
+   set syntaxReport [split ${syntaxReport} "\n"]
+   set listErr ""
+   foreach msg ${syntaxReport} {
+      if { [string match {*Syntax error *} ${msg}] == 1 } {
+         set listErr "${listErr}\n${msg}"
+      }
+   }
+   if { ${listErr} != "" } {
+      set listErr [string map {"ERROR: \[#UNDEF\]" ""} ${listErr} ]
+      set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]      
+      puts "\n\n\n\n\n********************************************************"
+      puts "********************************************************"
+      puts "********************************************************"   
+      puts "The following syntax error(s) were detected before synthesis:${listErr}"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "********************************************************\n\n\n\n\n"  
+      return false
+   } 
+   
    # Check SDK
    return [CheckSdkSrcPath]
 }
