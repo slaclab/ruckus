@@ -32,6 +32,10 @@ ifndef REMOVE_UNUSED_CODE
 export REMOVE_UNUSED_CODE = 0
 endif
 
+ifndef INCR_BUILD_BYPASS
+export INCR_BUILD_BYPASS = 0
+endif
+
 # Project Build Directory
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
 export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
