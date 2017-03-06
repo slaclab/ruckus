@@ -20,8 +20,22 @@ source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 # Check for errors during synthesis
 set NumErr [llength [lsearch -all -regexp [split [read [open ${SYN_DIR}/runme.log]]] "^ERROR:"]]
 if { ${NumErr} != 0 } {
-   puts "\n\n\nErrors detected during synthesis!!!"
-   puts "\tOpen the GUI to review the error messages\n\n\n" 
+   set errReport [read [open ${SYN_DIR}/runme.log]]
+   set errReport [split ${errReport} "\n"]
+   set listErr ""
+   foreach msg ${errReport} {
+      if { [string match {*ERROR:*} ${msg}] == 1 } {
+         regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
+         set listErr "${listErr}\n${trim1}"       
+      }
+   }   
+   puts "\n\n\n\n\n********************************************************"
+   puts "********************************************************"
+   puts "********************************************************"   
+   puts "The following error(s) were detected during synthesis:${listErr}"
+   puts "********************************************************"
+   puts "********************************************************"
+   puts "********************************************************\n\n\n\n\n"     
    exit -1
 }
 
