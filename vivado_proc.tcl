@@ -487,13 +487,14 @@ proc CheckSynth { {flags ""} } {
       if { $::env(GIT_BYPASS) == 0 } {
          # Check if file exists
          if { [file exists ${SYN_DIR}/git.hash] == 1 } {
-            set gitHash [read [open ${SYN_DIR}/git.hash]]
+            # Git the GIT Hash saved in the synth_1 directory
+            set gitHash [string trim [read [open ${SYN_DIR}/git.hash]]]
             # Compare the file's hash to current Makefile hash
-            if { [string match {$::env(GIT_HASH_LONG)} ${gitHash}] != 1 } {
-               # Mismatch detected
+            if { [string match $::env(GIT_HASH_LONG) ${gitHash}] != 1 } {
+               puts "GIT HASH mismatch detected"
                return false     
             } else {
-               # Match detected
+               puts "GIT HASH match detected"
                return true
             }            
          } else {
