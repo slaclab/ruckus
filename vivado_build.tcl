@@ -88,17 +88,17 @@ if { [CheckSynth] != true } {
 VivadoRefresh ${VIVADO_PROJECT}
 
 ########################################################
-## Target post synthesis script
-########################################################
-source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
-
-########################################################
 ## Check that the Synthesize is completed
 ########################################################
 if { [CheckSynth printMsg] != true } {  
    close_project
    exit -1
 }
+
+########################################################
+## Target post synthesis script
+########################################################
+source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
 
 ########################################################
 ## Check if only doing Synthesize
@@ -135,14 +135,9 @@ if { [CheckImpl] != true } {
 }
 
 ########################################################
-## Target post route script
-########################################################
-source ${RUCKUS_DIR}/vivado_post_route.tcl
-
-########################################################
 ## Check that the Implement is completed
 ########################################################
-if { [CheckImpl] != true } {
+if { [CheckImpl printMsg] != true } {
    close_project
    exit -1
 }
@@ -155,6 +150,11 @@ if { [CheckTiming] != true } {
    close_project
    exit -1
 }
+
+########################################################
+## Target post route script
+########################################################
+source ${RUCKUS_DIR}/vivado_post_route.tcl
 
 ########################################################
 ## Close the project and return sucessful flag

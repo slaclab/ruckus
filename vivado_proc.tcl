@@ -494,26 +494,70 @@ proc CheckSynth { {flags ""} } {
 
 # Check if the Synthesize is completed
 proc CheckIpSynth { ipSynthRun } {
-   if { [get_property PROGRESS [get_runs ${ipSynthRun}]] != "100\%" } {
-      return false
-   } elseif { [get_property NEEDS_REFRESH [get_runs ${ipSynthRun}]] == 1 } {
-      return false   
+   if { [get_property NEEDS_REFRESH [get_runs ${ipSynthRun}]] == 1 } {
+      set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs ${ipSynthRun}\]\] == 1,\n"  
+      set errmsg "${errmsg}\twhich means the synthesis is now \"out-of-date\".\n"
+      set errmsg "${errmsg}\t\"out-of-date\" typically happens when editing\n"
+      set errmsg "${errmsg}\tsource code during synthesis process."        
+   } elseif { [get_property PROGRESS [get_runs ${ipSynthRun}]] != "100\%" } {
+      set errmsg "\t\[get_property PROGRESS \[get_runs ${ipSynthRun}\]\] != 100\%\n"
    } elseif { [get_property STATUS [get_runs ${ipSynthRun}]] != "synth_design Complete!" } {
-      return false
+      set errmsg "\t\[get_property STATUS \[get_runs ${ipSynthRun}\]\] != \"synth_design Complete!\"\n"
    } else {
       return true
    }
+   puts "\n\nSynthesize's ${ipSynthRun} run is incompleted due to the following:"
+   puts "${errmsg}\n\n"
+   return false     
 }
 
 # Check if the Implementation is completed
-proc CheckImpl { } {
+proc CheckImpl { {flags ""} } {
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   # Check for errors during synthesis
+   if { ${flags} != "" } {   
+      set NumErr [llength [lsearch -all -regexp [split [read [open ${IMPL_DIR}/runme.log]]] "^ERROR:"]]
+      if { ${NumErr} != 0 } {
+         set errReport [read [open ${IMPL_DIR}/runme.log]]
+         set errReport [split ${errReport} "\n"]
+         set listErr ""
+         foreach msg ${errReport} {
+            if { [string match {*ERROR:*} ${msg}] == 1 } {
+               set listErr "${listErr}\n${msg}"       
+            }
+         }   
+         puts "\n\n\n\n\n********************************************************"
+         puts "********************************************************"
+         puts "********************************************************"   
+         puts "The following error(s) were detected during implementation:${listErr}"
+         # Check for DRC error during routing
+         if { [string match {*\[Vivado_Tcl 4-16\]*} ${listErr}] == 1 } { 
+            puts "# open_checkpoint ${IMPL_DIR}/${PROJECT}_routed_error.dcp"
+            open_checkpoint -quiet ${IMPL_DIR}/${PROJECT}_routed_error.dcp
+            puts "# report_drc -ruledecks {default}"
+            set drcReport [report_drc -ruledecks {default} -verbose -return_string]
+            puts ${drcReport}
+            close_design
+         }
+         puts "********************************************************"
+         puts "********************************************************"
+         puts "********************************************************\n\n\n\n\n"     
+         return false 
+      }
+   }
    if { [get_property PROGRESS [get_runs impl_1]] != "100\%" } {
-      return false 
+      set errmsg "\t\[get_property PROGRESS \[get_runs impl_1\]\] != 100\%\n"
    } elseif { [get_property STATUS [get_runs impl_1]] != "write_bitstream Complete!" } {
-      return false
+      set errmsg "\t\[get_property STATUS \[get_runs impl_1\]\] != \"write_bitstream Complete!\"\n"
    } else {
       return true
    }
+   if { ${flags} != "" } {
+      puts "\n\nImplementation is incompleted due to the following:"
+      puts "${errmsg}\n\n"
+   }
+   return false   
 }
 proc VcsCompleteMessage {dirPath sharedMem} {
    puts "\n\n********************************************************"
