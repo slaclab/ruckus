@@ -483,7 +483,27 @@ proc CheckSynth { {flags ""} } {
    } elseif { [get_property STATUS [get_runs synth_1]] != "synth_design Complete!" } {
       set errmsg "\t\[get_property STATUS \[get_runs synth_1\]\] != \"synth_design Complete!\"\n"
    } else {
-      return true
+      # Check if tracking GIT hash in build system
+      if { $::env(GIT_BYPASS) == 0 } {
+         # Check if file exists
+         if { [file exists ${SYN_DIR}/git.hash] == 1 } {
+            set gitHash [read [open ${SYN_DIR}/git.hash]]
+            # Compare the file's hash to current Makefile hash
+            if { [string match {$::env(GIT_HASH_LONG)} ${gitHash}] != 1 } {
+               # Mismatch detected
+               return false     
+            } else {
+               # Match detected
+               return true
+            }            
+         } else {
+            # Error: File does not exist
+            return false;
+         }                  
+      } else {
+         # Bypassing GIT hash tracking
+         return true
+      }
    }
    if { ${flags} != "" } {
       puts "\n\nSynthesize is incompleted due to the following:"
