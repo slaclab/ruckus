@@ -491,10 +491,10 @@ proc CheckSynth { {flags ""} } {
             set gitHash [string trim [read [open ${SYN_DIR}/git.hash]]]
             # Compare the file's hash to current Makefile hash
             if { [string match $::env(GIT_HASH_LONG) ${gitHash}] != 1 } {
-               puts "GIT HASH mismatch detected"
+               # puts "GIT HASH mismatch detected"
                return false     
             } else {
-               puts "GIT HASH match detected"
+               # puts "GIT HASH match detected"
                return true
             }            
          } else {
