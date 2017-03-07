@@ -35,12 +35,11 @@ if { [info exists ::env(COMMON_FILE)] != 1 } {
 # Common Variable
 set ProjYamlDir "${OUT_DIR}/${PROJECT}_project.yaml"
 
-# Check if the directory exists
-if [file exists ${ProjYamlDir}] {
-   exec rm -rf ${ProjYamlDir}/*
-} else {
-   exec mkdir ${ProjYamlDir}
-}
+# Remove old directory and files
+exec rm -rf ${ProjYamlDir}
+
+# Create a new directory
+exec mkdir ${ProjYamlDir}
 
 # Copy all of the submodule yaml files
 set listFiles  [ findFiles ${TOP_DIR}/submodules "*.yaml" ]
