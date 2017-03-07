@@ -30,6 +30,11 @@ if { ${AllowMultiDriven} != 1 } {
    }
 }
 
+# GUI Related:
+# Disable a refresh due to the changes 
+# in the Version.vhd file during synthesis 
+set_property NEEDS_REFRESH false [current_run]
+
 # Write the GIT hash to a file
 set fdOut [open ${SYN_DIR}/git.hash  w]
 puts ${fdOut} $::env(GIT_HASH_LONG)
