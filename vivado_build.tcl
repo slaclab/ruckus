@@ -21,11 +21,6 @@ source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 ## Open the project
 ########################################################
 
-# Check project configuration for errors
-if { [CheckPrjConfig] != true } {
-   exit -1
-}
-
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
@@ -40,6 +35,13 @@ source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
 ########################################################
 update_compile_order -quiet -fileset sources_1
 update_compile_order -quiet -fileset sim_1
+
+########################################################
+## Check project configuration for errors
+########################################################
+if { [CheckPrjConfig] != true } {
+   exit -1
+}
 
 ########################################################
 ## Check if we need to clean up or stop the implement

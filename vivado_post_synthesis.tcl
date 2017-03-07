@@ -13,31 +13,8 @@
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
-
-# Check for errors during synthesis
-set NumErr [llength [lsearch -all -regexp [split [read [open ${SYN_DIR}/runme.log]]] "^ERROR:"]]
-if { ${NumErr} != 0 } {
-   set errReport [read [open ${SYN_DIR}/runme.log]]
-   set errReport [split ${errReport} "\n"]
-   set listErr ""
-   foreach msg ${errReport} {
-      if { [string match {*ERROR:*} ${msg}] == 1 } {
-         regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
-         set listErr "${listErr}\n${trim1}"       
-      }
-   }   
-   puts "\n\n\n\n\n********************************************************"
-   puts "********************************************************"
-   puts "********************************************************"   
-   puts "The following error(s) were detected during synthesis:${listErr}"
-   puts "********************************************************"
-   puts "********************************************************"
-   puts "********************************************************\n\n\n\n\n"     
-   exit -1
-}
+source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
 # Target specific post_synthesis script
 SourceTclFile ${VIVADO_DIR}/post_synthesis.tcl

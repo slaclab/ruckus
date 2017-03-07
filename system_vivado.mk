@@ -36,6 +36,10 @@ ifndef INCR_BUILD_BYPASS
 export INCR_BUILD_BYPASS = 0
 endif
 
+ifndef GIT_BYPASS
+export GIT_BYPASS = 0
+endif
+
 # Project Build Directory
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
 export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
@@ -64,15 +68,12 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 
 # Generate build string
 export BUILD_SYS    = $(shell uname -m)
-export BUILD_DATE   = $(shell date)
-export BUILD_TIME   = $(shell date +%Y%m%d%H%M%S)
 export BUILD_USER   = $(shell whoami)
+BUILD_DATE := $(shell date)
+BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Check if we are using GIT tagging
-ifndef GIT_BYPASS
-export GIT_BYPASS = 0
-endif
 ifeq ($(GIT_BYPASS), 0)
    # Check the GIT status
    export GIT_STATUS = $(shell git diff-index HEAD --name-only)
@@ -104,7 +105,7 @@ endif
 
 # SDK Variables
 export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
-export SDK_ELF    = $(abspath $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).elf)
+export SDK_ELF    = $(abspath $(IMAGES_DIR)/$(IMAGENAME).elf)
 export LD_PRELOAD = 
 
 ifndef SDK_LIB

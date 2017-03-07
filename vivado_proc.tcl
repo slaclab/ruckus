@@ -449,6 +449,30 @@ proc CheckPrjConfig { } {
 
 # Check if the Synthesize is completed
 proc CheckSynth { {flags ""} } {
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   if { ${flags} != "" } {
+      # Check for errors during synthesis
+      set NumErr [llength [lsearch -all -regexp [split [read [open ${SYN_DIR}/runme.log]]] "^ERROR:"]]
+      if { ${NumErr} != 0 } {
+         set errReport [read [open ${SYN_DIR}/runme.log]]
+         set errReport [split ${errReport} "\n"]
+         set listErr ""
+         foreach msg ${errReport} {
+            if { [string match {*ERROR:*} ${msg}] == 1 } {
+               regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
+               set listErr "${listErr}\n${trim1}"       
+            }
+         }   
+         puts "\n\n\n\n\n********************************************************"
+         puts "********************************************************"
+         puts "********************************************************"   
+         puts "The following error(s) were detected during synthesis:${listErr}"
+         puts "********************************************************"
+         puts "********************************************************"
+         puts "********************************************************\n\n\n\n\n"     
+         return false
+      }
+   }
    if { [get_property NEEDS_REFRESH [get_runs synth_1]] == 1 } {
       set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs synth_1\]\] == 1,\n"  
       set errmsg "${errmsg}\twhich means the synthesis is now \"out-of-date\".\n"
