@@ -291,26 +291,21 @@ proc CreateFpgaBit { } {
    exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
 }
 
-proc CreateYamlTarGz { } {   
-   # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
-   #########################################################
-   ## Check if need to include YAML files with the .BIT file
-   #########################################################
-   if { [file exists ${PROJ_DIR}/yaml.txt] == 1 } {
-      source $::env(RUCKUS_DIR)/vivado_yaml.tcl
+# Create tar.gz of all cpsw files in firmware
+proc CreateCpswTarGz { } {   
+   if { [file exists $::env(PROJ_DIR)/yaml/000TopLevel.yaml] == 1 } {
+      source $::env(RUCKUS_DIR)/vivado_cpsw.tcl
    }
 }
 
+# Create tar.gz of all pyrogue files in firmware
+proc CreatePyRogueTarGz { } {   
+   source $::env(RUCKUS_DIR)/vivado_pyrogue.tcl
+}
+
+# Create .MCS PROM
 proc CreatePromMcs { } {   
-   # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
-   #########################################################
-   ## Check if promgen.tcl exist
-   #########################################################
-   if { [file exists ${PROJ_DIR}/vivado/promgen.tcl] == 1 } {
+   if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
       source $::env(RUCKUS_DIR)/vivado_promgen.tcl
    }
 }   

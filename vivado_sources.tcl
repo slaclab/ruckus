@@ -63,9 +63,15 @@ set ::BD_FILES ""
 loadRuckusTcl ${PROJ_DIR}
 
 # Change to AbsoluteFirst for source, simulation and constraint file sets
-set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {sources_1}]]
-set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {sim_1}]]
-set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {constrs_1}]]
+if { [get_files -of_objects [get_filesets {sources_1}]] != "" } {
+   set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {sources_1}]]
+}
+if { [get_files -of_objects [get_filesets {sim_1}]] != "" } {
+   set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {sim_1}]]
+}
+if { [get_files -of_objects [get_filesets {constrs_1}]] != "" } {
+   set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {constrs_1}]]
+}
 
 # Close and reopen project
 VivadoRefresh ${VIVADO_PROJECT}

@@ -83,15 +83,15 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
       export GIT_HASH_MSG   = $(GIT_HASH_LONG)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
    else 
       export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_TAG_MSG    = 
       export GIT_HASH_LONG  = 
       export GIT_HASH_SHORT = 
       export GIT_HASH_MSG   = dirty
+      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
    endif
-   # Generate common filename
-   export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
    
 else 
    export GIT_STATUS     =
@@ -303,12 +303,20 @@ elf : $(SOURCE_DEPEND)
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"   
 
 ###############################################################
-#### Vivado YAML ##############################################
+#### Vivado PyRogue ###########################################
+###############################################################
+.PHONY : pyrogue
+pyrogue : $(VIVADO_DEPEND)
+	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
+	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_pyrogue.tcl   
+   
+###############################################################
+#### Vivado CPSW ##############################################
 ###############################################################
 .PHONY : yaml
 yaml : $(VIVADO_DEPEND)
-	$(call ACTION_HEADER,"Generaring YAML.tar.gz file")
-	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_yaml.tcl
+	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
+	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
 
 ###############################################################
 #### Makefile Targets #########################################

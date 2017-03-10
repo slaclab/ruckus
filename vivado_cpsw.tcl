@@ -37,6 +37,7 @@ set ProjYamlDir "${OUT_DIR}/${PROJECT}_project.yaml"
 
 # Remove old directory and files
 exec rm -rf ${ProjYamlDir}
+exec rm -rf ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz
 
 # Create a new directory
 exec mkdir ${ProjYamlDir}
@@ -66,5 +67,5 @@ if { [info exists ::env(GIT_BYPASS)] != 1 } {
 exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
 
 # Compress the project's YAML directory to the target's image directory
-exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
-puts "${IMAGES_DIR}/$::env(IMAGENAME).tar.gz"
+exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
+puts "${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz"
