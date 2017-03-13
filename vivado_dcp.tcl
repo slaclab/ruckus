@@ -17,7 +17,7 @@ source  -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 set topName [get_property top [current_fileset]]
 
 ## Get the ouput file path
-set filepath "${IMAGES_DIR}/${topName}_${PRJ_VERSION}"
+set filepath "${IMAGES_DIR}/${topName}"
 
 ## Open the synthesis design
 open_run synth_1 -name synth_1
@@ -31,7 +31,8 @@ if { ${RemoveTimingConstraints} == 1 } {
 }
 
 ## Create synth_stub
-write_vhdl -force -mode synth_stub ${filepath}.vhd
+write_vhdl    -force -mode synth_stub ${filepath}.vhd
+write_verilog -force -mode synth_stub ${filepath}.v
 
 ## Overwrite the checkpoint   
 write_checkpoint -force ${filepath}.dcp
