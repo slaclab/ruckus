@@ -35,6 +35,7 @@ set_msg_config -suppress -id {Synth 8-5544};# SYNTH: ROM wont be mapped to block
 set_msg_config -suppress -id {Synth 8-5545};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5546};# SYNTH: ROM wont be mapped to block ram
 
+set_msg_config -suppress -id {HDL 9-2216};  # SIM: Analyzing SystemVerilog file into library work
 set_msg_config -suppress -id {HDL 9-1061};  # SIM: Parsing VHDL file 
 set_msg_config -suppress -id {Runs 36-5};   # SIM: Copied auxiliary file
 set_msg_config -suppress -id {VRFC 10-163}; # SIM: Analyzing VHDL file
