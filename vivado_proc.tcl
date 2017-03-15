@@ -295,6 +295,8 @@ proc CreateFpgaBit { } {
 proc CreateCpswTarGz { } {   
    if { [file exists $::env(PROJ_DIR)/yaml/000TopLevel.yaml] == 1 } {
       source $::env(RUCKUS_DIR)/vivado_cpsw.tcl
+   } else {
+      puts "$::env(PROJ_DIR)/yaml/000TopLevel.yaml does not exist"
    }
 }
 
@@ -935,6 +937,8 @@ proc loadRuckusTcl { filePath {flags ""} } {
    }
    # Revert the global variable back to orginal value
    set ::DIR_PATH ${LOC_PATH}
+   # Keep a history of all the load paths
+   set ::DIR_LIST "$::DIR_LIST ${filePath}"
 }
 
 # Function to load RTL files

@@ -55,6 +55,7 @@ set_property top "glbl"     [get_filesets sim_1]
 
 # Init the global variable
 set ::DIR_PATH ""
+set ::DIR_LIST ""
 set ::IP_LIST  ""
 set ::IP_FILES ""
 set ::BD_FILES ""
@@ -102,6 +103,16 @@ update_compile_order -quiet -fileset sim_1
 if { $::env(REMOVE_UNUSED_CODE) != 0 } {
    RemoveUnsuedCode
 }
+
+# Write the DIR list
+exec rm -f {${OUT_DIR}/dirList.txt}
+set dirList [open ${OUT_DIR}/dirList.txt  w]
+if { $::DIR_LIST != "" } {
+   foreach dirPntr $::DIR_LIST {
+      puts ${dirList} ${dirPntr}
+   }
+}
+close ${dirList}
 
 # Write the IP list
 exec rm -f {${OUT_DIR}/ipList.txt}

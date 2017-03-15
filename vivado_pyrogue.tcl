@@ -11,61 +11,51 @@
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source ${RUCKUS_DIR}/vivado_env_var.tcl
 
-proc FindPythonDir { baseDir } {
-   set src_rc [catch {
-      set dirPaths [glob -types d  ${baseDir}/python/*]
-   } _RESULT] 
-   if {$src_rc} { 
-      return "";
-   } else {
-      return ${dirPaths};
-   }
-}
-
 # Variables 
-set ProjYamlDir   "${OUT_DIR}/python"
-set submoduleDir  [FindPythonDir ${TOP_DIR}/submodules/*]
-set commonDir     [FindPythonDir ${TOP_DIR}/common/*]
-set targetDir     [FindPythonDir ${PROJ_DIR}]
+set PyRogueDirName  $::env(IMAGENAME).python
+set ProjPythonDir   "${OUT_DIR}/${PyRogueDirName}"
 
 # Remove old directory and files
-exec rm -rf ${ProjYamlDir}
+exec rm -rf ${ProjPythonDir}
 exec rm -rf ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz
 
 # Create a new directory
-exec mkdir ${ProjYamlDir}
+exec mkdir ${ProjPythonDir}
+exec mkdir ${ProjPythonDir}/python
 
-# Copy python modules from submodules
-if { ${submoduleDir} != "" } {
-   foreach dirName ${submoduleDir} {  
-      exec cp -rf ${dirName} ${ProjYamlDir}/
-   }     
-}
+# Get the ruckus.tcl directory list
+set dirList [read [open ${OUT_DIR}/dirList.txt]] 
 
-# Copy python modules from common
-if { ${commonDir} != "" } {
-   foreach dirName ${commonDir} {  
-      exec cp -rf ${dirName} ${ProjYamlDir}/
-   }     
-}
-
-# Copy python modules from target
-if { ${targetDir} != "" } {
-   foreach dirName ${targetDir} {  
-      exec cp -rf ${dirName} ${ProjYamlDir}/
-   }     
+# check for non-empty list
+if { ${dirList} != "" } {
+   # Loop through the list
+   foreach dirPntr ${dirList} {
+      # Check if python directory exist
+      if { [file isdirectory ${dirPntr}/python/] == 1 } {
+         # Create a list of files
+         set fileList [glob -dir ${dirPntr}/python/ *]
+         # check for non-empty list
+         if { ${fileList} != "" } {
+            # Loop through the list
+            foreach filePntr ${fileList} {      
+               # Copy all the files
+               exec cp -rf ${filePntr} ${ProjPythonDir}/python/.
+            }
+         }
+      }
+   }
 }
 
 # Copy the licensing file
-exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
+exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjPythonDir}/.
 
 # Copy the build.info
 if { $::env(GIT_HASH_LONG) != "" } {
    if { [file exists ${PROJ_DIR}/build.info] == 1 } {
-      exec cp -f ${PROJ_DIR}/build.info ${ProjYamlDir}/.
+      exec cp -f ${PROJ_DIR}/build.info ${ProjPythonDir}/.
    } 
 } 
 
 # Compress the python directory to the target's image directory
-exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz -C ${OUT_DIR} python
+exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz -C ${OUT_DIR} ${PyRogueDirName}
 puts "${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz"
