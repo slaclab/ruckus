@@ -456,8 +456,14 @@ proc CheckSynth { {flags ""} } {
          set listErr ""
          foreach msg ${errReport} {
             if { [string match {*ERROR:*} ${msg}] == 1 } {
+               set trim1 ""
+               set trim2 ""
                regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
-               set listErr "${listErr}\n${trim1}"       
+               if { ${trim1} != "" } {
+                  set listErr "${listErr}\n${trim1}"       
+               } else {
+                  set listErr "${listErr}\n${msg}"  
+               }
             }
          }   
          puts "\n\n\n\n\n********************************************************"
