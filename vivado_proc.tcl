@@ -511,7 +511,7 @@ proc CheckSynth { {flags ""} } {
 }
 
 # Check if the Synthesize is completed
-proc CheckIpSynth { ipSynthRun } {
+proc CheckIpSynth { ipSynthRun {flags ""} } {
    if { [get_property NEEDS_REFRESH [get_runs ${ipSynthRun}]] == 1 } {
       set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs ${ipSynthRun}\]\] == 1,\n"  
       set errmsg "${errmsg}\twhich means the synthesis is now \"out-of-date\".\n"
@@ -524,8 +524,10 @@ proc CheckIpSynth { ipSynthRun } {
    } else {
       return true
    }
-   puts "\n\nSynthesize's ${ipSynthRun} run is incompleted due to the following:"
-   puts "${errmsg}\n\n"
+   if { ${flags} != "" } {   
+      puts "\n\nSynthesize's ${ipSynthRun} run is incompleted due to the following:"
+      puts "${errmsg}\n\n"
+   }
    return false     
 }
 
