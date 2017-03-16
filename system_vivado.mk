@@ -194,11 +194,11 @@ $(IMPL_DIR)/$(PROJECT).bit : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 #### Vivado Batch (Partial Reconfiguration: Static) ###########
-$(IMPL_DIR)/$(PROJECT)_static.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
+$(IMPL_DIR)/$(PROJECT)_static.bit : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build (Partial Reconfiguration: Static)")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_static.tcl
 #### Vivado Batch (Partial Reconfiguration: Dynamic) ##########
-$(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(RTL_FILES) $(XDC_FILES) $(TCL_FILES) $(CORE_FILES) $(SOURCE_DEPEND)
+$(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build (Partial Reconfiguration: Dynamic)")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_dynamic.tcl
 
@@ -306,7 +306,7 @@ elf : $(SOURCE_DEPEND)
 #### Vivado PyRogue ###########################################
 ###############################################################
 .PHONY : pyrogue
-pyrogue : $(VIVADO_DEPEND)
+pyrogue : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_pyrogue.tcl   
    
@@ -314,7 +314,7 @@ pyrogue : $(VIVADO_DEPEND)
 #### Vivado CPSW ##############################################
 ###############################################################
 .PHONY : yaml
-yaml : $(VIVADO_DEPEND)
+yaml : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
 
