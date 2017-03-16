@@ -41,6 +41,7 @@ write_checkpoint -force ${filepath}.dcp
 close_design
 
 ## Parse the synth_stub
+exec rm -f  ${filepath}.vhd
 exec python ${RUCKUS_DIR}/write_vhd_synth_stub_parser.py ${filepath}.vhd
 
 # Target specific dcp script
