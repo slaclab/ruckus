@@ -41,8 +41,8 @@ write_checkpoint -force ${filepath}.dcp
 close_design
 
 ## Parse the synth_stub
-exec rm -f  ${filepath}.vhd
-exec python ${RUCKUS_DIR}/write_vhd_synth_stub_parser.py ${filepath}.vhd
+exec rm -f  ${filepath}.vho
+exec python ${RUCKUS_DIR}/write_vhd_synth_stub_parser.py ${filepath}_stub.vhd
 
 # Target specific dcp script
 SourceTclFile ${VIVADO_DIR}/dcp.tcl
