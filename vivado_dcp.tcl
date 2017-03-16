@@ -31,8 +31,8 @@ if { ${RemoveTimingConstraints} == 1 } {
 }
 
 ## Create synth_stub
-write_vhdl    -force -mode synth_stub ${filepath}.vhd
-write_verilog -force -mode synth_stub ${filepath}.v
+write_vhdl    -force -mode synth_stub ${filepath}_stub.vhd
+write_verilog -force -mode synth_stub ${filepath}_stub.v
 
 ## Overwrite the checkpoint   
 write_checkpoint -force ${filepath}.dcp
