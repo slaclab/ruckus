@@ -15,6 +15,11 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
+# Check if image directory doesn't exist
+if { [file exists ${IMAGES_DIR}] != 1 } {   
+   exec mkdir ${IMAGES_DIR}
+}
+
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
