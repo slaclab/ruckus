@@ -75,5 +75,13 @@ if { ${VIVADO_VERSION} >=  2016.1 } {
 # Enable physical optimization for register replication
 set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
 
+# Enable general project multi-threading
+set cpuNum [GetCpuNumber]
+if { ${cpuNum} >= 8 } { 
+   set_param general.maxThreads 8
+} else {
+   set_param general.maxThreads ${cpuNum}
+}
+
 # Target specific properties script
 SourceTclFile ${VIVADO_DIR}/properties.tcl
