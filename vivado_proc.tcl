@@ -718,6 +718,8 @@ proc InsertStaticReconfigDcp { } {
    
    # Set common variables
    set SYNTH_DIR ${OUT_DIR}/${PROJECT}_project.runs/synth_1
+   set xdcFile ${PROJECT}.xdc
+   set xdcFile [get_files ${xdcFile}]
    
    # Enable the RTL Blocks(s) Logic
    foreach rtlPntr ${RECONFIG_NAME} {
@@ -752,14 +754,12 @@ proc InsertStaticReconfigDcp { } {
    
    # Backup the top level checkpoint and reports
    file copy   -force ${SYNTH_DIR}/${PROJECT}.dcp                   ${SYNTH_DIR}/${PROJECT}_backup.dcp
-   file rename -force ${SYNTH_DIR}/${PROJECT}_utilization_synth.rpt ${SYNTH_DIR}/${PROJECT}_utilization_synth_backup.rpt
-   file rename -force ${SYNTH_DIR}/${PROJECT}_utilization_synth.pb  ${SYNTH_DIR}/${PROJECT}_utilization_synth_backup.pb
    
    # open the top level check point
    open_checkpoint ${SYNTH_DIR}/${PROJECT}.dcp   
 
    # Load the top-level constraint file
-   read_xdc [lsearch -all -inline ${XDC_FILES} *${PROJECT}.xdc]
+   read_xdc ${xdcFile}
 
    # Load the synthesized Partial Reconfiguration RTL Block's check points
    foreach rtlPntr ${RECONFIG_NAME} {
@@ -777,10 +777,7 @@ proc InsertStaticReconfigDcp { } {
    # Overwrite the existing synth_1 checkpoint, which is the 
    # checkpoint that impl_1 will refer to
    write_checkpoint -force ${SYNTH_DIR}/${PROJECT}.dcp   
-   
-   # Generate new top level reports to update GUI display
-   report_utilization -file ${SYNTH_DIR}/${PROJECT}_utilization_synth.rpt -pb ${SYNTH_DIR}/${PROJECT}_utilization_synth.pb
-   
+      
    # Close the opened design before launching the impl_1
    close_design
 }
