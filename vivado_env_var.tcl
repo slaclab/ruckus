@@ -11,6 +11,8 @@
 ########################################################
 ## Set Common Environmental variables
 ########################################################
+
+# Project Variables
 set PRJ_PART         $::env(PRJ_PART)
 set PROJECT          $::env(PROJECT)
 set PRJ_VERSION      $::env(PRJ_VERSION)
@@ -24,6 +26,12 @@ set VIVADO_DIR       $::env(VIVADO_DIR)
 set VIVADO_PROJECT   $::env(VIVADO_PROJECT)
 set VIVADO_VERSION   $::env(VIVADO_VERSION)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)
-set SDK_PRJ          $::env(SDK_PRJ)
-set SDK_LIB          $::env(SDK_LIB)
-set SDK_ELF          $::env(SDK_ELF)
+
+# Vivado SDK Variables
+set SDK_PRJ $::env(SDK_PRJ)
+set SDK_LIB $::env(SDK_LIB)
+set SDK_ELF $::env(SDK_ELF)
+
+# Partial Reconfiguration Variables
+set RECONFIG_NAME       $::env(RECONFIG_NAME)
+set RECONFIG_CHECKPOINT $::env(RECONFIG_CHECKPOINT)

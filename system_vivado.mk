@@ -40,6 +40,14 @@ ifndef GIT_BYPASS
 export GIT_BYPASS = 0
 endif
 
+ifndef RECONFIG_NAME
+export RECONFIG_NAME = 
+endif
+
+ifndef RECONFIG_CHECKPOINT
+export RECONFIG_CHECKPOINT = 
+endif
+
 # Project Build Directory
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
 export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
@@ -193,14 +201,6 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 $(IMPL_DIR)/$(PROJECT).bit : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
-#### Vivado Batch (Partial Reconfiguration: Static) ###########
-$(IMPL_DIR)/$(PROJECT)_static.bit : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Build (Partial Reconfiguration: Static)")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_static.tcl
-#### Vivado Batch (Partial Reconfiguration: Dynamic) ##########
-$(IMPL_DIR)/$(PROJECT)_dynamic.bit : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Build (Partial Reconfiguration: Dynamic)")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build_dynamic.tcl
 
 ###############################################################
 #### Bitfile Copy #############################################
@@ -211,26 +211,6 @@ $(IMAGES_DIR)/$(IMAGENAME).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@echo ""
 	@echo "Bit file copied to $@"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
-#### Bitfile Copy (Partial Reconfiguration: Static) ###########
-$(IMAGES_DIR)/$(IMAGENAME)_static.bit : $(IMPL_DIR)/$(PROJECT)_static.bit
-	@cp $< $@
-	@gzip -c -f -9 $@ > $@.gz
-	@echo ""
-	@echo "Bit file copied to $@"
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
-$(IMAGES_DIR)/$(IMAGENAME)_static.dcp : $(IMPL_DIR)/$(PROJECT)_static.dcp
-	@cp $< $@
-	@gzip -c -f -9 $@ > $@.gz
-	@echo ""
-	@echo "Checkpoint file copied to $@"
-	@echo "Don't forget to 'git commit and git push' the .dcp file when the image is stable!"
-#### Bitfile Copy (Partial Reconfiguration: Dynamic) ##########
-$(IMAGES_DIR)/$(IMAGENAME)_dynamic.bit : $(IMPL_DIR)/$(PROJECT)_dynamic.bit
-	@cp $< $@
-	@gzip -c -f -9 $@ > $@.gz
-	@echo ""
-	@echo "Bit file copied to $@"
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!" 
 
 ###############################################################
 #### Vivado Interactive #######################################
@@ -330,17 +310,8 @@ sources     : $(SOURCE_DEPEND)
 .PHONY      : bit
 bit         : $(IMAGES_DIR)/$(IMAGENAME).bit 
 
-.PHONY      : bit_static
-bit_static  : $(IMAGES_DIR)/$(IMAGENAME)_static.bit $(IMAGES_DIR)/$(IMAGENAME)_static.dcp 
-
-.PHONY      : bit_dynamic
-bit_dynamic : $(IMAGES_DIR)/$(IMAGENAME)_dynamic.bit
-
 .PHONY      : prom
 prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
-
-.PHONY      : prom_static
-prom_static : bit_static $(IMAGES_DIR)/$(IMAGENAME).mcs
 
 ###############################################################
 #### Clean ####################################################

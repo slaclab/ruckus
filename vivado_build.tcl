@@ -58,6 +58,26 @@ if { [CheckSynth] != true } {
 }
 
 ########################################################
+## Disable all the Partial Reconfiguration RTL Block(s) and 
+## their XDC files before launching the top level synthesis run
+########################################################
+if { ${RECONFIG_NAME} != "" } {
+   foreach rtlPntr ${RECONFIG_NAME} {
+      set_property is_enabled false [get_files ${rtlPntr}.vhd]
+      set_property is_enabled false [get_files ${rtlPntr}.xdc]
+   }
+}
+
+########################################################
+## Prevents I/O insertion for synthesis and downstream tools
+## Note:  To synthesis in GUI (debuggin only, this property 
+##        should also be set in the project's vivado/project_setup.tcl file
+########################################################
+if { ${RECONFIG_CHECKPOINT} != "" } {
+   set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
+}
+
+########################################################
 ## Check if we re-synthesis any of the IP cores
 ########################################################
 BuildIpCores
@@ -120,6 +140,21 @@ if { [info exists ::env(SYNTH_DCP)] } {
 }
 
 ########################################################
+## Insert the Partial Reconfiguration RTL Block(s) 
+## into top level checkpoint checkpoint
+########################################################
+if { ${RECONFIG_NAME} != "" } {
+   InsertStaticReconfigDcp
+}
+
+########################################################
+## Import static checkpoint
+########################################################
+if { ${RECONFIG_CHECKPOINT} != "" } {
+   ImportStaticReconfigDcp
+}
+
+########################################################
 ## Implement
 ########################################################
 if { [CheckImpl] != true } {
@@ -156,9 +191,23 @@ if { [CheckTiming] != true } {
 ########################################################
 source ${RUCKUS_DIR}/vivado_post_route.tcl
 
+
+########################################################
+## Export static checkpoint
+########################################################
+if { ${RECONFIG_NAME} != "" } {
+   ExportStaticReconfigDcp
+}
+
+########################################################
+## Export partial configuration bit file
+########################################################
+if { ${RECONFIG_CHECKPOINT} != "" } {
+   ExportPartialReconfigBit
+}
+
 ########################################################
 ## Close the project and return sucessful flag
 ########################################################
-
 close_project
 exit 0
