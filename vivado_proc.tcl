@@ -976,11 +976,24 @@ proc loadSource args {
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
-      if { [file exists $params(path)] != 1 } {   
+      if { [file exists $params(path)] != 1 } {
          return -code error "loadSource: $params(path) doesn't exist"
       } else {
-         # Add the RTL Files
-         add_files -quiet -fileset ${fileset} $params(path)
+         # Check the file extension
+         set fileExt [file extension $params(path)]
+         if { ${fileExt} eq {.vhd} ||
+              ${fileExt} eq {.v}   ||
+              ${fileExt} eq {.vh}  ||
+              ${fileExt} eq {.sv}  ||
+              ${fileExt} eq {.dcp} } {
+            # Add the RTL Files
+            add_files -quiet -fileset ${fileset} $params(path)
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadSource: $params(path) does not have a \[.vhd,.v,.vh,.sv,.dcp\] file extension"
+            puts "********************************************************\n\n\n\n\n"
+            return -code error
+         }
       }
    # Load all files from a directory
    } elseif {$has_dir} {
@@ -1017,22 +1030,31 @@ proc loadIpCore args {
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
-      if { [file exists $params(path)] != 1 } {   
+      if { [file exists $params(path)] != 1 } {
          return -code error "loadIpCore: $params(path) doesn't exist"
       } else {
-         # Add the IP core file
-         import_ip -quiet -srcset sources_1 $params(path)
-         # Update the global list
-         set strip [file rootname [file tail $params(path)]]
-         set ::IP_LIST "$::IP_LIST ${strip}"         
-         set ::IP_FILES "$::IP_FILES $params(path)"
+         # Check the file extension
+         set fileExt [file extension $params(path)]
+         if { ${fileExt} eq {.xci} } { 
+            # Add the IP core file
+            import_ip -quiet -srcset sources_1 $params(path)
+            # Update the global list
+            set strip [file rootname [file tail $params(path)]]
+            set ::IP_LIST "$::IP_LIST ${strip}"
+            set ::IP_FILES "$::IP_FILES $params(path)"
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadIpCore: $params(path) does not have a \[.xci\] file extension"
+            puts "********************************************************\n\n\n\n\n"
+            return -code error
+         }
       }
    # Load all files from a directory
    } elseif {$has_dir} {
       # Check if directory doesn't exist
-      if { [file exists $params(dir)] != 1 } {   
+      if { [file exists $params(dir)] != 1 } {
          return -code error "loadIpCore: $params(dir) doesn't exist"
-      } else {  
+      } else {
          # Get a list of all IP core files
          set list [glob -directory $params(dir) *.xci]
          # Load all the IP core files
@@ -1066,24 +1088,33 @@ proc loadBlockDesign args {
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
-      if { [file exists $params(path)] != 1 } {   
+      if { [file exists $params(path)] != 1 } {
          return -code error "loadBlockDesign: $params(path) doesn't exist"
       } else {
-         # Update the global list
-         set ::BD_FILES "$::BD_FILES $params(path)"
-         # Check if the block design file has already been loaded
-         if { [get_files -quiet [file tail $params(path)]] == ""} {
-            # Add block design file
-            set locPath [import_files -force -norecurse $params(path)]
-            export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet   
+         # Check the file extension
+         set fileExt [file extension $params(path)]
+         if { ${fileExt} eq {.bd} } {
+            # Update the global list
+            set ::BD_FILES "$::BD_FILES $params(path)"
+            # Check if the block design file has already been loaded
+            if { [get_files -quiet [file tail $params(path)]] == ""} {
+               # Add block design file
+               set locPath [import_files -force -norecurse $params(path)]
+               export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+            }
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadBlockDesign: $params(path) does not have a \[.bd\] file extension"
+            puts "********************************************************\n\n\n\n\n"
+            return -code error
          }
       }
    # Load all files from a directory
    } elseif {$has_dir} {
       # Check if directory doesn't exist
-      if { [file exists $params(dir)] != 1 } {   
+      if { [file exists $params(dir)] != 1 } {
          return -code error "loadBlockDesign: $params(dir) doesn't exist"
-      } else {  
+      } else {
          # Get a list of all block design files
          set list [glob -directory $params(dir) *.bd]
          # Load all the block design files
@@ -1092,10 +1123,10 @@ proc loadBlockDesign args {
                # Update the global list
                set ::BD_FILES "$::BD_FILES ${pntr}"
                # Check if the block design file has already been loaded
-               if { [get_files -quiet [file tail ${pntr}]] == ""} {            
+               if { [get_files -quiet [file tail ${pntr}]] == ""} {
                   # Add block design file
                   set locPath [import_files -force -norecurse ${pntr}]
-                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet      
+                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
                }
             }
          }
@@ -1119,24 +1150,37 @@ proc loadConstraints args {
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
-      if { [file exists $params(path)] != 1 } {   
+      if { [file exists $params(path)] != 1 } {
          return -code error "loadConstraints: $params(path) doesn't exist"
       } else {
-         # Add the constraint Files
-         add_files -quiet -fileset constrs_1 $params(path)
+         # Check the file extension
+         set fileExt [file extension $params(path)]
+         if { ${fileExt} eq {.xdc} ||
+              ${fileExt} eq {.tcl} } {
+            # Add the constraint Files
+            add_files -quiet -fileset constrs_1 $params(path)
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadConstraints: $params(path) does not have a \[.xdc,.tcl\] file extension"
+            puts "********************************************************\n\n\n\n\n"
+            return -code error
+         }
       }
    # Load all files from a directory
    } elseif {$has_dir} {
       # Check if directory doesn't exist
-      if { [file exists $params(dir)] != 1 } {   
+      if { [file exists $params(dir)] != 1 } {
          return -code error "loadConstraints: $params(dir) doesn't exist"
-      } else {   
+      } else {
          # Get a list of all constraint files
          set list [glob -directory $params(dir) *.xdc *.tcl]
-         # Load all the constraint files
-         foreach pntr ${list} {
-            # Add the RTL Files
-            add_files -quiet -fileset constrs_1 ${pntr}
+         # Load all the block design files
+         if { ${list} != "" } {
+            # Load all the constraint files
+            foreach pntr ${list} {
+               # Add the RTL Files
+               add_files -quiet -fileset constrs_1 ${pntr}
+            }
          }
       }
    }
