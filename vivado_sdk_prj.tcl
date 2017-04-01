@@ -48,6 +48,12 @@ if { [file exists ${SDK_PRJ}] != 1 } {
       sdk createbsp -name bsp_0 -proc microblaze_0 -hwproject hw_0 -os standalone
       sdk createapp -name app_0 -app ${EmptyApp} -proc microblaze_0 -hwproject hw_0 -bsp bsp_0 -os standalone -lang c++
       file delete -force ${SDK_PRJ}/app_0/src/main.cc
+      # Configure the debug build
+      sdk configapp -app app_0 build-config debug
+      sdk configapp -app  app_0 -set compiler-optimization {Optimize for size (-Os)}
+      foreach sdkLib ${SDK_LIB} {
+         sdk configapp -app app_0 -add include-path ${sdkLib}
+      }        
       # Configure the release build
       sdk configapp -app app_0 build-config release
       sdk configapp -app  app_0 -set compiler-optimization {Optimize for size (-Os)}

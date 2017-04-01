@@ -14,7 +14,9 @@ source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
 # Open the project (in case not already opened)
-open_project -quiet ${VIVADO_PROJECT}
+set open_rc [catch { 
+   open_project -quiet ${VIVADO_PROJECT}
+} _RESULT]   
 
 # Check if custom SDK exist
 if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {   
