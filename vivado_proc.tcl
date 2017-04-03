@@ -1002,13 +1002,21 @@ proc loadSource args {
          return -code error "loadSource: $params(dir) doesn't exist"
       } else {  
          # Get a list of all RTL files
-         set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.dcp]
+         set list ""
+         set list_rc [catch { 
+            set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.dcp]
+         } _RESULT]           
          # Load all the RTL files
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Add the RTL Files
                add_files -quiet -fileset ${fileset} ${pntr}
             }
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadSource: $params(dir) directory does not have any \[.vhd,.v,.vh,.sv,.dcp\] files"
+            puts "********************************************************\n\n\n\n\n"         
+            return -code error            
          }
       }
    }
@@ -1056,7 +1064,10 @@ proc loadIpCore args {
          return -code error "loadIpCore: $params(dir) doesn't exist"
       } else {
          # Get a list of all IP core files
-         set list [glob -directory $params(dir) *.xci]
+         set list ""
+         set list_rc [catch { 
+            set list [glob -directory $params(dir) *.xci]
+         } _RESULT]             
          # Load all the IP core files
          if { ${list} != "" } {
             foreach pntr ${list} {
@@ -1067,6 +1078,11 @@ proc loadIpCore args {
                set ::IP_LIST "$::IP_LIST ${strip}"
                set ::IP_FILES "$::IP_FILES ${pntr}"
             }
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadIpCore: $params(dir) directory does not have any \[.xci\] files"
+            puts "********************************************************\n\n\n\n\n"         
+            return -code error            
          }
       }
    }
@@ -1116,7 +1132,10 @@ proc loadBlockDesign args {
          return -code error "loadBlockDesign: $params(dir) doesn't exist"
       } else {
          # Get a list of all block design files
-         set list [glob -directory $params(dir) *.bd]
+         set list ""
+         set list_rc [catch { 
+            set list [glob -directory $params(dir) *.bd]
+         } _RESULT]           
          # Load all the block design files
          if { ${list} != "" } {
             foreach pntr ${list} {
@@ -1129,6 +1148,11 @@ proc loadBlockDesign args {
                   export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
                }
             }
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadBlockDesign: $params(dir) directory does not have any \[.bd\] files"
+            puts "********************************************************\n\n\n\n\n"         
+            return -code error            
          }
       }
    }
@@ -1173,7 +1197,10 @@ proc loadConstraints args {
          return -code error "loadConstraints: $params(dir) doesn't exist"
       } else {
          # Get a list of all constraint files
-         set list [glob -directory $params(dir) *.xdc *.tcl]
+         set list ""
+         set list_rc [catch { 
+            set list [glob -directory $params(dir) *.xdc *.tcl]
+         } _RESULT]           
          # Load all the block design files
          if { ${list} != "" } {
             # Load all the constraint files
@@ -1181,6 +1208,11 @@ proc loadConstraints args {
                # Add the RTL Files
                add_files -quiet -fileset constrs_1 ${pntr}
             }
+         } else {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadConstraints: $params(dir) directory does not have any \[.xdc,.tcl\] files"
+            puts "********************************************************\n\n\n\n\n"         
+            return -code error            
          }
       }
    }
