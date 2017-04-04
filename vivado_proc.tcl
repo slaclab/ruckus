@@ -946,7 +946,10 @@ proc loadRuckusTcl { filePath {flags ""} } {
          source -quiet ${filePath}/ruckus.tcl
       }
    } else {
-      return -code error "loadRuckusTcl: ${filePath}/ruckus.tcl doesn't exist"
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadRuckusTcl: ${filePath}/ruckus.tcl doesn't exist"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
    }
    # Revert the global variable back to orginal value
    set ::DIR_PATH ${LOC_PATH}
@@ -972,12 +975,18 @@ proc loadSource args {
    }
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "loadSource: Cannot specify both -path and -dir"
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadSource: Cannot specify both -path and -dir"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
       if { [file exists $params(path)] != 1 } {
-         return -code error "loadSource: $params(path) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadSource: $params(path) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -999,7 +1008,10 @@ proc loadSource args {
    } elseif {$has_dir} {
       # Check if directory doesn't exist
       if { [file exists $params(dir)] != 1 } {   
-         return -code error "loadSource: $params(dir) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadSource: $params(dir) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error
       } else {  
          # Get a list of all RTL files
          set list ""
@@ -1034,12 +1046,18 @@ proc loadIpCore args {
    set has_dir  [expr {[string length $params(dir)] > 0}]
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "loadIpCore: Cannot specify both -path and -dir"
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadIpCore: Cannot specify both -path and -dir"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
       if { [file exists $params(path)] != 1 } {
-         return -code error "loadIpCore: $params(path) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadIpCore: $params(path) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1061,7 +1079,10 @@ proc loadIpCore args {
    } elseif {$has_dir} {
       # Check if directory doesn't exist
       if { [file exists $params(dir)] != 1 } {
-         return -code error "loadIpCore: $params(dir) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadIpCore: $params(dir) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error            
       } else {
          # Get a list of all IP core files
          set list ""
@@ -1100,12 +1121,18 @@ proc loadBlockDesign args {
    set has_dir  [expr {[string length $params(dir)] > 0}]
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "loadBlockDesign: Cannot specify both -path and -dir"
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadBlockDesign: Cannot specify both -path and -dir"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error            
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
       if { [file exists $params(path)] != 1 } {
-         return -code error "loadBlockDesign: $params(path) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadBlockDesign: $params(path) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error            
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1129,7 +1156,10 @@ proc loadBlockDesign args {
    } elseif {$has_dir} {
       # Check if directory doesn't exist
       if { [file exists $params(dir)] != 1 } {
-         return -code error "loadBlockDesign: $params(dir) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadBlockDesign: $params(dir) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error            
       } else {
          # Get a list of all block design files
          set list ""
@@ -1170,12 +1200,18 @@ proc loadConstraints args {
    set has_dir  [expr {[string length $params(dir)] > 0}]
    # Check for error state
    if {${has_path} && ${has_dir}} {
-      return -code error "loadConstraints: Cannot specify both -path and -dir"
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadConstraints: Cannot specify both -path and -dir"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
       if { [file exists $params(path)] != 1 } {
-         return -code error "loadConstraints: $params(path) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadConstraints: $params(path) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1194,7 +1230,10 @@ proc loadConstraints args {
    } elseif {$has_dir} {
       # Check if directory doesn't exist
       if { [file exists $params(dir)] != 1 } {
-         return -code error "loadConstraints: $params(dir) doesn't exist"
+         puts "\n\n\n\n\n********************************************************"
+         puts "loadConstraints: $params(dir) doesn't exist"
+         puts "********************************************************\n\n\n\n\n"
+         return -code error
       } else {
          # Get a list of all constraint files
          set list ""
