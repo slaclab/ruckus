@@ -44,7 +44,7 @@ if { [CheckTiming false] == true } {
    ## Check if SDK's .sysdef file exists
    #########################################################
    # Check if SDK_SRC_PATH is a valid path
-   if { [CheckSdkSrcPath] != false } {
+   if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
       # Check for .sysdef file (generated when using Microblaze)
       if { [file exists ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.sysdef] == 1 } {
          # Check if custom SDK exist
