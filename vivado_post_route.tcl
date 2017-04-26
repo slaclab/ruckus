@@ -43,29 +43,29 @@ if { [CheckTiming false] == true } {
    #########################################################
    ## Check if SDK's .sysdef file exists
    #########################################################
+   set mbPath [get_files -quiet {MicroblazeBasicCore.bd}]
+   
    # Check if SDK_SRC_PATH is a valid path
-   if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
-      # Check for .sysdef file (generated when using Microblaze)
-      if { [file exists ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.sysdef] == 1 } {
-         # Check if custom SDK exist
-         if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {   
-            source ${VIVADO_DIR}/sdk.tcl
-         } else {
-            set SDK_PRJ_RDY false
-            while { ${SDK_PRJ_RDY} != true } {
-               set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_prj.tcl >@stdout}]       
-               if {$src_rc} {
-                  puts "Retrying to build SDK project"
-                  exec rm -rf ${SDK_PRJ}
-               } else {
-                  set SDK_PRJ_RDY true
-               }         
-            }
-            # Generate .ELF
-            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf.tcl >@stdout}]    
-            # Add .ELF to the .bit file
-            source ${RUCKUS_DIR}/vivado_sdk_bit.tcl       
+   if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 && ${mbPath} != "" &&
+        [file exists ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.sysdef] == 1 } {
+      # Check if custom SDK exist
+      if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {   
+         source ${VIVADO_DIR}/sdk.tcl
+      } else {
+         set SDK_PRJ_RDY false
+         while { ${SDK_PRJ_RDY} != true } {
+            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_prj.tcl >@stdout}]       
+            if {$src_rc} {
+               puts "Retrying to build SDK project"
+               exec rm -rf ${SDK_PRJ}
+            } else {
+               set SDK_PRJ_RDY true
+            }         
          }
+         # Generate .ELF
+         set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf.tcl >@stdout}]    
+         # Add .ELF to the .bit file
+         source ${RUCKUS_DIR}/vivado_sdk_bit.tcl       
       }
    }
 

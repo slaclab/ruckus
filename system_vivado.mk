@@ -48,11 +48,6 @@ ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 
 endif
 
-# Project Build Directory
-export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
-export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
-export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
-
 # Check for /u1 drive
 U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
 ifeq ($(U1_EXIST), 1)
@@ -73,6 +68,11 @@ export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
+
+# Project Build Directory
+export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
+export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
+export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 
 # Generate build string
 export BUILD_SYS    = $(shell uname -m)
@@ -113,7 +113,7 @@ endif
 
 # SDK Variables
 export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
-export SDK_ELF    = $(abspath $(IMAGES_DIR)/$(IMAGENAME).elf)
+export SDK_ELF    = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
 export LD_PRELOAD = 
 
 ifndef SDK_LIB
