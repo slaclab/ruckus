@@ -336,6 +336,22 @@ proc GitBuildTag { } {
    }
 }
 
+# Check if you have write permission
+proc CheckWritePermission { } {
+   set src_rc [catch {exec touch $::env(PROJ_DIR)/ruckus.tcl}]       
+   if {$src_rc} {
+      puts "\n\n\n\n\n********************************************************"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "Unable to touch $::env(PROJ_DIR)/ruckus.tcl"
+      puts "Please verify that your Unix session has not expired"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "********************************************************\n\n\n\n\n"     
+      exit -1
+   } 
+} 
+
 # Checking Timing Function
 proc CheckTiming { {printTiming true} } {
    # Check for timing and routing errors 
@@ -1258,3 +1274,4 @@ proc loadConstraints args {
       }
    }
 } 
+

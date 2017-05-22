@@ -15,6 +15,9 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
+# Check if you have write permission
+CheckWritePermission
+
 # Check if image directory doesn't exist
 if { [file exists ${IMAGES_DIR}] != 1 } {   
    exec mkdir ${IMAGES_DIR}
