@@ -60,6 +60,7 @@ set_msg_config -suppress -id {Pwropt 34-142};# Post-Place Power Opt: power_opt d
 set_msg_config -suppress -id {Common 17-1361};# The existing rule will be replaced.
 set_msg_config -suppress -id {Vivado 12-4430};# Overriding default DRC messaging
 set_msg_config -suppress -id {Vivado 12-1790};# IP core licensing warning
+set_msg_config -suppress -id {Vivado 12-3645};# Adding multiple files in a single "add_files" command
 set_msg_config -suppress -id {Project 1-486};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Project 1-560};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/support/answers/54842.html

@@ -1014,7 +1014,7 @@ proc loadSource args {
               ${fileExt} eq {.coe} ||
               ${fileExt} eq {.dcp} } {
             # Add the RTL Files
-            add_files -quiet -fileset ${fileset} $params(path)
+            add_files -fileset ${fileset} $params(path)
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(path) does not have a \[.vhd,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
@@ -1040,7 +1040,7 @@ proc loadSource args {
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Add the RTL Files
-               add_files -quiet -fileset ${fileset} ${pntr}
+               add_files -fileset ${fileset} ${pntr}
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
@@ -1236,7 +1236,7 @@ proc loadConstraints args {
          if { ${fileExt} eq {.xdc} ||
               ${fileExt} eq {.tcl} } {
             # Add the constraint Files
-            add_files -quiet -fileset constrs_1 $params(path)
+            add_files -fileset constrs_1 $params(path)
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(path) does not have a \[.xdc,.tcl\] file extension"
@@ -1263,7 +1263,7 @@ proc loadConstraints args {
             # Load all the constraint files
             foreach pntr ${list} {
                # Add the RTL Files
-               add_files -quiet -fileset constrs_1 ${pntr}
+               add_files -fileset constrs_1 ${pntr}
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
