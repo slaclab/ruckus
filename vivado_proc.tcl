@@ -1013,8 +1013,11 @@ proc loadSource args {
               ${fileExt} eq {.dat} ||
               ${fileExt} eq {.coe} ||
               ${fileExt} eq {.dcp} } {
-            # Add the RTL Files
-            add_files -fileset ${fileset} $params(path)
+            # Check if file doesn't exist in project
+            if { [get_files -quiet $params(path)] == "" } {              
+               # Add the RTL Files
+               add_files -fileset ${fileset} $params(path)
+            }
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(path) does not have a \[.vhd,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
@@ -1039,8 +1042,11 @@ proc loadSource args {
          # Load all the RTL files
          if { ${list} != "" } {
             foreach pntr ${list} {
-               # Add the RTL Files
-               add_files -fileset ${fileset} ${pntr}
+               # Check if file doesn't exist in project
+               if { [get_files -quiet ${pntr}] == "" } {
+                  # Add the RTL Files
+                  add_files -fileset ${fileset} ${pntr}
+               }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
@@ -1080,8 +1086,11 @@ proc loadIpCore args {
          # Check the file extension
          set fileExt [file extension $params(path)]
          if { ${fileExt} eq {.xci} } { 
-            # Add the IP core file
-            import_ip -quiet -srcset sources_1 $params(path)
+            # Check if file doesn't exist in project
+            if { [get_files -quiet $params(path)] == "" } {           
+               # Add the IP core file
+               import_ip -quiet -srcset sources_1 $params(path)
+            }
             # Update the global list
             set strip [file rootname [file tail $params(path)]]
             set ::IP_LIST "$::IP_LIST ${strip}"
@@ -1110,8 +1119,11 @@ proc loadIpCore args {
          # Load all the IP core files
          if { ${list} != "" } {
             foreach pntr ${list} {
-               # Add the IP core file
-               import_ip -quiet -srcset sources_1 ${pntr}
+               # Check if file doesn't exist in project
+               if { [get_files -quiet ${pntr}] == "" } {            
+                  # Add the IP core file
+                  import_ip -quiet -srcset sources_1 ${pntr}
+               }
                # Update the global list
                set strip [file rootname [file tail ${pntr}]]
                set ::IP_LIST "$::IP_LIST ${strip}"
@@ -1235,8 +1247,11 @@ proc loadConstraints args {
          set fileExt [file extension $params(path)]
          if { ${fileExt} eq {.xdc} ||
               ${fileExt} eq {.tcl} } {
-            # Add the constraint Files
-            add_files -fileset constrs_1 $params(path)
+            # Check if file doesn't exist in project
+            if { [get_files -quiet $params(path)] == "" } {                   
+               # Add the constraint Files
+               add_files -fileset constrs_1 $params(path)
+            }
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(path) does not have a \[.xdc,.tcl\] file extension"
@@ -1262,9 +1277,12 @@ proc loadConstraints args {
          if { ${list} != "" } {
             # Load all the constraint files
             foreach pntr ${list} {
-               # Add the RTL Files
-               add_files -fileset constrs_1 ${pntr}
-            }
+               # Check if file doesn't exist in project
+               if { [get_files -quiet ${pntr}] == "" } {            
+                  # Add the RTL Files
+                  add_files -fileset constrs_1 ${pntr}
+               }  
+            }  
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(dir) directory does not have any \[.xdc,.tcl\] files"
