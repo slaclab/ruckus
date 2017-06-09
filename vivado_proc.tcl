@@ -468,6 +468,14 @@ proc CheckPrjConfig { } {
    return [CheckSdkSrcPath]
 }
 
+# Print Message 
+proc PrintOpenGui { errMsg } {
+   puts "\n\n\n\n\n********************************************************"
+   puts ${errMsg}
+   puts "Please open the GUI ('make gui') and view the 'Messages' tab for list of all errors"
+   puts "********************************************************\n\n\n\n\n"
+}
+
 # Check if the Synthesize is completed
 proc CheckSynth { {flags ""} } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl

@@ -90,16 +90,26 @@ source ${RUCKUS_DIR}/vivado_pre_synthesis.tcl
 ########################################################
 ## Synthesize
 ########################################################
-if { [CheckSynth] != true } {
-   ## Check for DCP only synthesis run
-   if { [info exists ::env(SYNTH_DCP)] } {
-      set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
+set syn_rc [catch { 
+   if { [CheckSynth] != true } {
+      ## Check for DCP only synthesis run
+      if { [info exists ::env(SYNTH_DCP)] } {
+         set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
+      }
+      ## Launch the run
+      launch_runs synth_1
+      set src_rc [catch { 
+         wait_on_run synth_1
+      } _RESULT]     
    }
-   ## Launch the run
-   launch_runs synth_1
-   set src_rc [catch { 
-      wait_on_run synth_1 
-   } _RESULT]     
+} _SYN_RESULT]    
+
+########################################################
+# Check for error return code during synthesis process
+########################################################
+if { ${syn_rc} } {
+   PrintOpenGui ${_SYN_RESULT}
+   exit -1
 }
 
 ########################################################

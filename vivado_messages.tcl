@@ -84,6 +84,7 @@ set_msg_config -id {Synth 8-614}  -new_severity ERROR;# SYNTH: Signal not in the
 set_msg_config -id {Synth 8-3512} -new_severity ERROR;# SYNTH: Assigned value in logic is out of range 
 set_msg_config -id {Synth 8-327}  -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}  -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
+set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found
 
 ## Check for version 2015.3 (or older)
 if { ${VIVADO_VERSION} <= 2015.3 } {
