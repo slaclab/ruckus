@@ -427,8 +427,8 @@ proc CheckPrjConfig { } {
       return false
    }
 
-   # Check for empty GIT HASH string
-   if { $::env(GIT_HASH_LONG) == "" } {
+   # Check for empty GIT HASH string and not doing a synthesis only build
+   if { $::env(GIT_HASH_LONG) == "" && [info exists ::env(SYNTH_ONLY)] != 1} {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
       puts "********************************************************"   
