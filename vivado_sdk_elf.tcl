@@ -17,7 +17,7 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source ${RUCKUS_DIR}/vivado_env_var.tcl
 
 # Check the Vivado version (Refer to AR#66629)
-if { ${VIVADO_VERSION} < 2016.1 } {
+if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {
    # Generate .ELF for Vivado 2015.4 (or earlier) ....  Refer to AR#66629
    sdk set_workspace ${SDK_PRJ}
    sdk build_project  -type all

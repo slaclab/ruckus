@@ -879,7 +879,7 @@ proc ExportPartialReconfigBit { } {
  
    # Make a copy of the partial .bit file with a "_static" suffix for 
    # the Makefile system to copy over
-   if { ${VIVADO_VERSION} >= 2016.3 } {
+   if { [expr { ${VIVADO_VERSION} >= 2016.3 }] } {
       set topLevel [get_property top [current_fileset]]
       exec cp -f ${IMPL_DIR}/${topLevel}.bit ${IMPL_DIR}/${PROJECT}_dynamic.bit
    } else {

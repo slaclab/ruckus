@@ -28,7 +28,7 @@ if { [CheckTiming false] == true } {
    ## Make a copy of the routed .DCP file for future use 
    ## in an "incremental compile" build
    ########################################################
-   if { ${VIVADO_VERSION} >= 2015.3 } {
+   if { [expr { ${VIVADO_VERSION} >= 2015.3 }] } {
       exec cp -f ${IMPL_DIR}/${topLevel}_routed.dcp ${OUT_DIR}/IncrementalBuild.dcp
    }
    

@@ -59,11 +59,14 @@ update_compile_order -quiet -fileset sim_1
 ## Compile the libraries for VCS
 ########################################################
 set simLibOutDir ${OUT_DIR}/vcs_library
+if { [file exists ${simLibOutDir}] != 1 } {   
+   exec mkdir ${simLibOutDir}
+}
 
 ###############################################
 ## Check for Vivado Version 2016.2 (or earlier)
 ###############################################
-if { ${VIVADO_VERSION} <= 2016.2 } {
+if { [expr { ${VIVADO_VERSION} <= 2016.2 }] } {
 
    compile_simlib -simulator vcs_mx -library unisim -library simprim -library axi_bfm -directory ${simLibOutDir}
    
@@ -114,7 +117,7 @@ set simTbFileName [get_property top [get_filesets sim_1]]
 ###############################################
 ## Check for Vivado Version 2014.2 (or earlier)
 ###############################################
-if { ${VIVADO_VERSION} <= 2014.2 } {
+if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
 
    # Save the current top level simulation testbed value
    set simTbOutDir ${OUT_DIR}/vcs_scripts/${simTbFileName}
@@ -125,7 +128,7 @@ if { ${VIVADO_VERSION} <= 2014.2 } {
 ################################################
 ## Else if Vivado Version 2016.2 (or earlier)
 ################################################   
-} elseif { ${VIVADO_VERSION} <= 2016.2 } {
+} elseif { [expr { ${VIVADO_VERSION} <= 2016.2 }] } {
 
    # Save the current top level simulation testbed value
    set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
@@ -215,7 +218,7 @@ if { [file isdirectory ${simLinkDir}] == 1 } {
 ###############################################
 ## Check for Vivado Version 2014.2 (or earlier)
 ###############################################
-if { ${VIVADO_VERSION} <= 2014.2 } {
+if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
 
    ########################################################
    ## Customization of the executable bash (.sh) script 
@@ -289,7 +292,7 @@ if { ${VIVADO_VERSION} <= 2014.2 } {
 ################################################
 ## Else if Vivado Version 2016.2 (or earlier)
 ################################################   
-} elseif { ${VIVADO_VERSION} <= 2016.2 } {
+} elseif { [expr { ${VIVADO_VERSION} <= 2016.2 }] } {
 
    ####################################
    ## Customization of the setup script 

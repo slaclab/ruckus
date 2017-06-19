@@ -51,7 +51,7 @@ set_property nl.process_corner slow   [get_filesets sim_1]
 set_property nl.sdf_anno true         [get_filesets sim_1]
 set_property SOURCE_SET sources_1     [get_filesets sim_1]
 
-if { ${VIVADO_VERSION} <= 2014.2 } {
+if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
    set_property runtime {}             [get_filesets sim_1]
    set_property xelab.debug_level all  [get_filesets sim_1]
    set_property xelab.mt_level auto    [get_filesets sim_1]
@@ -68,7 +68,7 @@ if { ${VIVADO_VERSION} <= 2014.2 } {
 }   
 
 # Refer to http://www.xilinx.com/support/answers/65415.html
-if { ${VIVADO_VERSION} >=  2016.1 } {
+if { [expr { ${VIVADO_VERSION} >= 2016.1 }] } {
    set_property STEPS.SYNTH_DESIGN.ARGS.ASSERT true [get_runs synth_1]
 }
 
