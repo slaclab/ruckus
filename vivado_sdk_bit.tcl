@@ -27,9 +27,11 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
    exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf.tcl >@stdout
 
    # Add .ELF to the .bit file properties
-   add_files -norecurse ${SDK_ELF}  
-   set_property SCOPED_TO_REF   { MicroblazeBasicCore } [get_files ${SDK_ELF} ]
-   set_property SCOPED_TO_CELLS { microblaze_0 }        [get_files ${SDK_ELF} ]
+   set add_rc [catch {
+      add_files -norecurse ${SDK_ELF}  
+   } _RESULT]  
+   set_property SCOPED_TO_REF MicroblazeBasicCore [get_files -all -of_objects [get_fileset sources_1] ${SDK_ELF}]
+   set_property SCOPED_TO_CELLS { microblaze_0 }  [get_files -all -of_objects [get_fileset sources_1] ${SDK_ELF}]
 
    # Rebuild the .bit file with the .ELF file include
    reset_run impl_1 -prev_step
