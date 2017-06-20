@@ -464,6 +464,18 @@ proc CheckPrjConfig { } {
       return false
    } 
    
+   set myTop [get_property top [current_fileset]]
+   if { ${myTop} != $::env(PROJECT) } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "********************************************************"
+      puts "********************************************************"   
+      puts "WARNING: Your top-level firmware is defined as ${myTop}"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "********************************************************\n\n\n\n\n"     
+      sleep 5
+   }
+   
    # Check SDK
    return [CheckSdkSrcPath]
 }
