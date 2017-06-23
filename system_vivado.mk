@@ -84,7 +84,8 @@ export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built
 # Check if we are using GIT tagging
 ifeq ($(GIT_BYPASS), 0)
    # Check the GIT status
-   export GIT_STATUS = $(shell git diff-index HEAD --name-only)
+   export GIT_STAUS_FULL = $(shell git diff-index HEAD)
+   export GIT_STATUS     = $(shell git diff-index HEAD --name-only)
    ifeq ($(GIT_STATUS),)
       export GIT_TAG_NAME =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
       export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
@@ -159,7 +160,7 @@ test:
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 	@echo IMAGENAME: $(GIT_TAG_CMD)
 	@echo Untracked Files:
-	@echo -e "$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
+	@echo "\t$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
 ###############################################################
 #### Build Location ###########################################
