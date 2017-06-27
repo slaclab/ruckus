@@ -84,7 +84,7 @@ export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built
 # Check if we are using GIT tagging
 ifeq ($(GIT_BYPASS), 0)
    # Check the GIT status
-   export GIT_STAUS_FULL = $(shell git diff-index HEAD)
+   export GIT_STAUS_FULL = $(shell git status)
    export GIT_STATUS     = $(shell git diff-index HEAD --name-only)
    ifeq ($(GIT_STATUS),)
       export GIT_TAG_NAME =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
