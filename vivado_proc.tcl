@@ -999,11 +999,13 @@ proc loadSource args {
       {sim_only    "flag for tagging simulation file(s)"}
       {path.arg "" "path to a single file"}
       {dir.arg  "" "path to a directory of file(s)"}
+      {lib.arg  "" "library for file(s)"}
    }
    set usage ": loadSource \[options] ...\noptions:"
    array set params [::cmdline::getoptions args $options $usage]
    set has_path [expr {[string length $params(path)] > 0}]
    set has_dir  [expr {[string length $params(dir)] > 0}]
+   set has_lib  [expr {[string length $params(lib)] > 0}]
    if { $params(sim_only) } { 
       set fileset "sim_1" 
    } else {
@@ -1037,6 +1039,9 @@ proc loadSource args {
             if { [get_files -quiet $params(path)] == "" } {              
                # Add the RTL Files
                add_files -fileset ${fileset} $params(path)
+               if { ${has_lib} } {
+                  set_property LIBRARY $params(lib) [get_files $params(path)]
+               }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
@@ -1066,6 +1071,9 @@ proc loadSource args {
                if { [get_files -quiet ${pntr}] == "" } {
                   # Add the RTL Files
                   add_files -fileset ${fileset} ${pntr}
+                  if { ${has_lib} } {
+                     set_property LIBRARY $params(lib) [get_files ${pntr}]
+                  }
                }
             }
          } else {
