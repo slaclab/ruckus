@@ -84,8 +84,8 @@ export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built
 # Check if we are using GIT tagging
 ifeq ($(GIT_BYPASS), 0)
    # Check the GIT status
-   export GIT_STAUS_FULL = $(shell git status)
-   export GIT_STATUS     = $(shell git diff-index HEAD --name-only)
+   export GIT_DIFF   = $(shell git diff)
+   export GIT_STATUS = $(shell git diff-index --name-only HEAD)
    ifeq ($(GIT_STATUS),)
       export GIT_TAG_NAME =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
       export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
@@ -93,7 +93,7 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
       export GIT_HASH_MSG   = $(GIT_HASH_LONG)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
-   else 
+   else
       export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_TAG_MSG    = 
       export GIT_HASH_LONG  = 
@@ -101,8 +101,7 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_MSG   = dirty
       export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
    endif
-   
-else 
+else
    export GIT_STATUS     =
    export GIT_TAG_NAME   = Bypassing Build GIT Tagging
    export GIT_TAG_MSG    =
