@@ -54,10 +54,12 @@ if { [CheckTiming false] == true } {
       } else {
          set SDK_PRJ_RDY false
          while { ${SDK_PRJ_RDY} != true } {
-            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_prj.tcl >@stdout}]       
+            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_prj.tcl >@stdout} _RESULT]      
             if {$src_rc} {
+               puts "\n********************************************************"
                puts "Retrying to build SDK project"
-               exec rm -rf ${SDK_PRJ}
+               puts ${_RESULT}
+               puts "********************************************************\n"
             } else {
                set SDK_PRJ_RDY true
             }         

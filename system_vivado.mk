@@ -120,6 +120,11 @@ ifndef SDK_LIB
 export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
 endif
 
+# Ubuntu SDK support
+ifndef SWT_GTK3
+export SWT_GTK3=0
+endif
+
 define ACTION_HEADER
 @echo 
 @echo    "============================================================================="
