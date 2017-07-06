@@ -43,7 +43,17 @@ set_msg_config -suppress -id {VRFC 10-165}; # SIM: Analyzing VERILOG file
 set_msg_config -suppress -id {Simtcl 6-16}; # SIM: Simulation closed 
 set_msg_config -suppress -id {Simtcl 6-17}; # SIM: Simulation restarted 
 
-set_msg_config -suppress -id {Drc 23-20}; # DRC: writefirst - Synchronous clocking for BRAM
+set_msg_config -suppress -id {Drc 23-20};     # DRC: writefirst - Synchronous clocking for BRAM
+set_msg_config -suppress -id {DRC CHECK-3};   # DRC: Report rule limit reached
+set_msg_config -suppress -id {DRC DPIP-1};    # DRC:  Input pipelining for DSP
+set_msg_config -suppress -id {DRC DPOP-1};    # DRC:  PREG Output pipelining for DSP
+set_msg_config -suppress -id {DRC DPOP-2};    # DRC:  MREG Output pipelining for DSP
+set_msg_config -suppress -id {DRC LOCE-1};    # DRC:  Pblock ranges contradict LOC constraints
+set_msg_config -suppress -id {DRC REQP-1839}; # DRC:  RAMB36 async control check
+set_msg_config -suppress -id {DRC REQP-1840}; # DRC:  RAMB36 async control check
+set_msg_config -suppress -id {DRC RTSTAT-10}; # DRC:  No routable loads:
+set_msg_config -suppress -id {DRC REQP-181};  # DRC:  writefirst: Synchronous clocking is detected for BRAM
+set_msg_config -suppress -id {DRC REQP-52};   # DRC:  connects_GTGREFCLK_ACTIVE
 
 set_msg_config -suppress -id {BD 41-434}; # Block Design: Could not find an IP with XCI file by name
 
