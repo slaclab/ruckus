@@ -17,6 +17,14 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
+# Check for unsupported versions that ruckus does NOT support
+if { [expr { ${VIVADO_VERSION} == 2017.1 }] || [expr { ${VIVADO_VERSION} < 2014.1 }]} {
+   puts "\n\n\n\n\n********************************************************"
+   puts "ruckus does NOT support Vivado ${VIVADO_VERSION}"
+   puts "********************************************************\n\n\n\n\n"
+   return -code error
+}
+
 # Create a Project
 create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
 
