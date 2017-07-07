@@ -8,157 +8,103 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Vivado VCS Build Script
-
-## Note: 
-##    VCS must be version H-2013.06-3 (or newer)
-##    based on 2013.3 release notes
-
-########################################################
-## Get variables
-########################################################
+# Get variables and procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
 source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
 
-########################################################
-## Open the project
-########################################################
+# Check for version 2016.4 (or later)
+if { [VersionCheck 2016.4] < 0 } {
+   close_project
+   exit -1
+}
+
+# Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
-########################################################
-## Generate Verilog simulation models 
-## for all .DCP files in the source tree
-########################################################
-foreach filePntr [get_files {*.dcp}] {
-   if { [file extension ${filePntr}] == ".dcp" } {
-      ## Open the check point
-      open_checkpoint ${filePntr}     
-      ## Generate the output file path
-      set simName [file tail ${filePntr}]
-      set simName [string map {".dcp" "_sim.v"} ${simName}] 
-      set simFile ${OUT_DIR}/${PROJECT}_project.sim/${simName}
-      ## Write the simulation model to the build tree
-      write_verilog -force -mode funcsim -file ${simFile}     
-      ## close the check point
-      close_design
-      # Add the Simulation Files
-      add_files -quiet -fileset sim_1 ${simFile} 
-      # Force Absolute Path (not relative to project)
-      set_property PATH_MODE AbsoluteFirst [get_files ${simFile}]
-   } 
+#####################################################################################################
+## Compile VCS library
+##################################################################################################### 
+
+# Compile the libraries for VCS
+set simLibOutDir ${OUT_DIR}/vcs_library
+if { [file exists ${simLibOutDir}] != 1 } {  
+ 
+   # Make the directory
+   exec mkdir ${simLibOutDir}
+   
+   # Compile the simulation libraries
+   compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
+   
+   # Configure Vivado to generate the VCS scripts
+   set_property target_simulator "VCS" [current_project]
+   set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]   
+   
+   ##################################################################
+   ##                synopsys_sim.setup bug fix
+   ##################################################################
+
+   # Enable the LIBRARY_SCAN parameter in the synopsys_sim.setup file
+   set LIBRARY_SCAN_OLD "LIBRARY_SCAN                    = FALSE"
+   set LIBRARY_SCAN_NEW "LIBRARY_SCAN                    = TRUE"
+
+   # open the files
+   set in  [open ${OUT_DIR}/vcs_library/synopsys_sim.setup r]
+   set out [open ${OUT_DIR}/vcs_library/synopsys_sim.temp  w]
+
+   # Find and replace the LIBRARY_SCAN parameter
+   while { [eof ${in}] != 1 } {
+      gets ${in} line
+      if { ${line} == ${LIBRARY_SCAN_OLD} } {
+         puts ${out} ${LIBRARY_SCAN_NEW}
+      } else { 
+         puts ${out} ${line} 
+      }
+   }
+
+   # Close the files
+   close ${in}
+   close ${out}
+
+   # over-write the existing file
+   exec mv -f ${OUT_DIR}/vcs_library/synopsys_sim.temp ${OUT_DIR}/vcs_library/synopsys_sim.setup
+
 }
 
-########################################################
-## Update the complie order
-########################################################
-update_compile_order -quiet -fileset sources_1
+#####################################################################################################
+## Export simulation
+#####################################################################################################
+
+# Save the current top level simulation testbed value
+set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
+
+# Generate Verilog simulation models for all .DCP files in the source tree
+DcpToVerilogSim
+
+# Export IP
+export_ip_user_files -no_script -force
+
+# Update the compile order
 update_compile_order -quiet -fileset sim_1
 
-########################################################
-## Compile the libraries for VCS
-########################################################
-set simLibOutDir ${OUT_DIR}/vcs_library
-if { [file exists ${simLibOutDir}] != 1 } {   
-   exec mkdir ${simLibOutDir}
+# Launch the scripts generator 
+if { [expr { ${VIVADO_VERSION} <= 2016.4 }] } {
+   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
+# Else this is Vivado Version 2017.2 (or later)   
+} else {      
+   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
+   launch_simulation -absolute_path -scripts_only; # Required for making IP cores working in 2017.2
+   VivadoRefresh ${VIVADO_PROJECT}
+   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
+   launch_simulation -absolute_path -scripts_only; # Required for making IP cores working in 2017.2   
 }
 
-###############################################
-## Check for Vivado Version 2016.2 (or earlier)
-###############################################
-if { [expr { ${VIVADO_VERSION} <= 2016.2 }] } {
+#####################################################################################################
+## Build the simlink directory (required for softrware co-simulation)
+#####################################################################################################   
 
-   compile_simlib -simulator vcs_mx -library unisim -library simprim -library axi_bfm -directory ${simLibOutDir}
-   
-################################################
-## Else this is Vivado Version 2016.3 (or later)
-################################################   
-} else {
-   compile_simlib -directory ${simLibOutDir} \
-                  -family [getFpgaFamily] \
-                  -simulator vcs_mx \
-                  -no_ip_compile \
-                  -library axi_bfm \
-                  -library unisim \
-                  -library simprim
-}   
-
-########################################################
-## Enable the LIBRARY_SCAN parameter 
-## in the synopsys_sim.setup file
-########################################################
-
-set LIBRARY_SCAN_OLD "LIBRARY_SCAN                    = FALSE"
-set LIBRARY_SCAN_NEW "LIBRARY_SCAN                    = TRUE"
-
-# open the files
-set in  [open ${OUT_DIR}/vcs_library/synopsys_sim.setup r]
-set out [open ${OUT_DIR}/vcs_library/synopsys_sim.temp  w]
-
-# Find and replace the LIBRARY_SCAN parameter
-while { [eof ${in}] != 1 } {
-   gets ${in} line
-   if { ${line} == ${LIBRARY_SCAN_OLD} } {
-      puts ${out} ${LIBRARY_SCAN_NEW}
-   } else { 
-      puts ${out} ${line} 
-   }
-}
-
-# Close the files
-close ${in}
-close ${out}
-
-# over-write the existing file
-file rename -force ${OUT_DIR}/vcs_library/synopsys_sim.temp ${OUT_DIR}/vcs_library/synopsys_sim.setup
-
+# Get the top-level simulation file
 set simTbFileName [get_property top [get_filesets sim_1]]
-
-###############################################
-## Check for Vivado Version 2014.2 (or earlier)
-###############################################
-if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
-
-   # Save the current top level simulation testbed value
-   set simTbOutDir ${OUT_DIR}/vcs_scripts/${simTbFileName}
-
-   # Launch the scripts generator 
-   export_simulation -absolute_path -force -simulator vcs_mx -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
-   
-################################################
-## Else if Vivado Version 2016.2 (or earlier)
-################################################   
-} elseif { [expr { ${VIVADO_VERSION} <= 2016.2 }] } {
-
-   # Save the current top level simulation testbed value
-   set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
-
-   # Configure Vivado to generate the VCS scripts
-   set_property target_simulator "VCS" [current_project]
-   set_property compxlib.compiled_library_dir ${simLibOutDir} [current_project]
-   
-   # Launch the scripts generator 
-   launch_simulation -absolute_path -scripts_only    
-   
-################################################
-## Else this is Vivado Version 2016.3 (or later)
-################################################     
-} else {
-
-   # Save the current top level simulation testbed value
-   set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
-
-   # Configure Vivado to generate the VCS scripts
-   set_property target_simulator "VCS" [current_project]
-   set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]
-   
-   # Launch the scripts generator 
-   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
-}   
-
-########################################################
-## Build the simlink directory
-########################################################
 
 set simTbDirName [file dirname [get_files ${simTbFileName}.vhd]]
 set simLinkDir   ${simTbDirName}/../simlink/src/
@@ -215,18 +161,14 @@ if { [file isdirectory ${simLinkDir}] == 1 } {
    close ${envScript}      
 }
 
-###############################################
-## Check for Vivado Version 2014.2 (or earlier)
-###############################################
-if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
-
-   ########################################################
-   ## Customization of the executable bash (.sh) script 
-   ########################################################
-
+  
+#####################################################################################################   
+## Customization of the executable bash (.sh) script 
+#####################################################################################################   
+if { [expr { ${VIVADO_VERSION} <= 2016.4 }] } {
    # open the files
-   set in  [open ${simTbOutDir}/${simTbFileName}_sim_vcs_mx.sh r]
-   set out [open ${simTbOutDir}/${simTbFileName}_sim_vcs_mx.temp  w]
+   set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
+   set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
 
    # Find and replace the AFS path 
    while { [eof ${in}] != 1 } {
@@ -238,13 +180,15 @@ if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
          set simString "  source ${simTbOutDir}/setup_env.sh"
          puts ${out} ${simString}
       } else {              
-      
-         # Insert -nc flags into the vhdlan_opts and vlogan_opts options
-         set line [string map {" -l v" " -nc -l v"} ${line}]
-         
+            
          # Replace ${simTbFileName}_simv with the simv
          set replaceString "${simTbFileName}_simv simv"
-         set line [string map ${replaceString}  ${line}]       
+         set line [string map ${replaceString}  ${line}]  
+         
+         # By default: Mask off warnings during elaboration
+         set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
+         set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
+         set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]          
 
          # Write to file
           puts ${out} ${line}  
@@ -255,44 +199,11 @@ if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
    close ${in}
    close ${out}
 
-   # over-write the existing file
-   file rename -force ${simTbOutDir}/${simTbFileName}_sim_vcs_mx.temp ${simTbOutDir}/${simTbFileName}_sim_vcs_mx.sh
-
-   # Rename the File
-   exec mv ${simTbOutDir}/${simTbFileName}_sim_vcs_mx.sh ${simTbOutDir}/sim_vcs_mx.sh
-
    # Update the permissions
-   exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
+   exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh   
 
-   ########################################################
-   ## Modify the default .do file 
-   ########################################################
-   if { ${sharedMem} != false } {
-
-      # open the files
-      set in  [open ${simTbOutDir}/${simTbFileName}.do r]
-      set out [open ${simTbOutDir}/${simTbFileName}.temp  w]
-
-      # Find and replace the LIBRARY_SCAN parameter
-      while { [eof ${in}] != 1 } {
-         gets ${in} line
-         if { ${line} != "quit" } {
-            puts ${out} ${line} 
-         }
-      }
-
-      # Close the files
-      close ${in}
-      close ${out}
-
-      # over-write the existing file
-      file rename -force ${simTbOutDir}/${simTbFileName}.temp ${simTbOutDir}/${simTbFileName}.do
-   }
-   
-################################################
-## Else if Vivado Version 2016.2 (or earlier)
-################################################   
-} elseif { [expr { ${VIVADO_VERSION} <= 2016.2 }] } {
+# Else this is Vivado Version 2017.2 (or later) 
+} else {
 
    ####################################
    ## Customization of the setup script 
@@ -404,69 +315,24 @@ if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
    file delete -force ${simTbOutDir}/simulate.sh   
    file delete -force ${simTbOutDir}/simulate.log   
    file delete -force ${simTbOutDir}/${simTbFileName}.do   
-   
-################################################
-## Else this is Vivado Version 2016.3 (or later)
-################################################     
-} else {
-   ########################################################
-   ## Customization of the executable bash (.sh) script 
-   ########################################################
+} 
 
-   # open the files
-   set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
-   set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
-
-   # Find and replace the AFS path 
-   while { [eof ${in}] != 1 } {
-      
-      gets ${in} line
-
-      set simString "  simulate"
-      if { ${line} == ${simString} } {
-         set simString "  source ${simTbOutDir}/setup_env.sh"
-         puts ${out} ${simString}
-      } else {              
-      
-         # Insert -nc flags into the vhdlan_opts and vlogan_opts options
-         set line [string map {" -l v" " -nc -l v"} ${line}]
-         
-         # Replace ${simTbFileName}_simv with the simv
-         set replaceString "${simTbFileName}_simv simv"
-         set line [string map ${replaceString}  ${line}]       
-
-         # Write to file
-          puts ${out} ${line}  
-      }      
-   }
-
-   # Close the files
-   close ${in}
-   close ${out}
-
-   # Update the permissions
-   exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
-   
-   # Copy the .do file
-   exec cp -f ${simTbOutDir}/vcs/simulate.do ${simTbOutDir}/simulate.do
-   
-   # Copy the glbl.v file
-   if { [file exists ${simTbOutDir}/vcs/glbl.v] == 1 } {
-      exec cp -f ${simTbOutDir}/vcs/glbl.v ${simTbOutDir}/glbl.v 
-   }
+#####################################################################################################   
+#####################################################################################################   
+#####################################################################################################  
+ 
+# Copy the glbl.v file
+if { [file exists ${simTbOutDir}/vcs/glbl.v] == 1 } {
+   # Change the glbl.v path (Vivado 2017.2 fix)
+   exec cp -f ${simTbOutDir}/vcs/glbl.v ${simTbOutDir}/../glbl.v 
+   exec cp -f ${simTbOutDir}/vcs/glbl.v ${simTbOutDir}/glbl.v 
 }
 
-########################################################
-## Close the project (required for cd function)
-########################################################
+# Close the project (required for cd function)
 close_project
 
-########################################################
-## Target specific VCS script
-########################################################
+# Target specific VCS script
 SourceTclFile ${VIVADO_DIR}/vcs.tcl
 
-########################################################
-## VCS Complete Message
-########################################################
+# VCS Complete Message
 VcsCompleteMessage ${simTbOutDir} ${sharedMem}
