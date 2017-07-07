@@ -374,6 +374,17 @@ proc CheckWritePermission { } {
    } 
 } 
 
+
+# Check for unsupported versions that ruckus does NOT support
+proc CheckVivadoVersion { } {
+   if { [expr { $::env(VIVADO_VERSION) == 2017.1 }] || [expr { $::env(VIVADO_VERSION) < 2014.1 }]} {
+      puts "\n\n\n\n\n********************************************************"
+      puts "ruckus does NOT support Vivado ${VIVADO_VERSION}"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
+   }
+} 
+
 # Checking Timing Function
 proc CheckTiming { {printTiming true} } {
    # Check for timing and routing errors 
