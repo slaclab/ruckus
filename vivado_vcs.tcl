@@ -22,12 +22,15 @@ if { [VersionCheck 2016.4] < 0 } {
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
+# Setup variables
+set simLibOutDir ${OUT_DIR}/vcs_library
+set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
+
 #####################################################################################################
-## Compile VCS library
-##################################################################################################### 
+## Compile the VCS Simulation Library
+#####################################################################################################  
 
 # Compile the libraries for VCS
-set simLibOutDir ${OUT_DIR}/vcs_library
 if { [file exists ${simLibOutDir}] != 1 } {  
  
    # Make the directory
@@ -72,32 +75,21 @@ if { [file exists ${simLibOutDir}] != 1 } {
 }
 
 #####################################################################################################
-## Export simulation
-#####################################################################################################
-
-# Save the current top level simulation testbed value
-set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
+## Export the Simulation
+#####################################################################################################  
 
 # Generate Verilog simulation models for all .DCP files in the source tree
 DcpToVerilogSim
 
-# Export IP
-export_ip_user_files -no_script -force
+# Export Xilinx & User IP Cores
+generate_target {simulation} [get_ips]
+export_ip_user_files -no_script
 
 # Update the compile order
 update_compile_order -quiet -fileset sim_1
 
 # Launch the scripts generator 
-if { [expr { ${VIVADO_VERSION} <= 2016.4 }] } {
-   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
-# Else this is Vivado Version 2017.2 (or later)   
-} else {      
-   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
-   launch_simulation -absolute_path -scripts_only; # Required for making IP cores working in 2017.2
-   VivadoRefresh ${VIVADO_PROJECT}
-   export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
-   launch_simulation -absolute_path -scripts_only; # Required for making IP cores working in 2017.2   
-}
+export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
 
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
@@ -160,162 +152,50 @@ if { [file isdirectory ${simLinkDir}] == 1 } {
    puts  ${envScript} " "
    close ${envScript}      
 }
-
   
 #####################################################################################################   
 ## Customization of the executable bash (.sh) script 
 #####################################################################################################   
-if { [expr { ${VIVADO_VERSION} <= 2016.4 }] } {
-   # open the files
-   set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
-   set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
 
-   # Find and replace the AFS path 
-   while { [eof ${in}] != 1 } {
-      
-      gets ${in} line
+# open the files
+set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
+set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
 
-      set simString "  simulate"
-      if { ${line} == ${simString} } {
-         set simString "  source ${simTbOutDir}/setup_env.sh"
-         puts ${out} ${simString}
-      } else {              
-            
-         # Replace ${simTbFileName}_simv with the simv
-         set replaceString "${simTbFileName}_simv simv"
-         set line [string map ${replaceString}  ${line}]  
-         
-         # By default: Mask off warnings during elaboration
-         set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
-         set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
-         set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]          
-
-         # Write to file
-          puts ${out} ${line}  
-      }      
-   }
-
-   # Close the files
-   close ${in}
-   close ${out}
-
-   # Update the permissions
-   exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh   
-
-# Else this is Vivado Version 2017.2 (or later) 
-} else {
-
-   ####################################
-   ## Customization of the setup script 
-   ####################################
-
-   # open the files
-   set in  [open ${simTbOutDir}/setup.sh r]
-   set out [open ${simTbOutDir}/sim_vcs_mx.temp  w]
-
-   # Find and replace the AFS path 
-   while { [eof ${in}] != 1 } {
-      
-      gets ${in} line
-      
-      # Insert the sourcing of the local VCS setup_env.sh script
-      set exeString "setup \$1"
-      if { ${line} == ${exeString} } {
-         puts ${out} ${line}
-         puts ${out} "source ${simTbOutDir}/compile.sh"
-         puts ${out} "source ${simTbOutDir}/elaborate.sh"
-         puts ${out} "source ${simTbOutDir}/setup_env.sh"
-      } else {              
-         # Replace setup.sh with the sim_vcs_mx.sh
-         set replaceString "setup.sh sim_vcs_mx.sh"
-         set line [string map ${replaceString}  ${line}]       
-      
-         # Replace ${simTbFileName}_simv with the simv
-         set replaceString "${simTbFileName}_simv simv"
-         set line [string map ${replaceString}  ${line}] 
-
-         # Write to file
-          puts ${out} ${line}  
-      }
-   }
-
-   # Close the files
-   close ${in}
-   close ${out}
+# Find and replace the AFS path 
+while { [eof ${in}] != 1 } {
    
-   # over-write the existing file
-   file rename -force ${simTbOutDir}/sim_vcs_mx.temp ${simTbOutDir}/sim_vcs_mx.sh
+   gets ${in} line
 
-   # Update the permissions
-   exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh 
-
-   # Delete the old setup.sh
-   file delete -force ${simTbOutDir}/setup.sh
-  
-   ######################################
-   ## Customization of the compile script 
-   ######################################
-  
-   # open the files
-   set in  [open ${simTbOutDir}/compile.sh r]
-   set out [open ${simTbOutDir}/compile.temp  w]
-
-   # Find and replace the AFS path and added secure Verilog support
-   while { [eof ${in}] != 1 } {
-      gets ${in} line
-      set line [string map {"-full64" "-full64 -nc -l +v2k -xlrm"} ${line}]
-      puts ${out} ${line} 
-   }
-
-   # Close the files
-   close ${in}
-   close ${out}
-
-   # over-write the existing file
-   file rename -force ${simTbOutDir}/compile.temp ${simTbOutDir}/compile.sh
-
-   # Update the permissions
-   exec chmod 0755 ${simTbOutDir}/compile.sh   
-  
-   ########################################
-   ## Customization of the elaborate script 
-   ########################################
-  
-   # open the files
-   set in  [open ${simTbOutDir}/elaborate.sh r]
-   set out [open ${simTbOutDir}/elaborate.temp  w]
-
-   # Find and replace the AFS path 
-   while { [eof ${in}] != 1 } {
-      
-      gets ${in} line
-      
+   set simString "  simulate"
+   if { ${line} == ${simString} } {
+      set simString "  source ${simTbOutDir}/setup_env.sh"
+      puts ${out} ${simString}
+   } else {              
+         
       # Replace ${simTbFileName}_simv with the simv
       set replaceString "${simTbFileName}_simv simv"
-      set line [string map ${replaceString}  ${line}] 
-
+      set line [string map ${replaceString}  ${line}]  
+      
       # By default: Mask off warnings during elaboration
-      set line [string map {"-full64" "-full64 +warn=none"} ${line}]
+      set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
+      set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
+      set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]     
+
+      # Change the glbl.v path (Vivado 2017.2 fix)
+      set replaceString "behav/vcs/glbl.v glbl.v"
+      set line [string map ${replaceString}  ${line}]          
 
       # Write to file
-       puts ${out} ${line} 
-   }
+       puts ${out} ${line}  
+   }      
+}
 
-   # Close the files
-   close ${in}
-   close ${out}
+# Close the files
+close ${in}
+close ${out}
 
-   # over-write the existing file
-   file rename -force ${simTbOutDir}/elaborate.temp ${simTbOutDir}/elaborate.sh
-
-   # Update the permissions
-   exec chmod 0755 ${simTbOutDir}/elaborate.sh  
-
-   # Delete the default simulate.sh and .do file
-   file delete -force ${simTbOutDir}/simulate.sh   
-   file delete -force ${simTbOutDir}/simulate.log   
-   file delete -force ${simTbOutDir}/${simTbFileName}.do   
-} 
+# Update the permissions
+exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh   
 
 #####################################################################################################   
 #####################################################################################################   
