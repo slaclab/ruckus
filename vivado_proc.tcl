@@ -280,6 +280,28 @@ proc CopyBdCoresDebug { } {
    }
 } 
 
+# Generate Verilog simulation models for all .DCP files in the source tree
+proc DcpToVerilogSim { } {
+   foreach filePntr [get_files {*.dcp}] {
+      if { [file extension ${filePntr}] == ".dcp" } {
+         ## Open the check point
+         open_checkpoint ${filePntr}     
+         ## Generate the output file path
+         set simName [file tail ${filePntr}]
+         set simName [string map {".dcp" "_sim.v"} ${simName}] 
+         set simFile ${OUT_DIR}/${PROJECT}_project.sim/${simName}
+         ## Write the simulation model to the build tree
+         write_verilog -force -mode funcsim -file ${simFile}     
+         ## close the check point
+         close_design
+         # Add the Simulation Files
+         add_files -quiet -fileset sim_1 ${simFile} 
+         # Force Absolute Path (not relative to project)
+         set_property PATH_MODE AbsoluteFirst [get_files ${simFile}]
+      } 
+   }
+}
+
 proc CreateFpgaBit { } {   
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -350,6 +372,17 @@ proc CheckWritePermission { } {
       puts "********************************************************\n\n\n\n\n"     
       exit -1
    } 
+} 
+
+
+# Check for unsupported versions that ruckus does NOT support
+proc CheckVivadoVersion { } {
+   if { [expr { $::env(VIVADO_VERSION) == 2017.1 }] || [expr { $::env(VIVADO_VERSION) < 2014.1 }]} {
+      puts "\n\n\n\n\n********************************************************"
+      puts "ruckus does NOT support Vivado ${VIVADO_VERSION}"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
+   }
 } 
 
 # Checking Timing Function
