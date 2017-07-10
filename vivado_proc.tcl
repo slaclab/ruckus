@@ -106,6 +106,24 @@ proc sleep {N} {
    after [expr {int($N * 1000)}]
 }
 
+proc ListComp { List1 List2 } {
+   # Refer to https://wiki.tcl.tk/15489 under "[tcl_hack] - 2015-08-14 13:52:07"
+   set DiffList {}
+   foreach Item $List1 {
+      if { [ lsearch -exact $List2 $Item ] == -1 } {
+         lappend DiffList $Item
+      }
+   }
+   foreach Item $List2 {
+      if { [ lsearch -exact $List1 $Item ] == -1 } {
+         if { [ lsearch -exact $DiffList $Item ] == -1 } {
+            lappend DiffList $Item
+         }
+      }
+   }
+   return $DiffList
+}
+
 proc BuildIpCores { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -335,8 +353,23 @@ proc CreatePromMcs { } {
 }   
    
 # Remove unused code   
-proc RemoveUnsuedCode { } { 
-   remove_files [get_files -filter {IS_AUTO_DISABLED}]
+proc RemoveUnsuedCode { } {
+   # Get all used synthesis files 
+   set syn_list  [get_files -compile_order sources -used_in synthesis]
+   # Get all used simulation files 
+   set sim_list  [get_files -compile_order sources -used_in simulation]
+   # Combine the list together synthesis & simulation 
+   set file_list "${syn_list} ${sim_list}"
+   # Find all the files not in 
+   set diff_list [ListComp ${file_list} [get_files]]
+   # Remove the unused files
+   remove_files [get_files ${diff_list}]
+   
+   #######################################################
+   # This only worked with synthesis files (not simulation)
+   #######################################################
+   # remove_files [get_files -filter {IS_AUTO_DISABLED}]
+   #######################################################   
 }
 
 # GIT Build TAG   
