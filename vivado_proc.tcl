@@ -354,22 +354,26 @@ proc CreatePromMcs { } {
    
 # Remove unused code   
 proc RemoveUnsuedCode { } {
-   # Get all used synthesis files 
-   set syn_list  [get_files -compile_order sources -used_in synthesis]
-   # Get all used simulation files 
-   set sim_list  [get_files -compile_order sources -used_in simulation]
-   # Combine the list together synthesis & simulation 
-   set file_list "${syn_list} ${sim_list}"
-   # Find all the files not in 
-   set diff_list [ListComp ${file_list} [get_files]]
-   # Remove the unused files
-   remove_files [get_files ${diff_list}]
    
    #######################################################
-   # This only worked with synthesis files (not simulation)
+   ## This should work but cause DRC errors in impl_1
    #######################################################
-   # remove_files [get_files -filter {IS_AUTO_DISABLED}]
-   #######################################################   
+   # # Get all used synthesis files 
+   # set syn_list  [get_files -compile_order sources -used_in synthesis]
+   # # Get all used simulation files 
+   # set sim_list  [get_files -compile_order sources -used_in simulation]
+   # # Combine the list together synthesis & simulation 
+   # set file_list "${syn_list} ${sim_list}"
+   # # Find all the files not in 
+   # set diff_list [ListComp ${file_list} [get_files]]
+   # # Remove the unused files
+   # remove_files [get_files ${diff_list}]
+   
+   ###################################################
+   # Only workes with synthesis files (not simulation)
+   ###################################################
+   remove_files [get_files -filter {IS_AUTO_DISABLED}]
+   ###################################################   
 }
 
 # GIT Build TAG   
