@@ -75,11 +75,12 @@ export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
 export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 
 # Generate build string
-export BUILD_SYS    = $(shell uname -m -n)
+export BUILD_SYS_NAME    = $(shell uname -n)
+export BUILD_SVR_TYPE    = $(shell uname -m)
 export BUILD_USER   = $(shell whoami)
 BUILD_DATE := $(shell date)
 BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
-export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS), Built $(BUILD_DATE) by $(BUILD_USER)
+export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Check if we are using GIT tagging
 ifeq ($(GIT_BYPASS), 0)
