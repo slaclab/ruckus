@@ -75,7 +75,7 @@ export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
 export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 
 # Generate build string
-export BUILD_SYS    = $(shell uname -m)
+export BUILD_SYS    = $(shell uname -m -n)
 export BUILD_USER   = $(shell whoami)
 BUILD_DATE := $(shell date)
 BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
