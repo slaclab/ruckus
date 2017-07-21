@@ -179,18 +179,18 @@ if { [CheckImpl] != true } {
 }
 
 ########################################################
-## Check that the Implement is completed
+## Check if there were timing 
+## or routing errors during implement
 ########################################################
-if { [CheckImpl printMsg] != true } {
+if { [CheckTiming] != true } {
    close_project
    exit -1
 }
 
 ########################################################
-## Check if there were timing 
-## or routing errors during implement
+## Check that the Implement is completed
 ########################################################
-if { [CheckTiming] != true } {
+if { [CheckImpl printMsg] != true } {
    close_project
    exit -1
 }
