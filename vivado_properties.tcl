@@ -40,6 +40,7 @@ set_property STEPS.PLACE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_mess
 set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE             ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 set_property STEPS.ROUTE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 set_property STEPS.WRITE_BITSTREAM.TCL.PRE             ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 
 # Set the messaging limit
