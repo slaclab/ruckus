@@ -55,7 +55,7 @@ ifeq ($(U1_EXIST), 1)
    $(shell mkdir -p /u1/$(USER) )
    $(shell mkdir -p /u1/$(USER)/build )
    ifeq ($(BUILD_EXIST), 0)
-      $(shell ln    -s /u1/$(USER)/build $(TOP_DIR)/build )   
+      $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )   
    endif
 endif
 U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
