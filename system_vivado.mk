@@ -49,6 +49,15 @@ export RECONFIG_CHECKPOINT =
 endif
 
 # Check for /u1 drive
+BUILD_EXIST=$(shell [ -e  $(TOP_DIR)/build/ ] && echo 1 || echo 0 )
+U1_EXIST=$(shell [ -e /u1/ ] && echo 1 || echo 0 )
+ifeq ($(U1_EXIST), 1)
+   $(shell mkdir -p /u1/$(USER) )
+   $(shell mkdir -p /u1/$(USER)/build )
+   ifeq ($(BUILD_EXIST), 0)
+      $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )   
+   endif
+endif
 U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
 ifeq ($(U1_EXIST), 1)
    export TMP_DIR=/u1/$(USER)/build
