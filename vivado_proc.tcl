@@ -745,6 +745,28 @@ proc VersionCheck { lockVersion } {
    }
 }
 
+proc SubmoduleCheck { name lockTag } {
+   # Get the full git submodule string for a particular module
+   set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]
+   # Scan for the hash, name, and tag portions of the string
+   scan $submodule "%s %s (v%s )" hash temp tag
+   # Blowoff everything except for the major, minor, and patch numbers
+   set tag [string range $tag 0 4]
+   # Compare the tag version for the targeted submodule version lock
+   if { ${tag} < ${lockTag} } {
+      puts "\n\n*********************************************************"
+      puts "Your git clone ${name} = v${tag}"
+      puts "However, ${name} Lock  = v${lockTag}"
+      puts "Please update this submodule tag to v${lockTag} (or later)"
+      puts "*********************************************************\n\n"
+      return -1
+   } elseif { ${tag} == ${lockTag} } {
+      return 0
+   } else { 
+      return 1
+   }
+}
+
 ###############################################################
 #### Partial Reconfiguration Functions ########################
 ###############################################################
