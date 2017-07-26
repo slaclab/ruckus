@@ -749,18 +749,29 @@ proc SubmoduleCheck { name lockTag } {
    # Get the full git submodule string for a particular module
    set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]
    # Scan for the hash, name, and tag portions of the string
-   scan $submodule "%s %s (v%s )" hash temp tag
+   scan $submodule "%s %s (v%s)" hash temp tag
    # Blowoff everything except for the major, minor, and patch numbers
-   set tag [string range $tag 0 4]
+   scan $tag     "%d.%d.%d%s" major minor patch d
+   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
+   set tag [string map [list $d ""] $tag]
    # Compare the tag version for the targeted submodule version lock
-   if { ${tag} < ${lockTag} } {
+   if { [expr { ${major} < ${majorLock} }] } {
+      set invalidTag 1
+   } elseif { [expr { ${minor} < ${minorLock} }] } {
+      set invalidTag 1
+   } elseif { [expr { ${patch} < ${patchLock} }] } {
+      set invalidTag 1
+   } else { 
+      set invalidTag 0 
+   }
+   if { ${invalidTag} == 1 } {
       puts "\n\n*********************************************************"
       puts "Your git clone ${name} = v${tag}"
       puts "However, ${name} Lock  = v${lockTag}"
       puts "Please update this submodule tag to v${lockTag} (or later)"
       puts "*********************************************************\n\n"
       return -1
-   } elseif { ${tag} == ${lockTag} } {
+   } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
       return 0
    } else { 
       return 1
