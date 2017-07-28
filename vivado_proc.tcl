@@ -300,6 +300,7 @@ proc CopyBdCoresDebug { } {
 
 # Generate Verilog simulation models for all .DCP files in the source tree
 proc DcpToVerilogSim { } {
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    foreach filePntr [get_files {*.dcp}] {
       if { [file extension ${filePntr}] == ".dcp" } {
          ## Open the check point
