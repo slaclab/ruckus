@@ -57,17 +57,6 @@ if { [CheckSynth] != true } {
 }
 
 ########################################################
-## Disable all the Partial Reconfiguration RTL Block(s) and 
-## their XDC files before launching the top level synthesis run
-########################################################
-if { ${RECONFIG_NAME} != "" } {
-   foreach rtlPntr ${RECONFIG_NAME} {
-      set_property is_enabled false [get_files ${rtlPntr}.vhd]
-      set_property is_enabled false [get_files ${rtlPntr}.xdc]
-   }
-}
-
-########################################################
 ## Prevents I/O insertion for synthesis and downstream tools
 ## Note:  To synthesis in GUI (debuggin only, this property 
 ##        should also be set in the project's vivado/project_setup.tcl file
@@ -149,14 +138,6 @@ if { [info exists ::env(SYNTH_DCP)] } {
 }
 
 ########################################################
-## Insert the Partial Reconfiguration RTL Block(s) 
-## into top level checkpoint checkpoint
-########################################################
-if { ${RECONFIG_NAME} != "" } {
-   InsertStaticReconfigDcp
-}
-
-########################################################
 ## Import static checkpoint
 ########################################################
 if { ${RECONFIG_CHECKPOINT} != "" } {
@@ -179,18 +160,18 @@ if { [CheckImpl] != true } {
 }
 
 ########################################################
-## Check if there were timing 
-## or routing errors during implement
+## Check that the Implement is completed
 ########################################################
-if { [CheckTiming] != true } {
+if { [CheckImpl printMsg] != true } {
    close_project
    exit -1
 }
 
 ########################################################
-## Check that the Implement is completed
+## Check if there were timing 
+## or routing errors during implement
 ########################################################
-if { [CheckImpl printMsg] != true } {
+if { [CheckTiming] != true } {
    close_project
    exit -1
 }
@@ -203,12 +184,13 @@ source ${RUCKUS_DIR}/vivado_post_route.tcl
 ########################################################
 ## Export static checkpoint
 ########################################################
-if { ${RECONFIG_NAME} != "" } {
-   ExportStaticReconfigDcp
+if { [get_property PR_FLOW [current_project]] != 0 } {
+   # Make a copy of the .dcp file with a "_static" suffix
+   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)_static.dcp   
 }
 
 ########################################################
-## Export partial configuration bit file
+## Export partial configuration bit file(s)
 ########################################################
 if { ${RECONFIG_CHECKPOINT} != "" } {
    ExportPartialReconfigBit
