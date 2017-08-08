@@ -33,5 +33,6 @@ set SDK_LIB $::env(SDK_LIB)
 set SDK_ELF $::env(SDK_ELF)
 
 # Partial Reconfiguration Variables
-set RECONFIG_NAME       $::env(RECONFIG_NAME)
 set RECONFIG_CHECKPOINT $::env(RECONFIG_CHECKPOINT)
+set RECONFIG_ENDPOINT   $::env(RECONFIG_ENDPOINT)
+set RECONFIG_PBLOCK     $::env(RECONFIG_PBLOCK)
