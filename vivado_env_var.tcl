@@ -27,6 +27,8 @@ set VIVADO_PROJECT   $::env(VIVADO_PROJECT)
 set VIVADO_VERSION   $::env(VIVADO_VERSION)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)
 
+set PRJ_TOP  [get_property top [current_fileset]]
+
 # Vivado SDK Variables
 set SDK_PRJ $::env(SDK_PRJ)
 set SDK_LIB $::env(SDK_LIB)

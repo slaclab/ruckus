@@ -57,15 +57,6 @@ if { [CheckSynth] != true } {
 }
 
 ########################################################
-## Prevents I/O insertion for synthesis and downstream tools
-## Note:  To synthesis in GUI (debuggin only, this property 
-##        should also be set in the project's vivado/project_setup.tcl file
-########################################################
-if { ${RECONFIG_CHECKPOINT} != "" } {
-   set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
-}
-
-########################################################
 ## Check if we re-synthesis any of the IP cores
 ########################################################
 BuildIpCores
@@ -182,7 +173,7 @@ if { [CheckTiming] != true } {
 source ${RUCKUS_DIR}/vivado_post_route.tcl
 
 ########################################################
-## Export static checkpoint
+## Export static checkpoint for dynamic partial reconfiguration build
 ########################################################
 if { [get_property PR_FLOW [current_project]] != 0 } {
    # Make a copy of the .dcp file with a "_static" suffix
