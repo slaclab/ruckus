@@ -40,12 +40,16 @@ ifndef GIT_BYPASS
 export GIT_BYPASS = 0
 endif
 
-ifndef RECONFIG_NAME
-export RECONFIG_NAME = 
-endif
-
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 
+endif
+
+ifndef RECONFIG_ENDPOINT
+export RECONFIG_ENDPOINT = 
+endif
+
+ifndef RECONFIG_PBLOCK
+export RECONFIG_PBLOCK = 
 endif
 
 # Check for /u1 drive
