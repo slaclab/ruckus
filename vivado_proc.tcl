@@ -790,13 +790,10 @@ proc ImportStaticReconfigDcp { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    
-   # Set common variables
-   set SYNTH_DIR ${OUT_DIR}/${PROJECT}_project.runs/synth_1
-   
    # Backup the Partial Reconfiguration RTL Block checkpoint and reports
-   exec cp -f ${SYNTH_DIR}/${PROJECT}.dcp                   ${SYNTH_DIR}/${PROJECT}_backup.dcp
-   exec mv -f ${SYNTH_DIR}/${PROJECT}_utilization_synth.rpt ${SYNTH_DIR}/${PROJECT}_utilization_synth_backup.rpt
-   exec mv -f ${SYNTH_DIR}/${PROJECT}_utilization_synth.pb  ${SYNTH_DIR}/${PROJECT}_utilization_synth_backup.pb
+   exec cp -f ${SYN_DIR}/${PRJ_TOP}.dcp                   ${SYN_DIR}/${PRJ_TOP}_backup.dcp
+   exec mv -f ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt ${SYN_DIR}/${PRJ_TOP}_utilization_synth_backup.rpt
+   exec mv -f ${SYN_DIR}/${PRJ_TOP}_utilization_synth.pb  ${SYN_DIR}/${PRJ_TOP}_utilization_synth_backup.pb
    
    # Open the static design check point
    open_checkpoint ${RECONFIG_CHECKPOINT}   
@@ -808,17 +805,17 @@ proc ImportStaticReconfigDcp { } {
    lock_design -level routing     
 
    # Read the targeted reconfiguration RTL block's checkpoint
-   read_checkpoint -cell ${RECONFIG_ENDPOINT} ${SYNTH_DIR}/${PROJECT}.dcp   
+   read_checkpoint -cell ${RECONFIG_ENDPOINT} ${SYN_DIR}/${PRJ_TOP}.dcp   
    
    # Check for DRC
-   report_drc -file ${SYNTH_DIR}/${PROJECT}_reconfig_drc.txt   
+   report_drc -file ${SYN_DIR}/${PRJ_TOP}_reconfig_drc.txt   
 
    # Overwrite the existing synth_1 checkpoint, which is the 
    # checkpoint that impl_1 will refer to
-   write_checkpoint -force ${SYNTH_DIR}/${PROJECT}.dcp   
+   write_checkpoint -force ${SYN_DIR}/${PRJ_TOP}.dcp   
    
    # Generate new top level reports to update GUI display
-   report_utilization -file ${SYNTH_DIR}/${PROJECT}_utilization_synth.rpt -pb ${SYNTH_DIR}/${PROJECT}_utilization_synth.pb
+   report_utilization -file ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt -pb ${SYN_DIR}/${PRJ_TOP}_utilization_synth.pb
    
    # Close the opened design before launching the impl_1
    close_design
@@ -832,8 +829,8 @@ proc ExportPartialReconfigBit { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    
    # Define the build output .bit file paths
-   set partialBitFile ${IMPL_DIR}/${PROJECT}_${RECONFIG_PBLOCK}_partial.bit
-   set clearBitFile   ${IMPL_DIR}/${PROJECT}_${RECONFIG_PBLOCK}_partial_clear.bit
+   set partialBitFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bit
+   set clearBitFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bit
    
    # Overwrite the build output's ${PROJECT}.bit
    exec cp -f ${partialBitFile} ${IMPL_DIR}/${PROJECT}.bit
