@@ -398,12 +398,12 @@ proc GitBuildTag { } {
 
 # Check if you have write permission
 proc CheckWritePermission { } {
-   set src_rc [catch {exec touch $::env(PROJ_DIR)/ruckus.tcl}]       
+   set src_rc [catch {exec touch $::env(MODULES)/ruckus/LICENSE.txt}]       
    if {$src_rc} {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
       puts "********************************************************"
-      puts "Unable to touch $::env(PROJ_DIR)/ruckus.tcl"
+      puts "Unable to touch $::env(MODULES)/ruckus/LICENSE.txt"
       puts "Please verify that your Unix session has not expired"
       puts "********************************************************"
       puts "********************************************************"
@@ -790,6 +790,13 @@ proc ImportStaticReconfigDcp { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    
+   # Check for valid file path
+   if { [file exists ${RECONFIG_CHECKPOINT}] != 1 } {   
+      puts "\n\n\n\n\n********************************************************"
+      puts "${RECONFIG_CHECKPOINT} doesn't exist"
+      puts "********************************************************\n\n\n\n\n"   
+   }
+   
    # Backup the Partial Reconfiguration RTL Block checkpoint and reports
    exec cp -f ${SYN_DIR}/${PRJ_TOP}.dcp                   ${SYN_DIR}/${PRJ_TOP}_backup.dcp
    exec mv -f ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt ${SYN_DIR}/${PRJ_TOP}_utilization_synth_backup.rpt
@@ -817,8 +824,17 @@ proc ImportStaticReconfigDcp { } {
    # Generate new top level reports to update GUI display
    report_utilization -file ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt -pb ${SYN_DIR}/${PRJ_TOP}_utilization_synth.pb
    
+   # Get the name of the static build before closing .DCP file
+   set staticTop [get_property  TOP [current_design]]
+   
    # Close the opened design before launching the impl_1
    close_design
+   
+   # Set the top-level RTL (required for Ultrascale)
+   set_property top ${staticTop} [current_fileset]   
+   
+   # SYNTH is not out-of-date
+   set_property NEEDS_REFRESH false [get_runs synth_1]
 }
 
 # Export partial configuration bit file
@@ -837,7 +853,7 @@ proc ExportPartialReconfigBit { } {
    
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
    if { [file exists ${clearBitFile}] == 1 } {
-      cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bit
+      cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
    }
 }
 

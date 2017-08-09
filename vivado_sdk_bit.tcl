@@ -9,9 +9,8 @@
 ##############################################################################
 
 # Get variables and Custom Procedures
-set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
 # Open the project (in case not already opened)
 set open_rc [catch { 

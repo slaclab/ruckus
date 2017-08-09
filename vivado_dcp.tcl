@@ -9,9 +9,8 @@
 ##############################################################################
 
 ## Get variables and Custom Procedures
-set RUCKUS_DIR $::env(RUCKUS_DIR)
-source  -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
-source  -quiet ${RUCKUS_DIR}/vivado_proc.tcl 
+source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
 ## Get the top level name
 set topName [get_property top [current_fileset]]

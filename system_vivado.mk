@@ -42,6 +42,10 @@ endif
 
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 
+export RECONFIG_STATIC_HASH = 
+else
+export RECONFIG_STATIC_FILE = $(notdir $(RECONFIG_CHECKPOINT))
+export RECONFIG_STATIC_HASH = -$(shell echo '$(RECONFIG_STATIC_FILE)' | awk -F'-' '{print $$5}' )
 endif
 
 ifndef RECONFIG_ENDPOINT
@@ -73,7 +77,7 @@ endif
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
 export VIVADO_PROJECT   = $(PROJECT)_project
-export VIVADO_DEPEND    = $(OUT_DIR)/$(PROJECT)_project.xpr
+export VIVADO_DEPEND    = $(OUT_DIR)/$(VIVADO_PROJECT).xpr
 ifndef RUCKUS_DIR
 export RUCKUS_DIR = $(MODULES)/ruckus
 endif
@@ -106,14 +110,14 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
       export GIT_HASH_MSG   = $(GIT_HASH_LONG)
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
    else
       export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_TAG_MSG    = 
       export GIT_HASH_LONG  = 
       export GIT_HASH_SHORT = 
       export GIT_HASH_MSG   = dirty
-      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
    endif
 else
    export GIT_STATUS     =
@@ -122,7 +126,7 @@ else
    export GIT_HASH_LONG  = 0
    export GIT_HASH_SHORT = 0
    export GIT_HASH_MSG   = dirty
-   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
 endif
 
 # SDK Variables
@@ -176,7 +180,7 @@ test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
-	@echo IMAGENAME: $(GIT_TAG_CMD)
+	@echo IMAGENAME: $(IMAGENAME)
 	@echo Untracked Files:
 	@echo "\t$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
