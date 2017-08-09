@@ -13,10 +13,9 @@
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_env_var.tcl
-source -quiet ${RUCKUS_DIR}/vivado_proc.tcl
-source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 
 # Refer to http://www.xilinx.com/support/answers/65415.html
 set_param synth.elaboration.rodinMoreOptions {rt::set_parameter ignoreVhdlAssertStmts false}
