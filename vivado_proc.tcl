@@ -824,8 +824,17 @@ proc ImportStaticReconfigDcp { } {
    # Generate new top level reports to update GUI display
    report_utilization -file ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt -pb ${SYN_DIR}/${PRJ_TOP}_utilization_synth.pb
    
+   # Get the name of the static build before closing .DCP file
+   set staticTop [get_property  TOP [current_design]]
+   
    # Close the opened design before launching the impl_1
    close_design
+   
+   # Set the top-level RTL (required for Ultrascale)
+   set_property top ${staticTop} [current_fileset]   
+   
+   # SYNTH is not out-of-date
+   set_property NEEDS_REFRESH false [get_runs synth_1]
 }
 
 # Export partial configuration bit file
