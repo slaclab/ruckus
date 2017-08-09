@@ -177,7 +177,7 @@ source ${RUCKUS_DIR}/vivado_post_route.tcl
 ########################################################
 if { [get_property PR_FLOW [current_project]] != 0 } {
    # Make a copy of the .dcp file with a "_static" suffix
-   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)_static.dcp   
+   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
 }
 
 ########################################################

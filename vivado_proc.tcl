@@ -844,7 +844,7 @@ proc ExportPartialReconfigBit { } {
    
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
    if { [file exists ${clearBitFile}] == 1 } {
-      cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bit
+      cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
    }
 }
 
