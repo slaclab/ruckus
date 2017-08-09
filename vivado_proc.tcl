@@ -398,12 +398,12 @@ proc GitBuildTag { } {
 
 # Check if you have write permission
 proc CheckWritePermission { } {
-   set src_rc [catch {exec touch $::env(PROJ_DIR)/ruckus.tcl}]       
+   set src_rc [catch {exec touch $::env(MODULES)/ruckus/LICENSE.txt}]       
    if {$src_rc} {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
       puts "********************************************************"
-      puts "Unable to touch $::env(PROJ_DIR)/ruckus.tcl"
+      puts "Unable to touch $::env(MODULES)/ruckus/LICENSE.txt"
       puts "Please verify that your Unix session has not expired"
       puts "********************************************************"
       puts "********************************************************"
@@ -789,6 +789,13 @@ proc ImportStaticReconfigDcp { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Check for valid file path
+   if { [file exists ${RECONFIG_CHECKPOINT}] != 1 } {   
+      puts "\n\n\n\n\n********************************************************"
+      puts "${RECONFIG_CHECKPOINT} doesn't exist"
+      puts "********************************************************\n\n\n\n\n"   
+   }
    
    # Backup the Partial Reconfiguration RTL Block checkpoint and reports
    exec cp -f ${SYN_DIR}/${PRJ_TOP}.dcp                   ${SYN_DIR}/${PRJ_TOP}_backup.dcp
