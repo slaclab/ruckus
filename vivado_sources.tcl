@@ -48,10 +48,24 @@ set fwVersion [format %08X ${decVer}]
 
 # Generate the GIT SHA-1 string
 set gitHash $::env(GIT_HASH_LONG)
+while { [string bytelength $gitHash] != 40 } {
+   set gitHash "0${gitHash}"
+}
 
 # Set the top-level generic values
 set buildInfo "BUILD_INFO_G=2240'h${gitHash}${fwVersion}${buildString}"
 set_property generic ${buildInfo} -objects [current_fileset]
+
+# Auto-generate a "BUILD_INFO_C" VHDL package for Dynamic Partial Reconfiguration builds
+set out [open ${OUT_DIR}/BuildInfoPkg.vhd  w]
+puts ${out} "library ieee;" 
+puts ${out} "use ieee.std_logic_1164.all;" 
+puts ${out} "use work.StdRtlPkg.all;" 
+puts ${out} "package BuildInfoPkg is" 
+puts ${out} "constant BUILD_INFO_C : BuildInfoType :=x\"${gitHash}${fwVersion}${buildString}\";"
+puts ${out} "end BuildInfoPkg;" 
+close ${out}
+loadSource -path ${OUT_DIR}/BuildInfoPkg.vhd  
 
 ########################################################
 ## Load the source code
@@ -144,6 +158,7 @@ close ${bdList}
 
 # Check if this is a dynamic partial reconfiguration build
 if { ${RECONFIG_CHECKPOINT} != "" } {
+   # Set the top-level module as "out_of_context"
    set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
 }
 
