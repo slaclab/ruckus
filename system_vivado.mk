@@ -77,7 +77,7 @@ endif
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
 export VIVADO_PROJECT   = $(PROJECT)_project
-export VIVADO_DEPEND    = $(OUT_DIR)/$(PROJECT)_project.xpr
+export VIVADO_DEPEND    = $(OUT_DIR)/$(VIVADO_PROJECT).xpr
 ifndef RUCKUS_DIR
 export RUCKUS_DIR = $(MODULES)/ruckus
 endif
