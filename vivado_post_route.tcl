@@ -15,7 +15,6 @@
 ########################################################
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
-set topLevel [get_property top [current_fileset]]
 
 ########################################################
 ## Check if passed timing
@@ -29,7 +28,7 @@ if { [CheckTiming false] == true } {
    ## in an "incremental compile" build
    ########################################################
    if { [expr { ${VIVADO_VERSION} >= 2015.3 }] } {
-      exec cp -f ${IMPL_DIR}/${topLevel}_routed.dcp ${OUT_DIR}/IncrementalBuild.dcp
+      exec cp -f ${IMPL_DIR}/${PRJ_TOP}_routed.dcp ${OUT_DIR}/IncrementalBuild.dcp
    }
    
    #########################################################
@@ -53,6 +52,7 @@ if { [CheckTiming false] == true } {
          source ${VIVADO_DIR}/sdk.tcl
       } else {
          set SDK_PRJ_RDY false
+         set SDK_RETRY_CNT 0
          while { ${SDK_PRJ_RDY} != true } {
             set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_prj.tcl >@stdout} _RESULT]      
             if {$src_rc} {
@@ -60,6 +60,14 @@ if { [CheckTiming false] == true } {
                puts "Retrying to build SDK project"
                puts ${_RESULT}
                puts "********************************************************\n"
+               # Increment the counter
+               incr SDK_RETRY_CNT
+               # Check for max retries
+               if { ${SDK_RETRY_CNT} == 10 } {
+                  puts "Failed to build the SDK project"
+                  exit -1
+                  # break
+               }
             } else {
                set SDK_PRJ_RDY true
             }         

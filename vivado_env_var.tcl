@@ -27,8 +27,6 @@ set VIVADO_PROJECT   $::env(VIVADO_PROJECT)
 set VIVADO_VERSION   $::env(VIVADO_VERSION)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)
 
-set PRJ_TOP  [get_property top [current_fileset]]
-
 # Vivado SDK Variables
 set SDK_PRJ $::env(SDK_PRJ)
 set SDK_LIB $::env(SDK_LIB)
@@ -38,3 +36,11 @@ set SDK_ELF $::env(SDK_ELF)
 set RECONFIG_CHECKPOINT $::env(RECONFIG_CHECKPOINT)
 set RECONFIG_ENDPOINT   $::env(RECONFIG_ENDPOINT)
 set RECONFIG_PBLOCK     $::env(RECONFIG_PBLOCK)
+
+########################################################
+## Set Non-Environmental variables
+########################################################
+set vivado_cmd [catch { 
+   set PRJ_TOP  [get_property top [current_fileset]]
+   set SIM_TOP  [get_property top [get_filesets sim_1]]
+} _RESULT]  
