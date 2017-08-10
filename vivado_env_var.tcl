@@ -28,6 +28,7 @@ set VIVADO_VERSION   $::env(VIVADO_VERSION)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)
 
 set PRJ_TOP  [get_property top [current_fileset]]
+set SIM_TOP  [get_property top [get_filesets sim_1]]
 
 # Vivado SDK Variables
 set SDK_PRJ $::env(SDK_PRJ)

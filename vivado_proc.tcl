@@ -486,6 +486,9 @@ proc CheckSdkSrcPath { } {
 # Check project configuration for errors
 proc CheckPrjConfig { } {
 
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+
    # Check for empty Firwmare Version string
    if { $::env(PRJ_VERSION) == "" } {
       puts "\n\n\n\n\n********************************************************"
@@ -535,16 +538,19 @@ proc CheckPrjConfig { } {
       return false
    } 
    
-   set myTop [get_property top [current_fileset]]
-   if { ${myTop} != $::env(PROJECT) } {
-      puts "\n\n\n\n\n********************************************************"
-      puts "********************************************************"
-      puts "********************************************************"   
-      puts "WARNING: Your top-level firmware is defined as ${myTop}"
-      puts "********************************************************"
-      puts "********************************************************"
-      puts "********************************************************\n\n\n\n\n"     
-      sleep 5
+   if { ${PRJ_TOP} != $::env(PROJECT) } {
+      # Check if not a dynamic build of partial reconfiguration, 
+      # which usually ${PRJ_TOP} != $::env(PROJECT)
+      if { ${RECONFIG_CHECKPOINT} == "" } {
+         puts "\n\n\n\n\n********************************************************"
+         puts "********************************************************"
+         puts "********************************************************"   
+         puts "WARNING: Your top-level firmware is defined as ${PRJ_TOP}"
+         puts "********************************************************"
+         puts "********************************************************"
+         puts "********************************************************\n\n\n\n\n"     
+         sleep 5
+      }
    }
    
    # Check SDK

@@ -12,11 +12,8 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-## Get the top level name
-set topName [get_property top [current_fileset]]
-
 ## Get the ouput file path
-set filepath "${IMAGES_DIR}/${topName}"
+set filepath "${IMAGES_DIR}/${PRJ_TOP}"
 
 ## Open the synthesis design
 open_run synth_1 -name synth_1

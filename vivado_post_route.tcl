@@ -15,7 +15,6 @@
 ########################################################
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
-set topLevel [get_property top [current_fileset]]
 
 ########################################################
 ## Check if passed timing
@@ -29,7 +28,7 @@ if { [CheckTiming false] == true } {
    ## in an "incremental compile" build
    ########################################################
    if { [expr { ${VIVADO_VERSION} >= 2015.3 }] } {
-      exec cp -f ${IMPL_DIR}/${topLevel}_routed.dcp ${OUT_DIR}/IncrementalBuild.dcp
+      exec cp -f ${IMPL_DIR}/${PRJ_TOP}_routed.dcp ${OUT_DIR}/IncrementalBuild.dcp
    }
    
    #########################################################
