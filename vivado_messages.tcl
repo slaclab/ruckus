@@ -42,6 +42,8 @@ set_msg_config -suppress -id {VRFC 10-165}; # SIM: Analyzing VERILOG file
 set_msg_config -suppress -id {Simtcl 6-16}; # SIM: Simulation closed 
 set_msg_config -suppress -id {Simtcl 6-17}; # SIM: Simulation restarted 
 
+set_msg_config -suppress -id {Constraints 18-4434}; # XDC: Using a LOC constraint to assign the placement of a Global Clock Buffer can result in sub-optimal placement results in UltraScale
+
 set_msg_config -suppress -id {Drc 23-20};     # DRC: writefirst - Synchronous clocking for BRAM
 set_msg_config -suppress -id {DRC CHECK-3};   # DRC: Report rule limit reached
 set_msg_config -suppress -id {DRC DPIP-1};    # DRC: Input pipelining for DSP
