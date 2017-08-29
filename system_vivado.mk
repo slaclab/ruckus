@@ -41,19 +41,19 @@ export GIT_BYPASS = 0
 endif
 
 ifndef RECONFIG_CHECKPOINT
-export RECONFIG_CHECKPOINT = 
-export RECONFIG_STATIC_HASH = 
+export RECONFIG_CHECKPOINT = 0
+export RECONFIG_STATIC_HASH = 0
 else
 export RECONFIG_STATIC_FILE = $(notdir $(RECONFIG_CHECKPOINT))
 export RECONFIG_STATIC_HASH = -$(shell echo '$(RECONFIG_STATIC_FILE)' | awk -F'-' '{print $$5}' )
 endif
 
 ifndef RECONFIG_ENDPOINT
-export RECONFIG_ENDPOINT = 
+export RECONFIG_ENDPOINT = 0
 endif
 
 ifndef RECONFIG_PBLOCK
-export RECONFIG_PBLOCK = 
+export RECONFIG_PBLOCK = 0
 endif
 
 # Check for /u1 drive

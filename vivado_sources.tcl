@@ -158,7 +158,7 @@ if { $::BD_FILES != "" } {
 close ${bdList}
 
 # Check if this is a dynamic partial reconfiguration build
-if { ${RECONFIG_CHECKPOINT} != "" } {
+if { ${RECONFIG_CHECKPOINT} != 0 } {
    # Set the top-level module as "out_of_context"
    set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
 }
