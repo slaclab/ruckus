@@ -541,7 +541,7 @@ proc CheckPrjConfig { } {
    if { ${PRJ_TOP} != $::env(PROJECT) } {
       # Check if not a dynamic build of partial reconfiguration, 
       # which usually ${PRJ_TOP} != $::env(PROJECT)
-      if { ${RECONFIG_CHECKPOINT} == "" } {
+      if { ${RECONFIG_CHECKPOINT} == 0 } {
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
          puts "********************************************************"   

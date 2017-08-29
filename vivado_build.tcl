@@ -130,7 +130,7 @@ if { [info exists ::env(SYNTH_DCP)] } {
 ########################################################
 ## Import static checkpoint
 ########################################################
-if { ${RECONFIG_CHECKPOINT} != "" } {
+if { ${RECONFIG_CHECKPOINT} != 0 } {
    ImportStaticReconfigDcp
 }
 
@@ -182,7 +182,7 @@ if { [get_property PR_FLOW [current_project]] != 0 } {
 ########################################################
 ## Export partial configuration bit file(s)
 ########################################################
-if { ${RECONFIG_CHECKPOINT} != "" } {
+if { ${RECONFIG_CHECKPOINT} != 0 } {
    ExportPartialReconfigBit
 }
 
