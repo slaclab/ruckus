@@ -541,7 +541,7 @@ proc CheckPrjConfig { } {
    if { ${PRJ_TOP} != $::env(PROJECT) } {
       # Check if not a dynamic build of partial reconfiguration, 
       # which usually ${PRJ_TOP} != $::env(PROJECT)
-      if { ${RECONFIG_CHECKPOINT} == "" } {
+      if { ${RECONFIG_CHECKPOINT} == 0 } {
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
          puts "********************************************************"   
@@ -764,10 +764,18 @@ proc SubmoduleCheck { name lockTag } {
    # Compare the tag version for the targeted submodule version lock
    if { [expr { ${major} < ${majorLock} }] } {
       set invalidTag 1
-   } elseif { [expr { ${minor} < ${minorLock} }] } {
-      set invalidTag 1
+   } elseif { [expr { ${minor} < ${minorLock} }] } {      
+      if { [expr { ${major} >= ${majorLock} }] } {
+         set invalidTag 0
+      } else {
+         set invalidTag 1
+      }      
    } elseif { [expr { ${patch} < ${patchLock} }] } {
-      set invalidTag 1
+      if { [expr { ${minor} >= ${minorLock} }] } {
+         set invalidTag 0
+      } else {
+         set invalidTag 1
+      }
    } else { 
       set invalidTag 0 
    }

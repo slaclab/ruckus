@@ -15,7 +15,8 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]  
+set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]
+set AllowUnDriven    [expr {[info exists ::env(ALLOW_UN_DRIVEN)]    && [string is true -strict $::env(ALLOW_UN_DRIVEN)]}]
 
 ########################################################
 ## Message Suppression
@@ -156,6 +157,16 @@ if { ${AllowMultiDriven} == 1 } {
 } else {
     set_msg_config -id {Synth 8-3352} -new_severity ERROR;	
     set_msg_config -id {MDRV-1}       -new_severity ERROR;	
+}
+
+########################################################
+# Check if Un-Driven Nets are allowed
+########################################################
+
+if { ${AllowUnDriven} == 1 } {
+    set_msg_config -id {Synth 8-3848} -new_severity INFO;# SYNTH: multi-driven net
+} else {
+    set_msg_config -id {Synth 8-3848} -new_severity ERROR;	
 }
 
 ########################################################
