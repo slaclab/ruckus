@@ -968,16 +968,18 @@ proc loadRuckusTcl { filePath {flags ""} } {
 # Function to load RTL files
 proc loadSource args {
    set options {
-      {sim_only    "flag for tagging simulation file(s)"}
-      {path.arg "" "path to a single file"}
-      {dir.arg  "" "path to a directory of file(s)"}
-      {lib.arg  "" "library for file(s)"}
+      {sim_only         "flag for tagging simulation file(s)"}
+      {path.arg      "" "path to a single file"}
+      {dir.arg       "" "path to a directory of file(s)"}
+      {lib.arg       "" "library for file(s)"}
+      {fileType.arg  "" "library for file(s)"}
    }
    set usage ": loadSource \[options] ...\noptions:"
    array set params [::cmdline::getoptions args $options $usage]
-   set has_path [expr {[string length $params(path)] > 0}]
-   set has_dir  [expr {[string length $params(dir)] > 0}]
-   set has_lib  [expr {[string length $params(lib)] > 0}]
+   set has_path      [expr {[string length $params(path)]     > 0}]
+   set has_dir       [expr {[string length $params(dir)]      > 0}]
+   set has_lib       [expr {[string length $params(lib)]      > 0}]
+   set has_fileType  [expr {[string length $params(fileType)] > 0}]
    if { $params(sim_only) } { 
       set fileset "sim_1" 
    } else {
@@ -1001,6 +1003,7 @@ proc loadSource args {
          # Check the file extension
          set fileExt [file extension $params(path)]
          if { ${fileExt} eq {.vhd} ||
+              ${fileExt} eq {.vhdl}||
               ${fileExt} eq {.v}   ||
               ${fileExt} eq {.vh}  ||
               ${fileExt} eq {.sv}  ||
@@ -1014,10 +1017,13 @@ proc loadSource args {
                if { ${has_lib} } {
                   set_property LIBRARY $params(lib) [get_files $params(path)]
                }
+               if { ${has_fileType} } {
+                  set_property FILE_TYPE $params(fileType) [get_files $params(path)]
+               }               
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(path) does not have a \[.vhd,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
+            puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
             puts "********************************************************\n\n\n\n\n"
             return -code error
          }
@@ -1034,7 +1040,7 @@ proc loadSource args {
          # Get a list of all RTL files
          set list ""
          set list_rc [catch { 
-            set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.dat *.coe *.dcp]
+            set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.dat *.coe *.dcp]
          } _RESULT]           
          # Load all the RTL files
          if { ${list} != "" } {
@@ -1046,11 +1052,14 @@ proc loadSource args {
                   if { ${has_lib} } {
                      set_property LIBRARY $params(lib) [get_files ${pntr}]
                   }
+                  if { ${has_fileType} } {
+                     set_property FILE_TYPE $params(fileType) [get_files ${pntr}]
+                  }                  
                }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(dir) directory does not have any \[.vhd,.v,.vh,.sv,.dat,.coe,.dcp\] files"
+            puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.dcp\] files"
             puts "********************************************************\n\n\n\n\n"         
             return -code error            
          }
