@@ -183,6 +183,7 @@ if { [get_property PR_FLOW [current_project]] != 0 } {
 ########################################################
 if { ${RECONFIG_CHECKPOINT} != 0 } {
    ExportPartialReconfigBin
+   ExportPartialReconfigBit
 }
 
 ########################################################

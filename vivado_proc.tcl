@@ -890,6 +890,26 @@ proc ExportPartialReconfigBin { } {
    }
 }
 
+# Export partial configuration bin file
+proc ExportPartialReconfigBit { } {
+
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Define the build output .bit file paths
+   set partialBitFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bit
+   set clearBitFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bit
+   
+   # Overwrite the build output's ${PROJECT}.bit
+   exec cp -f ${partialBitFile} ${IMPL_DIR}/${PROJECT}.bit
+   
+   # Check for partial_clear.bit (generated for Ultrascale FPGAs)
+   if { [file exists ${clearBitFile}] == 1 } {
+      exec cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
+   }
+}
+
 ###############################################################
 #### Hardware Debugging Functions #############################
 ###############################################################
