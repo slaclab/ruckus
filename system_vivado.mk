@@ -110,14 +110,22 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
       export GIT_HASH_MSG   = $(GIT_HASH_LONG)
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
+      ifeq ($(RECONFIG_STATIC_HASH), 0)
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
+      else
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
+      endif
    else
       export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_TAG_MSG    = 
       export GIT_HASH_LONG  = 
       export GIT_HASH_SHORT = 
       export GIT_HASH_MSG   = dirty
-      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      ifeq ($(RECONFIG_STATIC_HASH), 0)
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+      else
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      endif
    endif
 else
    export GIT_STATUS     =
@@ -126,7 +134,11 @@ else
    export GIT_HASH_LONG  = 0
    export GIT_HASH_SHORT = 0
    export GIT_HASH_MSG   = dirty
-   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+   ifeq ($(RECONFIG_STATIC_HASH), 0)
+      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   else
+      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+   endif
 endif
 
 # SDK Variables
