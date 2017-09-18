@@ -175,15 +175,14 @@ source ${RUCKUS_DIR}/vivado_post_route.tcl
 ## Export static checkpoint for dynamic partial reconfiguration build
 ########################################################
 if { [get_property PR_FLOW [current_project]] != 0 } {
-   # Make a copy of the .dcp file with a "_static" suffix
-   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
+   ExportStaticReconfigDcp
 }
 
 ########################################################
 ## Export partial configuration bit file(s)
 ########################################################
 if { ${RECONFIG_CHECKPOINT} != 0 } {
-   ExportPartialReconfigBit
+   ExportPartialReconfigBin
 }
 
 ########################################################

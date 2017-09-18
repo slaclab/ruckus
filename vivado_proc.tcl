@@ -851,23 +851,42 @@ proc ImportStaticReconfigDcp { } {
    set_property NEEDS_REFRESH false [get_runs synth_1]
 }
 
-# Export partial configuration bit file
-proc ExportPartialReconfigBit { } {
+# Export partial configuration bin file
+proc ExportStaticReconfigDcp { } {
+
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Make a copy of the .dcp file with a "_static" suffix
+   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
+
+   # Get a list of all the clear bin files
+   set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bin]
+   if { ${clearList} != "" } {   
+      foreach clearFile ${clearList} {
+         exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+      }
+   }
+}
+
+# Export partial configuration bin file
+proc ExportPartialReconfigBin { } {
 
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    
    # Define the build output .bit file paths
-   set partialBitFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bit
-   set clearBitFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bit
+   set partialBinFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bin
+   set clearBinFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bin
    
    # Overwrite the build output's ${PROJECT}.bit
-   exec cp -f ${partialBitFile} ${IMPL_DIR}/${PROJECT}.bit
+   exec cp -f ${partialBinFile} ${IMPL_DIR}/${PROJECT}.bin
    
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
-   if { [file exists ${clearBitFile}] == 1 } {
-      exec cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
+   if { [file exists ${clearBinFile}] == 1 } {
+      exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
    }
 }
 

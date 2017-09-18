@@ -83,5 +83,8 @@ if { ${cpuNum} >= 8 } {
    set_param general.maxThreads ${cpuNum}
 }
 
+# Enable .bin generation for partial reconfiguration
+set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
+
 # Target specific properties script
 SourceTclFile ${VIVADO_DIR}/properties.tcl
