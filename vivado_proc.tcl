@@ -865,7 +865,7 @@ proc ExportStaticReconfigDcp { } {
    set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bin]
    if { ${clearList} != "" } {   
       foreach clearFile ${clearList} {
-         exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
       }
    }
 }
