@@ -761,25 +761,48 @@ proc SubmoduleCheck { name lockTag } {
    scan $tag     "%d.%d.%d%s" major minor patch d
    scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
    set tag [string map [list $d ""] $tag]
-   # Compare the tag version for the targeted submodule version lock
+   
+   ###################################################################
+   # Major Number Checking
+   ###################################################################
+   # major.X.X < majorLock.X.X
    if { [expr { ${major} < ${majorLock} }] } {
-      set invalidTag 1
-   } elseif { [expr { ${minor} < ${minorLock} }] } {      
-      if { [expr { ${major} >= ${majorLock} }] } {
-         set invalidTag 0
-      } else {
-         set invalidTag 1
-      }      
-   } elseif { [expr { ${patch} < ${patchLock} }] } {
-      if { [expr { ${minor} >= ${minorLock} }] } {
-         set invalidTag 0
-      } else {
-         set invalidTag 1
-      }
+      set validTag 0
+   # major.X.X = majorLock.X.X
+   } elseif { [expr { ${major} == ${majorLock} }] } {
+      ################################################################
+      # Minor Number Checking
+      ################################################################
+      # major.minor.X < major.minorLock.X
+      if { [expr { ${minor} < ${minorLock} }] } {
+         set validTag 0
+      # major.minor.X = major.minorLock.X
+      } elseif { [expr { ${minor} == ${minorLock} }] } {
+         #############################################################
+         # Patch Number Checking
+         #############################################################
+         # major.minor.patch < major.minor.patchLock
+         if { [expr { ${patch} < ${patchLock} }] } {
+            set validTag 0
+         # major.minor.patch = major.minor.patchLock
+         } elseif { [expr { ${patch} == ${patchLock} }] } {
+            set validTag 1
+         # major.minor.patch > major.minor.patchLock
+         } else { 
+            set validTag 1
+         }     
+      ################################################################
+      # major.minor.X > major.minorLock.X
+      } else { 
+         set validTag 1
+      }   
+   ###################################################################
+   # major.X.X > majorLock.X.X
    } else { 
-      set invalidTag 0 
-   }
-   if { ${invalidTag} == 1 } {
+      set validTag 1
+   }   
+   # Check the validTag flag
+   if { ${validTag} != 1 } {
       puts "\n\n*********************************************************"
       puts "Your git clone ${name} = v${tag}"
       puts "However, ${name} Lock  = v${lockTag}"
@@ -851,7 +874,46 @@ proc ImportStaticReconfigDcp { } {
    set_property NEEDS_REFRESH false [get_runs synth_1]
 }
 
-# Export partial configuration bit file
+# Export partial configuration bin file
+proc ExportStaticReconfigDcp { } {
+
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Make a copy of the .dcp file with a "_static" suffix
+   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
+
+   # Get a list of all the clear bin files
+   set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bin]
+   if { ${clearList} != "" } {   
+      foreach clearFile ${clearList} {
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+      }
+   }
+}
+
+# Export partial configuration bin file
+proc ExportPartialReconfigBin { } {
+
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Define the build output .bit file paths
+   set partialBinFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bin
+   set clearBinFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bin
+   
+   # Overwrite the build output's ${PROJECT}.bit
+   exec cp -f ${partialBinFile} ${IMPL_DIR}/${PROJECT}.bin
+   
+   # Check for partial_clear.bit (generated for Ultrascale FPGAs)
+   if { [file exists ${clearBinFile}] == 1 } {
+      exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+   }
+}
+
+# Export partial configuration bin file
 proc ExportPartialReconfigBit { } {
 
    # Get variables
