@@ -761,25 +761,48 @@ proc SubmoduleCheck { name lockTag } {
    scan $tag     "%d.%d.%d%s" major minor patch d
    scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
    set tag [string map [list $d ""] $tag]
-   # Compare the tag version for the targeted submodule version lock
+   
+   ###################################################################
+   # Major Number Checking
+   ###################################################################
+   # major.X.X < majorLock.X.X
    if { [expr { ${major} < ${majorLock} }] } {
-      set invalidTag 1
-   } elseif { [expr { ${minor} < ${minorLock} }] } {      
-      if { [expr { ${major} >= ${majorLock} }] } {
-         set invalidTag 0
-      } else {
-         set invalidTag 1
-      }      
-   } elseif { [expr { ${patch} < ${patchLock} }] } {
-      if { [expr { ${minor} >= ${minorLock} }] } {
-         set invalidTag 0
-      } else {
-         set invalidTag 1
-      }
+      set validTag 0
+   # major.X.X = majorLock.X.X
+   } elseif { [expr { ${major} == ${majorLock} }] } {
+      ################################################################
+      # Minor Number Checking
+      ################################################################
+      # major.minor.X < major.minorLock.X
+      if { [expr { ${minor} < ${minorLock} }] } {
+         set validTag 0
+      # major.minor.X = major.minorLock.X
+      } elseif { [expr { ${minor} == ${minorLock} }] } {
+         #############################################################
+         # Patch Number Checking
+         #############################################################
+         # major.minor.patch < major.minor.patchLock
+         if { [expr { ${patch} < ${patchLock} }] } {
+            set validTag 0
+         # major.minor.patch = major.minor.patchLock
+         } elseif { [expr { ${patch} == ${patchLock} }] } {
+            set validTag 1
+         # major.minor.patch > major.minor.patchLock
+         } else { 
+            set validTag 1
+         }     
+      ################################################################
+      # major.minor.X > major.minorLock.X
+      } else { 
+         set validTag 1
+      }   
+   ###################################################################
+   # major.X.X > majorLock.X.X
    } else { 
-      set invalidTag 0 
-   }
-   if { ${invalidTag} == 1 } {
+      set validTag 1
+   }   
+   # Check the validTag flag
+   if { ${validTag} != 1 } {
       puts "\n\n*********************************************************"
       puts "Your git clone ${name} = v${tag}"
       puts "However, ${name} Lock  = v${lockTag}"
