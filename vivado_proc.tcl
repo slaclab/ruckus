@@ -891,6 +891,14 @@ proc ExportStaticReconfigDcp { } {
          exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
       }
    }
+   
+   # Get a list of all the clear bit files
+   set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bit]
+   if { ${clearList} != "" } {   
+      foreach clearFile ${clearList} {
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
+      }
+   }   
 }
 
 # Export partial configuration bin file
