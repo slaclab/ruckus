@@ -736,17 +736,27 @@ proc HlsVersionCheck { } {
    }
 }
 
-proc VersionCheck { lockVersion } {
+proc VersionCheck { lockVersion {mustBeExact ""} } {
+   # Get the Vivado version
    set VersionNumber [version -short]
+   # Generate error message
+   set errMsg "\n\n*********************************************************\n"
+   set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+   set errMsg "${errMsg}However, Vivado Version Lock = ${lockVersion}\n"
+   set errMsg "${errMsg}You need to change your Vivado software to Version ${lockVersion}\n"
+   set errMsg "${errMsg}*********************************************************\n\n"   
+   # Check for less than
    if { ${VersionNumber} < ${lockVersion} } {
-      puts "\n\n*********************************************************"
-      puts "Your Vivado Version Vivado   = ${VersionNumber}"
-      puts "However, Vivado Version Lock = ${lockVersion}"
-      puts "You need to change your Vivado software to Version ${lockVersion}"
-      puts "*********************************************************\n\n" 
+      puts ${errMsg}
       return -1
+   # Check for equal to
    } elseif { ${VersionNumber} == ${lockVersion} } {
       return 0
+   # Check for greater than but must be exact
+   } elseif { ${mustBeExact} == "mustBeExact" } {
+      puts ${errMsg}
+      return -1
+   # Else for greater than and not exact
    } else { 
       return 1
    }
