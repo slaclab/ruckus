@@ -1018,16 +1018,16 @@ proc loadRuckusTcl { filePath {flags ""} } {
    set ::DIR_PATH ${filePath}
    # Open the TCL file
    if { [file exists ${filePath}/ruckus.tcl] == 1 } {
-      if { ${flags} == "" } {
+      if { ${flags} == "debug" } {
          source ${filePath}/ruckus.tcl
       } else {
-         source -quiet ${filePath}/ruckus.tcl
+         source ${filePath}/ruckus.tcl -notrace
       }
    } else {
       puts "\n\n\n\n\n********************************************************"
       puts "loadRuckusTcl: ${filePath}/ruckus.tcl doesn't exist"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    }
    # Revert the global variable back to orginal value
    set ::DIR_PATH ${LOC_PATH}
@@ -1060,7 +1060,7 @@ proc loadSource args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadSource: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1068,7 +1068,7 @@ proc loadSource args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadSource: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1083,7 +1083,13 @@ proc loadSource args {
             # Check if file doesn't exist in project
             if { [get_files -quiet $params(path)] == "" } {              
                # Add the RTL Files
-               add_files -fileset ${fileset} $params(path)
+               set src_rc [catch {add_files -fileset ${fileset} $params(path)} _RESULT]
+               if {$src_rc} {
+                  puts "\n\n\n\n\n********************************************************"
+                  puts ${_RESULT}
+                  puts "********************************************************\n\n\n\n\n"    
+                  exit -1
+               }
                if { ${has_lib} } {
                   set_property LIBRARY $params(lib) [get_files $params(path)]
                }
@@ -1095,7 +1101,7 @@ proc loadSource args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1105,7 +1111,7 @@ proc loadSource args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadSource: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {  
          # Get a list of all RTL files
          set list ""
@@ -1118,7 +1124,13 @@ proc loadSource args {
                # Check if file doesn't exist in project
                if { [get_files -quiet ${pntr}] == "" } {
                   # Add the RTL Files
-                  add_files -fileset ${fileset} ${pntr}
+                  set src_rc [catch {add_files -fileset ${fileset} ${pntr}} _RESULT]
+                  if {$src_rc} {
+                     puts "\n\n\n\n\n********************************************************"
+                     puts ${_RESULT}
+                     puts "********************************************************\n\n\n\n\n"    
+                     exit -1
+                  }
                   if { ${has_lib} } {
                      set_property LIBRARY $params(lib) [get_files ${pntr}]
                   }
@@ -1131,7 +1143,7 @@ proc loadSource args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.dcp\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
@@ -1152,7 +1164,7 @@ proc loadIpCore args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadIpCore: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1160,7 +1172,7 @@ proc loadIpCore args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadIpCore: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1178,7 +1190,7 @@ proc loadIpCore args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadIpCore: $params(path) does not have a \[.xci\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1188,7 +1200,7 @@ proc loadIpCore args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadIpCore: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error            
+         exit -1            
       } else {
          # Get a list of all IP core files
          set list ""
@@ -1212,7 +1224,7 @@ proc loadIpCore args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadIpCore: $params(dir) directory does not have any \[.xci\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
@@ -1233,7 +1245,7 @@ proc loadBlockDesign args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadBlockDesign: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error            
+      exit -1            
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1241,7 +1253,7 @@ proc loadBlockDesign args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadBlockDesign: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error            
+         exit -1            
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1258,7 +1270,7 @@ proc loadBlockDesign args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadBlockDesign: $params(path) does not have a \[.bd\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1268,7 +1280,7 @@ proc loadBlockDesign args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadBlockDesign: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error            
+         exit -1            
       } else {
          # Get a list of all block design files
          set list ""
@@ -1291,7 +1303,7 @@ proc loadBlockDesign args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadBlockDesign: $params(dir) directory does not have any \[.bd\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
@@ -1312,7 +1324,7 @@ proc loadConstraints args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadConstraints: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1320,7 +1332,7 @@ proc loadConstraints args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadConstraints: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1335,7 +1347,7 @@ proc loadConstraints args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(path) does not have a \[.xdc,.tcl\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1345,7 +1357,7 @@ proc loadConstraints args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadConstraints: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Get a list of all constraint files
          set list ""
@@ -1366,7 +1378,7 @@ proc loadConstraints args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(dir) directory does not have any \[.xdc,.tcl\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
