@@ -762,16 +762,12 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
    }
 }
 
-proc SubmoduleCheck { name lockTag } {
-   # Get the full git submodule string for a particular module
-   set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]
-   # Scan for the hash, name, and tag portions of the string
-   scan $submodule "%s %s (v%s)" hash temp tag
+proc CompareTags { tag lockTag } {
+
    # Blowoff everything except for the major, minor, and patch numbers
-   scan $tag     "%d.%d.%d%s" major minor patch d
+   scan $tag     "%d.%d.%d" major minor patch
    scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
-   set tag [string map [list $d ""] $tag]
-   
+
    ###################################################################
    # Major Number Checking
    ###################################################################
@@ -810,7 +806,68 @@ proc SubmoduleCheck { name lockTag } {
    # major.X.X > majorLock.X.X
    } else { 
       set validTag 1
-   }   
+   } 
+
+   return ${validTag}
+}
+
+# Check the git and git-lfs versions
+proc CheckGitVersion { } {
+   ######################################
+   # Define the git/git-lfs version locks
+   ######################################
+   set gitLockTag    {2.13.0}
+   set gitLfsLockTag {2.1.1}
+   ######################################
+   
+   # Get the git version
+   set gitStr [exec git version]
+   scan $gitStr "%s %s %s" name temp gitTag
+   
+   # Get the git-lfs version
+   set gitStr [exec git-lfs version]
+   scan $gitStr "git-lfs/%s %s" gitLfsTag temp
+   
+   # Compare the tags
+   set validGitTag    [CompareTags ${gitTag}    ${gitLockTag}]  
+   set validGitLfsTag [CompareTags ${gitLfsTag} ${gitLfsLockTag}]  
+
+   # Check the validGitTag flag
+   if { ${validGitTag} == 0 } {
+      puts "\n\n*********************************************************"
+      puts "Your git version = v${gitTag}"
+      puts "However, ruckus git version Lock = v${gitLockTag}"
+      puts "Please update this git version v${gitLockTag} (or later)"
+      puts "*********************************************************\n\n" 
+      exit -1
+   }
+
+   # Check the validGitLfsTag flag
+   if { ${validGitLfsTag} == 0 } {
+      puts "\n\n*********************************************************"
+      puts "Your git-lfs version = v${gitLfsTag}"
+      puts "However, ruckus git-lfs version Lock = v${gitLfsLockTag}"
+      puts "Please update this git-lfs version v${gitLfsLockTag} (or later)"
+      puts "*********************************************************\n\n" 
+      exit -1
+   }     
+}
+
+proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
+
+   # Get the full git submodule string for a particular module
+   set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]
+
+   # Scan for the hash, name, and tag portions of the string
+   scan $submodule "%s %s (v%s)" hash temp tag
+   scan $tag "%d.%d.%d%s" major minor patch d
+   set tag [string map [list $d ""] $tag]   
+   set tag "${major}.${minor}.${patch}"
+   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
+   
+   # Compare the tags
+   set validTag [CompareTags ${tag} ${lockTag}]
+
    # Check the validTag flag
    if { ${validTag} != 1 } {
       puts "\n\n*********************************************************"
@@ -821,7 +878,14 @@ proc SubmoduleCheck { name lockTag } {
       return -1
    } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
       return 0
-   } else { 
+   } elseif { ${mustBeExact} == "mustBeExact" } {
+      puts "\n\n*********************************************************"
+      puts "Your git clone ${name} = v${tag}"
+      puts "However, ${name} Lock  = v${lockTag}"
+      puts "Please update this submodule tag to v${lockTag}"
+      puts "*********************************************************\n\n"
+      return -1
+   } else {
       return 1
    }
 }

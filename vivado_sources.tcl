@@ -17,6 +17,9 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 # Check if you have write permission
 CheckWritePermission
 
+# Check the git version
+CheckGitVersion
+
 # Check if image directory doesn't exist
 if { [file exists ${IMAGES_DIR}] != 1 } {   
    exec mkdir ${IMAGES_DIR}
