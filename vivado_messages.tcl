@@ -76,6 +76,10 @@ set_msg_config -suppress -id {Project 1-486};# unresolve non-primitive black box
 set_msg_config -suppress -id {Project 1-560};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/support/answers/54842.html
 
+# Messages Suppression: CRITICAL_WARNING
+set_msg_config -suppress -id {Vivado 12-5470};  # Using .DCP instead of .XCI
+set_msg_config -suppress -id {Project 1-841};   # Using .DCP instead of .XCI
+
 ########################################################
 ## Modifying WARNING messaging
 ########################################################
