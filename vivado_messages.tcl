@@ -99,7 +99,6 @@ set_msg_config -id {Synth 8-614}  -new_severity ERROR;# SYNTH: Signal not in the
 set_msg_config -id {Synth 8-3512} -new_severity ERROR;# SYNTH: Assigned value in logic is out of range 
 set_msg_config -id {Synth 8-327}  -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}  -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
-set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found
 
 ## Check for version 2015.3 (or older)
 if { [expr { ${VIVADO_VERSION} <= 2015.3 }] } {
@@ -107,14 +106,15 @@ if { [expr { ${VIVADO_VERSION} <= 2015.3 }] } {
 }
 
 # Messages: Change from WARNING to CRITICAL_WARNING
-set_msg_config -id {Vivado 12-508} -new_severity "CRITICAL WARNING";# XDC: No pins matched 
-set_msg_config -id {Vivado 12-507} -new_severity "CRITICAL WARNING";# XDC: No netname matched 
-set_msg_config -id {Vivado 12-627} -new_severity "CRITICAL WARNING";# XDC: No clock matched
-set_msg_config -id {Project 1-498} -new_severity "CRITICAL WARNING";# XDC: One or more constraints failed evaluation while reading constraint file
-set_msg_config -id {Synth 8-3330}  -new_severity "CRITICAL WARNING";# SYNTH: an empty top module top detected
-set_msg_config -id {Synth 8-3919}  -new_severity "CRITICAL WARNING";# SYNTH: Null Assignment in logic
-set_msg_config -id {Synth 8-153}   -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
-set_msg_config -id {Synth 8-3295}  -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
+set_msg_config -id {Vivado 12-508}     -new_severity "CRITICAL WARNING";# XDC: No pins matched 
+set_msg_config -id {Vivado 12-507}     -new_severity "CRITICAL WARNING";# XDC: No netname matched 
+set_msg_config -id {Vivado 12-627}     -new_severity "CRITICAL WARNING";# XDC: No clock matched
+set_msg_config -id {Project 1-498}     -new_severity "CRITICAL WARNING";# XDC: One or more constraints failed evaluation while reading constraint file
+set_msg_config -id {Synth 8-3330}      -new_severity "CRITICAL WARNING";# SYNTH: an empty top module top detected
+set_msg_config -id {Synth 8-3919}      -new_severity "CRITICAL WARNING";# SYNTH: Null Assignment in logic
+set_msg_config -id {Synth 8-153}       -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
+set_msg_config -id {Synth 8-3295}      -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
+set_msg_config -id {filemgmt 20-1318}  -new_severity "CRITICAL WARNING";# FILEMGMT: Duplicate entities/files found
 
 ########################################################
 ## Modifying CRITICAL_WARNING messaging
