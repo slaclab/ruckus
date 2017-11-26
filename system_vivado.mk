@@ -167,8 +167,8 @@ endef
 
 define COPY_PROBES_FILE
 @if [ -f '$(OUT_DIR)/debugProbes.ltx' ] ; then \
-	$(RM) $(IMAGES_DIR)/$(IMAGENAME).ltx ; \
-	cp $< $(IMAGES_DIR)/$(IMAGENAME).ltx ; \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	cp '$(OUT_DIR)/debugProbes.ltx' '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
 	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
 else \
 	echo "No Debug Probes found"; \
