@@ -165,6 +165,16 @@ define ACTION_HEADER
 @echo 	
 endef
 
+define COPY_PROBES_FILE
+@if [ -f '$(OUT_DIR)/debugProbes.ltx' ] ; then \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	cp '$(OUT_DIR)/debugProbes.ltx' '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
+else \
+	echo "No Debug Probes found"; \
+fi
+endef
+
 .PHONY : all
 all: target
 
@@ -244,6 +254,7 @@ $(IMAGES_DIR)/$(IMAGENAME).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
+	@$(COPY_PROBES_FILE)
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
@@ -254,6 +265,7 @@ $(IMAGES_DIR)/$(IMAGENAME).bin : $(IMPL_DIR)/$(PROJECT).bin
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
+	@$(COPY_PROBES_FILE)
 	@echo "Don't forget to 'git commit and git push' the .bin.gz file when the image is stable!"
 
 ###############################################################
