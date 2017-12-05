@@ -79,6 +79,7 @@ set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/supp
 # Messages Suppression: CRITICAL_WARNING
 set_msg_config -suppress -id {Vivado 12-5470};  # Using .DCP instead of .XCI
 set_msg_config -suppress -id {Project 1-841};   # Using .DCP instead of .XCI
+set_msg_config -suppress -id {Project 1-863};   # Using .DCP instead of .XCI
 
 ########################################################
 ## Modifying WARNING messaging
