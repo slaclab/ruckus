@@ -1070,13 +1070,24 @@ proc ConfigProbe {ilaName netName} {
 }
 
 # Write the port map file
-proc WriteDebugProbes {ilaName filePath} {
+proc WriteDebugProbes {ilaName {filePath ""}} {
 
    # Delete the last unused port
    delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
 
-   # Write the port map file
-   write_debug_probes -force ${filePath}
+   # Check if write_debug_probes is support
+   if { $::env(VIVADO_VERSION) <= 2017.2 } {
+      # Write the port map file
+      write_debug_probes -force ${filePath}
+   } else {
+      # Check if not empty string
+      if { ${filePath} != "" } {
+         puts "\n\n\n\n\n********************************************************"
+         puts "WriteDebugProbes(): Vivado's 'write_debug_probes' procedure has been deprecated in 2017.3"
+         puts "Instead the debug_probe file will automatically get copied in the ruckus/system_vivado.mk COPY_PROBES_FILE() function"
+         puts "********************************************************\n\n\n\n\n"         
+      }
+   }
 }
 
 ###############################################################

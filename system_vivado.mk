@@ -170,6 +170,10 @@ define COPY_PROBES_FILE
 	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
 	cp '$(OUT_DIR)/debugProbes.ltx' '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
 	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
+elif  [ -f '$(IMPL_DIR)/debug_nets.ltx' ] ; then \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	cp '$(IMPL_DIR)/debug_nets.ltx' '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
 else \
 	echo "No Debug Probes found"; \
 fi

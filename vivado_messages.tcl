@@ -75,6 +75,7 @@ set_msg_config -suppress -id {Vivado 12-3645};# Adding multiple files in a singl
 set_msg_config -suppress -id {Project 1-486};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Project 1-560};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/support/answers/54842.html
+set_msg_config -suppress -id {filemgmt 56-12};# .ELF/.BMM already added to project
 
 # Messages Suppression: CRITICAL_WARNING
 set_msg_config -suppress -id {Vivado 12-5470};  # Using .DCP instead of .XCI
