@@ -139,7 +139,7 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
 ########################################################
 if { [CheckImpl] != true } {
    if { [file exists ${OUT_DIR}/IncrementalBuild.dcp] == 1 } {
-      if { $::env(INCR_BUILD_BYPASS) != 0 } {
+      if { $::env(INCR_BUILD_BYPASS) == 0 } {
          set_property incremental_checkpoint ${OUT_DIR}/IncrementalBuild.dcp [get_runs impl_1]
       }
    }

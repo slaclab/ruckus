@@ -25,7 +25,7 @@ export MODULES = $(TOP_DIR)/submodules
 endif
 
 ifndef PRJ_VERSION
-export PRJ_VERSION = 
+export PRJ_VERSION = 0xFFFFFFFF
 endif
 
 ifndef REMOVE_UNUSED_CODE

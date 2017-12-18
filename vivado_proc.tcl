@@ -516,26 +516,29 @@ proc CheckPrjConfig { } {
       return false
    }   
    
-   # Check for syntax errors
-   set syntaxReport [check_syntax -fileset sources_1 -return_string -quiet -verbose]
-   set syntaxReport [split ${syntaxReport} "\n"]
-   set listErr ""
-   foreach msg ${syntaxReport} {
-      if { [string match {*Syntax error *} ${msg}] == 1 } {
-         set listErr "${listErr}\n${msg}"
+   # Check the Vivado version (check_syntax added to Vivado in 2016.1)
+   if { $::env(VIVADO_VERSION) >= 2016.1 } {   
+      # Check for syntax errors
+      set syntaxReport [check_syntax -fileset sources_1 -return_string -quiet -verbose]
+      set syntaxReport [split ${syntaxReport} "\n"]
+      set listErr ""
+      foreach msg ${syntaxReport} {
+         if { [string match {*Syntax error *} ${msg}] == 1 } {
+            set listErr "${listErr}\n${msg}"
+         }
       }
-   }
-   if { ${listErr} != "" } {
-      set listErr [string map {"ERROR: \[#UNDEF\]" ""} ${listErr} ]
-      set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]      
-      puts "\n\n\n\n\n********************************************************"
-      puts "********************************************************"
-      puts "********************************************************"   
-      puts "The following syntax error(s) were detected before synthesis:${listErr}"
-      puts "********************************************************"
-      puts "********************************************************"
-      puts "********************************************************\n\n\n\n\n"  
-      return false
+      if { ${listErr} != "" } {
+         set listErr [string map {"ERROR: \[#UNDEF\]" ""} ${listErr} ]
+         set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]      
+         puts "\n\n\n\n\n********************************************************"
+         puts "********************************************************"
+         puts "********************************************************"   
+         puts "The following syntax error(s) were detected before synthesis:${listErr}"
+         puts "********************************************************"
+         puts "********************************************************"
+         puts "********************************************************\n\n\n\n\n"  
+         return false
+      } 
    } 
    
    if { ${PRJ_TOP} != $::env(PROJECT) } {
