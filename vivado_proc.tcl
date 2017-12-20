@@ -1029,12 +1029,14 @@ proc CreateDebugCore {ilaName} {
    delete_debug_core -quiet [get_debug_cores ${ilaName}]
 
    # Create the debug core
-   create_debug_core ${ilaName} labtools_ila_v3
+   if { $::env(VIVADO_VERSION) <= 2017.2 } {   
+      create_debug_core ${ilaName} labtools_ila_v3
+   } else {
+      create_debug_core ${ilaName} ila
+   }
    set_property C_DATA_DEPTH 1024       [get_debug_cores ${ilaName}]
    set_property C_INPUT_PIPE_STAGES 2   [get_debug_cores ${ilaName}]
-   
-   # set_property C_EN_STRG_QUAL true     [get_debug_cores ${ilaName}]
-   
+
    # Force a reset of the implementation
    reset_run impl_1
 }
