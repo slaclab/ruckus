@@ -179,6 +179,15 @@ else \
 fi
 endef
 
+define COPY_DEFAULTS
+@if [ -d $(PROJ_DIR)/config ] ; then \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' ; \
+	(cd $(PROJ_DIR); tar cvfz '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' config/); \
+else \
+	echo "No 'config' directory found in $(PROJ_DIR)"; \
+fi
+endef
+
 .PHONY : all
 all: target
 
@@ -359,6 +368,15 @@ yaml : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
 
 ###############################################################
+#### Defaults YAML ############################################
+###############################################################
+.PHONY : defaults
+defaults    : $(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz
+
+$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz : $(wildcard $(PROJ_DIR)/config/*)
+	$(COPY_DEFAULTS)
+
+###############################################################
 #### Makefile Targets #########################################
 ###############################################################
 .PHONY      : depend
@@ -368,13 +386,13 @@ depend      : $(VIVADO_DEPEND)
 sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
-bit         : $(IMAGES_DIR)/$(IMAGENAME).bit
+bit         : $(IMAGES_DIR)/$(IMAGENAME).bit defaults
 
 .PHONY      : bin
-bin         : $(IMAGES_DIR)/$(IMAGENAME).bin
+bin         : $(IMAGES_DIR)/$(IMAGENAME).bin defaults
 
 .PHONY      : prom
-prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
+prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs defaults
 
 ###############################################################
 #### Clean ####################################################
