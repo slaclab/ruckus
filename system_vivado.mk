@@ -56,6 +56,10 @@ ifndef RECONFIG_PBLOCK
 export RECONFIG_PBLOCK = 0
 endif
 
+ifndef DEFAULTS_DIR
+export DEFAULTS_DIR = $(PROJ_DIR)/config
+endif
+
 # Check for /u1 drive
 BUILD_EXIST=$(shell [ -e  $(TOP_DIR)/build/ ] && echo 1 || echo 0 )
 U1_EXIST=$(shell [ -e /u1/ ] && echo 1 || echo 0 )
@@ -180,11 +184,11 @@ fi
 endef
 
 define COPY_DEFAULTS
-@if [ -d $(PROJ_DIR)/config ] ; then \
+@if [ -d $(DEFAULTS_DIR) ] ; then \
 	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' ; \
-	(cd $(PROJ_DIR); tar cvfz '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' config/); \
+	(cd $(dir $(DEFAULTS_DIR)); tar cvfz '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' $(notdir $(DEFAULTS_DIR))/); \
 else \
-	echo "No 'config' directory found in $(PROJ_DIR)"; \
+	echo "No '$(notdir $(DEFAULTS_DIR))' directory found in $(dir $(DEFAULTS_DIR)PROJ_DIR)"; \
 fi
 endef
 
