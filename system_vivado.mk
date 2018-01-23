@@ -56,6 +56,10 @@ ifndef RECONFIG_PBLOCK
 export RECONFIG_PBLOCK = 0
 endif
 
+ifndef DEFAULTS_DIR
+export DEFAULTS_DIR = $(PROJ_DIR)/config
+endif
+
 # Check for /u1 drive
 BUILD_EXIST=$(shell [ -e  $(TOP_DIR)/build/ ] && echo 1 || echo 0 )
 U1_EXIST=$(shell [ -e /u1/ ] && echo 1 || echo 0 )
@@ -176,6 +180,15 @@ elif  [ -f '$(IMPL_DIR)/debug_nets.ltx' ] ; then \
 	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
 else \
 	echo "No Debug Probes found"; \
+fi
+endef
+
+define COPY_DEFAULTS
+@if [ -d $(DEFAULTS_DIR) ] ; then \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' ; \
+	(cd $(dir $(DEFAULTS_DIR)); tar cvfz '$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz' $(notdir $(DEFAULTS_DIR))/); \
+else \
+	echo "No '$(notdir $(DEFAULTS_DIR))' directory found in $(dir $(DEFAULTS_DIR)PROJ_DIR)"; \
 fi
 endef
 
@@ -359,6 +372,15 @@ yaml : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
 
 ###############################################################
+#### Defaults YAML ############################################
+###############################################################
+.PHONY : defaults
+defaults    : $(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz
+
+$(IMAGES_DIR)/$(IMAGENAME).defaults.tar.gz : $(wildcard $(PROJ_DIR)/config/*)
+	$(COPY_DEFAULTS)
+
+###############################################################
 #### Makefile Targets #########################################
 ###############################################################
 .PHONY      : depend
@@ -368,13 +390,13 @@ depend      : $(VIVADO_DEPEND)
 sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
-bit         : $(IMAGES_DIR)/$(IMAGENAME).bit
+bit         : $(IMAGES_DIR)/$(IMAGENAME).bit defaults
 
 .PHONY      : bin
-bin         : $(IMAGES_DIR)/$(IMAGENAME).bin
+bin         : $(IMAGES_DIR)/$(IMAGENAME).bin defaults
 
 .PHONY      : prom
-prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
+prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs defaults
 
 ###############################################################
 #### Clean ####################################################
