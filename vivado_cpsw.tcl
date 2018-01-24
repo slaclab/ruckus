@@ -8,6 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+# Get variables and Custom Procedures
 source $::env(RUCKUS_DIR)/vivado_env_var.tcl
 
 # Check for top level YAML file
@@ -58,6 +59,20 @@ if { $::env(GIT_HASH_LONG) != "" } {
       exec cp -f ${PROJ_DIR}/build.info ${ProjYamlDir}/.
    } 
 } 
+
+# Set the defaults directory
+if { [info exists ::env(DEFAULTS_DIR)] != 1 } {
+   set defaultsDir "$::env(PROJ_DIR)/config"
+} else {
+   set defaultsDir "$::env(DEFAULTS_DIR)"
+}
+
+# Copy the defaults into the dump directory
+if { [file isdirectory ${defaultsDir}] == 1 } {
+	exec cp -rf ${defaultsDir} ${ProjYamlDir}/.
+} else {
+	puts "Note: ${defaultsDir} doesn't exist"
+}
 
 # Compress the project's YAML directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
