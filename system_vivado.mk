@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -25,7 +25,7 @@ export MODULES = $(TOP_DIR)/submodules
 endif
 
 ifndef PRJ_VERSION
-export PRJ_VERSION = 
+export PRJ_VERSION =
 endif
 
 ifndef REMOVE_UNUSED_CODE
@@ -63,13 +63,13 @@ ifeq ($(U1_EXIST), 1)
    $(shell mkdir -p /u1/$(USER) )
    $(shell mkdir -p /u1/$(USER)/build )
    ifeq ($(BUILD_EXIST), 0)
-      $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )   
+      $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )
    endif
 endif
 U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
 ifeq ($(U1_EXIST), 1)
    export TMP_DIR=/u1/$(USER)/build
-else    
+else
    export TMP_DIR=/tmp/build
 endif
 
@@ -113,9 +113,9 @@ ifeq ($(GIT_BYPASS), 0)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
    else
       export GIT_TAG_NAME   = Uncommitted code detected
-      export GIT_TAG_MSG    = 
-      export GIT_HASH_LONG  = 
-      export GIT_HASH_SHORT = 
+      export GIT_TAG_MSG    =
+      export GIT_HASH_LONG  =
+      export GIT_HASH_SHORT =
       export GIT_HASH_MSG   = dirty
       export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
    endif
@@ -132,7 +132,7 @@ endif
 # SDK Variables
 export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
 export SDK_ELF    = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
-export LD_PRELOAD = 
+export LD_PRELOAD =
 
 ifndef SDK_LIB
 export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
@@ -144,7 +144,7 @@ export SWT_GTK3=0
 endif
 
 define ACTION_HEADER
-@echo 
+@echo
 @echo    "============================================================================="
 @echo    $(1)
 @echo    "   Project      = $(PROJECT)"
@@ -154,7 +154,7 @@ define ACTION_HEADER
 @echo    "   GIT Tag      = $(GIT_TAG_NAME)"
 @echo    "   GIT Hash     = $(GIT_HASH_MSG)"
 @echo    "============================================================================="
-@echo 	
+@echo
 endef
 
 .PHONY : all
@@ -283,7 +283,7 @@ $(IMAGES_DIR)/$(IMAGENAME).mcs: $(IMPL_DIR)/$(PROJECT).bit
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen.tcl
 	@echo ""
 	@echo "Prom file copied to $@"
-	@echo "Don't forget to 'git commit and git push' the .mcs.gz file when the image is stable!" 
+	@echo "Don't forget to 'git commit and git push' the .mcs.gz file when the image is stable!"
 
 ###############################################################
 #### Vivado SDK ###############################################
@@ -303,7 +303,7 @@ elf : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sdk_bit.tcl
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"   
+	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
 #### Vivado PyRogue ###########################################
@@ -311,8 +311,8 @@ elf : $(SOURCE_DEPEND)
 .PHONY : pyrogue
 pyrogue : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
-	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_pyrogue.tcl   
-   
+	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_pyrogue.tcl
+
 ###############################################################
 #### Vivado CPSW ##############################################
 ###############################################################
@@ -320,6 +320,14 @@ pyrogue : $(SOURCE_DEPEND)
 yaml : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
+	
+###############################################################
+#### Vivado WIS ##############################################
+###############################################################
+.PHONY : wis
+wis : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_wis.tcl
 
 ###############################################################
 #### Makefile Targets #########################################
@@ -331,7 +339,7 @@ depend      : $(VIVADO_DEPEND)
 sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
-bit         : $(IMAGES_DIR)/$(IMAGENAME).bit 
+bit         : $(IMAGES_DIR)/$(IMAGENAME).bit
 
 .PHONY      : prom
 prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
