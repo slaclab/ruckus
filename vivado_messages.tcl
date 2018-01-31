@@ -31,6 +31,7 @@ set_msg_config -suppress -id {Synth 8-3332};# SYNTH: Sequential element is unuse
 set_msg_config -suppress -id {Synth 8-5544};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5545};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5546};# SYNTH: ROM wont be mapped to block ram
+set_msg_config -suppress -id {Opt   31-422};# SYNTH: BRAM changed from INDEPENDENT to COMMON
 
 set_msg_config -suppress -id {HDL 9-2216};  # SIM: Analyzing SystemVerilog file into library work
 set_msg_config -suppress -id {HDL 9-1061};  # SIM: Parsing VHDL file 
