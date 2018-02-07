@@ -920,7 +920,9 @@ proc ImportStaticReconfigDcp { } {
    open_checkpoint ${RECONFIG_CHECKPOINT}   
    
    # Clear out the targeted reconfigurable module logic
-   update_design -cell ${RECONFIG_ENDPOINT} -black_box 
+   if { [get_property black_box [get_cells ${RECONFIG_ENDPOINT}]] != {TRUE} } {
+      update_design -cell ${RECONFIG_ENDPOINT} -black_box 
+   }
    
    # Lock down all placement and routing of the static design
    lock_design -level routing     
