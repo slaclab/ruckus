@@ -76,4 +76,5 @@ if { [file isdirectory ${defaultsDir}] == 1 } {
 
 # Compress the project's YAML directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
+exec cp -f      ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz    $::env(IMPL_DIR)/$::env(IMAGENAME).cpsw.bin
 puts "${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz"

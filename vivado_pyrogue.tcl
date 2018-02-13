@@ -72,4 +72,5 @@ if { [file isdirectory ${defaultsDir}] == 1 } {
 
 # Compress the python directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz -C ${OUT_DIR} ${PyRogueDirName}
+exec cp -f      ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz    $::env(IMPL_DIR)/$::env(IMAGENAME).pyrogue.bin
 puts "${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz"
