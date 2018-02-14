@@ -76,5 +76,10 @@ if { [file isdirectory ${defaultsDir}] == 1 } {
 
 # Compress the project's YAML directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
-exec cp -f      ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz    $::env(IMPL_DIR)/$::env(IMAGENAME).cpsw.bin
 puts "${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz"
+
+# Create a copy of the tar.gz file with ones padding for PROM loading support (prevent Vivado from unzipping from the load)
+set onesFile "$::env(IMPL_DIR)/ones.bin"
+exec rm -f ${onesFile}
+exec printf "%b" '\xff\xff' > ${onesFile}
+exec cat ${onesFile} ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz > $::env(IMPL_DIR)/$::env(IMAGENAME).cpsw.tar.gz
