@@ -25,6 +25,7 @@ open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
 source -quiet ${RUCKUS_DIR}/vivado_properties.tcl
+set_property STEPS.WRITE_BITSTREAM.TCL.POST "" [get_runs impl_1]
 
 # Setup project messaging
 source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
@@ -139,7 +140,7 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
 ########################################################
 if { [CheckImpl] != true } {
    if { [file exists ${OUT_DIR}/IncrementalBuild.dcp] == 1 } {
-      if { $::env(INCR_BUILD_BYPASS) != 0 } {
+      if { $::env(INCR_BUILD_BYPASS) == 0 } {
          set_property incremental_checkpoint ${OUT_DIR}/IncrementalBuild.dcp [get_runs impl_1]
       }
    }
@@ -175,14 +176,14 @@ source ${RUCKUS_DIR}/vivado_post_route.tcl
 ## Export static checkpoint for dynamic partial reconfiguration build
 ########################################################
 if { [get_property PR_FLOW [current_project]] != 0 } {
-   # Make a copy of the .dcp file with a "_static" suffix
-   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
+   ExportStaticReconfigDcp
 }
 
 ########################################################
 ## Export partial configuration bit file(s)
 ########################################################
 if { ${RECONFIG_CHECKPOINT} != 0 } {
+   ExportPartialReconfigBin
    ExportPartialReconfigBit
 }
 

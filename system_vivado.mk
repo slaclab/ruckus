@@ -25,7 +25,7 @@ export MODULES = $(TOP_DIR)/submodules
 endif
 
 ifndef PRJ_VERSION
-export PRJ_VERSION =
+export PRJ_VERSION = 0xFFFFFFFF
 endif
 
 ifndef REMOVE_UNUSED_CODE
@@ -110,14 +110,18 @@ ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
       export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
       export GIT_HASH_MSG   = $(GIT_HASH_LONG)
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
+      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
    else
       export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_TAG_MSG    =
       export GIT_HASH_LONG  =
       export GIT_HASH_SHORT =
       export GIT_HASH_MSG   = dirty
-      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      ifeq ($(RECONFIG_STATIC_HASH), 0)
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+      else
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      endif
    endif
 else
    export GIT_STATUS     =
@@ -126,7 +130,11 @@ else
    export GIT_HASH_LONG  = 0
    export GIT_HASH_SHORT = 0
    export GIT_HASH_MSG   = dirty
-   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+   ifeq ($(RECONFIG_STATIC_HASH), 0)
+      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   else
+      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+   endif
 endif
 
 # SDK Variables
@@ -155,6 +163,20 @@ define ACTION_HEADER
 @echo    "   GIT Hash     = $(GIT_HASH_MSG)"
 @echo    "============================================================================="
 @echo
+endef
+
+define COPY_PROBES_FILE
+@if [ -f '$(OUT_DIR)/debugProbes.ltx' ] ; then \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	cp '$(OUT_DIR)/debugProbes.ltx' '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
+elif  [ -f '$(IMPL_DIR)/debug_nets.ltx' ] ; then \
+	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	cp '$(IMPL_DIR)/debug_nets.ltx' '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
+	echo "Debug Probes file copied to $(IMAGES_DIR)/$(IMAGENAME).ltx "; \
+else \
+	echo "No Debug Probes found"; \
+fi
 endef
 
 .PHONY : all
@@ -209,7 +231,7 @@ $(VIVADO_DEPEND) :
 	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
 	@cd $(OUT_DIR); rm -f firmware
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_project.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_project.tcl -notrace 
 
 ###############################################################
 #### Vivado Sources ###########################################
@@ -224,6 +246,9 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 $(IMPL_DIR)/$(PROJECT).bit : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Build")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
+$(IMPL_DIR)/$(PROJECT).bin : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Build")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 
 ###############################################################
 #### Bitfile Copy #############################################
@@ -233,7 +258,19 @@ $(IMAGES_DIR)/$(IMAGENAME).bit : $(IMPL_DIR)/$(PROJECT).bit
 	@gzip -c -f -9 $@ > $@.gz
 	@echo ""
 	@echo "Bit file copied to $@"
+	@$(COPY_PROBES_FILE)
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
+
+###############################################################
+#### Bitfile Copy #############################################
+###############################################################
+$(IMAGES_DIR)/$(IMAGENAME).bin : $(IMPL_DIR)/$(PROJECT).bin
+	@cp $< $@
+	@gzip -c -f -9 $@ > $@.gz
+	@echo ""
+	@echo "Bit file copied to $@"
+	@$(COPY_PROBES_FILE)
+	@echo "Don't forget to 'git commit and git push' the .bin.gz file when the image is stable!"
 
 ###############################################################
 #### Vivado Interactive #######################################

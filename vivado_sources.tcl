@@ -17,6 +17,9 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 # Check if you have write permission
 CheckWritePermission
 
+# Check the git version
+CheckGitVersion
+
 # Check if image directory doesn't exist
 if { [file exists ${IMAGES_DIR}] != 1 } {   
    exec mkdir ${IMAGES_DIR}
@@ -121,9 +124,9 @@ VivadoRefresh ${VIVADO_PROJECT}
 SourceTclFile ${VIVADO_DIR}/sources.tcl
 
 # Remove all unused code
-update_compile_order -quiet -fileset sources_1
-update_compile_order -quiet -fileset sim_1
 if { $::env(REMOVE_UNUSED_CODE) != 0 } {
+   update_compile_order -quiet -fileset sources_1
+   update_compile_order -quiet -fileset sim_1
    RemoveUnsuedCode
 }
 

@@ -15,8 +15,6 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]  
-
 ########################################################
 ## Message Suppression
 ########################################################
@@ -33,6 +31,7 @@ set_msg_config -suppress -id {Synth 8-3332};# SYNTH: Sequential element is unuse
 set_msg_config -suppress -id {Synth 8-5544};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5545};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5546};# SYNTH: ROM wont be mapped to block ram
+set_msg_config -suppress -id {Opt   31-422};# SYNTH: BRAM changed from INDEPENDENT to COMMON
 
 set_msg_config -suppress -id {HDL 9-2216};  # SIM: Analyzing SystemVerilog file into library work
 set_msg_config -suppress -id {HDL 9-1061};  # SIM: Parsing VHDL file 
@@ -77,6 +76,12 @@ set_msg_config -suppress -id {Vivado 12-3645};# Adding multiple files in a singl
 set_msg_config -suppress -id {Project 1-486};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Project 1-560};# unresolve non-primitive black box cell when using DCP files
 set_msg_config -suppress -id {Designutils 20-1307};# https://www.xilinx.com/support/answers/54842.html
+set_msg_config -suppress -id {filemgmt 56-12};# .ELF/.BMM already added to project
+
+# Messages Suppression: CRITICAL_WARNING
+set_msg_config -suppress -id {Vivado 12-5470};  # Using .DCP instead of .XCI
+set_msg_config -suppress -id {Project 1-841};   # Using .DCP instead of .XCI
+set_msg_config -suppress -id {Project 1-863};   # Using .DCP instead of .XCI
 
 ########################################################
 ## Modifying WARNING messaging
@@ -97,7 +102,6 @@ set_msg_config -id {Synth 8-614}  -new_severity ERROR;# SYNTH: Signal not in the
 set_msg_config -id {Synth 8-3512} -new_severity ERROR;# SYNTH: Assigned value in logic is out of range 
 set_msg_config -id {Synth 8-327}  -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}  -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
-set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found
 
 ## Check for version 2015.3 (or older)
 if { [expr { ${VIVADO_VERSION} <= 2015.3 }] } {
@@ -105,14 +109,15 @@ if { [expr { ${VIVADO_VERSION} <= 2015.3 }] } {
 }
 
 # Messages: Change from WARNING to CRITICAL_WARNING
-set_msg_config -id {Vivado 12-508} -new_severity "CRITICAL WARNING";# XDC: No pins matched 
-set_msg_config -id {Vivado 12-507} -new_severity "CRITICAL WARNING";# XDC: No netname matched 
-set_msg_config -id {Vivado 12-627} -new_severity "CRITICAL WARNING";# XDC: No clock matched
-set_msg_config -id {Project 1-498} -new_severity "CRITICAL WARNING";# XDC: One or more constraints failed evaluation while reading constraint file
-set_msg_config -id {Synth 8-3330}  -new_severity "CRITICAL WARNING";# SYNTH: an empty top module top detected
-set_msg_config -id {Synth 8-3919}  -new_severity "CRITICAL WARNING";# SYNTH: Null Assignment in logic
-set_msg_config -id {Synth 8-153}   -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
-set_msg_config -id {Synth 8-3295}  -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
+set_msg_config -id {Vivado 12-508}     -new_severity "CRITICAL WARNING";# XDC: No pins matched 
+set_msg_config -id {Vivado 12-507}     -new_severity "CRITICAL WARNING";# XDC: No netname matched 
+set_msg_config -id {Vivado 12-627}     -new_severity "CRITICAL WARNING";# XDC: No clock matched
+set_msg_config -id {Project 1-498}     -new_severity "CRITICAL WARNING";# XDC: One or more constraints failed evaluation while reading constraint file
+set_msg_config -id {Synth 8-3330}      -new_severity "CRITICAL WARNING";# SYNTH: an empty top module top detected
+set_msg_config -id {Synth 8-3919}      -new_severity "CRITICAL WARNING";# SYNTH: Null Assignment in logic
+set_msg_config -id {Synth 8-153}       -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
+set_msg_config -id {Synth 8-3295}      -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
+set_msg_config -id {filemgmt 20-1318}  -new_severity "CRITICAL WARNING";# FILEMGMT: Duplicate entities/files found
 
 ########################################################
 ## Modifying CRITICAL_WARNING messaging
@@ -150,12 +155,21 @@ set_property SEVERITY {Warning} [get_drc_checks {UCIO-1}];  # DRC: using the XAD
 # Check if Multi-Driven Nets are allowed
 ########################################################
 
-if { ${AllowMultiDriven} == 1 } {
-    set_msg_config -id {Synth 8-3352} -new_severity INFO;# SYNTH: multi-driven net
-    set_msg_config -id {MDRV-1}       -new_severity INFO;# DRC: multi-driven net	
+if { [info exists ::env(ALLOW_MULTI_DRIVEN)] != 1 || $::env(ALLOW_MULTI_DRIVEN) == 0 } {
+    set_msg_config -id {Synth 8-3352} -new_severity ERROR;  # SYNTH: multi-driven net	
+    set_msg_config -id {MDRV-1}       -new_severity ERROR;  # DRC: multi-driven net		
 } else {
-    set_msg_config -id {Synth 8-3352} -new_severity ERROR;	
-    set_msg_config -id {MDRV-1}       -new_severity ERROR;	
+    set_msg_config -id {Synth 8-3352} -new_severity INFO;   # SYNTH: multi-driven net
+    set_msg_config -id {MDRV-1}       -new_severity INFO;   # DRC: multi-driven net	
+}
+
+########################################################
+# Check if Un-Driven Nets are **NOT** allowed
+########################################################
+if { [info exists ::env(ALLOW_UN_DRIVEN)] != 1 || $::env(ALLOW_UN_DRIVEN) == 1 } {
+    set_msg_config -id {Synth 8-3848} -new_severity "CRITICAL WARNING"; # SYNTH: un-driven net
+} else {
+    set_msg_config -id {Synth 8-3848} -new_severity ERROR; # SYNTH: un-driven net	
 }
 
 ########################################################

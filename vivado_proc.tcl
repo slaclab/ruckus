@@ -516,26 +516,29 @@ proc CheckPrjConfig { } {
       return false
    }   
    
-   # Check for syntax errors
-   set syntaxReport [check_syntax -fileset sources_1 -return_string -quiet -verbose]
-   set syntaxReport [split ${syntaxReport} "\n"]
-   set listErr ""
-   foreach msg ${syntaxReport} {
-      if { [string match {*Syntax error *} ${msg}] == 1 } {
-         set listErr "${listErr}\n${msg}"
+   # Check the Vivado version (check_syntax added to Vivado in 2016.1)
+   if { $::env(VIVADO_VERSION) >= 2016.1 } {   
+      # Check for syntax errors
+      set syntaxReport [check_syntax -fileset sources_1 -return_string -quiet -verbose]
+      set syntaxReport [split ${syntaxReport} "\n"]
+      set listErr ""
+      foreach msg ${syntaxReport} {
+         if { [string match {*Syntax error *} ${msg}] == 1 } {
+            set listErr "${listErr}\n${msg}"
+         }
       }
-   }
-   if { ${listErr} != "" } {
-      set listErr [string map {"ERROR: \[#UNDEF\]" ""} ${listErr} ]
-      set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]      
-      puts "\n\n\n\n\n********************************************************"
-      puts "********************************************************"
-      puts "********************************************************"   
-      puts "The following syntax error(s) were detected before synthesis:${listErr}"
-      puts "********************************************************"
-      puts "********************************************************"
-      puts "********************************************************\n\n\n\n\n"  
-      return false
+      if { ${listErr} != "" } {
+         set listErr [string map {"ERROR: \[#UNDEF\]" ""} ${listErr} ]
+         set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]      
+         puts "\n\n\n\n\n********************************************************"
+         puts "********************************************************"
+         puts "********************************************************"   
+         puts "The following syntax error(s) were detected before synthesis:${listErr}"
+         puts "********************************************************"
+         puts "********************************************************"
+         puts "********************************************************\n\n\n\n\n"  
+         return false
+      } 
    } 
    
    if { ${PRJ_TOP} != $::env(PROJECT) } {
@@ -736,50 +739,140 @@ proc HlsVersionCheck { } {
    }
 }
 
-proc VersionCheck { lockVersion } {
+proc VersionCheck { lockVersion {mustBeExact ""} } {
+   # Get the Vivado version
    set VersionNumber [version -short]
+   # Generate error message
+   set errMsg "\n\n*********************************************************\n"
+   set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+   set errMsg "${errMsg}However, Vivado Version Lock = ${lockVersion}\n"
+   set errMsg "${errMsg}You need to change your Vivado software to Version ${lockVersion}\n"
+   set errMsg "${errMsg}*********************************************************\n\n"   
+   # Check for less than
    if { ${VersionNumber} < ${lockVersion} } {
-      puts "\n\n*********************************************************"
-      puts "Your Vivado Version Vivado   = ${VersionNumber}"
-      puts "However, Vivado Version Lock = ${lockVersion}"
-      puts "You need to change your Vivado software to Version ${lockVersion}"
-      puts "*********************************************************\n\n" 
+      puts ${errMsg}
       return -1
+   # Check for equal to
    } elseif { ${VersionNumber} == ${lockVersion} } {
       return 0
+   # Check for greater than but must be exact
+   } elseif { ${mustBeExact} == "mustBeExact" } {
+      puts ${errMsg}
+      return -1
+   # Else for greater than and not exact
    } else { 
       return 1
    }
 }
 
-proc SubmoduleCheck { name lockTag } {
+proc CompareTags { tag lockTag } {
+
+   # Blowoff everything except for the major, minor, and patch numbers
+   scan $tag     "%d.%d.%d" major minor patch
+   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
+
+   ###################################################################
+   # Major Number Checking
+   ###################################################################
+   # major.X.X < majorLock.X.X
+   if { [expr { ${major} < ${majorLock} }] } {
+      set validTag 0
+   # major.X.X = majorLock.X.X
+   } elseif { [expr { ${major} == ${majorLock} }] } {
+      ################################################################
+      # Minor Number Checking
+      ################################################################
+      # major.minor.X < major.minorLock.X
+      if { [expr { ${minor} < ${minorLock} }] } {
+         set validTag 0
+      # major.minor.X = major.minorLock.X
+      } elseif { [expr { ${minor} == ${minorLock} }] } {
+         #############################################################
+         # Patch Number Checking
+         #############################################################
+         # major.minor.patch < major.minor.patchLock
+         if { [expr { ${patch} < ${patchLock} }] } {
+            set validTag 0
+         # major.minor.patch = major.minor.patchLock
+         } elseif { [expr { ${patch} == ${patchLock} }] } {
+            set validTag 1
+         # major.minor.patch > major.minor.patchLock
+         } else { 
+            set validTag 1
+         }     
+      ################################################################
+      # major.minor.X > major.minorLock.X
+      } else { 
+         set validTag 1
+      }   
+   ###################################################################
+   # major.X.X > majorLock.X.X
+   } else { 
+      set validTag 1
+   } 
+
+   return ${validTag}
+}
+
+# Check the git and git-lfs versions
+proc CheckGitVersion { } {
+   ######################################
+   # Define the git/git-lfs version locks
+   ######################################
+   set gitLockTag    {2.13.0}
+   set gitLfsLockTag {2.1.1}
+   ######################################
+   
+   # Get the git version
+   set gitStr [exec git version]
+   scan $gitStr "%s %s %s" name temp gitTag
+   
+   # Get the git-lfs version
+   set gitStr [exec git-lfs version]
+   scan $gitStr "git-lfs/%s %s" gitLfsTag temp
+   
+   # Compare the tags
+   set validGitTag    [CompareTags ${gitTag}    ${gitLockTag}]  
+   set validGitLfsTag [CompareTags ${gitLfsTag} ${gitLfsLockTag}]  
+
+   # Check the validGitTag flag
+   if { ${validGitTag} == 0 } {
+      puts "\n\n*********************************************************"
+      puts "Your git version = v${gitTag}"
+      puts "However, ruckus git version Lock = v${gitLockTag}"
+      puts "Please update this git version v${gitLockTag} (or later)"
+      puts "*********************************************************\n\n" 
+      exit -1
+   }
+
+   # Check the validGitLfsTag flag
+   if { ${validGitLfsTag} == 0 } {
+      puts "\n\n*********************************************************"
+      puts "Your git-lfs version = v${gitLfsTag}"
+      puts "However, ruckus git-lfs version Lock = v${gitLfsLockTag}"
+      puts "Please update this git-lfs version v${gitLfsLockTag} (or later)"
+      puts "*********************************************************\n\n" 
+      exit -1
+   }     
+}
+
+proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
+
    # Get the full git submodule string for a particular module
    set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]
+
    # Scan for the hash, name, and tag portions of the string
    scan $submodule "%s %s (v%s)" hash temp tag
-   # Blowoff everything except for the major, minor, and patch numbers
-   scan $tag     "%d.%d.%d%s" major minor patch d
+   scan $tag "%d.%d.%d%s" major minor patch d
+   set tag [string map [list $d ""] $tag]   
+   set tag "${major}.${minor}.${patch}"
    scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
-   set tag [string map [list $d ""] $tag]
-   # Compare the tag version for the targeted submodule version lock
-   if { [expr { ${major} < ${majorLock} }] } {
-      set invalidTag 1
-   } elseif { [expr { ${minor} < ${minorLock} }] } {      
-      if { [expr { ${major} >= ${majorLock} }] } {
-         set invalidTag 0
-      } else {
-         set invalidTag 1
-      }      
-   } elseif { [expr { ${patch} < ${patchLock} }] } {
-      if { [expr { ${minor} >= ${minorLock} }] } {
-         set invalidTag 0
-      } else {
-         set invalidTag 1
-      }
-   } else { 
-      set invalidTag 0 
-   }
-   if { ${invalidTag} == 1 } {
+   
+   # Compare the tags
+   set validTag [CompareTags ${tag} ${lockTag}]
+
+   # Check the validTag flag
+   if { ${validTag} != 1 } {
       puts "\n\n*********************************************************"
       puts "Your git clone ${name} = v${tag}"
       puts "However, ${name} Lock  = v${lockTag}"
@@ -788,7 +881,14 @@ proc SubmoduleCheck { name lockTag } {
       return -1
    } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
       return 0
-   } else { 
+   } elseif { ${mustBeExact} == "mustBeExact" } {
+      puts "\n\n*********************************************************"
+      puts "Your git clone ${name} = v${tag}"
+      puts "However, ${name} Lock  = v${lockTag}"
+      puts "Please update this submodule tag to v${lockTag}"
+      puts "*********************************************************\n\n"
+      return -1
+   } else {
       return 1
    }
 }
@@ -820,7 +920,9 @@ proc ImportStaticReconfigDcp { } {
    open_checkpoint ${RECONFIG_CHECKPOINT}   
    
    # Clear out the targeted reconfigurable module logic
-   update_design -cell ${RECONFIG_ENDPOINT} -black_box 
+   if { [get_property black_box [get_cells ${RECONFIG_ENDPOINT}]] != {TRUE} } {
+      update_design -cell ${RECONFIG_ENDPOINT} -black_box 
+   }
    
    # Lock down all placement and routing of the static design
    lock_design -level routing     
@@ -851,7 +953,54 @@ proc ImportStaticReconfigDcp { } {
    set_property NEEDS_REFRESH false [get_runs synth_1]
 }
 
-# Export partial configuration bit file
+# Export partial configuration bin file
+proc ExportStaticReconfigDcp { } {
+
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Make a copy of the .dcp file with a "_static" suffix
+   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
+
+   # Get a list of all the clear bin files
+   set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bin]
+   if { ${clearList} != "" } {   
+      foreach clearFile ${clearList} {
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+      }
+   }
+   
+   # Get a list of all the clear bit files
+   set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bit]
+   if { ${clearList} != "" } {   
+      foreach clearFile ${clearList} {
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
+      }
+   }   
+}
+
+# Export partial configuration bin file
+proc ExportPartialReconfigBin { } {
+
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   
+   # Define the build output .bit file paths
+   set partialBinFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bin
+   set clearBinFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bin
+   
+   # Overwrite the build output's ${PROJECT}.bit
+   exec cp -f ${partialBinFile} ${IMPL_DIR}/${PROJECT}.bin
+   
+   # Check for partial_clear.bit (generated for Ultrascale FPGAs)
+   if { [file exists ${clearBinFile}] == 1 } {
+      exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+   }
+}
+
+# Export partial configuration bin file
 proc ExportPartialReconfigBit { } {
 
    # Get variables
@@ -882,12 +1031,14 @@ proc CreateDebugCore {ilaName} {
    delete_debug_core -quiet [get_debug_cores ${ilaName}]
 
    # Create the debug core
-   create_debug_core ${ilaName} labtools_ila_v3
+   if { $::env(VIVADO_VERSION) <= 2017.2 } {   
+      create_debug_core ${ilaName} labtools_ila_v3
+   } else {
+      create_debug_core ${ilaName} ila
+   }
    set_property C_DATA_DEPTH 1024       [get_debug_cores ${ilaName}]
    set_property C_INPUT_PIPE_STAGES 2   [get_debug_cores ${ilaName}]
-   
-   # set_property C_EN_STRG_QUAL true     [get_debug_cores ${ilaName}]
-   
+
    # Force a reset of the implementation
    reset_run impl_1
 }
@@ -926,13 +1077,24 @@ proc ConfigProbe {ilaName netName} {
 }
 
 # Write the port map file
-proc WriteDebugProbes {ilaName filePath} {
+proc WriteDebugProbes {ilaName {filePath ""}} {
 
    # Delete the last unused port
    delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
 
-   # Write the port map file
-   write_debug_probes -force ${filePath}
+   # Check if write_debug_probes is support
+   if { $::env(VIVADO_VERSION) <= 2017.2 } {
+      # Write the port map file
+      write_debug_probes -force ${filePath}
+   } else {
+      # Check if not empty string
+      if { ${filePath} != "" } {
+         puts "\n\n\n\n\n********************************************************"
+         puts "WriteDebugProbes(): Vivado's 'write_debug_probes' procedure has been deprecated in 2017.3"
+         puts "Instead the debug_probe file will automatically get copied in the ruckus/system_vivado.mk COPY_PROBES_FILE() function"
+         puts "********************************************************\n\n\n\n\n"         
+      }
+   }
 }
 
 ###############################################################
@@ -948,16 +1110,16 @@ proc loadRuckusTcl { filePath {flags ""} } {
    set ::DIR_PATH ${filePath}
    # Open the TCL file
    if { [file exists ${filePath}/ruckus.tcl] == 1 } {
-      if { ${flags} == "" } {
+      if { ${flags} == "debug" } {
          source ${filePath}/ruckus.tcl
       } else {
-         source -quiet ${filePath}/ruckus.tcl
+         source ${filePath}/ruckus.tcl -notrace
       }
    } else {
       puts "\n\n\n\n\n********************************************************"
       puts "loadRuckusTcl: ${filePath}/ruckus.tcl doesn't exist"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    }
    # Revert the global variable back to orginal value
    set ::DIR_PATH ${LOC_PATH}
@@ -968,16 +1130,18 @@ proc loadRuckusTcl { filePath {flags ""} } {
 # Function to load RTL files
 proc loadSource args {
    set options {
-      {sim_only    "flag for tagging simulation file(s)"}
-      {path.arg "" "path to a single file"}
-      {dir.arg  "" "path to a directory of file(s)"}
-      {lib.arg  "" "library for file(s)"}
+      {sim_only         "flag for tagging simulation file(s)"}
+      {path.arg      "" "path to a single file"}
+      {dir.arg       "" "path to a directory of file(s)"}
+      {lib.arg       "" "library for file(s)"}
+      {fileType.arg  "" "library for file(s)"}
    }
    set usage ": loadSource \[options] ...\noptions:"
    array set params [::cmdline::getoptions args $options $usage]
-   set has_path [expr {[string length $params(path)] > 0}]
-   set has_dir  [expr {[string length $params(dir)] > 0}]
-   set has_lib  [expr {[string length $params(lib)] > 0}]
+   set has_path      [expr {[string length $params(path)]     > 0}]
+   set has_dir       [expr {[string length $params(dir)]      > 0}]
+   set has_lib       [expr {[string length $params(lib)]      > 0}]
+   set has_fileType  [expr {[string length $params(fileType)] > 0}]
    if { $params(sim_only) } { 
       set fileset "sim_1" 
    } else {
@@ -988,7 +1152,7 @@ proc loadSource args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadSource: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -996,11 +1160,12 @@ proc loadSource args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadSource: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
          if { ${fileExt} eq {.vhd} ||
+              ${fileExt} eq {.vhdl}||
               ${fileExt} eq {.v}   ||
               ${fileExt} eq {.vh}  ||
               ${fileExt} eq {.sv}  ||
@@ -1010,16 +1175,25 @@ proc loadSource args {
             # Check if file doesn't exist in project
             if { [get_files -quiet $params(path)] == "" } {              
                # Add the RTL Files
-               add_files -fileset ${fileset} $params(path)
+               set src_rc [catch {add_files -fileset ${fileset} $params(path)} _RESULT]
+               if {$src_rc} {
+                  puts "\n\n\n\n\n********************************************************"
+                  puts ${_RESULT}
+                  puts "********************************************************\n\n\n\n\n"    
+                  exit -1
+               }
                if { ${has_lib} } {
                   set_property LIBRARY $params(lib) [get_files $params(path)]
                }
+               if { ${has_fileType} } {
+                  set_property FILE_TYPE $params(fileType) [get_files $params(path)]
+               }               
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(path) does not have a \[.vhd,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
+            puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.dcp\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1029,12 +1203,12 @@ proc loadSource args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadSource: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {  
          # Get a list of all RTL files
          set list ""
          set list_rc [catch { 
-            set list [glob -directory $params(dir) *.vhd *.v *.vh *.sv *.dat *.coe *.dcp]
+            set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.dat *.coe *.dcp]
          } _RESULT]           
          # Load all the RTL files
          if { ${list} != "" } {
@@ -1042,17 +1216,26 @@ proc loadSource args {
                # Check if file doesn't exist in project
                if { [get_files -quiet ${pntr}] == "" } {
                   # Add the RTL Files
-                  add_files -fileset ${fileset} ${pntr}
+                  set src_rc [catch {add_files -fileset ${fileset} ${pntr}} _RESULT]
+                  if {$src_rc} {
+                     puts "\n\n\n\n\n********************************************************"
+                     puts ${_RESULT}
+                     puts "********************************************************\n\n\n\n\n"    
+                     exit -1
+                  }
                   if { ${has_lib} } {
                      set_property LIBRARY $params(lib) [get_files ${pntr}]
                   }
+                  if { ${has_fileType} } {
+                     set_property FILE_TYPE $params(fileType) [get_files ${pntr}]
+                  }                  
                }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(dir) directory does not have any \[.vhd,.v,.vh,.sv,.dat,.coe,.dcp\] files"
+            puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.dcp\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
@@ -1073,7 +1256,7 @@ proc loadIpCore args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadIpCore: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1081,7 +1264,7 @@ proc loadIpCore args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadIpCore: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1099,7 +1282,7 @@ proc loadIpCore args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadIpCore: $params(path) does not have a \[.xci\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1109,7 +1292,7 @@ proc loadIpCore args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadIpCore: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error            
+         exit -1            
       } else {
          # Get a list of all IP core files
          set list ""
@@ -1133,7 +1316,7 @@ proc loadIpCore args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadIpCore: $params(dir) directory does not have any \[.xci\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
@@ -1154,7 +1337,7 @@ proc loadBlockDesign args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadBlockDesign: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error            
+      exit -1            
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1162,7 +1345,7 @@ proc loadBlockDesign args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadBlockDesign: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error            
+         exit -1            
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1179,7 +1362,7 @@ proc loadBlockDesign args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadBlockDesign: $params(path) does not have a \[.bd\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1189,7 +1372,7 @@ proc loadBlockDesign args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadBlockDesign: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error            
+         exit -1            
       } else {
          # Get a list of all block design files
          set list ""
@@ -1212,7 +1395,7 @@ proc loadBlockDesign args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadBlockDesign: $params(dir) directory does not have any \[.bd\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }
@@ -1233,7 +1416,7 @@ proc loadConstraints args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadConstraints: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      return -code error
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1241,7 +1424,7 @@ proc loadConstraints args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadConstraints: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1256,7 +1439,7 @@ proc loadConstraints args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(path) does not have a \[.xdc,.tcl\] file extension"
             puts "********************************************************\n\n\n\n\n"
-            return -code error
+            exit -1
          }
       }
    # Load all files from a directory
@@ -1266,7 +1449,7 @@ proc loadConstraints args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadConstraints: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         return -code error
+         exit -1
       } else {
          # Get a list of all constraint files
          set list ""
@@ -1287,7 +1470,7 @@ proc loadConstraints args {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(dir) directory does not have any \[.xdc,.tcl\] files"
             puts "********************************************************\n\n\n\n\n"         
-            return -code error            
+            exit -1            
          }
       }
    }

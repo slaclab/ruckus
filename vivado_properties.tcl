@@ -8,28 +8,12 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Project Properties Script
-
-########################################################
-## Get variables and Custom Procedures
-########################################################
+# Get variables and Custom Procedures
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-# Set VHDL as preferred language
-set_property target_language VHDL [current_project]
-
-# Disable Xilinx's WebTalk
-config_webtalk -user off
-
-# Default to no flattening of the hierarchy
-set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
-
-# Close and reopen project to force the physical path of ${RUCKUS_DIR} (bug in Vivado 2014.1)
-VivadoRefresh ${VIVADO_PROJECT}
-
 # Setup pre and post scripts for synthesis
-set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_pre_synth_run.tcl [get_runs synth_1]
+set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_pre_synth_run.tcl  [get_runs synth_1]
 set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado_post_synth_run.tcl [get_runs synth_1]
 
 # Setup pre and post scripts for implementation
@@ -42,31 +26,6 @@ set_property STEPS.ROUTE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_mess
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 set_property STEPS.WRITE_BITSTREAM.TCL.PRE             ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 
-# Set the messaging limit
-set_param messaging.defaultLimit 10000
-
-# Vivado simulation properties
-set_property simulator_language Mixed [current_project]
-set_property nl.process_corner slow   [get_filesets sim_1]
-set_property nl.sdf_anno true         [get_filesets sim_1]
-set_property SOURCE_SET sources_1     [get_filesets sim_1]
-
-if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
-   set_property runtime {}             [get_filesets sim_1]
-   set_property xelab.debug_level all  [get_filesets sim_1]
-   set_property xelab.mt_level auto    [get_filesets sim_1]
-   set_property xelab.sdf_delay sdfmin [get_filesets sim_1]
-   set_property xelab.rangecheck false [get_filesets sim_1]
-   set_property xelab.unifast false    [get_filesets sim_1]
-} else {
-   set_property xsim.simulate.runtime {}  [get_filesets sim_1]
-   set_property xsim.debug_level all      [get_filesets sim_1]
-   set_property xsim.mt_level auto        [get_filesets sim_1]
-   set_property xsim.sdf_delay sdfmin     [get_filesets sim_1]
-   set_property xsim.rangecheck false     [get_filesets sim_1]
-   set_property xsim.unifast false        [get_filesets sim_1]
-}   
-
 # Refer to http://www.xilinx.com/support/answers/65415.html
 if { [expr { ${VIVADO_VERSION} >= 2016.1 }] } {
    set_property STEPS.SYNTH_DESIGN.ARGS.ASSERT true [get_runs synth_1]
@@ -75,13 +34,8 @@ if { [expr { ${VIVADO_VERSION} >= 2016.1 }] } {
 # Enable physical optimization for register replication
 set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
 
-# Enable general project multi-threading
-set cpuNum [GetCpuNumber]
-if { ${cpuNum} >= 8 } { 
-   set_param general.maxThreads 8
-} else {
-   set_param general.maxThreads ${cpuNum}
-}
+# Enable .bin generation for partial reconfiguration
+set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 
 # Target specific properties script
 SourceTclFile ${VIVADO_DIR}/properties.tcl

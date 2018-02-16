@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Get variables and Custom Procedures
+# Get variables and Custom Procedures and common properties
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_properties.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado_post_route_run.tcl [get_runs impl_1]

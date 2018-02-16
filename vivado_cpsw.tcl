@@ -8,8 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+# Get variables and Custom Procedures
+source $::env(RUCKUS_DIR)/vivado_env_var.tcl
 
 # Check for top level YAML file
 if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] != 1 } {
@@ -60,6 +60,26 @@ if { $::env(GIT_HASH_LONG) != "" } {
    } 
 } 
 
+# Set the defaults directory
+if { [info exists ::env(DEFAULTS_DIR)] != 1 } {
+   set defaultsDir "$::env(PROJ_DIR)/config"
+} else {
+   set defaultsDir "$::env(DEFAULTS_DIR)"
+}
+
+# Copy the defaults into the dump directory
+if { [file isdirectory ${defaultsDir}] == 1 } {
+	exec cp -rf ${defaultsDir} ${ProjYamlDir}/.
+} else {
+	puts "Note: ${defaultsDir} doesn't exist"
+}
+
 # Compress the project's YAML directory to the target's image directory
 exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz -C ${OUT_DIR} ${PROJECT}_project.yaml
 puts "${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz"
+
+# Create a copy of the tar.gz file with ones padding for PROM loading support (prevent Vivado from unzipping from the load)
+set onesFile "$::env(IMPL_DIR)/ones.bin"
+exec rm -f ${onesFile}
+exec printf "%b" '\xff\xff' > ${onesFile}
+exec cat ${onesFile} ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz > $::env(IMPL_DIR)/$::env(IMAGENAME).cpsw.tar.gz
