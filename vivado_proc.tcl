@@ -572,32 +572,40 @@ proc PrintOpenGui { errMsg } {
 proc CheckSynth { {flags ""} } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    if { ${flags} != "" } {
-      # Check for errors during synthesis
-      set NumErr [llength [lsearch -all -regexp [split [read [open ${SYN_DIR}/runme.log]]] "^ERROR:"]]
-      if { ${NumErr} != 0 } {
-         set errReport [read [open ${SYN_DIR}/runme.log]]
-         set errReport [split ${errReport} "\n"]
-         set listErr ""
-         foreach msg ${errReport} {
-            if { [string match {*ERROR:*} ${msg}] == 1 } {
-               set trim1 ""
-               set trim2 ""
-               regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
-               if { ${trim1} != "" } {
-                  set listErr "${listErr}\n${trim1}"       
-               } else {
-                  set listErr "${listErr}\n${msg}"  
-               }
+      # Loop through the synth runs
+      foreach sythRun [get_runs {*synth_1}] {
+         # Set the synthesis log file path
+         set synthLog "${OUT_DIR}/${VIVADO_PROJECT}.runs/${sythRun}/runme.log"
+         # Check if log file exists
+         if { [file exists ${synthLog}] == 1 } {
+            # Check for errors during synthesis
+            set NumErr [llength [lsearch -all -regexp [split [read [open ${synthLog}]]] "^ERROR:"]]
+            if { ${NumErr} != 0 } {
+               set errReport [read [open ${synthLog}]]
+               set errReport [split ${errReport} "\n"]
+               set listErr ""
+               foreach msg ${errReport} {
+                  if { [string match {*ERROR:*} ${msg}] == 1 } {
+                     set trim1 ""
+                     set trim2 ""
+                     regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
+                     if { ${trim1} != "" } {
+                        set listErr "${listErr}\n${trim1}"       
+                     } else {
+                        set listErr "${listErr}\n${msg}"  
+                     }
+                  }
+               }   
+               puts "\n\n\n\n\n********************************************************"
+               puts "********************************************************"
+               puts "********************************************************"   
+               puts "The following error(s) were detected during synthesis:${listErr}"
+               puts "********************************************************"
+               puts "********************************************************"
+               puts "********************************************************\n\n\n\n\n"     
+               return false
             }
-         }   
-         puts "\n\n\n\n\n********************************************************"
-         puts "********************************************************"
-         puts "********************************************************"   
-         puts "The following error(s) were detected during synthesis:${listErr}"
-         puts "********************************************************"
-         puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"     
-         return false
+         }
       }
    }
    if { [get_property NEEDS_REFRESH [get_runs synth_1]] == 1 } {
@@ -1179,6 +1187,15 @@ proc loadSource args {
                if {$src_rc} {
                   puts "\n\n\n\n\n********************************************************"
                   puts ${_RESULT}
+                  set gitLfsCheck "Runs 36-335"
+                  if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
+                     puts "Here's what the .DCP file looks like right now:"
+                     puts [exec cat $params(path)]
+                     puts "\nPlease do the following commands:"
+                     puts "$ git-lfs install"
+                     puts "$ git-lfs pull"
+                     puts "$ git submodule foreach git-lfs pull"
+                  }                  
                   puts "********************************************************\n\n\n\n\n"    
                   exit -1
                }
@@ -1220,6 +1237,15 @@ proc loadSource args {
                   if {$src_rc} {
                      puts "\n\n\n\n\n********************************************************"
                      puts ${_RESULT}
+                     set gitLfsCheck "Runs 36-335"
+                     if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
+                        puts "Here's what the .DCP file looks like right now:"
+                        puts [exec cat ${pntr}]
+                        puts "\nPlease do the following commands:"
+                        puts "$ git-lfs install"
+                        puts "$ git-lfs pull"
+                        puts "$ git submodule foreach git-lfs pull"
+                     }
                      puts "********************************************************\n\n\n\n\n"    
                      exit -1
                   }
