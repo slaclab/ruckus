@@ -1189,9 +1189,12 @@ proc loadSource args {
                   puts ${_RESULT}
                   set gitLfsCheck "Runs 36-335"
                   if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
-                     puts "Please double check that you did \"git-lfs install\" before cloning the git repo"
-                     puts "Here's what the .DCP file looks like right now:\n"
+                     puts "Here's what the .DCP file looks like right now:"
                      puts [exec cat $params(path)]
+                     puts "\nPlease do the following commands:"
+                     puts "$ git-lfs install"
+                     puts "$ git-lfs pull"
+                     puts "$ git submodule foreach git-lfs pull"
                   }                  
                   puts "********************************************************\n\n\n\n\n"    
                   exit -1
@@ -1236,9 +1239,12 @@ proc loadSource args {
                      puts ${_RESULT}
                      set gitLfsCheck "Runs 36-335"
                      if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
-                        puts "Please double check that you did \"git-lfs install\" before cloning the git repo"
-                        puts "Here's what the .DCP file looks like right now:\n"
+                        puts "Here's what the .DCP file looks like right now:"
                         puts [exec cat ${pntr}]
+                        puts "\nPlease do the following commands:"
+                        puts "$ git-lfs install"
+                        puts "$ git-lfs pull"
+                        puts "$ git submodule foreach git-lfs pull"
                      }
                      puts "********************************************************\n\n\n\n\n"    
                      exit -1
