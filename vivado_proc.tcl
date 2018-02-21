@@ -1187,7 +1187,8 @@ proc loadSource args {
                if {$src_rc} {
                   puts "\n\n\n\n\n********************************************************"
                   puts ${_RESULT}
-                  if { [file extension $params(path)] eq {.dcp} } {
+                  set gitLfsCheck "Runs 36-335"
+                  if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
                      puts "Please double check that you did \"git-lfs install\" before cloning the git repo"
                      puts "Here's what the .DCP file looks like right now:\n"
                      puts [exec cat $params(path)]
@@ -1233,7 +1234,8 @@ proc loadSource args {
                   if {$src_rc} {
                      puts "\n\n\n\n\n********************************************************"
                      puts ${_RESULT}
-                     if { [file extension ${pntr}] eq {.dcp} } {
+                     set gitLfsCheck "Runs 36-335"
+                     if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
                         puts "Please double check that you did \"git-lfs install\" before cloning the git repo"
                         puts "Here's what the .DCP file looks like right now:\n"
                         puts [exec cat ${pntr}]
