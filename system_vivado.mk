@@ -105,20 +105,20 @@ export GIT_STATUS = $(shell git diff-index --name-only HEAD)
 
 # Check for non-dirty git clone
 ifeq ($(GIT_STATUS),)
-   export GIT_TAG_NAME   =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
+   export GIT_TAG_NAME   = build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
    export GIT_TAG_MSG    = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
    export GIT_HASH_MSG   = $(GIT_HASH_LONG)
    export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
 else
-   export GIT_TAG_MSG    = 
+   export GIT_TAG_MSG    =
    export GIT_HASH_MSG   = dirty
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
       export GIT_TAG_NAME   = Uncommitted code detected
-      export GIT_HASH_LONG  = 
-      export GIT_HASH_SHORT = 
+      export GIT_HASH_LONG  =
+      export GIT_HASH_SHORT =
    else
       export GIT_STATUS     =
       export GIT_TAG_NAME   = Bypassing Build GIT Tagging
