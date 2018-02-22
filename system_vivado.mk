@@ -99,41 +99,36 @@ BUILD_DATE := $(shell date)
 BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
-# Check if we are using GIT tagging
-ifeq ($(GIT_BYPASS), 0)
-   # Check the GIT status
-   export GIT_DIFF   = $(shell git diff)
-   export GIT_STATUS = $(shell git diff-index --name-only HEAD)
-   ifeq ($(GIT_STATUS),)
-      export GIT_TAG_NAME =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
-      export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
-      export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
-      export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
-      export GIT_HASH_MSG   = $(GIT_HASH_LONG)
-      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
-   else
-      export GIT_TAG_NAME   = Uncommitted code detected
-      export GIT_TAG_MSG    = 
-      export GIT_HASH_LONG  = 
-      export GIT_HASH_SHORT = 
-      export GIT_HASH_MSG   = dirty
-      ifeq ($(RECONFIG_STATIC_HASH), 0)
-         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
-      else
-         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
-      endif
-   endif
+# Check the GIT status
+export GIT_DIFF   = $(shell git diff)
+export GIT_STATUS = $(shell git diff-index --name-only HEAD)
+
+# Check for non-dirty git clone
+ifeq ($(GIT_STATUS),)
+   export GIT_TAG_NAME   = build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
+   export GIT_TAG_MSG    = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
+   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
+   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+   export GIT_HASH_MSG   = $(GIT_HASH_LONG)
+   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
 else
-   export GIT_STATUS     =
-   export GIT_TAG_NAME   = Bypassing Build GIT Tagging
    export GIT_TAG_MSG    =
-   export GIT_HASH_LONG  = 0
-   export GIT_HASH_SHORT = 0
    export GIT_HASH_MSG   = dirty
-   ifeq ($(RECONFIG_STATIC_HASH), 0)
-      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   # Check if we are using GIT tagging
+   ifeq ($(GIT_BYPASS), 0)
+      export GIT_TAG_NAME   = Uncommitted code detected
+      export GIT_HASH_LONG  =
+      export GIT_HASH_SHORT =
    else
-      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      export GIT_STATUS     =
+      export GIT_TAG_NAME   = Bypassing Build GIT Tagging
+      export GIT_HASH_LONG  = 0
+      export GIT_HASH_SHORT = 0
+   endif
+   ifeq ($(RECONFIG_STATIC_HASH), 0)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   else
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
    endif
 endif
 
