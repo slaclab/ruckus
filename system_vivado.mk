@@ -124,16 +124,28 @@ ifeq ($(GIT_BYPASS), 0)
       endif
    endif
 else
-   export GIT_STATUS     =
-   export GIT_TAG_NAME   = Bypassing Build GIT Tagging
-   export GIT_TAG_MSG    =
-   export GIT_HASH_LONG  = 0
-   export GIT_HASH_SHORT = 0
-   export GIT_HASH_MSG   = dirty
-   ifeq ($(RECONFIG_STATIC_HASH), 0)
-      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   # Check the GIT status
+   export GIT_DIFF   = $(shell git diff)
+   export GIT_STATUS = $(shell git diff-index --name-only HEAD)
+   ifeq ($(GIT_STATUS),)
+      export GIT_TAG_NAME =  build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
+      export GIT_TAG_MSG  = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
+      export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
+      export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+      export GIT_HASH_MSG   = $(GIT_HASH_LONG)
+      export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
    else
-      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      export GIT_STATUS     =
+      export GIT_TAG_NAME   = Bypassing Build GIT Tagging
+      export GIT_TAG_MSG    =
+      export GIT_HASH_LONG  = 0
+      export GIT_HASH_SHORT = 0
+      export GIT_HASH_MSG   = dirty
+      ifeq ($(RECONFIG_STATIC_HASH), 0)
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+      else
+         export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      endif
    endif
 endif
 
