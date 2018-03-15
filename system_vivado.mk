@@ -37,7 +37,7 @@ export INCR_BUILD_BYPASS = 0
 endif
 
 ifndef GIT_BYPASS
-export GIT_BYPASS = 0
+export GIT_BYPASS = 1
 endif
 
 ifndef RECONFIG_CHECKPOINT
