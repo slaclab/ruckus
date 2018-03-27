@@ -124,16 +124,23 @@ ifeq ($(GIT_BYPASS), 0)
       endif
    endif
 else
-   export GIT_STATUS     =
-   export GIT_TAG_NAME   = Bypassing Build GIT Tagging
    export GIT_TAG_MSG    =
-   export GIT_HASH_LONG  = 0
-   export GIT_HASH_SHORT = 0
    export GIT_HASH_MSG   = dirty
-   ifeq ($(RECONFIG_STATIC_HASH), 0)
-      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   # Check if we are using GIT tagging
+   ifeq ($(GIT_BYPASS), 0)
+      export GIT_TAG_NAME   = Uncommitted code detected
+      export GIT_HASH_LONG  =
+      export GIT_HASH_SHORT =
    else
-      export IMAGENAME   = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      export GIT_STATUS     =
+      export GIT_TAG_NAME   = Bypassing Build GIT Tagging
+      export GIT_HASH_LONG  = 0
+      export GIT_HASH_SHORT = 0
+   endif
+   ifeq ($(RECONFIG_STATIC_HASH), 0)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
+   else
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
    endif
 endif
 
