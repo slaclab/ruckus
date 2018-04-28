@@ -373,6 +373,9 @@ sources     : $(SOURCE_DEPEND)
 .PHONY      : bit
 bit         : $(IMAGES_DIR)/$(IMAGENAME).bit
 
+.PHONY      : bin
+bit         : $(IMAGES_DIR)/$(IMAGENAME).bin
+
 .PHONY      : prom
 prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
 
