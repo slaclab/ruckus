@@ -112,15 +112,15 @@ ifeq ($(GIT_STATUS),)
    export GIT_HASH_MSG   = $(GIT_HASH_LONG)
    export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
 else
-   export GIT_TAG_MSG    =
+   export GIT_TAG_MSG    = 
    export GIT_HASH_MSG   = dirty
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
       export GIT_TAG_NAME   = Uncommitted code detected
-      export GIT_HASH_LONG  =
-      export GIT_HASH_SHORT =
+      export GIT_HASH_LONG  = 
+      export GIT_HASH_SHORT = 
    else
-      export GIT_STATUS     =
+      export GIT_STATUS     = 
       export GIT_TAG_NAME   = Bypassing Build GIT Tagging
       export GIT_HASH_LONG  = 0
       export GIT_HASH_SHORT = 0
@@ -135,7 +135,9 @@ endif
 # SDK Variables
 export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
 export SDK_ELF    = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
-export LD_PRELOAD =
+ifndef LD_PRELOAD
+export LD_PRELOAD = 
+endif
 
 ifndef SDK_LIB
 export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
@@ -143,7 +145,7 @@ endif
 
 # Ubuntu SDK support
 ifndef SWT_GTK3
-export SWT_GTK3=0
+export SWT_GTK3 = 0
 endif
 
 define ACTION_HEADER
@@ -372,6 +374,9 @@ sources     : $(SOURCE_DEPEND)
 
 .PHONY      : bit
 bit         : $(IMAGES_DIR)/$(IMAGENAME).bit
+
+.PHONY      : bin
+bin         : $(IMAGES_DIR)/$(IMAGENAME).bin
 
 .PHONY      : prom
 prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
