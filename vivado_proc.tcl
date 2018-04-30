@@ -929,7 +929,7 @@ proc ImportStaticReconfigDcp { } {
    open_checkpoint ${RECONFIG_CHECKPOINT}   
    
    # Clear out the targeted reconfigurable module logic
-   if { [get_property black_box [get_cells ${RECONFIG_ENDPOINT}]] != {TRUE} } {
+   if { [get_property IS_BLACKBOX [get_cells ${RECONFIG_ENDPOINT}]]  != 1 } {
       update_design -cell ${RECONFIG_ENDPOINT} -black_box 
    }
    
