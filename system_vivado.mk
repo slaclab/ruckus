@@ -100,7 +100,6 @@ BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Check the GIT status
-export GIT_DIFF   = $(shell git diff)
 export GIT_STATUS = $(shell git diff-index --name-only HEAD)
 
 # Check for non-dirty git clone

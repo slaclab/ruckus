@@ -49,7 +49,6 @@ lappend linuxVars "RECONFIG_PBLOCK"
 
 # Set GIT variables
 lappend linuxVars "GIT_BYPASS"
-lappend linuxVars "GIT_DIFF"
 lappend linuxVars "GIT_STATUS"
 lappend linuxVars "GIT_TAG_NAME"
 lappend linuxVars "GIT_HASH_LONG"
