@@ -828,7 +828,7 @@ proc CheckGitVersion { } {
    ######################################
    # Define the git/git-lfs version locks
    ######################################
-   set gitLockTag    {2.13.0}
+   set gitLockTag    {2.9.0}
    set gitLfsLockTag {2.1.1}
    ######################################
    
