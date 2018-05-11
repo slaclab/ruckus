@@ -72,6 +72,35 @@ close ${out}
 loadSource -path ${pathToPkg} 
 
 ########################################################
+## Check for change in hash or fwVersion between builds
+########################################################
+set pathToLog "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfo.log"
+
+# Check if file doesn't exist
+if { [expr [file exists ${pathToLog}]] == 0 } {
+   reset_run synth_1
+} else {
+   
+   # Get the previous build info
+   set in [open ${pathToLog} r]
+   gets ${in} oldGitHash
+   gets ${in} oldFwVersion
+   close ${in}
+  
+   # Compare the old to current
+   if { ${oldGitHash}   != ${gitHash} ||
+        ${oldFwVersion} != ${fwVersion}} {
+      reset_run synth_1
+   }
+}
+
+# Write the current build info
+set out [open ${pathToLog} w]   
+puts ${out} ${gitHash}   
+puts ${out} ${fwVersion}   
+close ${out}
+
+########################################################
 ## Load the source code
 ########################################################
 
