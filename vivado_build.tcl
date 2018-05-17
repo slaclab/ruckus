@@ -175,8 +175,10 @@ source ${RUCKUS_DIR}/vivado_post_route.tcl
 ########################################################
 ## Export static checkpoint for dynamic partial reconfiguration build
 ########################################################
-if { [get_property PR_FLOW [current_project]] != 0 } {
-   ExportStaticReconfigDcp
+if { [expr { ${VIVADO_VERSION} >= 2016.4 }] } {
+   if { [get_property PR_FLOW [current_project]] != 0 } {
+      ExportStaticReconfigDcp
+   }
 }
 
 ########################################################
