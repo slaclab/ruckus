@@ -322,15 +322,36 @@ proc DcpToVerilogSim { } {
    }
 }
 
+# Create .MCS PROM
+proc CreatePromMcs { } {   
+   if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
+      source $::env(RUCKUS_DIR)/vivado_promgen.tcl
+   }
+}   
+   
 proc CreateFpgaBit { } {   
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
-   #########################################################
-   ## Check if need to include YAML files with the .BIT file
-   #########################################################
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(IMAGENAME).bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+
+   # Check if need to include YAML files with the .BIT file
+   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${imagePath}.bit
+   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${imagePath}.bit.gz
+
+   # Copy the .ltx file (if it exists)
+   if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
+      exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
+      puts "Debug Probes file copied to ${imagePath}.ltx"
+   } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
+      exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
+      puts "Debug Probes file copied to ${imagePath}.ltx"   
+   } else {
+      puts "No Debug Probes found"   
+   }
+   
+   # Create the MCS file (if target/vivado/promgen.tcl exists)
+   CreatePromMcs
 }
 
 # Create tar.gz of all cpsw files in firmware
@@ -347,13 +368,6 @@ proc CreatePyRogueTarGz { } {
    source $::env(RUCKUS_DIR)/vivado_pyrogue.tcl
 }
 
-# Create .MCS PROM
-proc CreatePromMcs { } {   
-   if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
-      source $::env(RUCKUS_DIR)/vivado_promgen.tcl
-   }
-}   
-   
 # Remove unused code   
 proc RemoveUnsuedCode { } {
    
@@ -734,18 +748,6 @@ proc DcpCompleteMessage { filename } {
    puts "The new .dcp file is located here:"
    puts ${filename}
    puts "********************************************************\n\n" 
-}
-
-proc HlsVersionCheck { } {
-   set VersionNumber [version -short]
-   if { ${VersionNumber} == 2014.2 } {
-      puts "\n\n****************************************************************"
-      puts "Vivado_HLS Version = ${VersionNumber} is not support in this build system."
-      puts "****************************************************************\n\n" 
-      return -1
-   } else {
-      return 0
-   }
 }
 
 proc VersionCheck { lockVersion {mustBeExact ""} } {

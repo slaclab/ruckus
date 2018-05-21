@@ -15,12 +15,17 @@ source  -quiet ${RUCKUS_DIR}/vivado_hls_proc.tcl
 
 ## Get the file name and path of the new .dcp file
 set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]
+set fbasename [file rootname [file tail ${filename}]]
 
 ## Open the check point
 open_checkpoint ${filename}
 
 ## Delete all timing constraint for importing into a target vivado project
 reset_timing
+
+## Create synth_stub
+write_verilog -force -mode synth_stub ${PROJ_DIR}/ip/${fbasename}_stub.v
+write_vhdl    -force -mode synth_stub ${PROJ_DIR}/ip/${fbasename}_stub.vhd
 
 ## Overwrite the checkpoint   
 write_checkpoint -force ${filename}
