@@ -750,18 +750,6 @@ proc DcpCompleteMessage { filename } {
    puts "********************************************************\n\n" 
 }
 
-proc HlsVersionCheck { } {
-   set VersionNumber [version -short]
-   if { ${VersionNumber} == 2014.2 } {
-      puts "\n\n****************************************************************"
-      puts "Vivado_HLS Version = ${VersionNumber} is not support in this build system."
-      puts "****************************************************************\n\n" 
-      return -1
-   } else {
-      return 0
-   }
-}
-
 proc VersionCheck { lockVersion {mustBeExact ""} } {
    # Get the Vivado version
    set VersionNumber [version -short]
