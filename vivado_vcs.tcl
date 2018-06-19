@@ -12,9 +12,45 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
+proc VcsVersionCheck { } {
+   # List of supported VCS versions
+   set supported "M-2017.03"
+   
+   # Get the VCS version
+   set grepVersion [exec vcs -ID | grep version]
+   scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
+   set retVar -1
+   
+   # Generate error message
+   set errMsg "\n\n*********************************************************\n"
+   set errMsg "${errMsg}Your VCS Version Vivado   = ${VersionNumber}\n"
+   set errMsg "${errMsg}However, VCS Version Lock = ${supported}\n"
+   set errMsg "${errMsg}You need to change your VCS software to one of these versions\n"
+   set errMsg "${errMsg}*********************************************************\n\n"  
+   
+   # Loop through the different support version list
+   foreach pntr ${supported} {
+      if { ${VersionNumber} == ${pntr} } {
+         set retVar 0      
+      }
+   }
+   
+   # Check for no support version detected
+   if  { ${retVar} < 0 } {
+      puts ${errMsg}
+   }
+   
+   return ${retVar}
+}
+
 # Check for version 2016.4 (or later)
 if { [VersionCheck 2016.4] < 0 } {
    close_project
+   exit -1
+}
+
+# Check for supported VCS version
+if { [VcsVersionCheck] < 0 } {
    exit -1
 }
 
@@ -184,10 +220,13 @@ while { [eof ${in}] != 1 } {
 
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
-      set line [string map ${replaceString}  ${line}]          
+      set line [string map ${replaceString}  ${line}]  
 
+      # Remove xil_defaultlib.glbl (Rogue simulation bug fix)
+      set line [string map { "xil_defaultlib.glbl" "" } ${line}] 
+      
       # Write to file
-       puts ${out} ${line}  
+      puts ${out} ${line}  
    }      
 }
 
