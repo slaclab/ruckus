@@ -88,7 +88,9 @@ export_ip_user_files -no_script
 update_compile_order -quiet -fileset sim_1
 
 # Launch the scripts generator 
-export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
+set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
+set define  [get_property verilog_define [get_filesets sim_1]]; # Verilog only
+export_simulation -absolute_path -force -simulator vcs -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
 
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
