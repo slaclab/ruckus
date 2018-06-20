@@ -187,7 +187,7 @@ if { ${rogueSimPath} != "" } {
    exec make clean
 
    # Move back to simulation target directory
-   cd $::DIR_PATH
+   cd $::env(PROJ_DIR)
 
 }
 
