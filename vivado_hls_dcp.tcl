@@ -8,30 +8,33 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## Get variables and Custom Procedures
+# Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source  -quiet ${RUCKUS_DIR}/vivado_hls_env_var.tcl
 source  -quiet ${RUCKUS_DIR}/vivado_hls_proc.tcl 
 
-## Get the file name and path of the new .dcp file
+# Get the file name and path of the new .dcp file
 set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]
 set fbasename [file rootname [file tail ${filename}]]
 
-## Open the check point
+# Open the check point
 open_checkpoint ${filename}
 
-## Delete all timing constraint for importing into a target vivado project
+# Delete all timing constraint for importing into a target vivado project
 reset_timing
 
-## Create synth_stub
+# Create synth_stub
 write_verilog -force -mode synth_stub ${PROJ_DIR}/ip/${fbasename}_stub.v
 write_vhdl    -force -mode synth_stub ${PROJ_DIR}/ip/${fbasename}_stub.vhd
 
-## Overwrite the checkpoint   
+# Overwrite the checkpoint   
 write_checkpoint -force ${filename}
 
-## Print Build complete reminder
+# Close the checkpoint
+close_design
+
+# Print Build complete reminder
 PrintBuildComplete ${filename}
 
-## IP is ready for use in target firmware project
+# IP is ready for use in target firmware project
 exit 0

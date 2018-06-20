@@ -1282,7 +1282,8 @@ proc loadIpCore args {
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
-         if { ${fileExt} eq {.xci} } { 
+         if { ${fileExt} eq {.xci} ||
+              ${fileExt} eq {.xcix} } {
             # Check if file doesn't exist in project
             if { [get_files -quiet $params(path)] == "" } {           
                # Add the IP core file
@@ -1294,7 +1295,7 @@ proc loadIpCore args {
             set ::IP_FILES "$::IP_FILES $params(path)"
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadIpCore: $params(path) does not have a \[.xci\] file extension"
+            puts "loadIpCore: $params(path) does not have a \[.xci,.xcix\] file extension"
             puts "********************************************************\n\n\n\n\n"
             exit -1
          }
@@ -1311,7 +1312,7 @@ proc loadIpCore args {
          # Get a list of all IP core files
          set list ""
          set list_rc [catch { 
-            set list [glob -directory $params(dir) *.xci]
+            set list [glob -directory $params(dir) *.xci *.xcix]
          } _RESULT]             
          # Load all the IP core files
          if { ${list} != "" } {
@@ -1328,7 +1329,7 @@ proc loadIpCore args {
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadIpCore: $params(dir) directory does not have any \[.xci\] files"
+            puts "loadIpCore: $params(dir) directory does not have any \[.xci,.xcix\] files"
             puts "********************************************************\n\n\n\n\n"         
             exit -1            
          }
