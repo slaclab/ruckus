@@ -116,9 +116,6 @@ if { [file exists ${simLibOutDir}] != 1 } {
 ## Export the Simulation
 #####################################################################################################  
 
-# Generate Verilog simulation models for all .DCP files in the simulation tree
-DcpToVerilogSim
-
 # Update the compile order
 update_compile_order -quiet -fileset sim_1
 
