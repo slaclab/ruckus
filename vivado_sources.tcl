@@ -154,8 +154,6 @@ SourceTclFile ${VIVADO_DIR}/sources.tcl
 
 # Remove all unused code
 if { $::env(REMOVE_UNUSED_CODE) != 0 } {
-   update_compile_order -quiet -fileset sources_1
-   update_compile_order -quiet -fileset sim_1
    RemoveUnsuedCode
 }
 

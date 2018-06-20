@@ -17,7 +17,9 @@ proc VcsVersionCheck { } {
    set supported "M-2017.03"
    
    # Get the VCS version
-   set grepVersion [exec vcs -ID | grep version]
+   set git_rc [catch {
+      exec vcs -ID | grep version
+   } grepVersion]
    scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
    set retVar -1
    
@@ -60,6 +62,7 @@ open_project -quiet ${VIVADO_PROJECT}
 # Setup variables
 set simLibOutDir ${OUT_DIR}/vcs_library
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
+set simTbFileName [get_property top [get_filesets sim_1]]
 
 #####################################################################################################
 ## Compile the VCS Simulation Library
@@ -113,15 +116,15 @@ if { [file exists ${simLibOutDir}] != 1 } {
 ## Export the Simulation
 #####################################################################################################  
 
-# Generate Verilog simulation models for all .DCP files in the source tree
+# Generate Verilog simulation models for all .DCP files in the simulation tree
 DcpToVerilogSim
+
+# Update the compile order
+update_compile_order -quiet -fileset sim_1
 
 # Export Xilinx & User IP Cores
 generate_target {simulation} [get_ips]
 export_ip_user_files -no_script
-
-# Update the compile order
-update_compile_order -quiet -fileset sim_1
 
 # Launch the scripts generator 
 set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
@@ -131,65 +134,51 @@ export_simulation -absolute_path -force -simulator vcs -include ${include} -defi
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################   
+set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueStreamSim.vhd}]
+set rogueSimEn false
+if { ${rogueSimPath} != "" } {
 
-# Get the top-level simulation file
-set simTbFileName [get_property top [get_filesets sim_1]]
+   # Set the flag true
+   set rogueSimEn true 
 
-set simTbDirName [file dirname [get_files ${simTbFileName}.vhd]]
-set simLinkDir   ${simTbDirName}/../simlink/src/
-set sharedMem    false
-
-# Check if the simlink directory exists
-if { [file isdirectory ${simLinkDir}] == 1 } {
-   
-   # Check if the Makefile exists
-   if { [file exists  ${simLinkDir}/Makefile] == 1 } {
-      
-      # Set the flag true
-      set sharedMem true   
-
-      # Create the setup environment script: C-SHELL
-      set envScript [open ${simTbOutDir}/setup_env.csh  w]
-      puts  ${envScript} "limit stacksize 60000"
-      set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH ${simTbOutDir}:$::env(LD_LIBRARY_PATH)"
-      puts  ${envScript} ${LD_LIBRARY_PATH} 
-      close ${envScript} 
-
-      # Create the setup environment script: S-SHELL
-      set envScript [open ${simTbOutDir}/setup_env.sh  w]
-      puts  ${envScript} "ulimit -S -s 60000"
-      set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=$::env(LD_LIBRARY_PATH):${simTbOutDir}"
-      puts  ${envScript} ${LD_LIBRARY_PATH} 
-      close ${envScript}          
-      
-      # Move the working directory to the simlink directory
-      cd ${simLinkDir}
-      
-      # Set up the 
-      set ::env(SIMLINK_PWD) ${simLinkDir}
-      
-      # Run the Makefile
-      exec make
-      
-      # Copy the library to the binary output directory
-      exec cp -f [glob -directory ${simLinkDir} *.so] ${simTbOutDir}/.
-      
-      # Remove the output binary files from the source tree
-      exec make clean
-   }   
-} else {
-   
-   # Create a blank setup environment .csh script
+   # Create the setup environment script: C-SHELL
    set envScript [open ${simTbOutDir}/setup_env.csh  w]
-   puts  ${envScript} " "
-   close ${envScript}
-   
-   # Create a blank setup environment .sh script
+   puts  ${envScript} "limit stacksize 60000"
+   set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH ${simTbOutDir}:$::env(LD_LIBRARY_PATH)"
+   puts  ${envScript} ${LD_LIBRARY_PATH} 
+   close ${envScript} 
+
+   # Create the setup environment script: S-SHELL
    set envScript [open ${simTbOutDir}/setup_env.sh  w]
-   puts  ${envScript} " "
-   close ${envScript}      
+   puts  ${envScript} "ulimit -S -s 60000"
+   set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=$::env(LD_LIBRARY_PATH):${simTbOutDir}"
+   puts  ${envScript} ${LD_LIBRARY_PATH} 
+   close ${envScript}          
+
+   # Find the surf/axi/simlink/src directory
+   set simTbDirName [file dirname ${rogueSimPath}]
+   set simLinkDir   ${simTbDirName}/../src/
+
+   # Move the working directory to the simlink directory
+   cd ${simLinkDir}
+
+   # Set up the 
+   set ::env(SIMLINK_PWD) ${simLinkDir}
+
+   # Run the Makefile
+   exec make
+
+   # Copy the library to the binary output directory
+   exec cp -f [glob -directory ${simLinkDir} *.so] ${simTbOutDir}/.
+
+   # Remove the output binary files from the source tree
+   exec make clean
+
+   # Move back to simulation target directory
+   cd $::DIR_PATH
+
 }
-  
+
 #####################################################################################################   
 ## Customization of the executable bash (.sh) script 
 #####################################################################################################   
@@ -221,9 +210,6 @@ while { [eof ${in}] != 1 } {
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
       set line [string map ${replaceString}  ${line}]  
-
-      # Remove xil_defaultlib.glbl (Rogue simulation bug fix)
-      set line [string map { "xil_defaultlib.glbl" "" } ${line}] 
       
       # Write to file
       puts ${out} ${line}  
@@ -255,4 +241,4 @@ close_project
 SourceTclFile ${VIVADO_DIR}/vcs.tcl
 
 # VCS Complete Message
-VcsCompleteMessage ${simTbOutDir} ${sharedMem}
+VcsCompleteMessage ${simTbOutDir} ${rogueSimEn}
