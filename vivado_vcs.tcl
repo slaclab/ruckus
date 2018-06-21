@@ -80,6 +80,7 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Configure Vivado to generate the VCS scripts
    set_property target_simulator "VCS" [current_project]
    set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]   
+   set_property nl.process_corner fast [get_filesets sim_1]   
    
    ##################################################################
    ##                synopsys_sim.setup bug fix
