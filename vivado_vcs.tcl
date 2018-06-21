@@ -192,9 +192,13 @@ if { ${rogueSimPath} != "" } {
 
 }
 
-#####################################################################################################   
-## Customization of the executable bash (.sh) script 
-#####################################################################################################   
+#####################################################################################################
+## Customization of the executable bash (.sh) script
+#####################################################################################################
+
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.v}}  vList]
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.vh}} vhList]
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.sv}} svList]
 
 # open the files
 set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
@@ -213,19 +217,27 @@ while { [eof ${in}] != 1 } {
          
       # Replace ${simTbFileName}_simv with the simv
       set replaceString "${simTbFileName}_simv simv"
-      set line [string map ${replaceString}  ${line}]  
+      set line [string map ${replaceString}  ${line}]
       
       # By default: Mask off warnings during elaboration
-      set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
-      set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
-      set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]     
+      set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]
+      set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]
+      set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]
 
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
       set line [string map ${replaceString}  ${line}]  
       
+      # Check if only a VHDL simulation
+      if { ${vList}   == "" &&
+           ${vhList}  == "" &&
+           ${svList}  == "" } {
+         # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
+         set line [string map { "xil_defaultlib.glbl" "" } ${line}]
+      }
+      
       # Write to file
-      puts ${out} ${line}  
+      puts ${out} ${line}
    }      
 }
 
@@ -234,11 +246,11 @@ close ${in}
 close ${out}
 
 # Update the permissions
-exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh   
+exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
 
-#####################################################################################################   
-#####################################################################################################   
-#####################################################################################################  
+#####################################################################################################
+#####################################################################################################
+#####################################################################################################
  
 # Copy the glbl.v file
 if { [file exists ${simTbOutDir}/vcs/glbl.v] == 1 } {
