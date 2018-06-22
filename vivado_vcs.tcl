@@ -81,6 +81,7 @@ if { [file exists ${simLibOutDir}] != 1 } {
    set_property target_simulator "VCS" [current_project]
    set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]   
    set_property nl.process_corner fast [get_filesets sim_1]   
+   set_property unifast true [get_filesets sim_1]
    
    ##################################################################
    ##                synopsys_sim.setup bug fix
