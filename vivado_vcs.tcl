@@ -12,9 +12,47 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
+proc VcsVersionCheck { } {
+   # List of supported VCS versions
+   set supported "M-2017.03"
+   
+   # Get the VCS version
+   set err_ret [catch {
+      exec vcs -ID | grep version
+   } grepVersion]
+   scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
+   set retVar -1
+   
+   # Generate error message
+   set errMsg "\n\n*********************************************************\n"
+   set errMsg "${errMsg}Your VCS Version Vivado   = ${VersionNumber}\n"
+   set errMsg "${errMsg}However, VCS Version Lock = ${supported}\n"
+   set errMsg "${errMsg}You need to change your VCS software to one of these versions\n"
+   set errMsg "${errMsg}*********************************************************\n\n"  
+   
+   # Loop through the different support version list
+   foreach pntr ${supported} {
+      if { ${VersionNumber} == ${pntr} } {
+         set retVar 0      
+      }
+   }
+   
+   # Check for no support version detected
+   if  { ${retVar} < 0 } {
+      puts ${errMsg}
+   }
+   
+   return ${retVar}
+}
+
 # Check for version 2016.4 (or later)
 if { [VersionCheck 2016.4] < 0 } {
    close_project
+   exit -1
+}
+
+# Check for supported VCS version
+if { [VcsVersionCheck] < 0 } {
    exit -1
 }
 
@@ -24,6 +62,7 @@ open_project -quiet ${VIVADO_PROJECT}
 # Setup variables
 set simLibOutDir ${OUT_DIR}/vcs_library
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
+set simTbFileName [get_property top [get_filesets sim_1]]
 
 #####################################################################################################
 ## Compile the VCS Simulation Library
@@ -41,6 +80,7 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Configure Vivado to generate the VCS scripts
    set_property target_simulator "VCS" [current_project]
    set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]   
+   set_property nl.process_corner fast [get_filesets sim_1]   
    
    ##################################################################
    ##                synopsys_sim.setup bug fix
@@ -77,84 +117,88 @@ if { [file exists ${simLibOutDir}] != 1 } {
 ## Export the Simulation
 #####################################################################################################  
 
-# Generate Verilog simulation models for all .DCP files in the source tree
-DcpToVerilogSim
+# Update the compile order
+update_compile_order -quiet -fileset sim_1
 
 # Export Xilinx & User IP Cores
 generate_target {simulation} [get_ips]
 export_ip_user_files -no_script
 
-# Update the compile order
-update_compile_order -quiet -fileset sim_1
-
 # Launch the scripts generator 
-export_simulation -absolute_path -force -simulator vcs -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
+set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
+set define  [get_property verilog_define [get_filesets sim_1]]; # Verilog only
+export_simulation -absolute_path -force -simulator vcs -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/   
 
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################   
+set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueStreamSim.vhd}]
+set rogueSimEn false
+if { ${rogueSimPath} != "" } {
 
-# Get the top-level simulation file
-set simTbFileName [get_property top [get_filesets sim_1]]
-
-set simTbDirName [file dirname [get_files ${simTbFileName}.vhd]]
-set simLinkDir   ${simTbDirName}/../simlink/src/
-set sharedMem    false
-
-# Check if the simlink directory exists
-if { [file isdirectory ${simLinkDir}] == 1 } {
+   # Set the flag true
+   set rogueSimEn true 
    
-   # Check if the Makefile exists
-   if { [file exists  ${simLinkDir}/Makefile] == 1 } {
-      
-      # Set the flag true
-      set sharedMem true   
-
-      # Create the setup environment script: C-SHELL
-      set envScript [open ${simTbOutDir}/setup_env.csh  w]
-      puts  ${envScript} "limit stacksize 60000"
-      set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH ${simTbOutDir}:$::env(LD_LIBRARY_PATH)"
-      puts  ${envScript} ${LD_LIBRARY_PATH} 
-      close ${envScript} 
-
-      # Create the setup environment script: S-SHELL
-      set envScript [open ${simTbOutDir}/setup_env.sh  w]
-      puts  ${envScript} "ulimit -S -s 60000"
-      set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=$::env(LD_LIBRARY_PATH):${simTbOutDir}"
-      puts  ${envScript} ${LD_LIBRARY_PATH} 
-      close ${envScript}          
-      
-      # Move the working directory to the simlink directory
-      cd ${simLinkDir}
-      
-      # Set up the 
-      set ::env(SIMLINK_PWD) ${simLinkDir}
-      
-      # Run the Makefile
-      exec make
-      
-      # Copy the library to the binary output directory
-      exec cp -f [glob -directory ${simLinkDir} *.so] ${simTbOutDir}/.
-      
-      # Remove the output binary files from the source tree
-      exec make clean
-   }   
-} else {
+   # Check the zeromq library exists and its version
+   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.2.0} --print-errors} libzmq]   
+   if { ${libzmq} != "" } {
+      puts "\n\n\n\n\n********************************************************"      
+      if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
+         puts "libzmq package was not found"
+         puts "Please make sure that you have libzmq installed"
+         puts "or have sourced the necessary rogue setup scripts"
+      } else {
+         puts ${libzmq}
+      }
+      puts "********************************************************\n\n\n\n\n"
+      exit -1   
+   }
    
-   # Create a blank setup environment .csh script
+   # Create the setup environment script: C-SHELL
    set envScript [open ${simTbOutDir}/setup_env.csh  w]
-   puts  ${envScript} " "
-   close ${envScript}
-   
-   # Create a blank setup environment .sh script
+   puts  ${envScript} "limit stacksize 60000"
+   set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH ${simTbOutDir}:$::env(LD_LIBRARY_PATH)"
+   puts  ${envScript} ${LD_LIBRARY_PATH} 
+   close ${envScript} 
+
+   # Create the setup environment script: S-SHELL
    set envScript [open ${simTbOutDir}/setup_env.sh  w]
-   puts  ${envScript} " "
-   close ${envScript}      
+   puts  ${envScript} "ulimit -S -s 60000"
+   set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=$::env(LD_LIBRARY_PATH):${simTbOutDir}"
+   puts  ${envScript} ${LD_LIBRARY_PATH} 
+   close ${envScript}          
+
+   # Find the surf/axi/simlink/src directory
+   set simTbDirName [file dirname ${rogueSimPath}]
+   set simLinkDir   ${simTbDirName}/../src/
+
+   # Move the working directory to the simlink directory
+   cd ${simLinkDir}
+
+   # Set up the 
+   set ::env(SIMLINK_PWD) ${simLinkDir}
+
+   # Run the Makefile
+   exec make
+
+   # Copy the library to the binary output directory
+   exec cp -f [glob -directory ${simLinkDir} *.so] ${simTbOutDir}/.
+
+   # Remove the output binary files from the source tree
+   exec make clean
+
+   # Move back to simulation target directory
+   cd $::env(PROJ_DIR)
+
 }
-  
-#####################################################################################################   
-## Customization of the executable bash (.sh) script 
-#####################################################################################################   
+
+#####################################################################################################
+## Customization of the executable bash (.sh) script
+#####################################################################################################
+
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.v}}  vList]
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.vh}} vhList]
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.sv}} svList]
 
 # open the files
 set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
@@ -173,19 +217,27 @@ while { [eof ${in}] != 1 } {
          
       # Replace ${simTbFileName}_simv with the simv
       set replaceString "${simTbFileName}_simv simv"
-      set line [string map ${replaceString}  ${line}]  
+      set line [string map ${replaceString}  ${line}]
       
       # By default: Mask off warnings during elaboration
-      set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
-      set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]          
-      set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]     
+      set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]
+      set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]
+      set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]
 
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
-      set line [string map ${replaceString}  ${line}]          
-
+      set line [string map ${replaceString}  ${line}]  
+      
+      # Check if only a VHDL simulation
+      if { ${vList}   == "" &&
+           ${vhList}  == "" &&
+           ${svList}  == "" } {
+         # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
+         set line [string map { "xil_defaultlib.glbl" "" } ${line}]
+      }
+      
       # Write to file
-       puts ${out} ${line}  
+      puts ${out} ${line}
    }      
 }
 
@@ -194,11 +246,11 @@ close ${in}
 close ${out}
 
 # Update the permissions
-exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh   
+exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
 
-#####################################################################################################   
-#####################################################################################################   
-#####################################################################################################  
+#####################################################################################################
+#####################################################################################################
+#####################################################################################################
  
 # Copy the glbl.v file
 if { [file exists ${simTbOutDir}/vcs/glbl.v] == 1 } {
@@ -214,4 +266,4 @@ close_project
 SourceTclFile ${VIVADO_DIR}/vcs.tcl
 
 # VCS Complete Message
-VcsCompleteMessage ${simTbOutDir} ${sharedMem}
+VcsCompleteMessage ${simTbOutDir} ${rogueSimEn}

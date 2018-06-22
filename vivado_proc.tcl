@@ -302,7 +302,7 @@ proc CopyBdCoresDebug { } {
 # Generate Verilog simulation models for all .DCP files in the source tree
 proc DcpToVerilogSim { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   foreach filePntr [get_files {*.dcp}] {
+   foreach filePntr [get_files -compile_order sources -used_in simulation -filter {FILE_TYPE == DCP}] {
       if { [file extension ${filePntr}] == ".dcp" } {
          ## Open the check point
          open_checkpoint ${filePntr}     
@@ -370,26 +370,9 @@ proc CreatePyRogueTarGz { } {
 
 # Remove unused code   
 proc RemoveUnsuedCode { } {
-   
-   #######################################################
-   ## This should work but cause DRC errors in impl_1
-   #######################################################
-   # # Get all used synthesis files 
-   # set syn_list  [get_files -compile_order sources -used_in synthesis]
-   # # Get all used simulation files 
-   # set sim_list  [get_files -compile_order sources -used_in simulation]
-   # # Combine the list together synthesis & simulation 
-   # set file_list "${syn_list} ${sim_list}"
-   # # Find all the files not in 
-   # set diff_list [ListComp ${file_list} [get_files]]
-   # # Remove the unused files
-   # remove_files [get_files ${diff_list}]
-   
-   ###################################################
-   # Only workes with synthesis files (not simulation)
-   ###################################################
+   update_compile_order -quiet -fileset sources_1
+   update_compile_order -quiet -fileset sim_1
    remove_files [get_files -filter {IS_AUTO_DISABLED}]
-   ###################################################   
 }
 
 # GIT Build TAG   
@@ -732,13 +715,15 @@ proc CheckImpl { {flags ""} } {
    }
    return false   
 }
-proc VcsCompleteMessage {dirPath sharedMem} {
+proc VcsCompleteMessage {dirPath rogueSim} {
    puts "\n\n********************************************************"
    puts "The VCS simulation script has been generated."
    puts "To compile and run the simulation:"
    puts "\t\$ cd ${dirPath}/"    
    puts "\t\$ ./sim_vcs_mx.sh"
-   puts "\t\$ source setup_env.csh"
+   if { ${rogueSim} == true } {
+      puts "\t\$ source setup_env.csh"
+   }
    puts "\t\$ ./simv"   
    puts "********************************************************\n\n" 
 }
@@ -1297,7 +1282,8 @@ proc loadIpCore args {
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
-         if { ${fileExt} eq {.xci} } { 
+         if { ${fileExt} eq {.xci} ||
+              ${fileExt} eq {.xcix} } {
             # Check if file doesn't exist in project
             if { [get_files -quiet $params(path)] == "" } {           
                # Add the IP core file
@@ -1309,7 +1295,7 @@ proc loadIpCore args {
             set ::IP_FILES "$::IP_FILES $params(path)"
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadIpCore: $params(path) does not have a \[.xci\] file extension"
+            puts "loadIpCore: $params(path) does not have a \[.xci,.xcix\] file extension"
             puts "********************************************************\n\n\n\n\n"
             exit -1
          }
@@ -1326,7 +1312,7 @@ proc loadIpCore args {
          # Get a list of all IP core files
          set list ""
          set list_rc [catch { 
-            set list [glob -directory $params(dir) *.xci]
+            set list [glob -directory $params(dir) *.xci *.xcix]
          } _RESULT]             
          # Load all the IP core files
          if { ${list} != "" } {
@@ -1343,7 +1329,7 @@ proc loadIpCore args {
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadIpCore: $params(dir) directory does not have any \[.xci\] files"
+            puts "loadIpCore: $params(dir) directory does not have any \[.xci,.xcix\] files"
             puts "********************************************************\n\n\n\n\n"         
             exit -1            
          }

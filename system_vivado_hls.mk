@@ -95,8 +95,7 @@ $(SOURCE_DEPEND) : $(SRC_FILE) $(VIVADO_DEPEND)
 .PHONY : dcp
 dcp : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build")
-	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
+	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl; vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
 
 ###############################################################
 #### Vivado Batch without co-simulation #######################
@@ -104,8 +103,7 @@ dcp : $(SOURCE_DEPEND)
 .PHONY : dcp_fast
 dcp_fast : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation")
-	@cd $(OUT_DIR); export FAST_DCP_GEN=1; @cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
+	@cd $(OUT_DIR); export FAST_DCP_GEN=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl; vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
 
 ###############################################################
 #### Vivado Interactive #######################################
