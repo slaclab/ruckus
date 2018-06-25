@@ -18,7 +18,7 @@ proc VcsVersionCheck { } {
    
    # Get the VCS version
    set err_ret [catch {
-      exec vcs -ID | grep version
+      exec vcs -ID | grep "vcs script version"
    } grepVersion]
    scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
    set retVar -1
