@@ -18,6 +18,19 @@ proc VcsVersionCheck { } {
    
    # Get the VCS version
    set err_ret [catch {
+      exec bash -c "command -v vcs"
+   } grepCmd]   
+   
+   if { ${err_ret} != 0} {
+      puts "\n\n*********************************************************" 
+      puts "vcs: Command not found."
+      puts "Please setup VCS in your SHELL environment" 
+      puts "*********************************************************\n\n"
+      return -1
+   }
+   
+   # Get the VCS version
+   set err_ret [catch {
       exec vcs -ID | grep "vcs script version"
    } grepVersion]
    scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
@@ -38,7 +51,7 @@ proc VcsVersionCheck { } {
    }
    
    # Check for no support version detected
-   if  { ${retVar} < 0 } {
+   if { ${retVar} < 0 } {
       puts ${errMsg}
    }
    
