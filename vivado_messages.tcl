@@ -82,6 +82,7 @@ set_msg_config -suppress -id {filemgmt 56-12};# .ELF/.BMM already added to proje
 set_msg_config -suppress -id {Vivado 12-5470};  # Using .DCP instead of .XCI
 set_msg_config -suppress -id {Project 1-841};   # Using .DCP instead of .XCI
 set_msg_config -suppress -id {Project 1-863};   # Using .DCP instead of .XCI
+set_msg_config -suppress -id {Project 1-840};   # Using .DCP instead of .XCI
 
 ########################################################
 ## Modifying WARNING messaging
