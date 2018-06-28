@@ -77,6 +77,10 @@ set simLibOutDir ${OUT_DIR}/vcs_library
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
 
+# Set the compile/elaborate options
+set compOpt "-nc -l +v2k -xlrm"
+set elabOpt "+warn=none"
+
 #####################################################################################################
 ## Compile the VCS Simulation Library
 #####################################################################################################  
@@ -90,9 +94,15 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Compile the simulation libraries
    compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
    
-   # Configure Vivado to generate the VCS scripts
+   # Set VCS as target_simulator
    set_property target_simulator "VCS" [current_project]
-   set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]   
+   set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]
+   
+   # Configure VCS settings
+   set_property -name {vcs.compile.vhdlan.more_options} -value ${compOpt} -objects [get_filesets sim_1]
+   set_property -name {vcs.compile.vlogan.more_options} -value ${compOpt} -objects [get_filesets sim_1]   
+   set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt} -objects [get_filesets sim_1]
+   set_property -name {vcs.elaborate.debug_pp}          -value {false}    -objects [get_filesets sim_1]
    set_property nl.process_corner fast [get_filesets sim_1]   
    set_property unifast true [get_filesets sim_1]
    
@@ -214,6 +224,14 @@ set err_ret [catch {get_files -compile_order sources -used_in simulation {*.v}} 
 set err_ret [catch {get_files -compile_order sources -used_in simulation {*.vh}} vhList]
 set err_ret [catch {get_files -compile_order sources -used_in simulation {*.sv}} svList]
 
+set vlogan_opts_old   "vlogan_opts=\"-full64"
+set vhdlan_opts_old   "vhdlan_opts=\"-full64"
+set vcs_elab_opts_old "vcs_elab_opts=\"-full64"
+
+set vlogan_opts_new   "${vlogan_opts_old} ${compOpt}"
+set vhdlan_opts_new   "${vhdlan_opts_old} ${compOpt}"
+set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
+
 # open the files
 set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
 set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
@@ -233,10 +251,10 @@ while { [eof ${in}] != 1 } {
       set replaceString "${simTbFileName}_simv simv"
       set line [string map ${replaceString}  ${line}]
       
-      # By default: Mask off warnings during elaboration
-      set line [string map {"vlogan_opts=\"-full64\""   "vlogan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]
-      set line [string map {"vhdlan_opts=\"-full64\""   "vhdlan_opts=\"-full64 -nc -l +v2k -xlrm\""} ${line}]
-      set line [string map {"vcs_elab_opts=\"-full64\"" "vcs_elab_opts=\"-full64 +warn=none\""}      ${line}]
+      # Update the compile options (fix bug in export_simulation not including more_options properties)
+      set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
+      set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
+      set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]      
 
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
