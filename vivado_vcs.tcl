@@ -14,7 +14,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
 proc VcsVersionCheck { } {
    # List of supported VCS versions
-   set supported "M-2017.03"
+   set supported "M-2017.03 N-2017.12"
    
    # Get the VCS version
    set err_ret [catch {
