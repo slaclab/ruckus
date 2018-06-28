@@ -12,6 +12,15 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
+if { [info exists ::env(VCS_VERSION)] != 1 } {
+   puts "\n\n*********************************************************" 
+   puts "VCS_VERSION environmental variable does not exist. Please add"
+   puts "VCS_VERSION environmental variable to your VCS setup script."
+   puts "Example: export VCS_VERSION=2017"
+   puts "*********************************************************\n\n"
+   exit -1
+}
+
 proc VcsVersionCheck { } {
    # List of supported VCS versions
    set supported "M-2017.03 N-2017.12"
@@ -57,6 +66,8 @@ proc VcsVersionCheck { } {
    
    return ${retVar}
 }
+
+
 
 # Check for version 2016.4 (or later)
 if { [VersionCheck 2016.4] < 0 } {
