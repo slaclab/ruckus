@@ -301,6 +301,7 @@ proc CopyBdCoresDebug { } {
 
 # Generate Verilog simulation models for a specific .dcp file
 proc DcpToVerilogSim {dcpPath} {
+   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    if { [file exists ${dcpPath}] == 1 } {
       ## Open the check point
       open_checkpoint ${dcpPath}     
