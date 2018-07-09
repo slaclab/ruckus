@@ -300,13 +300,14 @@ proc CopyBdCoresDebug { } {
 } 
 
 # Generate Verilog simulation models for a specific .dcp file
-proc DcpToVerilogSim {dcpPath} {
+proc DcpToVerilogSim {dcpName} {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   if { [file exists ${dcpPath}] == 1 } {
+   set filePntr [get_files ${dcpName}.dcp]
+   if { [file extension ${filePntr}] == ".dcp" } {
       ## Open the check point
-      open_checkpoint ${dcpPath}     
+      open_checkpoint ${filePntr}     
       ## Generate the output file path
-      set simName [file tail ${dcpPath}]
+      set simName [file tail ${filePntr}]
       set simName [string map {".dcp" "_sim.v"} ${simName}] 
       set simFile ${OUT_DIR}/${PROJECT}_project.sim/${simName}
       ## Write the simulation model to the build tree
