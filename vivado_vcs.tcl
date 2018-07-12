@@ -83,6 +83,11 @@ if { [VcsVersionCheck] < 0 } {
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
 
+# Check project configuration for errors
+if { [CheckPrjConfig sim_1] != true } {
+   exit -1
+}
+
 # Setup variables
 set simLibOutDir ${OUT_DIR}/vcs_library
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav

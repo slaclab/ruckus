@@ -481,7 +481,7 @@ proc CheckSdkSrcPath { } {
 }
 
 # Check project configuration for errors
-proc CheckPrjConfig { } {
+proc CheckPrjConfig { fileset } {
 
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -516,7 +516,7 @@ proc CheckPrjConfig { } {
    # Check the Vivado version (check_syntax added to Vivado in 2016.1)
    if { $::env(VIVADO_VERSION) >= 2016.1 } {   
       # Check for syntax errors
-      set syntaxReport [check_syntax -fileset sources_1 -return_string -quiet -verbose]
+      set syntaxReport [check_syntax -fileset ${fileset} -return_string -quiet -verbose]
       set syntaxReport [split ${syntaxReport} "\n"]
       set listErr ""
       foreach msg ${syntaxReport} {
