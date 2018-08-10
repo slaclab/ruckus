@@ -106,7 +106,7 @@ close ${out}
 
 # By default, set the Top Level file same as project name
 set_property top ${PROJECT} [current_fileset]
-set_property top "glbl"     [get_filesets sim_1]
+# set_property top "glbl"     [get_filesets sim_1]
 
 # Init the global variable
 set ::DIR_PATH ""
