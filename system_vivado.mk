@@ -36,6 +36,10 @@ ifndef INCR_BUILD_BYPASS
 export INCR_BUILD_BYPASS = 0
 endif
 
+ifndef PARALLEL_SYNTH
+export PARALLEL_SYNTH = 1
+endif
+
 ifndef GIT_BYPASS
 export GIT_BYPASS = 1
 endif
