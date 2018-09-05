@@ -60,4 +60,7 @@ if { ${errorDet} != true } {
 
    # Target specific post_synthesis script
    SourceTclFile ${VIVADO_DIR}/post_synth_run.tcl
+} else {
+   # Force the run to be "out of date" by touching top-level file
+   exec touch [get_files *[get_property top [get_filesets {sources_1}]].* -of_objects [get_filesets {sources_1}]]
 }
