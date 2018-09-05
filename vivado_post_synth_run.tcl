@@ -17,11 +17,21 @@ source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 
+set errorDet false
+
 # Check for "unsafe" timing in the clock interaction report
-read_xdc [get_files {*.xdc} -of_objects [get_filesets {constrs_1}]]
+set src_xdc [catch {read_xdc [get_files {*.xdc} -of_objects [get_filesets {constrs_1}]]} _RESULT]
 set crossClkRpt [report_clock_interaction -no_header -return_string]
-if { [regexp  {(unsafe)} ${crossClkRpt}] != 0 } { 
+if { [regexp {(unsafe)} ${crossClkRpt}] != 0 } { 
    puts "\n\n\nWarning: \"Unsafe\" timing in the clock interaction report detected during synthesis!!!\n${crossClkRpt}\n"    
+   set errorDet true
+}
+
+# Check for "Unconstrained Clocks" in the clock network report
+set clkRpt [report_clock_networks -return_string]
+if { [regexp {Unconstrained Clocks} ${clkRpt}] != 0 } { 
+   puts "\n\n\nWarning: \"Unconstrained Clocks\" in the clock network report detected during synthesis!!!\n${clkRpt}\n"    
+   set errorDet true
 }
 
 # Check if Multi-Driven Nets are not allowed
@@ -32,19 +42,22 @@ if { ${AllowMultiDriven} != 1 } {
    # Check if any multi-driven nets during synthesis
    if { ${MDRV} != 0 } {
       puts "\n\n\nMulti-driven nets detected during synthesis!!!\n\n"    
-      exit -1
+      set errorDet true
    }
 }
 
-# GUI Related:
-# Disable a refresh due to the changes 
-# in the Version.vhd file during synthesis 
-set_property NEEDS_REFRESH false [current_run]
+# Check if any post-synthesis errors were detected
+if { ${errorDet} != true } {
+   # GUI Related:
+   # Disable a refresh due to the changes 
+   # in the Version.vhd file during synthesis 
+   set_property NEEDS_REFRESH false [current_run]
 
-# Write the GIT hash to a file
-set fdOut [open ${SYN_DIR}/git.hash  w]
-puts ${fdOut} $::env(GIT_HASH_LONG)
-close ${fdOut}
+   # Write the GIT hash to a file
+   set fdOut [open ${SYN_DIR}/git.hash  w]
+   puts ${fdOut} $::env(GIT_HASH_LONG)
+   close ${fdOut}
 
-# Target specific post_synthesis script
-SourceTclFile ${VIVADO_DIR}/post_synth_run.tcl
+   # Target specific post_synthesis script
+   SourceTclFile ${VIVADO_DIR}/post_synth_run.tcl
+}
