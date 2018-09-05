@@ -17,6 +17,13 @@ source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 
+# Check for "unsafe" timing in the clock interaction report
+read_xdc [get_files {*.xdc} -of_objects [get_filesets {constrs_1}]]
+set crossClkRpt [report_clock_interaction -no_header -return_string]
+if { [regexp  {(unsafe)} ${crossClkRpt}] != 0 } { 
+   puts "\n\n\nWarning: \"Unsafe\" timing in the clock interaction report detected during synthesis!!!\n${crossClkRpt}\n"    
+}
+
 # Check if Multi-Driven Nets are not allowed
 set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]  
 if { ${AllowMultiDriven} != 1 } {
