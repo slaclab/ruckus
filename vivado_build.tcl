@@ -92,11 +92,6 @@ if { ${syn_rc} } {
 }
 
 ########################################################
-## Force a refresh of project by close then open project
-########################################################
-VivadoRefresh ${VIVADO_PROJECT}
-
-########################################################
 ## Check that the Synthesize is completed
 ########################################################
 if { [CheckSynth printMsg] != true } {  
