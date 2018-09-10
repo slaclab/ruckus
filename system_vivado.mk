@@ -40,6 +40,10 @@ ifndef PARALLEL_SYNTH
 export PARALLEL_SYNTH = 1
 endif
 
+ifndef HLS_SIM_TOOL
+export HLS_SIM_TOOL = vcs
+endif
+
 ifndef GIT_BYPASS
 export GIT_BYPASS = 1
 endif
