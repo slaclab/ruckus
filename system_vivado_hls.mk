@@ -98,16 +98,16 @@ $(SOURCE_DEPEND) : $(SRC_FILE) $(VIVADO_DEPEND)
 ###############################################################
 #### Vivado Batch without design export  ######################
 ###############################################################
-.PHONY : hls
-hls : $(SOURCE_DEPEND)
+.PHONY : csyn
+csyn : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without design export")
 	@cd $(OUT_DIR); export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl;
 
 ######################################################################################
 #### Vivado Batch without co-simulation and without design export ####################
 ######################################################################################
-.PHONY : hls_fast
-hls_fast : $(SOURCE_DEPEND)
+.PHONY : csyn_nocosim
+csyn_nocosim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation and without design export")
 	@cd $(OUT_DIR); export FAST_DCP_GEN=1; export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl;
 
@@ -122,8 +122,8 @@ dcp : $(SOURCE_DEPEND)
 ###############################################################
 #### Vivado Batch without co-simulation #######################
 ###############################################################
-.PHONY : dcp_fast
-dcp_fast : $(SOURCE_DEPEND)
+.PHONY : dcp_nocosim
+dcp_nocosim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation")
 	@cd $(OUT_DIR); export FAST_DCP_GEN=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl; vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
 
