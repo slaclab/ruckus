@@ -28,6 +28,12 @@ export RTL_DIR = $(abspath $(PROJ_DIR)/rtl)
 # Source Files
 export SRC_FILE = $(PROJ_DIR)/sources.tcl
 
+# HLS Simulation Tool [vcs, xsim, modelsim, ncsim, riviera]
+ifndef HLS_SIM_TOOL
+export HLS_SIM_TOOL = vcs
+endif
+
+
 define ACTION_HEADER
 @echo 
 @echo    ================================================================
@@ -90,6 +96,22 @@ $(SOURCE_DEPEND) : $(SRC_FILE) $(VIVADO_DEPEND)
 	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_sources.tcl
 
 ###############################################################
+#### Vivado Batch without design export  ######################
+###############################################################
+.PHONY : csyn
+csyn : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado HLS Build without design export")
+	@cd $(OUT_DIR); export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl;
+
+######################################################################################
+#### Vivado Batch without co-simulation and without design export ####################
+######################################################################################
+.PHONY : csyn_nocosim
+csyn_nocosim : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation and without design export")
+	@cd $(OUT_DIR); export FAST_DCP_GEN=1; export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl;
+
+###############################################################
 #### Vivado Batch #############################################
 ###############################################################
 .PHONY : dcp
@@ -100,8 +122,8 @@ dcp : $(SOURCE_DEPEND)
 ###############################################################
 #### Vivado Batch without co-simulation #######################
 ###############################################################
-.PHONY : dcp_fast
-dcp_fast : $(SOURCE_DEPEND)
+.PHONY : dcp_nocosim
+dcp_nocosim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation")
 	@cd $(OUT_DIR); export FAST_DCP_GEN=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl; vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
 

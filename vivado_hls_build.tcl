@@ -30,7 +30,7 @@ csynth_design
 
 # Run co-simulation (compares the C/C++ code to the RTL)
 if { [info exists ::env(FAST_DCP_GEN)] == 0 } {
-   cosim_design -O -ldflags ${LDFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool vcs
+   cosim_design -O -ldflags ${LDFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL)
 }
 
 # Copy the IP directory to module source tree
@@ -38,22 +38,27 @@ if { [file isdirectory ${PROJ_DIR}/ip/] != 1 } {
    exec mkdir ${PROJ_DIR}/ip/
 }
 
+# Copy the HLS csynth report
+exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/syn/report/*.rpt"]] ${PROJ_DIR}/ip/.
+
 # Export the Design
-export_design -flow syn -rtl verilog -format ip_catalog
+if { [info exists ::env(SKIP_EXPORT)] == 0 } {
+   export_design -flow syn -rtl verilog -format ip_catalog
 
-# Copy over the .DCP file
-exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/.
+   # Copy over the .DCP file
+   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/.
 
-# Copy the driver to module source tree
-set DRIVER ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/drivers
-if { [file exist  ${DRIVER}] } {
-   set DRIVER ${DRIVER}/[exec ls ${DRIVER}]/src
-   set DRIVER [glob ${DRIVER}/*_hw.h]
-   exec cp -f ${DRIVER} ${PROJ_DIR}/ip/.
+   # Copy the driver to module source tree
+   set DRIVER ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/drivers
+   if { [file exist  ${DRIVER}] } {
+      set DRIVER ${DRIVER}/[exec ls ${DRIVER}]/src
+      set DRIVER [glob ${DRIVER}/*_hw.h]
+      exec cp -f ${DRIVER} ${PROJ_DIR}/ip/.
+   }   
+
+   # Copy the HLS implementation report
+   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/report/verilog/*.rpt"]] ${PROJ_DIR}/ip/.
 }
-
-# Copy the HLS report
-exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/report/verilog/*.rpt"]] ${PROJ_DIR}/ip/.
 
 # Close current solution
 close_solution
