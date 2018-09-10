@@ -28,6 +28,12 @@ export RTL_DIR = $(abspath $(PROJ_DIR)/rtl)
 # Source Files
 export SRC_FILE = $(PROJ_DIR)/sources.tcl
 
+# HLS Simulation Tool [vcs, xsim, modelsim, ncsim, riviera]
+ifndef HLS_SIM_TOOL
+export HLS_SIM_TOOL = vcs
+endif
+
+
 define ACTION_HEADER
 @echo 
 @echo    ================================================================
