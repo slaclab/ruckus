@@ -38,8 +38,9 @@ if { [file isdirectory ${PROJ_DIR}/ip/] != 1 } {
    exec mkdir ${PROJ_DIR}/ip/
 }
 
-# Copy the HLS csynth report
-exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/syn/report/*.rpt"]] ${PROJ_DIR}/ip/.
+# Copy the HLS csynth reports
+set csyn_reports [glob "${OUT_DIR}/${PROJECT}_project/solution1/syn/report/*.rpt"]
+file copy -force {*}$csyn_reports ${PROJ_DIR}/ip/.
 
 # Export the Design
 if { [info exists ::env(SKIP_EXPORT)] == 0 } {
