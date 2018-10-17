@@ -1,5 +1,11 @@
 # ruckus
-Vivado build system
+A Makefile/TCL Vivado build system
+
+# Documentation
+
+[An Introduction to Ruckus](https://docs.google.com/presentation/d/1kvzXiByE8WISo40Xd573DdR7dQU4BpDQGwEgNyeJjTI/edit?usp=sharing)
+
+[Ruckus Homepage](https://confluence.slac.stanford.edu/display/ppareg/Build+System%3A+Vivado+Support)
 
 # List of user defined TCL scripts
 
