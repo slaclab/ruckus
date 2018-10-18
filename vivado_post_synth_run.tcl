@@ -19,6 +19,11 @@ source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 
 set errorDet false
 
+# Work around from artificially generating an "placement" error when using the 
+# read_xdc during the end of the synthesis run (within the context of the synthesis run)
+# Example: "[Vivado 12-1411] Cannot set LOC property of ports, Site location is not valid"
+set_msg_config -suppress -id {Vivado 12-1411}
+
 # Check for "unsafe" timing in the clock interaction report
 set src_xdc [catch {read_xdc [get_files {*.xdc} -of_objects [get_filesets {constrs_1}]]} _RESULT]
 set crossClkRpt [report_clock_interaction -no_header -return_string]
