@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Post-Synthesis Run Script
+# Pre-OPT_DESIGN Run Script
 
 ########################################################
 ## Get variables and Custom Procedures
@@ -17,27 +17,26 @@ source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 
-# Check if Multi-Driven Nets are not allowed
-set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]  
-if { ${AllowMultiDriven} != 1 } {
-   # Get the number of errors and multi-driven nets during synthesis
-   set MDRV [report_drc -quiet -checks {MDRV-1}]
-   # Check if any multi-driven nets during synthesis
-   if { ${MDRV} != 0 } {
-      puts "\n\n\nMulti-driven nets detected during synthesis!!!\n\n"    
-      exit -1
-   }
+set errorDet false
+
+# Check for "unsafe" timing in the clock interaction report
+set crossClkRpt [report_clock_interaction -no_header -return_string]
+if { [regexp {(unsafe)} ${crossClkRpt}] != 0 } { 
+   puts "\n\n\nError: \"Unsafe\" timing in the clock interaction report detected during synthesis!!!\n${crossClkRpt}\n"    
+   set errorDet true
 }
 
-# GUI Related:
-# Disable a refresh due to the changes 
-# in the Version.vhd file during synthesis 
-set_property NEEDS_REFRESH false [current_run]
+# Check for "Unconstrained Clocks" in the clock network report
+set clkRpt [report_clock_networks -return_string]
+if { [regexp {Unconstrained Clocks} ${clkRpt}] != 0 } { 
+   puts "\n\n\nError: \"Unconstrained Clocks\" in the clock network report detected during synthesis!!!\n${clkRpt}\n"    
+   set errorDet true
+}
 
-# Write the GIT hash to a file
-set fdOut [open ${SYN_DIR}/git.hash  w]
-puts ${fdOut} $::env(GIT_HASH_LONG)
-close ${fdOut}
-
-# Target specific post_synthesis script
-SourceTclFile ${VIVADO_DIR}/post_synth_run.tcl
+# Check if any post-synthesis errors were detected
+if { ${errorDet} != true } {
+   # Target specific post_synthesis script
+   SourceTclFile ${VIVADO_DIR}/pre_opt_run.tcl
+} else {
+   exit -1
+}
