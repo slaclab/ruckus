@@ -60,6 +60,16 @@ if { $::env(GIT_HASH_LONG) != "" } {
    } 
 } 
 
+# Copy the .ltx file
+set filePath "$::env(OUT_DIR)/debugProbes.ltx"; # Vivado 2016 (or earlier)
+if { [file exists ${filePath}] == 1 } {
+   exec cp -f ${filePath} ${ProjYamlDir}/.
+}
+set filePath "$::env(IMPL_DIR)/debug_nets.ltx"; # Vivado 2017 (or later)
+if { [file exists ${filePath}] == 1 } {
+   exec cp -f ${filePath} ${ProjYamlDir}/.
+}
+
 # Set the defaults directory
 if { [info exists ::env(DEFAULTS_DIR)] != 1 } {
    set defaultsDir "$::env(PROJ_DIR)/config"

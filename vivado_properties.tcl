@@ -17,7 +17,7 @@ set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_pre_synth_run.tcl 
 set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado_post_synth_run.tcl [get_runs synth_1]
 
 # Setup pre and post scripts for implementation
-set_property STEPS.OPT_DESIGN.TCL.PRE                  ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
+set_property STEPS.OPT_DESIGN.TCL.PRE                  ${RUCKUS_DIR}/vivado_pre_opt_run.tcl [get_runs impl_1]
 set_property STEPS.POWER_OPT_DESIGN.TCL.PRE            ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 set_property STEPS.PLACE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
