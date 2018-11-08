@@ -96,13 +96,17 @@ if [ -d "html" ] && [ -f "html/index.html" ]; then
     # Commit the added files with a title and description containing the Travis CI
     # build number and the GitHub commit reference that issued this build.
     echo 'Commit the added files with a title and description containing the Travis CI'
+    echo ${TRAVIS_COMMIT}
+    echo ${TRAVIS_BUILD_NUMBER}
     git commit -m "Deploy code docs to GitHub Pages Travis build: ${TRAVIS_BUILD_NUMBER}" -m "Commit: ${TRAVIS_COMMIT}"
+    git log
 
     # Force push to the remote gh-pages branch.
     # The ouput is redirected to /dev/null to hide any sensitive credential data
     # that might otherwise be exposed.
     echo 'Force push to the remote gh-pages branch'
-    git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
+    #git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
+    git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}"
 else
     echo '' >&2
     echo 'Warning: No documentation (html) files have been found!' >&2
