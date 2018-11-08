@@ -12,9 +12,6 @@ language:
 python:
   - 3.6
 
-stages:
-  - document
-
 # Environment variables
 env:
   global:
@@ -25,19 +22,19 @@ env:
 # Install dependencies
 addons:
   apt:
-    packages:    
+    packages:
       - doxygen
       - doxygen-doc
       - doxygen-latex
       - doxygen-gui
       - graphviz
 
-# Build your code e.g. by calling make
-script:
-  - test true
-
 # Generate and deploy documentation
-after_success:
-  - cd $TRAVIS_BUILD_DIR
-  - chmod +x generateDocumentationAndDeploy.sh
-  - ./generateDocumentationAndDeploy.sh
+jobs:
+  include:
+    - stage: document
+      name: "Generate Documentation"
+      script:
+        - cd $TRAVIS_BUILD_DIR
+        - chmod +x generateDocumentationAndDeploy.sh
+        - ./generateDocumentationAndDeploy.sh
