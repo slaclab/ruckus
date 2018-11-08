@@ -30,6 +30,10 @@
 # copied, modified, propagated, or distributed except according to the terms 
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
+##
+# @file releaseNotes.py
+# Generate release notes for pull requests relative to a tag.
+
 import os
 import sys
 import argparse

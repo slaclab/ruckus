@@ -21,7 +21,7 @@ Here's a full list of user defined TCL scripts:
 | properties.tcl     | vivado_properties.tcl          | 
 | messages.tcl       | vivado_messages.tcl            | 
 | sources.tcl        | vivado_sources.tcl             | 
-| pre_synthesis.tcl  | vivado_pre_synthesiss.tcl      | 
+| pre_synthesis.tcl  | vivado_pre_synthesis.tcl       | 
 | pre_synth_run.tcl  | vivado_pre_synth_run.tcl       | 
 | post_synth_run.tcl | vivado_post_synth_run.tcl      | 
 | post_synthesis.tcl | vivado_post_synthesis.tcl      | 

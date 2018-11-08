@@ -8,6 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_vcs.tcl
+# \brief This script generates the VCS build scripts using Vivado to determine the 
+# build ordering and other dependencies. 
+
 # Get variables and procedures
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
@@ -21,6 +25,7 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
    exit -1
 }
 
+## Checks for VCS versions that ruckus supports
 proc VcsVersionCheck { } {
    # List of supported VCS versions
    set supported "M-2017.03 N-2017.12"
@@ -66,8 +71,6 @@ proc VcsVersionCheck { } {
    
    return ${retVar}
 }
-
-
 
 # Check for version 2016.4 (or later)
 if { [VersionCheck 2016.4] < 0 } {

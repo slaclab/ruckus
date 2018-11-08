@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_env_var.tcl
+# \brief This script set all the common ruckus environmental variables for Vivado
+
 ########################################################
 ## Set Common Environmental variables
 ########################################################

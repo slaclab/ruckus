@@ -8,7 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Pre-Synthesis Run Script
+## \file vivado_pre_synth_run.tcl
+# \brief This script runs at the beginning of the synthesis run (inside of synth_1)
 
 ########################################################
 ## Get variables and Custom Procedures

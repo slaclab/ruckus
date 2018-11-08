@@ -8,7 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Custom Procedure Script
+## \file vivado_proc.tcl
+# \brief This script contains all the custom TLC procedures for Vivado
 
 package require cmdline
 
@@ -16,14 +17,14 @@ package require cmdline
 #### General Functions ########################################
 ###############################################################
 
-# Refresh a Vivado project
+## Refresh a Vivado project
 proc VivadoRefresh { vivadoProject } {
    close_project
    open_project -quiet ${vivadoProject}
    set_property NEEDS_REFRESH false [get_runs {synth_1}]; # Bug fix for open/close project
 }
 
-# Achieve a Vivado Project
+## Achieve a Vivado Project
 proc ArchiveProject { } {
    ## Make a copy of the TCL configurations
    set SYNTH_PRE     [get_property {STEPS.SYNTH_DESIGN.TCL.PRE}                 [get_runs synth_1]]
@@ -83,7 +84,7 @@ proc ArchiveProject { } {
    set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}    [get_runs impl_1]     
 }
 
-# Custom TLC source function
+## Custom TLC source function
 proc SourceTclFile { filePath } {
    if { [file exists ${filePath}] == 1 } {
       source ${filePath}
@@ -93,20 +94,22 @@ proc SourceTclFile { filePath } {
    }
 }
 
+## Returns the FPGA family string
 proc getFpgaFamily { } {
    return [get_property FAMILY [get_property {PART} [current_project]]]
 }
 
-# Get the number of CPUs available on the Linux box
+## Get the number of CPUs available on the Linux box
 proc GetCpuNumber { } {
    return [exec cat /proc/cpuinfo | grep processor | wc -l]
 }
 
-# Function for putting the TCL script into a wait (in units of seconds)
+## Function for putting the TCL script into a wait (in units of seconds)
 proc sleep {N} {
    after [expr {int($N * 1000)}]
 }
 
+## Function for comparing two list
 proc ListComp { List1 List2 } {
    # Refer to https://wiki.tcl.tk/15489 under "[tcl_hack] - 2015-08-14 13:52:07"
    set DiffList {}
@@ -125,6 +128,7 @@ proc ListComp { List1 List2 } {
    return $DiffList
 }
 
+## Function to build all the IP cores
 proc BuildIpCores { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -176,7 +180,7 @@ proc BuildIpCores { } {
    VivadoRefresh ${VIVADO_PROJECT}   
 }
 
-# Copies all IP cores from the build tree to source tree
+## Copies all IP cores from the build tree to source tree
 proc CopyIpCores { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -211,7 +215,7 @@ proc CopyIpCores { } {
    }
 }  
 
-# Copies all IP cores from the build tree to source tree (with source code)
+## Copies all IP cores from the build tree to source tree (with source code)
 proc CopyIpCoresDebug { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -242,7 +246,7 @@ proc CopyIpCoresDebug { } {
    }
 }   
 
-# Copies all block designs from the build tree to source tree
+## Copies all block designs from the build tree to source tree
 proc CopyBdCores { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -270,7 +274,7 @@ proc CopyBdCores { } {
    }
 } 
 
-# Copies all block designs from the build tree to source tree (with source code)
+## Copies all block designs from the build tree to source tree (with source code)
 proc CopyBdCoresDebug { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -299,7 +303,7 @@ proc CopyBdCoresDebug { } {
    }
 } 
 
-# Generate Verilog simulation models for a specific .dcp file
+## Generate Verilog simulation models for a specific .dcp file
 proc DcpToVerilogSim {dcpName} {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    set filePntr [get_files ${dcpName}.dcp]
@@ -321,13 +325,14 @@ proc DcpToVerilogSim {dcpName} {
    }
 }
 
-# Create .MCS PROM
+## Create .MCS PROM
 proc CreatePromMcs { } {   
    if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
       source $::env(RUCKUS_DIR)/vivado_promgen.tcl
    }
 }   
-   
+
+## Create .BIT file   
 proc CreateFpgaBit { } {   
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -353,7 +358,7 @@ proc CreateFpgaBit { } {
    CreatePromMcs
 }
 
-# Create tar.gz of all cpsw files in firmware
+## Create tar.gz of all cpsw files in firmware
 proc CreateCpswTarGz { } {   
    if { [file exists $::env(PROJ_DIR)/yaml/000TopLevel.yaml] == 1 } {
       source $::env(RUCKUS_DIR)/vivado_cpsw.tcl
@@ -362,19 +367,19 @@ proc CreateCpswTarGz { } {
    }
 }
 
-# Create tar.gz of all pyrogue files in firmware
+## Create tar.gz of all pyrogue files in firmware
 proc CreatePyRogueTarGz { } {   
    source $::env(RUCKUS_DIR)/vivado_pyrogue.tcl
 }
 
-# Remove unused code   
+## Remove unused code   
 proc RemoveUnsuedCode { } {
    update_compile_order -quiet -fileset sources_1
    update_compile_order -quiet -fileset sim_1
    remove_files [get_files -filter {IS_AUTO_DISABLED}]
 }
 
-# GIT Build TAG   
+## GIT Build TAG   
 proc GitBuildTag { } { 
    set git_rc [catch {
       if { $::env(GIT_TAG_MSG) != "" } {
@@ -393,7 +398,7 @@ proc GitBuildTag { } {
    }
 }
 
-# Check if you have write permission
+## Check if you have write permission
 proc CheckWritePermission { } {
    set src_rc [catch {exec touch $::env(MODULES)/ruckus/LICENSE.txt}]       
    if {$src_rc} {
@@ -410,7 +415,7 @@ proc CheckWritePermission { } {
 } 
 
 
-# Check for unsupported versions that ruckus does NOT support
+## Check for unsupported versions that ruckus does NOT support
 proc CheckVivadoVersion { } {
    if { [expr { $::env(VIVADO_VERSION) == 2017.1 }] || [expr { $::env(VIVADO_VERSION) < 2014.1 }]} {
       puts "\n\n\n\n\n********************************************************"
@@ -420,7 +425,7 @@ proc CheckVivadoVersion { } {
    }
 } 
 
-# Checking Timing Function
+## Checking Timing Function
 proc CheckTiming { {printTiming true} } {
    # Check for timing and routing errors 
    set WNS [get_property STATS.WNS [get_runs impl_1]]
@@ -463,7 +468,7 @@ proc CheckTiming { {printTiming true} } {
    }
 }
 
-# Check if SDK_SRC_PATH exist, then it checks for a valid path 
+## Check if SDK_SRC_PATH exist, then it checks for a valid path 
 proc CheckSdkSrcPath { } {
    if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
       if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
@@ -480,7 +485,7 @@ proc CheckSdkSrcPath { } {
    return true
 }
 
-# Check project configuration for errors
+## Check project configuration for errors
 proc CheckPrjConfig { fileset } {
 
    # Get variables
@@ -557,7 +562,7 @@ proc CheckPrjConfig { fileset } {
    return [CheckSdkSrcPath]
 }
 
-# Print Message 
+## Print Message for users to open GUI if error detected
 proc PrintOpenGui { errMsg } {
    puts "\n\n\n\n\n********************************************************"
    puts ${errMsg}
@@ -565,7 +570,7 @@ proc PrintOpenGui { errMsg } {
    puts "********************************************************\n\n\n\n\n"
 }
 
-# Check if the Synthesize is completed
+## Check if the Synthesize is completed
 proc CheckSynth { {flags ""} } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    if { ${flags} != "" } {
@@ -645,7 +650,7 @@ proc CheckSynth { {flags ""} } {
    return false
 }
 
-# Check if the Synthesize is completed
+## Check if the Synthesize is completed
 proc CheckIpSynth { ipSynthRun {flags ""} } {
    if { [get_property NEEDS_REFRESH [get_runs ${ipSynthRun}]] == 1 } {
       set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs ${ipSynthRun}\]\] == 1,\n"  
@@ -666,7 +671,7 @@ proc CheckIpSynth { ipSynthRun {flags ""} } {
    return false     
 }
 
-# Check if the Implementation is completed
+## Check if the Implementation is completed
 proc CheckImpl { {flags ""} } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
@@ -714,6 +719,8 @@ proc CheckImpl { {flags ""} } {
    }
    return false   
 }
+
+## Print the VCS build complete message
 proc VcsCompleteMessage {dirPath rogueSim} {
    puts "\n\n********************************************************"
    puts "The VCS simulation script has been generated."
@@ -727,6 +734,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "********************************************************\n\n" 
 }
 
+## Print the DCP build complete message
 proc DcpCompleteMessage { filename } {
    puts "\n\n********************************************************"
    puts "The new .dcp file is located here:"
@@ -734,6 +742,7 @@ proc DcpCompleteMessage { filename } {
    puts "********************************************************\n\n" 
 }
 
+## Check the Vivado version number to a user defined value
 proc VersionCheck { lockVersion {mustBeExact ""} } {
    # Get the Vivado version
    set VersionNumber [version -short]
@@ -760,6 +769,7 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
    }
 }
 
+## Compares the tag release to a user defined value
 proc CompareTags { tag lockTag } {
 
    # Blowoff everything except for the major, minor, and patch numbers
@@ -809,7 +819,7 @@ proc CompareTags { tag lockTag } {
    return ${validTag}
 }
 
-# Check the git and git-lfs versions
+## Check the git and git-lfs versions
 proc CheckGitVersion { } {
    ######################################
    # Define the git/git-lfs version locks
@@ -851,6 +861,7 @@ proc CheckGitVersion { } {
    }     
 }
 
+## Checks the submodule tag release to a user defined value
 proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
 
    # Get the full git submodule string for a particular module
@@ -892,7 +903,7 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
 #### Partial Reconfiguration Functions ########################
 ###############################################################
 
-# Import static checkpoint
+## Import static checkpoint
 proc ImportStaticReconfigDcp { } {
 
    # Get variables
@@ -948,7 +959,7 @@ proc ImportStaticReconfigDcp { } {
    set_property NEEDS_REFRESH false [get_runs synth_1]
 }
 
-# Export partial configuration bin file
+## Export partial configuration bin file
 proc ExportStaticReconfigDcp { } {
 
    # Get variables
@@ -975,7 +986,7 @@ proc ExportStaticReconfigDcp { } {
    }   
 }
 
-# Export partial configuration bin file
+## Export partial configuration bin file
 proc ExportPartialReconfigBin { } {
 
    # Get variables
@@ -995,7 +1006,7 @@ proc ExportPartialReconfigBin { } {
    }
 }
 
-# Export partial configuration bin file
+## Export partial configuration bin file
 proc ExportPartialReconfigBit { } {
 
    # Get variables
@@ -1019,7 +1030,7 @@ proc ExportPartialReconfigBit { } {
 #### Hardware Debugging Functions #############################
 ###############################################################
 
-# Create a Debug Core Function
+## Create a Debug Core Function
 proc CreateDebugCore {ilaName} {
    
    # Delete the Core if it already exist
@@ -1038,18 +1049,18 @@ proc CreateDebugCore {ilaName} {
    reset_run impl_1
 }
 
-# Sets the clock on the debug core
+## Sets the clock on the debug core
 proc SetDebugCoreClk {ilaName clkNetName} {
    set_property port_width 1 [get_debug_ports  ${ilaName}/clk]
    connect_debug_port ${ilaName}/clk [get_nets ${clkNetName}]
 }
 
-# Get Current Debug Probe Function
+## Get Current Debug Probe Function
 proc GetCurrentProbe {ilaName} {
    return ${ilaName}/probe[expr [llength [get_debug_ports ${ilaName}/probe*]] - 1]
 }
 
-# Probe Configuring function
+## Probe Configuring function
 proc ConfigProbe {ilaName netName} {
    
    # determine the probe index
@@ -1071,7 +1082,7 @@ proc ConfigProbe {ilaName netName} {
    create_debug_port ${ilaName} probe
 }
 
-# Write the port map file
+## Write the port map file
 proc WriteDebugProbes {ilaName {filePath ""}} {
 
    # Delete the last unused port
@@ -1096,7 +1107,7 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
 #### Loading Source Code Functions ############################
 ###############################################################
 
-# Open ruckus.tcl file
+## Open ruckus.tcl file
 proc loadRuckusTcl { filePath {flags ""} } {
    puts "loadRuckusTcl: ${filePath} ${flags}"
    # Make a local copy of global variable
@@ -1122,7 +1133,7 @@ proc loadRuckusTcl { filePath {flags ""} } {
    set ::DIR_LIST "$::DIR_LIST ${filePath}"
 }
 
-# Function to load RTL files
+## Function to load RTL files
 proc loadSource args {
    set options {
       {sim_only         "flag for tagging simulation file(s)"}
@@ -1255,7 +1266,7 @@ proc loadSource args {
    }
 } 
 
-# Function to load IP core files
+## Function to load IP core files
 proc loadIpCore args {
    set options {
       {path.arg "" "path to a single file"}
@@ -1337,7 +1348,7 @@ proc loadIpCore args {
    }
 } 
 
-# Function to load block design files
+## Function to load block design files
 proc loadBlockDesign args {
    set options {
       {path.arg "" "path to a single file"}
@@ -1416,7 +1427,7 @@ proc loadBlockDesign args {
    }
 }
 
-# Function to load constraint files
+## Function to load constraint files
 proc loadConstraints args {
    set options {
       {path.arg "" "path to a single file"}

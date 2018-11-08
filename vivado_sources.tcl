@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_sources.tcl
+# \brief This script loads the source code into the Vivado project
+
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################

@@ -8,18 +8,20 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Custom Procedure Script
+## \file vivado_hls_proc.tcl
+# \brief This script contains all the custom TLC procedures for Vivado HLS
 
 ###############################################################
 #### General Functions ########################################
 ###############################################################
 
+## Refreshes the Vivado HLS project
 proc VivadoRefresh { vivadoHlsProject } {
    close_project
    open_project ${vivadoHlsProject}
 }
 
-# Custom TLC source function
+## Custom TLC source function
 proc SourceTclFile { filePath } {
    if { [file exists ${filePath}] == 1 } {
       source ${filePath}
@@ -29,11 +31,12 @@ proc SourceTclFile { filePath } {
    }
 }
 
-# Get the number of CPUs available on the Linux box
+## Get the number of CPUs available on the Linux box
 proc GetCpuNumber { } {
    return [exec cat /proc/cpuinfo | grep processor | wc -l]
 }
 
+## Check for Vivado HLS versions that are supportted by ruckus
 proc HlsVersionCheck { } {
    set VersionNumber [version -short]
    if { ${VersionNumber} == 2014.2 } {
@@ -46,7 +49,7 @@ proc HlsVersionCheck { } {
    }
 }
 
-# Check if the Synthesize is completed
+## Check if the Synthesize is completed
 proc PrintBuildComplete { filename } {
    puts "\n\n********************************************************"
    puts "The new .dcp file is located here:"

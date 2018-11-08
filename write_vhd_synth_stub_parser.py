@@ -42,13 +42,17 @@
 # may be copied, modified, propagated, or distributed except according to 
 # the terms contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
-
+##
+# @file write_vhd_synth_stub_parser.py
+# This script is designed to parse the Vivado "write_vhdl -mode synth_stub"
+# output file back into the user friendly record types.
 
 import os
 import sys
 import re
 
 def proc(line):
+    """Function that processes a line of the VHDL synth_stub file"""
     # Get the port name
     port = line.split(":")[0]
     
@@ -86,8 +90,8 @@ def proc(line):
     # Return the results    
     return retVar
 
-
 def vho(arg):
+    """Function that writes a .vho file from the VHDL synth_stub file"""
     # common define
     entity  = ''
     line    = ''

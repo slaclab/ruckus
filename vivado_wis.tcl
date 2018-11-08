@@ -1,8 +1,9 @@
 ##############################################################################
-## Description: Creates a tcl script that copies the current values of the KotoDpm project's
-##      Linux OS environment variables. The purpose of the init.tcl output script is to
-##      properly establish the environment variables within the Windows version of Vivado without the need
-##      to first load Cygwin. This is useful because while using Vivado with Cygwin, Vivado runs roughly 2x slower.
+## \file vivado_wis.tcl
+# \brief Creates a tcl script that copies the current values of the KotoDpm project's
+# Linux OS environment variables. The purpose of the init.tcl output script is to
+# properly establish the environment variables within the Windows version of Vivado without the need
+# to first load Cygwin. This is useful because while using Vivado with Cygwin, Vivado runs roughly 2x slower.
 ## Dependencies: system_vivado.mk
 ## Author: Joshua Robinson
 ## Author Email: jorobin@umich.edu
