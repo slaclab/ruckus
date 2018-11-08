@@ -35,8 +35,8 @@ addons:
 # Run jobs
 jobs:
   include:
-    - stage: document
-      - cd $TRAVIS_BUILD_DIR
-      - chmod +x generateDocumentationAndDeploy.sh
-      - ./generateDocumentationAndDeploy.sh
-      
+  - stage: document
+    - cd $TRAVIS_BUILD_DIR
+    - chmod +x generateDocumentationAndDeploy.sh
+    - ./generateDocumentationAndDeploy.sh
+
