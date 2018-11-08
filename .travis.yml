@@ -16,9 +16,7 @@ env:
 # Install dependencies
 addons:
   apt:
-    packages:      
-      - ruby
-      - gem      
+    packages:    
       - doxygen
       - doxygen-doc
       - doxygen-latex
@@ -26,7 +24,7 @@ addons:
       - graphviz
       
 # Generate and deploy documentation
-after_success:
+jobs:
   - cd $TRAVIS_BUILD_DIR
   - chmod +x generateDocumentationAndDeploy.sh
   - ./generateDocumentationAndDeploy.sh
