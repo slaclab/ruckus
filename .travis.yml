@@ -17,6 +17,8 @@ env:
 addons:
   apt:
     packages:      
+      - ruby
+      - gem      
       - doxygen
       - doxygen-doc
       - doxygen-latex
