@@ -1,11 +1,11 @@
 #!/bin/sh
 #-----------------------------------------------------------------------------
 # This file is part of 'SLAC Firmware Standard Library'.
-# It is subject to the license terms in the LICENSE.txt file found in the 
-# top-level directory of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of 'SLAC Firmware Standard Library', including this file, 
-# may be copied, modified, propagated, or distributed except according to 
+# It is subject to the license terms in the LICENSE.txt file found in the
+# top-level directory of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of 'SLAC Firmware Standard Library', including this file,
+# may be copied, modified, propagated, or distributed except according to
 # the terms contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 ################################################################################
@@ -37,7 +37,7 @@ __AUTHOR__="Larry Ruckman"
 # the gh-pages branch of a repository specified by GH_REPO_REF.
 # Before this script is used there should already be a gh-pages branch in the
 # repository.
-# 
+#
 ################################################################################
 
 ################################################################################
@@ -109,4 +109,3 @@ else
     echo 'Warning: Not going to push the documentation to GitHub!' >&2
     exit 1
 fi
-
