@@ -33,7 +33,7 @@ addons:
 jobs:
   include:
     - stage: document
-      name: "Generate Documentation"
+      name: "Generate and Deploy Documentation"
       script:
         - cd $TRAVIS_BUILD_DIR
         - chmod +x generateDocumentationAndDeploy.sh
