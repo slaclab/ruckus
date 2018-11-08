@@ -57,9 +57,8 @@ cd $GH_REPO_NAME
 ##### Configure git.
 # Set the push default to simple i.e. push only the current branch.
 git config --global push.default simple
-# Pretend to be an user called Travis CI.
-git config user.name "Travis CI"
-git config user.email "travis@travis-ci.org"
+git config user.name "Larry Ruckman"
+git config user.email "ruckman@slac.stanford.edu"
 
 # Remove everything currently in the gh-pages branch.
 # GitHub is smart enough to know which files have changed and which files have
