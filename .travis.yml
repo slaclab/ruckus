@@ -32,11 +32,12 @@ addons:
       - doxygen-gui
       - graphviz
 
-# Run jobs
-jobs:
-  include:
-  - stage: document
-    - cd $TRAVIS_BUILD_DIR
-    - chmod +x generateDocumentationAndDeploy.sh
-    - ./generateDocumentationAndDeploy.sh
+# Build your code e.g. by calling make
+script:
+  - test true
 
+# Generate and deploy documentation
+after_success:
+  - cd $TRAVIS_BUILD_DIR
+  - chmod +x generateDocumentationAndDeploy.sh
+  - ./generateDocumentationAndDeploy.sh
