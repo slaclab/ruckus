@@ -8,6 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_gui.tcl
+# \brief This script launches the Vivado HLS interface GUI mode with all the 
+# ruckus procedures and environmental variables included 
+
 # Get variables and Custom Procedures and common properties
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl

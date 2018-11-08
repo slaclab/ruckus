@@ -8,7 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Vivado PROMGEN Build Script
+## \file vivado_promgen.tcl
+# \brief This script builds the .MCS PROM file
 
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl

@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_pyrogue.tcl
+# \brief This script tarballs all the rogue python source code
+
 # Get variables and Custom Procedures
 source $::env(RUCKUS_DIR)/vivado_env_var.tcl
 

@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_sdk_elf.tcl
+# \brief This script builds the .elf file
+
 # Project SDK Run Script
 
 #############################

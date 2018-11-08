@@ -8,7 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Project Batch-Mode Build Script
+## \file vivado_project.tcl
+# \brief This script create the Vivado project
 
 ########################################################
 ## Get variables and Custom Procedures

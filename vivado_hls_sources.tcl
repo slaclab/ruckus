@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_hls_sources.tcl
+# \brief This script loads the source code into the Vivado HLS project
+
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source ${RUCKUS_DIR}/vivado_hls_env_var.tcl

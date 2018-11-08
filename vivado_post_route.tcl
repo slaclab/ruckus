@@ -8,7 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Post-Route Build Script
+## \file vivado_post_route.tcl
+# \brief This script runs at the end of the place and route (outside of impl_1)
 
 ########################################################
 ## Get variables and Custom Procedures

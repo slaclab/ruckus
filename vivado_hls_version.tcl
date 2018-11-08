@@ -8,6 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_hls_version.tcl
+# \brief This script checks the Vivado HLS version for versions supported by ruckus
+
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source -quiet ${RUCKUS_DIR}/vivado_hls_env_var.tcl

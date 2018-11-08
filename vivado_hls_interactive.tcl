@@ -8,6 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+## \file vivado_hls_interactive.tcl
+# \brief This script launches the Vivado HLS interface TCL mode with all the 
+# ruckus procedures and environmental variables included 
+
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
 source ${RUCKUS_DIR}/vivado_hls_env_var.tcl

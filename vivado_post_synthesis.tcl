@@ -8,7 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Post-Synthesis Build Script
+## \file vivado_post_synthesis.tcl
+# \brief This script runs end the synthesis run (outside of synth_1)
 
 ########################################################
 ## Get variables and Custom Procedures
