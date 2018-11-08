@@ -51,6 +51,7 @@ mkdir code_docs
 cd code_docs
 
 # Get the current gh-pages branch
+composer config github-oauth.github.com ${GH_TOKEN}
 git clone -b gh-pages https://git@$GH_REPO_REF
 cd $GH_REPO_NAME
 
@@ -95,9 +96,6 @@ if [ -d "html" ] && [ -f "html/index.html" ]; then
 
     # Commit the added files with a title and description containing the Travis CI
     # build number and the GitHub commit reference that issued this build.
-    echo 'Commit the added files with a title and description containing the Travis CI'
-    echo ${TRAVIS_COMMIT}
-    echo ${TRAVIS_BUILD_NUMBER}
     git commit -m "Deploy code docs to GitHub Pages Travis build: ${TRAVIS_BUILD_NUMBER}" -m "Commit: ${TRAVIS_COMMIT}"
     git log
 
