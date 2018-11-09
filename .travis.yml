@@ -29,13 +29,13 @@ addons:
       - doxygen-gui
       - graphviz
 
-stage:
+stages:
     # On master branch, generate and deploy the documentation
     # (but not on PRs to master).
-    - generate_and_deploy
+    - name: generate_and_deploy
       if: branch = master AND NOT (type = pull_request)
     # On all other branches only try to generate the documentation
-    - generate
+    - name: generate
       if: branch != master
 
 
