@@ -92,7 +92,7 @@ doxygen $DOXYFILE 2>&1 | tee doxygen.log
 # both exist. This is a good indication that Doxygen did it's work.
 if [ -d "html" ] && [ -f "html/index.html" ]; then
 
-    if [ $DEPLOY == 1 ]; then
+    if [ $DEPLOY -eq 1 ]; then
         echo 'Uploading documentation to the gh-pages branch...'
         # Add everything in this directory (the Doxygen code documentation) to the
         # gh-pages branch.

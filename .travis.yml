@@ -30,13 +30,14 @@ addons:
       - graphviz
 
 stages:
-    # On master branch, generate and deploy the documentation
-    # (but not on PRs to master).
+    # On master branch (but not on PRs to master) or in tagged releases
+    # generate and deploy the documentation
     - name: generate_and_deploy
-      if: branch = master AND NOT (type = pull_request)
-    # On all other branches only try to generate the documentation
+      if: (branch = master AND NOT (type = pull_request)) OR tag IS present
+    # On all other branches or PRs, but not on tagged releases
+    # only try to generate the documentation
     - name: generate
-      if: branch != master
+      if: (branch != master OR (type == pull_request)) AND tag IS blank
 
 
 # Generate and deploy documentation
