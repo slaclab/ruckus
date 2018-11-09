@@ -34,7 +34,10 @@ __AUTHOR__="Larry Ruckman"
 # branch, please go to https://gist.github.com/vidavidorra/846a2fc7dd51f4fe56a0
 #
 # This script will generate Doxygen documentation and push the documentation to
-# the gh-pages branch of a repository specified by GH_REPO_REF.
+# the gh-pages branch of a repository specified by GH_REPO_REF. The script
+# receives an argument (0 or 1) which indicates if the generated documentation
+# should be deployed (0: no, 1: yes).
+#
 # Before this script is used there should already be a gh-pages branch in the
 # repository.
 #
@@ -42,6 +45,9 @@ __AUTHOR__="Larry Ruckman"
 
 ################################################################################
 ##### Setup this script and get the current gh-pages branch.               #####
+# Get deployment argument (0: do not deploy, 1: deploy)
+DEPLOY=$1
+
 echo 'Setting up the script...'
 # Exit with nonzero exit code if anything fails
 set -e
@@ -86,23 +92,25 @@ doxygen $DOXYFILE 2>&1 | tee doxygen.log
 # both exist. This is a good indication that Doxygen did it's work.
 if [ -d "html" ] && [ -f "html/index.html" ]; then
 
-    echo 'Uploading documentation to the gh-pages branch...'
-    # Add everything in this directory (the Doxygen code documentation) to the
-    # gh-pages branch.
-    # GitHub is smart enough to know which files have changed and which files have
-    # stayed the same and will only update the changed files.
-    git add --all
+    if [ $DEPLOY == 1 ]; then
+        echo 'Uploading documentation to the gh-pages branch...'
+        # Add everything in this directory (the Doxygen code documentation) to the
+        # gh-pages branch.
+        # GitHub is smart enough to know which files have changed and which files have
+        # stayed the same and will only update the changed files.
+        git add --all
 
-    # Commit the added files with a title and description containing the Travis CI
-    # build number and the GitHub commit reference that issued this build.
-    git commit -m "Deploy code docs to GitHub Pages Travis build: ${TRAVIS_BUILD_NUMBER}" -m "Commit: ${TRAVIS_COMMIT}" || true
-    git log
+        # Commit the added files with a title and description containing the Travis CI
+        # build number and the GitHub commit reference that issued this build.
+        git commit -m "Deploy code docs to GitHub Pages Travis build: ${TRAVIS_BUILD_NUMBER}" -m "Commit: ${TRAVIS_COMMIT}" || true
+        git log
 
-    # Force push to the remote gh-pages branch.
-    # The ouput is redirected to /dev/null to hide any sensitive credential data
-    # that might otherwise be exposed.
-    echo 'Force push to the remote gh-pages branch'
-    git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
+        # Force push to the remote gh-pages branch.
+        # The ouput is redirected to /dev/null to hide any sensitive credential data
+        # that might otherwise be exposed.
+        echo 'Force push to the remote gh-pages branch'
+        git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
+    fi
 else
     echo '' >&2
     echo 'Warning: No documentation (html) files have been found!' >&2
