@@ -20,18 +20,26 @@ source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 
 set errorDet false
 
+# Check the TIG variable
+set TIG [expr {[info exists ::env(TIG)] && [string is true -strict $::env(TIG)]}]
+if { ${TIG} == 1 } { 
+   set notTIG false 
+} else { 
+   set notTIG true 
+}
+
 # Check for "unsafe" timing in the clock interaction report
 set crossClkRpt [report_clock_interaction -no_header -return_string]
 if { [regexp {(unsafe)} ${crossClkRpt}] != 0 } { 
    puts "\n\n\nError: \"Unsafe\" timing in the clock interaction report detected during synthesis!!!\n${crossClkRpt}\n"    
-   set errorDet true
+   set errorDet ${notTIG}
 }
 
 # Check for "Unconstrained Clocks" in the clock network report
 set clkRpt [report_clock_networks -return_string]
 if { [regexp {Unconstrained Clocks} ${clkRpt}] != 0 } { 
    puts "\n\n\nError: \"Unconstrained Clocks\" in the clock network report detected during synthesis!!!\n${clkRpt}\n"    
-   set errorDet true
+   set errorDet ${notTIG}
 }
 
 # Check if any post-synthesis errors were detected
