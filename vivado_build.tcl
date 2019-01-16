@@ -39,7 +39,8 @@ update_compile_order -quiet -fileset sources_1
 ########################################################
 ## Check project configuration for errors
 ########################################################
-if { [CheckPrjConfig sources_1] != true } {
+if { [CheckPrjConfig sources_1] != true ||
+     [CheckPrjConfig sim_1]     != true } {
    exit -1
 }
 
