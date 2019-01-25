@@ -77,6 +77,14 @@ else
    export TMP_DIR=/tmp/build
 endif
 
+# Simulation Variables
+ifndef VIVADO_PROJECT_SIM
+export VIVADO_PROJECT_SIM = $(PROJECT)
+endif
+ifndef VIVADO_PROJECT_SIM_TIME
+export VIVADO_PROJECT_SIM_TIME = 1000 ns
+endif
+
 # Synthesis Variables
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
@@ -359,12 +367,20 @@ yaml : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
 	
 ###############################################################
-#### Vivado WIS ##############################################
+#### Vivado WIS ###############################################
 ###############################################################
 .PHONY : wis
 wis : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_wis.tcl
+
+###############################################################
+#### Vivado Simulation ########################################
+###############################################################
+.PHONY : sim
+sim : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Simulation")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sim.tcl
 
 ###############################################################
 #### Makefile Targets #########################################
