@@ -50,7 +50,7 @@ if { [info exists ::env(SKIP_EXPORT)] == 0 } {
    export_design -flow syn -rtl verilog -format ip_catalog
 
    # Copy over the .DCP file
-   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/.
+   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/${PROJECT}.dcp
 
    # Copy the driver to module source tree
    set DRIVER ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/drivers
@@ -61,7 +61,7 @@ if { [info exists ::env(SKIP_EXPORT)] == 0 } {
    }   
 
    # Copy the HLS implementation report
-   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/report/verilog/*.rpt"]] ${PROJ_DIR}/ip/.
+   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/report/verilog/*.rpt"]] ${PROJ_DIR}/ip/${PROJECT}.rpt
 }
 
 # Close current solution
