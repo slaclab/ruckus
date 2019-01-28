@@ -17,7 +17,7 @@ source  -quiet ${RUCKUS_DIR}/vivado_hls_env_var.tcl
 source  -quiet ${RUCKUS_DIR}/vivado_hls_proc.tcl 
 
 # Get the file name and path of the new .dcp file
-set filename [exec ls [glob "${PROJ_DIR}/ip/${PROJECT}.dcp"]]
+set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]
 set fbasename [file rootname [file tail ${filename}]]
 
 # Open the check point
