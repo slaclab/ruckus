@@ -41,6 +41,9 @@ set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
 set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
 
 # Automatically use the checkpoint from the previous run
+if { [expr { ${VIVADO_VERSION} >= 2019.1 }] } {
+   set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs synth_1]
+}
 if { [expr { ${VIVADO_VERSION} >= 2018.3 }] } {
    set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs impl_1]
 }
