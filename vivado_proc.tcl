@@ -21,7 +21,6 @@ package require cmdline
 proc VivadoRefresh { vivadoProject } {
    close_project
    open_project -quiet ${vivadoProject}
-   set_property NEEDS_REFRESH false [get_runs {synth_1}]; # Bug fix for open/close project
 }
 
 ## Achieve a Vivado Project
