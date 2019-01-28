@@ -23,14 +23,6 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 if { [CheckTiming false] == true } {
    # Make the GIT build tag
    GitBuildTag
-
-   ########################################################
-   ## Make a copy of the routed .DCP file for future use 
-   ## in an "incremental compile" build
-   ########################################################
-   if { [expr { ${VIVADO_VERSION} >= 2015.3 }] } {
-      exec cp -f ${IMPL_DIR}/${PRJ_TOP}_routed.dcp ${OUT_DIR}/IncrementalBuild.dcp
-   }
    
    #########################################################
    ## Check if need to include python files with build
