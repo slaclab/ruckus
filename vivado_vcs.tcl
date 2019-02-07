@@ -172,7 +172,7 @@ export_simulation -absolute_path -force -simulator vcs -include ${include} -defi
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################   
-set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueStreamBridge.vhd RogueMemoryBridge.vhd RogueSideBand.vhd}]
+set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueTcpStream.vhd RogueTcpMemory.vhd RogueSideBand.vhd}]
 set rogueSimEn false
 if { ${rogueSimPath} != "" } {
 
