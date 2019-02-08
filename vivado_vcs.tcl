@@ -175,7 +175,7 @@ export_simulation -absolute_path -force -simulator vcs -include ${include} -defi
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################   
-set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueStreamSim.vhd}]
+set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueTcpStream.vhd RogueTcpMemory.vhd RogueSideBand.vhd}]
 set rogueSimEn false
 if { ${rogueSimPath} != "" } {
 
@@ -212,7 +212,7 @@ if { ${rogueSimPath} != "" } {
    close ${envScript}          
 
    # Find the surf/axi/simlink/src directory
-   set simTbDirName [file dirname ${rogueSimPath}]
+   set simTbDirName [file dirname [lindex ${rogueSimPath} 0]]
    set simLinkDir   ${simTbDirName}/../src/
 
    # Move the working directory to the simlink directory
