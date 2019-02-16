@@ -77,7 +77,7 @@ else
    export TMP_DIR=/tmp/build
 endif
 
-# Simulation Variables
+# Vivado Simulation Variables
 ifndef VIVADO_PROJECT_SIM
 export VIVADO_PROJECT_SIM = $(PROJECT)
 endif
@@ -377,8 +377,8 @@ wis : $(SOURCE_DEPEND)
 ###############################################################
 #### Vivado Simulation ########################################
 ###############################################################
-.PHONY : sim
-sim : $(SOURCE_DEPEND)
+.PHONY : xsim
+xsim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Simulation")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sim.tcl
 
