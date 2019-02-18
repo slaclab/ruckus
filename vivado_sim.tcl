@@ -45,9 +45,10 @@ if { [CheckPrjConfig sources_1] != true ||
 }
 
 ########################################################
-## Check if we re-synthesis any of the IP cores
+## Prepare simulation and check IP cores
 ########################################################
-BuildIpCores
+generate_target {simulation} [get_ips]
+export_ip_user_files -no_script
 
 ########################################################
 ## Simulate
