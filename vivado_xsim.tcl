@@ -8,8 +8,8 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_sim.tcl
-# \brief This script simulates the Vivado project in batch mode
+## \file vivado_xsim.tcl
+# \brief This script proforms a Vivado XSIM simulation
 
 ########################################################
 ## Get variables and Custom Procedures
@@ -49,20 +49,24 @@ generate_target {simulation} [get_ips]
 export_ip_user_files -no_script
 
 ########################################################
-## Simulate
+## Simulate Process
 ########################################################
 set sim_rc [catch { 
-   ## Set sim properties
+   
+   # Set sim properties
    set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
    set_property top_lib xil_defaultlib [get_filesets sim_1]
-   ## Launch the sim
+   
+   # Launch the xsim
    launch_simulation
-   ## Run simulation for time specified
+   
+   # Run simulation for time specified
    set VIVADO_PROJECT_SIM_TIME "run ${VIVADO_PROJECT_SIM_TIME}"; # set cmd
    eval ${VIVADO_PROJECT_SIM_TIME}; # run cmd
    set src_rc [catch { 
       wait_on_run sim_1
    } _RESULT]     
+   
 } _SIM_RESULT]    
 
 ########################################################
