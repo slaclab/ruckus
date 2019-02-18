@@ -68,14 +68,14 @@ set sim_rc [catch {
 } _SIM_RESULT]    
 
 ########################################################
+# Target specific XSIM script
+########################################################
+SourceTclFile ${VIVADO_DIR}/xsim.tcl
+
+########################################################
 # Check for error return code during the process
 ########################################################
 if { ${sim_rc} } {
    PrintOpenGui ${_SIM_RESULT}
    exit -1
 }
-
-########################################################
-## Check that the process is completed
-########################################################
-# todo
