@@ -9,7 +9,7 @@
 ##############################################################################
 
 ## \file vivado_xsim.tcl
-# \brief This script proforms a Vivado XSIM simulation
+# \brief This script performs a Vivado XSIM simulation
 
 ########################################################
 ## Get variables and Custom Procedures
