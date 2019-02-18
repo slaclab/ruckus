@@ -293,14 +293,6 @@ gui : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado_gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
-#### Vivado VCS ###############################################
-###############################################################
-.PHONY : vcs
-vcs : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado VCS")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_vcs.tcl
-
-###############################################################
 #### Vivado Sythnesis Only ####################################
 ###############################################################
 .PHONY : syn
@@ -371,12 +363,20 @@ wis : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_wis.tcl
 
 ###############################################################
-#### Vivado Simulation ########################################
+#### Vivado XSIM Simulation ###################################
 ###############################################################
 .PHONY : xsim
 xsim : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Simulation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sim.tcl
+	$(call ACTION_HEADER,"Vivado XSIM Simulation")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_xsim.tcl
+
+###############################################################
+#### Vivado VCS Simulation ####################################
+###############################################################
+.PHONY : vcs
+vcs : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado VCS Simulation")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_vcs.tcl
 
 ###############################################################
 #### Makefile Targets #########################################
