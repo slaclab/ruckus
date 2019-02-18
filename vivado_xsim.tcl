@@ -34,7 +34,7 @@ source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
 ########################################################
 ## Update the complie order
 ########################################################
-update_compile_order -quiet -fileset sources_1
+update_compile_order -quiet -fileset sim_1
 
 ########################################################
 ## Check project configuration for errors
