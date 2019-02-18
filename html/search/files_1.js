@@ -30,5 +30,6 @@ var searchData=
   ['vivado_5fsdk_5fprj_2etcl',['vivado_sdk_prj.tcl',['../vivado__sdk__prj_8tcl.html',1,'']]],
   ['vivado_5fsources_2etcl',['vivado_sources.tcl',['../vivado__sources_8tcl.html',1,'']]],
   ['vivado_5fvcs_2etcl',['vivado_vcs.tcl',['../vivado__vcs_8tcl.html',1,'']]],
-  ['vivado_5fwis_2etcl',['vivado_wis.tcl',['../vivado__wis_8tcl.html',1,'']]]
+  ['vivado_5fwis_2etcl',['vivado_wis.tcl',['../vivado__wis_8tcl.html',1,'']]],
+  ['vivado_5fxsim_2etcl',['vivado_xsim.tcl',['../vivado__xsim_8tcl.html',1,'']]]
 ];
