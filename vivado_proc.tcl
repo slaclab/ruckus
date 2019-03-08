@@ -302,6 +302,28 @@ proc CopyBdCoresDebug { } {
    }
 } 
 
+## Generate the wrappers for all the BD files and add them to sources_1 fileset
+proc GenerateBdWrappers { } {
+
+   # Get a list of .bd files
+   set bdList [get_files {*.bd}]
+
+   # Check if any .bd files exist
+   if { ${bdList} != "" } {
+      # Loop through the has block designs
+      foreach bdpath ${bdList} {
+         # Create the wrapper
+         make_wrapper -force -files [get_files $bdpath] -top   
+         # Get the base dir and file name
+         set bd_wrapper_path [file dirname [lindex ${bdpath} 0]]
+         set wrapperFileName [exec ls ${bd_wrapper_path}/hdl/]
+         # Add the VHDL (or Verilog) to the project
+         add_files -force -fileset sources_1 ${bd_wrapper_path}/hdl/${wrapperFileName}
+      }
+   }
+   
+}
+
 ## Generate Verilog simulation models for a specific .dcp file
 proc DcpToVerilogSim {dcpName} {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
