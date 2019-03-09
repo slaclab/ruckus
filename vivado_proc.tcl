@@ -359,10 +359,15 @@ proc CreateFpgaBit { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   set topModule [get_property top [get_filesets {sources_1}]]
 
-   # Check if need to include YAML files with the .BIT file
+   # Copy the .BIT file to image directory
    exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${imagePath}.bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${imagePath}.bit.gz
+   exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+   
+   # Copy the .BIN file to image directory
+   exec cp -f ${IMPL_DIR}/${PROJECT}.bin ${imagePath}.bin
+   exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz   
 
    # Copy the .ltx file (if it exists)
    if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
