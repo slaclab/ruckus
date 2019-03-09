@@ -362,11 +362,11 @@ proc CreateFpgaBit { } {
    set topModule [get_property top [get_filesets {sources_1}]]
 
    # Copy the .BIT file to image directory
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${imagePath}.bit
+   exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
    exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
    
    # Copy the .BIN file to image directory
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bin ${imagePath}.bin
+   exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
    exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz   
 
    # Copy the .ltx file (if it exists)
