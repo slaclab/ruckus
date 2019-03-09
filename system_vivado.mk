@@ -247,8 +247,8 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 ###############################################################
 #### Vivado Batch #############################################
 ###############################################################
-.PHONY : bit bin mcs
-bit bin mcs : $(SOURCE_DEPEND)
+.PHONY : bit bin prom
+bit bin prom : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.bin/.mcs")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
