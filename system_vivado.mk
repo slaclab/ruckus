@@ -247,34 +247,11 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 ###############################################################
 #### Vivado Batch #############################################
 ###############################################################
-$(IMPL_DIR)/$(PROJECT).bit : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Build")
+.PHONY : bit bin mcs
+bit bin mcs : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.bin/.mcs")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
-$(IMPL_DIR)/$(PROJECT).bin : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Build")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
-
-###############################################################
-#### Bitfile Copy #############################################
-###############################################################
-$(IMAGES_DIR)/$(IMAGENAME).bit : $(IMPL_DIR)/$(PROJECT).bit
-	@cp $< $@
-	@gzip -c -f -9 $@ > $@.gz
-	@echo ""
-	@echo "Bit file copied to $@"
-	@$(COPY_PROBES_FILE)
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
-
-###############################################################
-#### Bitfile Copy #############################################
-###############################################################
-$(IMAGES_DIR)/$(IMAGENAME).bin : $(IMPL_DIR)/$(PROJECT).bin
-	@cp $< $@
-	@gzip -c -f -9 $@ > $@.gz
-	@echo ""
-	@echo "Bit file copied to $@"
-	@$(COPY_PROBES_FILE)
-	@echo "Don't forget to 'git commit and git push' the .bin.gz file when the image is stable!"
+	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
 
 ###############################################################
 #### Vivado Interactive #######################################
@@ -307,16 +284,6 @@ syn : $(SOURCE_DEPEND)
 dcp : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis DCP")
 	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
-
-###############################################################
-#### Prom #####################################################
-###############################################################
-$(IMAGES_DIR)/$(IMAGENAME).mcs: $(IMPL_DIR)/$(PROJECT).bit
-	$(call ACTION_HEADER,"PROM Generate")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_promgen.tcl
-	@echo ""
-	@echo "Prom file copied to $@"
-	@echo "Don't forget to 'git commit and git push' the .mcs.gz file when the image is stable!"
 
 ###############################################################
 #### Vivado SDK ###############################################
@@ -353,7 +320,7 @@ pyrogue : $(SOURCE_DEPEND)
 yaml : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
-	
+
 ###############################################################
 #### Vivado WIS ###############################################
 ###############################################################
@@ -375,7 +342,7 @@ xsim : $(SOURCE_DEPEND)
 ###############################################################
 .PHONY : vcs
 vcs : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado VCS Simulation")
+	$(call ACTION_HEADER,"Generating the VCS Simulation scripts")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_vcs.tcl
 
 ###############################################################
@@ -386,15 +353,6 @@ depend      : $(VIVADO_DEPEND)
 
 .PHONY      : sources
 sources     : $(SOURCE_DEPEND)
-
-.PHONY      : bit
-bit         : $(IMAGES_DIR)/$(IMAGENAME).bit
-
-.PHONY      : bin
-bin         : $(IMAGES_DIR)/$(IMAGENAME).bin
-
-.PHONY      : prom
-prom        : bit $(IMAGES_DIR)/$(IMAGENAME).mcs
 
 ###############################################################
 #### Clean ####################################################
