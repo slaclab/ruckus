@@ -15,7 +15,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
 # Target PROMGEN script
-set topModule [get_property top [get_filesets {sources_1}]]
+set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
 set inputFile     "$::env(IMPL_DIR)/${topModule}.bit"
 set outputFile    "$::env(IMPL_DIR)/${topModule}.mcs"
 set outputFilePri "$::env(IMPL_DIR)/${topModule}_primary.mcs"
