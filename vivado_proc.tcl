@@ -359,7 +359,7 @@ proc CreateFpgaBit { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
-   set topModule [get_property top [get_filesets {sources_1}]]
+   set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
 
    # Copy the .BIT file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
