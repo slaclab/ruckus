@@ -29,5 +29,8 @@ if { [info exists ::env(PRE_SYNTH_ELABORATE)] != 1 || $::env(PRE_SYNTH_ELABORATE
    }   
 }
 
+# Update the BD wrappers
+GenerateBdWrappers
+
 # Target specific pre_synthesis script
 SourceTclFile ${VIVADO_DIR}/pre_synthesis.tcl

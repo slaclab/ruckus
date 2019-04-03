@@ -302,6 +302,28 @@ proc CopyBdCoresDebug { } {
    }
 } 
 
+## Generate the wrappers for all the BD files and add them to sources_1 fileset
+proc GenerateBdWrappers { } {
+
+   # Get a list of .bd files
+   set bdList [get_files {*.bd}]
+
+   # Check if any .bd files exist
+   if { ${bdList} != "" } {
+      # Loop through the has block designs
+      foreach bdpath ${bdList} {
+         # Create the wrapper
+         make_wrapper -force -files [get_files $bdpath] -top   
+         # Get the base dir and file name
+         set bd_wrapper_path [file dirname [lindex ${bdpath} 0]]
+         set wrapperFileName [exec ls ${bd_wrapper_path}/hdl/]
+         # Add the VHDL (or Verilog) to the project
+         add_files -force -fileset sources_1 ${bd_wrapper_path}/hdl/${wrapperFileName}
+      }
+   }
+   
+}
+
 ## Generate Verilog simulation models for a specific .dcp file
 proc DcpToVerilogSim {dcpName} {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
@@ -337,10 +359,15 @@ proc CreateFpgaBit { } {
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
 
-   # Check if need to include YAML files with the .BIT file
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${imagePath}.bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${imagePath}.bit.gz
+   # Copy the .BIT file to image directory
+   exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
+   exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+   
+   # Copy the .BIN file to image directory
+   exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
+   exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz   
 
    # Copy the .ltx file (if it exists)
    if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
