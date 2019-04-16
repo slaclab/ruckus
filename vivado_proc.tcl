@@ -364,6 +364,7 @@ proc CreateFpgaBit { } {
    # Copy the .BIT file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
    exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+   puts "Bit file copied to ${imagePath}.bit"
    
    # Copy the .BIN file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
