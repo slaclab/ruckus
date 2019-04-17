@@ -58,6 +58,8 @@ if { ${inteface} == "SPIx8" } {
    # Copy the images from build tree to source tree
    exec cp -f ${outputFilePri} ${imagesFilePri}
    exec cp -f ${outputFileSec} ${imagesFileSec}
+   puts "PROM file copied to ${imagesFilePri}"
+   puts "PROM file copied to ${imagesFileSec}"
    # Create a compressed version of the image files
    exec gzip -c -f -9 ${imagesFilePri} > ${imagesFilePri}.gz   
    exec gzip -c -f -9 ${imagesFileSec} > ${imagesFileSec}.gz   
@@ -65,6 +67,7 @@ if { ${inteface} == "SPIx8" } {
 } else {
    # Copy the image from build tree to source tree
    exec cp -f ${outputFile} ${imagesFile}
+   puts "PROM file copied to ${imagesFile}"
    # Create a compressed version of the image file
    exec gzip -c -f -9 ${imagesFile} > ${imagesFile}.gz
 }

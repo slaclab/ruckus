@@ -316,7 +316,7 @@ proc GenerateBdWrappers { } {
          make_wrapper -force -files [get_files $bdpath] -top   
          # Get the base dir and file name
          set bd_wrapper_path [file dirname [lindex ${bdpath} 0]]
-         set wrapperFileName [exec ls ${bd_wrapper_path}/hdl/]
+         set wrapperFileName [lsearch -inline [exec ls ${bd_wrapper_path}/hdl/] *_wrapper.vhd]
          # Add the VHDL (or Verilog) to the project
          add_files -force -fileset sources_1 ${bd_wrapper_path}/hdl/${wrapperFileName}
       }
@@ -364,6 +364,7 @@ proc CreateFpgaBit { } {
    # Copy the .BIT file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
    exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+   puts "Bit file copied to ${imagePath}.bit"
    
    # Copy the .BIN file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
