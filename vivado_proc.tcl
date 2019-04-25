@@ -381,6 +381,9 @@ proc CreateFpgaBit { } {
       puts "No Debug Probes found"   
    }
    
+   # Try to generate the .HDF file
+   write_hwdef -force -file ${imagePath}.hdf   
+   
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs
 }
