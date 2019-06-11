@@ -42,7 +42,7 @@ endif
 
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 0
-export RECONFIG_STATIC_HASH = 0
+export RECONFIG_STATIC_HASH = ""
 else
 export RECONFIG_STATIC_FILE = $(notdir $(RECONFIG_CHECKPOINT))
 export RECONFIG_STATIC_HASH = -$(shell echo '$(RECONFIG_STATIC_FILE)' | awk -F'-' '{print $$5}' )
