@@ -117,7 +117,11 @@ ifeq ($(GIT_STATUS),)
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
    export GIT_HASH_MSG   = $(GIT_HASH_LONG)
-   export IMAGENAME      = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
+   ifeq ($(RECONFIG_STATIC_HASH), 0)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
+   else
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
+   endif
 else
    export GIT_TAG_MSG    = 
    export GIT_HASH_MSG   = dirty
