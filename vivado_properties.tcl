@@ -37,8 +37,10 @@ if { [expr { ${VIVADO_VERSION} >= 2016.1 }] } {
 # Enable physical optimization for register replication
 set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
 
-# Enable .bin generation for partial reconfiguration
-set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
+if { $::env(GEN_BIN_IMAGE) != 0 } {
+   # Enable .bin generation for partial reconfiguration
+   set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
+}
 
 # Automatically use the checkpoint from the previous run
 if { [expr { ${VIVADO_VERSION} >= 2019.1 }] } {

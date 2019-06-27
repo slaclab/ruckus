@@ -40,6 +40,14 @@ ifndef GIT_BYPASS
 export GIT_BYPASS = 1
 endif
 
+ifndef GZIP_BUILD_IMAGE
+export GZIP_BUILD_IMAGE = 0
+endif
+
+ifndef GEN_BIN_IMAGE
+export GEN_BIN_IMAGE = 0
+endif
+
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 0
 export RECONFIG_STATIC_HASH = 0
@@ -251,9 +259,9 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 ###############################################################
 #### Vivado Batch #############################################
 ###############################################################
-.PHONY : bit bin prom
-bit bin prom : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.bin/.mcs")
+.PHONY : bit mcs prom
+bit mcs prom: $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
 
