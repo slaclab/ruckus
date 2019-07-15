@@ -363,12 +363,20 @@ proc CreateFpgaBit { } {
 
    # Copy the .BIT file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
    puts "Bit file copied to ${imagePath}.bit"
    
+   # Check if gzip-ing the image files
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {    
+      exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+   }
+   
    # Copy the .BIN file to image directory
-   exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
-   exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz   
+   if { $::env(GEN_BIN_IMAGE) != 0 } {
+      exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
+      if { $::env(GZIP_BUILD_IMAGE) != 0 } {  
+         exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz 
+      }   
+   }
 
    # Copy the .ltx file (if it exists)
    if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
@@ -1036,7 +1044,7 @@ proc ExportPartialReconfigBin { } {
    }
 }
 
-## Export partial configuration bin file
+## Export partial configuration bit file
 proc ExportPartialReconfigBit { } {
 
    # Get variables

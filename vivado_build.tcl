@@ -177,12 +177,14 @@ if { [expr { ${VIVADO_VERSION} >= 2016.4 }] } {
 ## Export partial configuration bit file(s)
 ########################################################
 if { ${RECONFIG_CHECKPOINT} != 0 } {
-   ExportPartialReconfigBin
+   if { $::env(GEN_BIN_IMAGE) != 0 } {
+      ExportPartialReconfigBin
+   }
    ExportPartialReconfigBit
 }
 
 ########################################################
-## Copy the .bit/.bin/.mcs image files
+## Copy the .bit/.mcs image files
 ########################################################
 CreateFpgaBit
 
