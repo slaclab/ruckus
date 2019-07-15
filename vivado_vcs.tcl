@@ -251,6 +251,16 @@ set vlogan_opts_new   "${vlogan_opts_old} ${compOpt}"
 set vhdlan_opts_new   "${vhdlan_opts_old} ${compOpt}"
 set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
 
+# Copy of all the Xilinx IP core datafile 
+set list_rc [catch { 
+   set list [glob -directory ${simTbOutDir}/vcs/ *.dat *.coe *.edif *.mif]
+} _RESULT] 
+if { ${list} != "" } {
+   foreach pntr ${list} {
+      exec cp -f ${pntr} ${simTbOutDir}/.
+   }
+}
+
 # open the files
 set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
 set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
