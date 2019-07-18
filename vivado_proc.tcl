@@ -452,15 +452,23 @@ proc CheckWritePermission { } {
    } 
 } 
 
-
-## Check for unsupported versions that ruckus does NOT support
+## Check for unsupported versions that ruckus does NOT support (https://confluence.slac.stanford.edu/x/n4-jCg)
 proc CheckVivadoVersion { } {
+   # Check for unsupported versions of ruckus
    if { [expr { $::env(VIVADO_VERSION) == 2017.1 }] || [expr { $::env(VIVADO_VERSION) < 2014.1 }]} {
       puts "\n\n\n\n\n********************************************************"
-      puts "ruckus does NOT support Vivado ${VIVADO_VERSION}"
+      puts "ruckus does NOT support Vivado $::env(VIVADO_VERSION)"
+      puts "https://confluence.slac.stanford.edu/x/n4-jCg"
       puts "********************************************************\n\n\n\n\n"
       return -code error
    }
+   # Check if version is newer than what official been tested
+   if { [expr { $::env(VIVADO_VERSION) > 2018.3 }] } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
+      puts "https://confluence.slac.stanford.edu/x/n4-jCg"
+      puts "********************************************************\n\n\n\n\n"
+   }   
 } 
 
 ## Checking Timing Function
