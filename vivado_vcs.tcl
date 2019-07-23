@@ -28,7 +28,7 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
 ## Checks for VCS versions that ruckus supports
 proc VcsVersionCheck { } {
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12"
+   set supported "M-2017.03 N-2017.12 P-2019.06"
    
    # Get the VCS version
    set err_ret [catch {
@@ -252,6 +252,7 @@ set vhdlan_opts_new   "${vhdlan_opts_old} ${compOpt}"
 set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
 
 # Copy of all the Xilinx IP core datafile 
+set list ""
 set list_rc [catch { 
    set list [glob -directory ${simTbOutDir}/vcs/ *.dat *.coe *.edif *.mif]
 } _RESULT] 
