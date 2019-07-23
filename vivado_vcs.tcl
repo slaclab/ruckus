@@ -28,7 +28,7 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
 ## Checks for VCS versions that ruckus supports
 proc VcsVersionCheck { } {
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 P-2019.06"
+   set supported "M-2017.03 N-2017.12 O-2018.09"
    
    # Get the VCS version
    set err_ret [catch {
