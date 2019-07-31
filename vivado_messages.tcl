@@ -146,6 +146,9 @@ set_msg_config -id {AVAL-46}        -new_severity ERROR;# DRC: MMCM's (or PLL's)
 ## Modifying ERROR messaging
 ########################################################
 
+# Messages: Change from ERROR to WARNING
+set_msg_config -id {Common 17-356} -new_severity {Warning};# Failed to install all user apps.
+
 # DRC: Change from ERROR to WARNING
 set_property SEVERITY {Warning} [get_drc_checks {REQP-52}]; # DRC: using the GTGREFCLK port on a MGT  (GTP7 & GTX7)
 set_property SEVERITY {Warning} [get_drc_checks {REQP-44}]; # DRC: using the GTGREFCLK port on a MGT  (GTH7)
