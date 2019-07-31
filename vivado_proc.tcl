@@ -774,7 +774,11 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "\t\$ cd ${dirPath}/"    
    puts "\t\$ ./sim_vcs_mx.sh"
    if { ${rogueSim} == true } {
-      puts "\t\$ source setup_env.csh"
+      if { $::env(SHELL) != "/bin/bash" } {
+         puts "\t\$ source setup_env.csh"
+      } else {
+         puts "\t\$ source setup_env.sh"
+      }
    }
    puts "\t\$ ./simv"   
    puts "********************************************************\n\n" 
