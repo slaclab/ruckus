@@ -74,8 +74,8 @@ if { ${cpuNum} >= 8 } {
    set_param general.maxThreads ${cpuNum}
 }
 
-# https://www.xilinx.com/support/answers/62908.html
-tclapp::reset_tclstore
+# # https://www.xilinx.com/support/answers/62908.html
+# tclapp::reset_tclstore
 
 # Target specific project setup script
 VivadoRefresh ${VIVADO_PROJECT}
