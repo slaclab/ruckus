@@ -261,7 +261,7 @@ set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
 # Copy of all the Xilinx IP core datafile 
 set list ""
 set list_rc [catch { 
-   set list [glob -directory ${simTbOutDir}/vcs/ *.dat *.coe *.edif *.mif]
+   set list [glob -directory ${simTbOutDir}/vcs/ *.dat *.coe *.mem *.edif *.mif]
 } _RESULT] 
 if { ${list} != "" } {
    foreach pntr ${list} {
