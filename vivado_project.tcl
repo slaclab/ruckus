@@ -64,6 +64,8 @@ if { [expr { ${VIVADO_VERSION} <= 2014.2 }] } {
    set_property xsim.sdf_delay sdfmin     [get_filesets sim_1]
    set_property xsim.rangecheck false     [get_filesets sim_1]
    set_property xsim.unifast false        [get_filesets sim_1]
+   
+   set_property -name {xsim.compile.xvlog.more_options} -value {-d SIM_SPEED_UP} -objects [get_filesets sim_1]   
 } 
 
 # Enable general project multi-threading
