@@ -463,7 +463,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [expr { $::env(VIVADO_VERSION) > 2018.3 }] } {
+   if { [expr { $::env(VIVADO_VERSION) > 2019.1 }] } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
