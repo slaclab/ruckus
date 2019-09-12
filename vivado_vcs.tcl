@@ -7,6 +7,11 @@
 ## may be copied, modified, propagated, or distributed except according to 
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
+# VCS + Verdi GUI + Ubuntu 19.04 Notes:
+# $ wget http://ftp.us.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb
+# $ dpkg -x libpng12-0_1.2.50-2+deb8u3_amd64.deb .
+# $ cp lib/x86_64-linux-gnu/libpng12.so.0 /afs/slac.stanford.edu/g/reseng/vol27/verdi/Verdi_P-2019.06/platform/LINUXAMD64/bin/.
+##############################################################################
 
 ## \file vivado_vcs.tcl
 # \brief This script generates the VCS build scripts using Vivado to determine the 
@@ -28,7 +33,7 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
 ## Checks for VCS versions that ruckus supports
 proc VcsVersionCheck { } {
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09"
+   set supported "M-2017.03 N-2017.12 O-2018.09 P-2019.06"
    
    # Get the VCS version
    set err_ret [catch {
@@ -47,6 +52,7 @@ proc VcsVersionCheck { } {
    set err_ret [catch {
       exec vcs -ID | grep "vcs script version"
    } grepVersion]
+   set err_ret 0 ; # Work around for Ubuntu 19.04 not having /usr/lib/i386-linux-gnu/libelf.so.
    if { ${err_ret} != 0} {
       puts "\n\n*********************************************************" 
       puts "\"vcs -ID\" command failed:"
@@ -105,7 +111,7 @@ set simTbFileName [get_property top [get_filesets sim_1]]
 
 # Set the compile/elaborate options
 set compOpt "-nc -l +v2k -xlrm"
-set elabOpt "+warn=none"
+set elabOpt "+warn=none -kdb -lca -debug_access+all"
 
 #####################################################################################################
 ## Compile the VCS Simulation Library
