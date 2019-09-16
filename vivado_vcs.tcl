@@ -110,7 +110,8 @@ set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
 
 # Set the compile/elaborate options
-set compOpt "-nc -l +v2k -xlrm"
+set vloganOpt "-nc -l +v2k -xlrm -kdb"
+set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
 set elabOpt "+warn=none -kdb -lca -debug_access+all"
 
 #####################################################################################################
@@ -123,6 +124,13 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Make the directory
    exec mkdir ${simLibOutDir}
    
+   # Configure the simlib compiler
+   config_compile_simlib -simulator vcs_mx \
+   -cfgopt {vcs_mx.vhdl.unisim: -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs_mx.verilog.unisim: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.simprim: -sverilog -nc +v2k +define+XIL_TIMING -kdb }
+
    # Compile the simulation libraries
    compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
    
@@ -131,10 +139,10 @@ if { [file exists ${simLibOutDir}] != 1 } {
    set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]
    
    # Configure VCS settings
-   set_property -name {vcs.compile.vhdlan.more_options} -value ${compOpt} -objects [get_filesets sim_1]
-   set_property -name {vcs.compile.vlogan.more_options} -value ${compOpt} -objects [get_filesets sim_1]   
-   set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt} -objects [get_filesets sim_1]
-   set_property -name {vcs.elaborate.debug_pp}          -value {false}    -objects [get_filesets sim_1]
+   set_property -name {vcs.compile.vhdlan.more_options} -value ${vhdlanOpt} -objects [get_filesets sim_1]
+   set_property -name {vcs.compile.vlogan.more_options} -value ${vloganOpt} -objects [get_filesets sim_1]   
+   set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt}   -objects [get_filesets sim_1]
+   set_property -name {vcs.elaborate.debug_pp}          -value {false}      -objects [get_filesets sim_1]
    set_property nl.process_corner fast [get_filesets sim_1]   
    set_property unifast true [get_filesets sim_1]
    
@@ -260,8 +268,8 @@ set vlogan_opts_old   "vlogan_opts=\"-full64"
 set vhdlan_opts_old   "vhdlan_opts=\"-full64"
 set vcs_elab_opts_old "vcs_elab_opts=\"-full64"
 
-set vlogan_opts_new   "${vlogan_opts_old} ${compOpt}"
-set vhdlan_opts_new   "${vhdlan_opts_old} ${compOpt}"
+set vlogan_opts_new   "${vlogan_opts_old} ${vloganOpt}"
+set vhdlan_opts_new   "${vhdlan_opts_old} ${vhdlanOpt}"
 set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
 
 # Copy of all the Xilinx IP core datafile 
