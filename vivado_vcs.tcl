@@ -110,7 +110,7 @@ set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
 
 # Set the compile/elaborate options
-set vloganOpt "-nc -l +v2k -xlrm -kdb"
+set vloganOpt "-nc -l +v2k -xlrm -kdb +define+SIM_SPEED_UP"
 set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
 set elabOpt "+warn=none -kdb -lca -debug_access+all"
 
