@@ -780,7 +780,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
          puts "\t\$ source setup_env.sh"
       }
    }
-   puts "\t\$ ./simv"   
+   puts "\t\$ ./simv -gui &"   
    puts "********************************************************\n\n" 
 }
 
