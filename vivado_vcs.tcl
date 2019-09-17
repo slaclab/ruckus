@@ -7,6 +7,11 @@
 ## may be copied, modified, propagated, or distributed except according to 
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
+# VCS + Verdi GUI + Ubuntu 19.04 Notes:
+# $ wget http://ftp.us.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb
+# $ dpkg -x libpng12-0_1.2.50-2+deb8u3_amd64.deb .
+# $ cp lib/x86_64-linux-gnu/libpng12.so.0 /afs/slac.stanford.edu/g/reseng/vol27/verdi/Verdi_P-2019.06/platform/LINUXAMD64/bin/.
+##############################################################################
 
 ## \file vivado_vcs.tcl
 # \brief This script generates the VCS build scripts using Vivado to determine the 
@@ -28,7 +33,7 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
 ## Checks for VCS versions that ruckus supports
 proc VcsVersionCheck { } {
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09"
+   set supported "M-2017.03 N-2017.12 O-2018.09 P-2019.06"
    
    # Get the VCS version
    set err_ret [catch {
@@ -47,6 +52,7 @@ proc VcsVersionCheck { } {
    set err_ret [catch {
       exec vcs -ID | grep "vcs script version"
    } grepVersion]
+   set err_ret 0 ; # Work around for Ubuntu 19.04 not having /usr/lib/i386-linux-gnu/libelf.so.
    if { ${err_ret} != 0} {
       puts "\n\n*********************************************************" 
       puts "\"vcs -ID\" command failed:"
@@ -104,8 +110,9 @@ set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
 
 # Set the compile/elaborate options
-set compOpt "-nc -l +v2k -xlrm"
-set elabOpt "+warn=none"
+set vloganOpt "-nc -l +v2k -xlrm -kdb"
+set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
+set elabOpt "+warn=none -kdb -lca -debug_access+all"
 
 #####################################################################################################
 ## Compile the VCS Simulation Library
@@ -117,6 +124,13 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Make the directory
    exec mkdir ${simLibOutDir}
    
+   # Configure the simlib compiler
+   config_compile_simlib -simulator vcs_mx \
+   -cfgopt {vcs_mx.vhdl.unisim: -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs_mx.verilog.unisim: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.simprim: -sverilog -nc +v2k +define+XIL_TIMING -kdb }
+
    # Compile the simulation libraries
    compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
    
@@ -125,10 +139,10 @@ if { [file exists ${simLibOutDir}] != 1 } {
    set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]
    
    # Configure VCS settings
-   set_property -name {vcs.compile.vhdlan.more_options} -value ${compOpt} -objects [get_filesets sim_1]
-   set_property -name {vcs.compile.vlogan.more_options} -value ${compOpt} -objects [get_filesets sim_1]   
-   set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt} -objects [get_filesets sim_1]
-   set_property -name {vcs.elaborate.debug_pp}          -value {false}    -objects [get_filesets sim_1]
+   set_property -name {vcs.compile.vhdlan.more_options} -value ${vhdlanOpt} -objects [get_filesets sim_1]
+   set_property -name {vcs.compile.vlogan.more_options} -value ${vloganOpt} -objects [get_filesets sim_1]   
+   set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt}   -objects [get_filesets sim_1]
+   set_property -name {vcs.elaborate.debug_pp}          -value {false}      -objects [get_filesets sim_1]
    set_property nl.process_corner fast [get_filesets sim_1]   
    set_property unifast true [get_filesets sim_1]
    
@@ -254,14 +268,14 @@ set vlogan_opts_old   "vlogan_opts=\"-full64"
 set vhdlan_opts_old   "vhdlan_opts=\"-full64"
 set vcs_elab_opts_old "vcs_elab_opts=\"-full64"
 
-set vlogan_opts_new   "${vlogan_opts_old} ${compOpt}"
-set vhdlan_opts_new   "${vhdlan_opts_old} ${compOpt}"
+set vlogan_opts_new   "${vlogan_opts_old} ${vloganOpt}"
+set vhdlan_opts_new   "${vhdlan_opts_old} ${vhdlanOpt}"
 set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
 
 # Copy of all the Xilinx IP core datafile 
 set list ""
 set list_rc [catch { 
-   set list [glob -directory ${simTbOutDir}/vcs/ *.dat *.coe *.edif *.mif]
+   set list [glob -directory ${simTbOutDir}/vcs/ *.dat *.coe *.mem *.edif *.mif]
 } _RESULT] 
 if { ${list} != "" } {
    foreach pntr ${list} {
