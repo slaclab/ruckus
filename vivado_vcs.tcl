@@ -8,9 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 # VCS + Verdi GUI + Ubuntu 19.04 Notes:
-# $ wget http://ftp.us.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb
-# $ dpkg -x libpng12-0_1.2.50-2+deb8u3_amd64.deb .
-# $ cp lib/x86_64-linux-gnu/libpng12.so.0 /afs/slac.stanford.edu/g/reseng/vol27/verdi/Verdi_P-2019.06/platform/LINUXAMD64/bin/.
+# Download https://www.dropbox.com/s/79x3imq73tcqyw4/libpng12-0_1.2.54-1ubuntu1b_amd64.deb?dl=1
+# $ sudo dpkg -i libpng12-0_1.2.54-1ubuntu1b_amd64.deb
+# $ sudo apt install -f
 ##############################################################################
 
 ## \file vivado_vcs.tcl
@@ -112,7 +112,8 @@ set simTbFileName [get_property top [get_filesets sim_1]]
 # Set the compile/elaborate options
 set vloganOpt "-nc -l +v2k -xlrm -kdb +define+SIM_SPEED_UP"
 set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
-set elabOpt "+warn=none -kdb -lca -debug_access+all"
+# set elabOpt "+warn=none -kdb -lca -debug_access+all"
+set elabOpt "+warn=none -kdb -lca"
 
 #####################################################################################################
 ## Compile the VCS Simulation Library
