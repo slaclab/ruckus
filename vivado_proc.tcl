@@ -455,7 +455,7 @@ proc CheckWritePermission { } {
 ## Check for unsupported versions that ruckus does NOT support (https://confluence.slac.stanford.edu/x/n4-jCg)
 proc CheckVivadoVersion { } {
    # Check for unsupported versions of ruckus
-   if { [expr { $::env(VIVADO_VERSION) == 2017.1 }] || [expr { $::env(VIVADO_VERSION) < 2014.1 }]} {
+   if { [VersionCompare 2017.1] == 0 || [VersionCompare 2014.1] < 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus does NOT support Vivado $::env(VIVADO_VERSION)"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -463,7 +463,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [expr { $::env(VIVADO_VERSION) > 2019.1 }] } {
+   if { [VersionCompare 2019.1.3] == 1 }] } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -565,7 +565,7 @@ proc CheckPrjConfig { fileset } {
    }   
    
    # Check the Vivado version (check_syntax added to Vivado in 2016.1)
-   if { $::env(VIVADO_VERSION) >= 2016.1 } {   
+   if { [VersionCompare 2016.1] >= 0 } {
       # Check for syntax errors
       set syntaxReport [check_syntax -fileset ${fileset} -return_string -quiet -verbose]
       set syntaxReport [split ${syntaxReport} "\n"]
@@ -949,6 +949,48 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
    }
 }
 
+## Compares currnet vivado version to a argument value
+proc VersionCompare { versionLock } {
+
+   # Check if missing patch version number field
+   if { [expr {[llength [split $::env(VIVADO_VERSION) .]] - 1}] == 1 } {
+      set tag "$::env(VIVADO_VERSION).0"
+   } else {
+      set tag $::env(VIVADO_VERSION)
+   }
+   
+   # Check if missing patch version number field
+   if { [expr {[llength [split ${versionLock} .]] - 1}] == 1 } {
+      set lockTag "${versionLock}.0"
+   } else {
+      set lockTag ${versionLock}
+   }   
+   
+   # Parse the strings
+   scan $tag     "%d.%d.%d" major minor patch  
+   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock   
+   
+   # Compare the tags
+   set validTag [CompareTags ${tag} ${lockTag}]   
+   
+   # Debug Messages
+   puts "VIVADO_VERSION: ${tag}"
+   puts "compareVersion: ${lockTag}"
+   puts "validTag:       ${validTag}"   
+   
+   # Check the validTag flag
+   if { ${validTag} != 1 } {
+      # compareVersion > VIVADO_VERSION
+      return 1
+   } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
+      # compareVersion = VIVADO_VERSION
+      return 0
+   } else {
+      # compareVersion < VIVADO_VERSION
+      return -1
+   }   
+}
+
 ###############################################################
 #### Partial Reconfiguration Functions ########################
 ###############################################################
@@ -1087,7 +1129,7 @@ proc CreateDebugCore {ilaName} {
    delete_debug_core -quiet [get_debug_cores ${ilaName}]
 
    # Create the debug core
-   if { $::env(VIVADO_VERSION) <= 2017.2 } {   
+   if { [VersionCompare 2017.2] <= 0 } {
       create_debug_core ${ilaName} labtools_ila_v3
    } else {
       create_debug_core ${ilaName} ila
@@ -1139,7 +1181,7 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
    delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
 
    # Check if write_debug_probes is support
-   if { $::env(VIVADO_VERSION) <= 2017.2 } {
+   if { [VersionCompare 2017.2] <= 0 } {
       # Write the port map file
       write_debug_probes -force ${filePath}
    } else {
