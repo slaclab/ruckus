@@ -63,7 +63,7 @@ set_msg_config -suppress -id {DRC REQP-52};   # DRC: connects_GTGREFCLK_ACTIVE
 set_msg_config -suppress -id {BD 41-434}; # Block Design: Could not find an IP with XCI file by name
 
 ## Check for version 2015.3 (or older)
-if { [expr { ${VIVADO_VERSION} <= 2015.3 }] } {
+if { [VersionCompare 2015.3] <= 0 } {
    set_msg_config -suppress -id {Synth 8-637}; # SYNTH: synthesizing blackbox instance .... [required for upgrading {Synth 8-63} to an ERROR]
    set_msg_config -suppress -id {Synth 8-638}; # SYNTH: synthesizing module .... [required for upgrading {Synth 8-63} to an ERROR]
 }
@@ -108,7 +108,7 @@ set_msg_config -id {Synth 8-327}  -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}  -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 
 ## Check for version 2015.3 (or older)
-if { [expr { ${VIVADO_VERSION} <= 2015.3 }] } {
+if { [VersionCompare 2015.3] <= 0 } {
    set_msg_config -id {Synth 8-63}   -new_severity ERROR;# SYNTH: RTL assertion
 }
 
