@@ -455,7 +455,8 @@ proc CheckWritePermission { } {
 ## Check for unsupported versions that ruckus does NOT support (https://confluence.slac.stanford.edu/x/n4-jCg)
 proc CheckVivadoVersion { } {
    # Check for unsupported versions of ruckus
-   if { [VersionCompare 2017.1] == 0 || [VersionCompare 2014.1] < 0 } {
+   if { [VersionCompare 2017.1] == 0 ||
+        [VersionCompare 2014.1] < 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus does NOT support Vivado $::env(VIVADO_VERSION)"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -463,7 +464,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [VersionCompare 2019.1.3] == 1 }] } {
+   if { [VersionCompare 2019.1.3] > 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -973,21 +974,21 @@ proc VersionCompare { versionLock } {
    # Compare the tags
    set validTag [CompareTags ${tag} ${lockTag}]   
    
-   # Debug Messages
-   puts "VIVADO_VERSION: ${tag}"
-   puts "compareVersion: ${lockTag}"
-   puts "validTag:       ${validTag}"   
+   # # Debug Messages
+   # puts "VIVADO_VERSION: ${tag}"
+   # puts "compareVersion: ${lockTag}"
+   # puts "validTag:       ${validTag}"   
    
    # Check the validTag flag
    if { ${validTag} != 1 } {
       # compareVersion > VIVADO_VERSION
-      return 1
+      return -1
    } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
       # compareVersion = VIVADO_VERSION
       return 0
    } else {
       # compareVersion < VIVADO_VERSION
-      return -1
+      return 1
    }   
 }
 
