@@ -30,7 +30,7 @@ set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado_mess
 set_property STEPS.WRITE_BITSTREAM.TCL.PRE             ${RUCKUS_DIR}/vivado_messages.tcl [get_runs impl_1]
 
 # Refer to http://www.xilinx.com/support/answers/65415.html
-if { [expr { ${VIVADO_VERSION} >= 2016.1 }] } {
+if { [VersionCompare 2016.1] >= 0 } {
    set_property STEPS.SYNTH_DESIGN.ARGS.ASSERT true [get_runs synth_1]
 }
 
@@ -43,10 +43,10 @@ if { $::env(GEN_BIN_IMAGE) != 0 } {
 }
 
 # Automatically use the checkpoint from the previous run
-if { [expr { ${VIVADO_VERSION} >= 2019.1 }] } {
+if { [VersionCompare 2019.1] >= 0 } {
    set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs synth_1]
 }
-if { [expr { ${VIVADO_VERSION} >= 2018.3 }] } {
+if { [VersionCompare 2018.3] >= 0 } {
    set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs impl_1]
 }
 
