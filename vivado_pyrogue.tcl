@@ -50,6 +50,20 @@ if { ${dirList} != "" } {
    }
 }
 
+# Always copy TOP_DIR/firmware/python directory if it exists
+if { [file isdirectory ${TOP_DIR}/python/] == 1 } {
+   # Create a list of files
+   set fileList [glob -dir ${TOP_DIR}/python/ *]
+   # check for non-empty list
+   if { ${fileList} != "" } {
+      # Loop through the list
+      foreach filePntr ${fileList} {
+         # Copy all the files
+         exec cp -rf ${filePntr} ${ProjPythonDir}/python/.
+      }
+   }
+}
+
 # Copy the licensing file
 exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjPythonDir}/.
 
