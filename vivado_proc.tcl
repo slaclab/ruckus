@@ -474,7 +474,7 @@ proc CheckVivadoVersion { } {
 
 ## Checking Timing Function
 proc CheckTiming { {printTiming true} } {
-   # Check for timing and routing errors 
+   # Get the timing/routing results
    set WNS [get_property STATS.WNS [get_runs impl_1]]
    set TNS [get_property STATS.TNS [get_runs impl_1]]
    set WHS [get_property STATS.WHS [get_runs impl_1]]
@@ -482,10 +482,16 @@ proc CheckTiming { {printTiming true} } {
    set TPWS [get_property STATS.TPWS [get_runs impl_1]]
    set FAILED_NETS [get_property STATS.FAILED_NETS [get_runs impl_1]]
 
-   if { ${WNS}<0.0 || ${TNS}<0.0 \
-      || ${WHS}<0.0 || ${THS}<0.0 \
-      || ${TPWS}<0.0 || ${FAILED_NETS}>0.0 } {
+   # Check for timing and routing errors 
+   if { ${WNS}<0.0 || ${TNS}<0.0 }  { set setupError true } else { set setupError false }
+   if { ${WHS}<0.0 || ${THS}<0.0 }  { set holdError  true } else { set holdError  false }
+   if { ${TPWS}<0.0 }               { set pulseError true } else { set pulseError false }
+   if { ${FAILED_NETS}>0.0 }        { set failedNet  true } else { set failedNet  false }
+
+   # Check if any timing/routing error detected
+   if { ${setupError} || ${holdError} || ${pulseError} || ${failedNet} } {
       
+      # Check if we are printing out the results
       if { ${printTiming} == true } {
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
@@ -502,14 +508,32 @@ proc CheckTiming { {printTiming true} } {
          puts "********************************************************\n\n\n\n\n"  
       }
       
-      # Check the TIG variable
-      set retVar [expr {[info exists ::env(TIG)] && [string is true -strict $::env(TIG)]}]  
-      if { ${retVar} == 1 } {
-         return true
-      } else {
-         return false
-      }    
+      # Get the value of all the timing ignore flags
+      set tigAll   [expr {[info exists ::env(TIG)]       && [string is true -strict $::env(TIG)]}]  
+      set tigSetup [expr {[info exists ::env(TIG_SETUP)] && [string is true -strict $::env(TIG_SETUP)]}]  
+      set tigHold  [expr {[info exists ::env(TIG_HOLD)]  && [string is true -strict $::env(TIG_HOLD)]}]  
+      set tigPulse [expr {[info exists ::env(TIG_PULSE)] && [string is true -strict $::env(TIG_PULSE)]}]  
       
+      # Override the flags
+      if { ${tigSetup} == 1 } { set setupError false }
+      if { ${tigHold}  == 1 } { set holdError  false }
+      if { ${tigPulse} == 1 } { set pulseError false }
+      if { ${tigAll}   == 1 } { 
+         set setupError false 
+         set holdError  false 
+         set pulseError false 
+      }
+      
+      # Recheck the flags after the custom overrides
+      if { ${setupError} || ${holdError} || ${pulseError} || ${failedNet} } {
+         return false
+         
+      # Else overriding the timing error flag
+      } else {
+         return true
+      }    
+   
+   # Else no timing or routing errors detected
    } else {
       return true
    }
