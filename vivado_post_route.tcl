@@ -21,6 +21,8 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 ## Check if passed timing
 ########################################################
 if { [CheckTiming false] == true } {
+   # Make the GIT build tag
+   GitBuildTag
    
    #########################################################
    ## Check if need to include python files with build

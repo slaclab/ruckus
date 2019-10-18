@@ -56,6 +56,13 @@ if { ${dirList} != "" } {
 # Copy the licensing file
 exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
 
+# Copy the build.info
+if { $::env(GIT_HASH_LONG) != "" } {
+   if { [file exists ${PROJ_DIR}/build.info] == 1 } {
+      exec cp -f ${PROJ_DIR}/build.info ${ProjYamlDir}/.
+   } 
+} 
+
 # Copy the .ltx file
 set filePath "$::env(OUT_DIR)/debugProbes.ltx"; # Vivado 2016 (or earlier)
 if { [file exists ${filePath}] == 1 } {
