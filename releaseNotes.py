@@ -93,7 +93,7 @@ def getReleaseNotes(locRepo, remRepo, tagRange):
         md += '\n|||\n|---:|:---|\n'
 
         for i in ['Author','Date','Pull','Branch','Jira']:
-            if entry[i] is not None:
+            if i in entry and entry[i] is not None:
                 md += f'|**{i}:**|{entry[i]}|\n'
 
         md += '\n**Notes:**\n'
