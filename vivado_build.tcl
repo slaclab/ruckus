@@ -111,6 +111,7 @@ source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
 ########################################################
 if { [info exists ::env(SYNTH_ONLY)] } {
    close_project
+   GitBuildTag
    exit 0
 }
 
@@ -120,6 +121,7 @@ if { [info exists ::env(SYNTH_ONLY)] } {
 if { [info exists ::env(SYNTH_DCP)] } {
    source ${RUCKUS_DIR}/vivado_dcp.tcl
    close_project
+   GitBuildTag
    exit 0
 }
 
