@@ -164,14 +164,14 @@ if __name__ == "__main__":
     # Local git clone
     g = git.Git('.')
     g.fetch()
-    project = g.remote('get-url','origin').strip('git@github.com:/')
+    project = re.compile(r'slaclab/(?P<name>.*?).git').search(g.remote('get-url','origin')).group('name')
 
     # Connect to the Git server
     token = input("Enter your github token: ")
     github = Github(token)
 
     # Get the repo information
-    repo = github.get_repo(project)
+    repo = gh.get_repo(f'slaclab/{project}')
 
     md = getReleaseNotes(g,repo,tags)
 
