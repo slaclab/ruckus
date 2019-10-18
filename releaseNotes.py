@@ -114,6 +114,7 @@ if __name__ == "__main__":
     import argparse
     import pyperclip
     from getpass import getpass
+    import re
 
     import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
     from github import Github # https://pygithub.readthedocs.io/en/latest/introduction.html
