@@ -21,15 +21,6 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 ## Check if passed timing
 ########################################################
 if { [CheckTiming false] == true } {
-   # Make the GIT build tag
-   GitBuildTag
-   
-   #########################################################
-   ## Check if need to include python files with build
-   #########################################################   
-   if { [file isdirectory ${PROJ_DIR}/python] == 1 } {
-      source ${RUCKUS_DIR}/vivado_pyrogue.tcl
-   }   
    
    #########################################################
    ## Check if need to include YAML files with build
