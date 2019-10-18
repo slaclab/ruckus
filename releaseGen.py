@@ -3,7 +3,8 @@
 # Title      : Release Generation
 # ----------------------------------------------------------------------------
 # Description:
-#
+# Script to generate rogue.zip and cpsw.tar.gz files as well as creating 
+# a github release with proper release attachments.
 # ----------------------------------------------------------------------------
 # This file is part of the 'SLAC Firmware Standard Library'. It is subject to 
 # the license terms in the LICENSE.txt file found in the top-level directory 
