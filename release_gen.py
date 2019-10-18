@@ -39,12 +39,6 @@ parser.add_argument(
 # Get the arguments
 args = parser.parse_args()
 
-
-
-
-
-
-
 def loadReleaseYaml():
     relFile = os.path.join(FirmwareDir,'releases.yaml')
 
@@ -56,6 +50,14 @@ def loadReleaseYaml():
         raise Exception(f"Failed to load project release file {relFile}")
 
     return d
+
+def getVersion():
+    ver = args.version
+
+    if ver is None:
+        ver = input('\nEnter version for release (i.e. v1.2.3): ')
+
+    return ver
 
 def selectRelease(cfg):
 
@@ -120,73 +122,122 @@ def selectBuildImages(cfg, relData):
 
     return retList
 
-def selectConfigDirs(cfg, relData):
+def genFileList(base,root,entries,typ):
     retList = []
+
+    for e in entries:
+        fullPath = os.path.join(root,e)
+        subPath  = fullPath.replace(base+'/','')
+
+        retList.append({'type':typ,
+                        'fullPath':fullPath,
+                        'subPath': subPath})
+    return retList
+
+def selectFiles(dirs):
+    retList = []
+
+    for d in dirs:
+        base = os.path.join(FirmwareDir,d)
+
+        for root, folders, files in os.walk(base):
+            retList.extend(genFileList(base,root,folders,'folder'))
+            retList.extend(genFileList(base,root,files,'file'))
+
+    return retList
+
+def selectConfigFiles(cfg, relData):
+    dirs    = []
 
     if cfg['CommonConfig']:
-        for conf in cfg['CommonConfig']:
-            retList.append(os.path.join(FirmwareDir,conf))
+        dirs.extend(cfg['CommonConfig'])
 
     if relData['Config']:
-        for conf in relData['Config']:
-            retList.append(os.path.join(FirmwareDir,conf))
+        dirs.extend(relData['Config'])
 
-    return retList
+    return selectFiles(dirs)
 
-def selectPythonDirs(cfg, relData):
-    retList = []
+def selectPythonFiles(cfg, relData):
+    dirs    = []
 
     if cfg['CommonPython']:
-        for py in cfg['CommonPython']:
-            retList.append(os.path.join(FirmwareDir,py))
+        dirs.extend(cfg['CommonPython'])
 
     if relData['Python']:
-        for py in relData['Python']:
-            retList.append(os.path.join(FirmwareDir,py))
+        dirs.extend(relData['Python'])
 
-    return retList
-
-def getVersion():
-    ver = args.version
-
-    if ver is None:
-        ver = input('\nEnter version for release (i.e. v1.2.3): ')
-
-    return ver
-
-def addFolderToZip(zf, srcPath, arcPath):
-    contents = os.walk(srcPath)
-    parent = os.path.dirname(srcPath)
-
-    for root, folders, files in contents:
-
-        # Include add folders & files
-        for fn in folders + files:
-            absPath = os.path.join(root,fn)
-            zipPath = absPath.replace(srcPath,arcPath)
-            zf.write(absPath,zipPath)
-
-def createSetupPy(cfg, ver, relName, relData):
-    pass
+    return selectFiles(dirs)
 
 def buildZipFile(cfg, ver, relName, relData, imgList):
     rel = f'{relName}_{ver}'
 
+    pList = selectPythonFiles(cfg, relData)
+    cList = selectConfigFiles(cfg, relData)
+
+    setupPy  =  "\n\nfrom distutils.core import setup\n\n"
+    setupPy +=  "setup (\n"
+    setupPy += f"   name='{relName}',\n"
+    setupPy += f"   version='{ver}',\n"
+    setupPy +=  "   packages=[\n"
+
+    topInit = cfg['TopPackage'] + '/__init__.py'
+    topPath = None
+
     with zipfile.ZipFile(rel + '.zip','w') as zf:
         print(f"\nCreating zipfile {rel}.zip")
 
-        for pd in selectPythonDirs(cfg, relData):
-            print(f"   {pd}")
-            addFolderToZip(zf,pd,'python')
+        for e in pList:
+            dst = e['subPath']
+            print(f"   {dst}")
 
-        for cd in selectConfigDirs(cfg, relData):
-            print(f"   {cd}")
-            addFolderToZip(zf,cd,'config')
-            zf.write(cd)
+            # Don't add raw version of TopPackage/__init__.py
+            if e['subPath'] == topInit:
+                topPath = e['fullPath']
+            else:
+                zf.write(e['fullPath'],dst)
 
-        for im in imgList:
-            print(f"   {im}")
-            zf.write(im,'images/' + os.path.basename(im))
+            if e['type'] == 'folder':
+                setupPy +=  "             '{}',\n".format(dst)
+
+        setupPy +=  "            ],\n"
+
+        for e in cList:
+            dst = cfg['TopPackage'] + '/config/' + e['subPath']
+            print(f"   {dst}")
+            zf.write(e['fullPath'],dst)
+
+        for e in imgList:
+            dst = cfg['TopPackage'] + '/images/' + os.path.basename(e)
+            print(f"   {dst}")
+            zf.write(e,dst)
+
+        # Generate setup.py payload
+        setupPy +=  "   package_data={'" + cfg['TopPackage'] + "':['config/*','images/*']}\n"
+        setupPy += ")\n"
+
+        with zf.open('setup.py','w') as sf: sf.write(setupPy.encode('utf-8'))
+
+        with open(topPath,'r') as f:
+            newInit = ""
+
+            for line in f:
+                if (not 'import os'   in line) and \
+                   (not '__version__' in line) and \
+                   (not 'ConfigDir'   in line) and \
+                   (not 'ImageDir'    in line): newInit += line
+
+        # Append new lines
+        newInit += "\n\n"
+        newInit += "##################### Added by release script ###################\n"
+        newInit += "import os\n"
+        newInit += f"__version__ = '{ver}'\n"
+        newInit += "ConfigDir = os.path.dirname(__file__) + '/config'\n"
+        newInit += "ImageDir  = os.path.dirname(__file__) + '/images'\n"
+        newInit += "#################################################################\n"
+
+        with zf.open(topInit,'w') as f:
+            f.write(newInit.encode('utf-8'))
+
 
 if __name__ == "__main__":
     cfg = loadReleaseYaml()
