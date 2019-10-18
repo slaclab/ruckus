@@ -35,146 +35,153 @@
 # @file releaseNotes.py
 # Generate release notes for pull requests relative to a tag.
 
-import os
-import sys
-import argparse
-import pyperclip
-from getpass import getpass
-
-import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
 from github import Github # https://pygithub.readthedocs.io/en/latest/introduction.html
 
-#################################################################
+def getReleaseNotes(locRepo, remRepo, tagRange):
 
-# Set the argument parser
-parser = argparse.ArgumentParser('Release notes generator')
+    # Collect all the pull request with request to the tagging
+    loginfo = locRepo.log(tagRange,'--grep','Merge pull request')
 
-# Convert str to bool
-argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
+    # Parse the log entries
+    records = []
+    entry = {}
+    for line in loginfo.splitlines():
 
-# Add arguments
-parser.add_argument(
-    "tag", 
-    type     = str,
-    help     = 'reference tag or range. (i.e. v2.5.0 or v2.5.0..v2.6.0)',
-) 
+        if line.startswith('Author:'):
+            entry['Author'] = line[7:].lstrip()
 
-parser.add_argument(
-    "--nosort", 
-    type     = argBool,
-    required = False,
-    default  = False,
-    help     = "Disable sort by change counts",
-)  
+        elif line.startswith('Date:'):
+            entry['Date'] = line[5:].lstrip()
 
-parser.add_argument(
-    "--copy", 
-    type     = argBool,
-    required = False,
-    default  = False,
-    help     = "Copy to clipboard",
-)  
+        elif 'Merge pull request' in line:
+            entry['PR'] = line.split()[3].lstrip()
+            entry['Branch'] = line.split()[5].lstrip()
 
-# Get the arguments
-args = parser.parse_args()
+            # Get PR info from github
+            # print(f"{entry['PR']}")
+            req = remRepo.get_pull(int(entry['PR'][1:]))
+            entry['Title'] = req.title
+            entry['body']  = req.body
 
-#################################################################
+            entry['changes'] = req.additions + req.deletions
+            entry['Pull'] = entry['PR'] + f" ({req.additions} additions, {req.deletions} deletions, {req.changed_files} files changed)"
 
-if '..' in args.tag:
-    tags = args.tag
-else:
-    tags = F"{args.tag}..HEAD"
+            # Detect JIRA entry
+            if entry['Branch'].startswith('slaclab/ES'):
+                url = 'https://jira.slac.stanford.edu/issues/{}'.format(entry['Branch'].split('/')[1])
+                entry['Jira'] = url
+            else:
+                entry['Jira'] = None
 
-print(f"Using range: {tags}")
+            records.append(entry)
+            entry = {}         
+            
+    # Check if sorting the pull request entries        
+    if args.nosort is False:
+        records = sorted(records, key=lambda v : v['changes'], reverse=True)
 
-# Local git clone
-g = git.Git('.')
-g.fetch()
-project = g.remote('get-url','origin').strip('git@github.com:/')
+    # Generate text
+    md = '# Pull Requests\n'
 
-# Connect to the Git server
-token = input("Enter your github token: ")
-github = Github(token)
+    for i, entry in enumerate(records):
+        md += f" 1. {entry['PR']} - {entry['Title']}\n"
 
-# Get the repo information
-repo = github.get_repo(f'{project}')
+    md += '## Pull Request Details\n'
 
-# Collect all the pull request with request to the tagging
-loginfo = g.log(tags,'--grep','Merge pull request')
+    for entry in records:
 
-# Parse the log entries
-records = []
-entry = {}
-for line in loginfo.splitlines():
+        md += f"### {entry['Title']}"
 
-    if line.startswith('Author:'):
-        entry['Author'] = line[7:].lstrip()
+        md += '\n|||\n|---:|:---|\n'
 
-    elif line.startswith('Date:'):
-        entry['Date'] = line[5:].lstrip()
+        for i in ['Author','Date','Pull','Branch','Jira']:
+            if entry[i] is not None:
+                md += f'|**{i}:**|{entry[i]}|\n'
 
-    elif 'Merge pull request' in line:
-        entry['PR'] = line.split()[3].lstrip()
-        entry['Branch'] = line.split()[5].lstrip()
+        md += '\n**Notes:**\n'
+        for line in entry['body'].splitlines():
+            md += '> ' + line + '\n'
+        md += '\n-------\n'         
+        md += '\n\n'
 
-        # Get PR info from github
-        # print(f"{entry['PR']}")
-        req = repo.get_pull(int(entry['PR'][1:]))
-        entry['Title'] = req.title
-        entry['body']  = req.body
+    # Deal with potential UNICODE in the md
+    # Note: Markup language uses the XML # character for unicode
+    md = md.encode('ascii', 'xmlcharrefreplace')  
+    md = str(md)[2:-1]      
+    md = md.replace('\\n', '\n') 
 
-        entry['changes'] = req.additions + req.deletions
-        entry['Pull'] = entry['PR'] + f" ({req.additions} additions, {req.deletions} deletions, {req.changed_files} files changed)"
+    return md
 
-        # Detect JIRA entry
-        if entry['Branch'].startswith('slaclab/ES'):
-            url = 'https://jira.slac.stanford.edu/issues/{}'.format(entry['Branch'].split('/')[1])
-            entry['Jira'] = url
-        else:
-            entry['Jira'] = None
+if __name__ == "__main__":
+    import argparse
+    import pyperclip
+    from getpass import getpass
 
-        records.append(entry)
-        entry = {}         
-        
-# Check if sorting the pull request entries        
-if args.nosort is False:
-    records = sorted(records, key=lambda v : v['changes'], reverse=True)
+    import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
 
-# Generate text
-md = '# Pull Requests\n'
+    #################################################################
 
-for i, entry in enumerate(records):
-    md += f" 1. {entry['PR']} - {entry['Title']}\n"
+    # Set the argument parser
+    parser = argparse.ArgumentParser('Release notes generator')
 
-md += '## Pull Request Details\n'
+    # Convert str to bool
+    argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
 
-for entry in records:
+    # Add arguments
+    parser.add_argument(
+        "tag", 
+        type     = str,
+        help     = 'reference tag or range. (i.e. v2.5.0 or v2.5.0..v2.6.0)',
+    ) 
 
-    md += f"### {entry['Title']}"
+    parser.add_argument(
+        "--nosort", 
+        type     = argBool,
+        required = False,
+        default  = False,
+        help     = "Disable sort by change counts",
+    )  
 
-    md += '\n|||\n|---:|:---|\n'
+    parser.add_argument(
+        "--copy", 
+        type     = argBool,
+        required = False,
+        default  = False,
+        help     = "Copy to clipboard",
+    )  
 
-    for i in ['Author','Date','Pull','Branch','Jira']:
-        if entry[i] is not None:
-            md += f'|**{i}:**|{entry[i]}|\n'
+    # Get the arguments
+    args = parser.parse_args()
 
-    md += '\n**Notes:**\n'
-    for line in entry['body'].splitlines():
-        md += '> ' + line + '\n'
-    md += '\n-------\n'         
-    md += '\n\n'
+    #################################################################
 
-# Deal with potential UNICODE in the md
-# Note: Markup language uses the XML # character for unicode
-md = md.encode('ascii', 'xmlcharrefreplace')  
-md = str(md)[2:-1]      
-md = md.replace('\\n', '\n') 
+    if '..' in args.tag:
+        tags = args.tag
+    else:
+        tags = F"{args.tag}..HEAD"
 
-print(md)
+    print(f"Using range: {tags}")
 
-if args.copy:
-    try:	
-        pyperclip.copy(md)	
-        print('Release notes copied to clipboard')	
-    except:	
-        print("Copy to clipboard failed!")
+    # Local git clone
+    g = git.Git('.')
+    g.fetch()
+    project = g.remote('get-url','origin').strip('git@github.com:/')
+
+    # Connect to the Git server
+    token = input("Enter your github token: ")
+    github = Github(token)
+
+    # Get the repo information
+    repo = github.get_repo(project)
+
+    md = getReleaseNotes(g,repo,tags)
+
+    print(md)
+
+    if args.copy:
+        try:	
+            pyperclip.copy(md)	
+            print('Release notes copied to clipboard')	
+        except:	
+            print("Copy to clipboard failed!")
+
