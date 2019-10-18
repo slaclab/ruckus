@@ -22,7 +22,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 ########################################################
 if { [CheckTiming false] == true } {
    # Make the GIT build tag
-   GitBuildTag
+   BuildInfo
    
    #########################################################
    ## Check if need to include YAML files with build
