@@ -56,7 +56,7 @@ def getReleaseNotes(locRepo, remRepo, tagRange):
             entry['Branch'] = line.split()[5].lstrip()
 
             # Get PR info from github
-            # print(f"{entry['PR']}")
+            #print(f"{entry['PR']}")
             req = remRepo.get_pull(int(entry['PR'][1:]))
             entry['Title'] = req.title
             entry['body']  = req.body
@@ -165,14 +165,18 @@ if __name__ == "__main__":
     # Local git clone
     g = git.Git('.')
     g.fetch()
-    project = re.compile(r'slaclab/(?P<name>.*?).git').search(g.remote('get-url','origin')).group('name')
+
+    url = g.remote('get-url','origin')
+    if not url.endswith('.git'): url += '.git'
+
+    project = re.compile(r'slaclab/(?P<name>.*?).git').search(url).group('name')
 
     # Connect to the Git server
     token = input("Enter your github token: ")
     github = Github(token)
 
     # Get the repo information
-    repo = gh.get_repo(f'slaclab/{project}')
+    repo = github.get_repo(f'slaclab/{project}')
 
     md = getReleaseNotes(g,repo,tags)
 
