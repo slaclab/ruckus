@@ -35,8 +35,6 @@
 # @file releaseNotes.py
 # Generate release notes for pull requests relative to a tag.
 
-from github import Github # https://pygithub.readthedocs.io/en/latest/introduction.html
-
 def getReleaseNotes(locRepo, remRepo, tagRange):
 
     # Collect all the pull request with request to the tagging
@@ -118,6 +116,7 @@ if __name__ == "__main__":
     from getpass import getpass
 
     import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
+    from github import Github # https://pygithub.readthedocs.io/en/latest/introduction.html
 
     #################################################################
 
