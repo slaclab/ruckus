@@ -419,6 +419,7 @@ proc BuildInfo { } {
    puts $fp "PROJECT: $::env(PROJECT)"
    puts $fp "FW_VERSION: $::env(PRJ_VERSION)"
    puts $fp "BUILD_STRING: $::env(BUILD_STRING)"
+   puts $fp "GIT_HASH: $::env(GIT_HASH_LONG)"
    close $fp
 }
 
