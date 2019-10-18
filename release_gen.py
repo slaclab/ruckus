@@ -168,9 +168,7 @@ def selectPythonFiles(cfg, relData):
 
     return selectFiles(dirs)
 
-def buildZipFile(cfg, ver, relName, relData, imgList):
-    rel = f'{relName}_{ver}'
-
+def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     pList = selectPythonFiles(cfg, relData)
     cList = selectConfigFiles(cfg, relData)
 
@@ -183,8 +181,8 @@ def buildZipFile(cfg, ver, relName, relData, imgList):
     topInit = cfg['TopPackage'] + '/__init__.py'
     topPath = None
 
-    with zipfile.ZipFile(rel + '.zip','w') as zf:
-        print(f"\nCreating zipfile {rel}.zip")
+    with zipfile.ZipFile(zipName,'w') as zf:
+        print(f"\nCreating zipfile {zipName}")
 
         for e in pList:
             dst = e['subPath']
@@ -249,5 +247,17 @@ if __name__ == "__main__":
     print("Images = {}".format(imgList))
     print("Version = {}".format(ver))
 
-    buildZipFile(cfg,ver,relName,relData,imgList)
+    tagAttach = []
+
+    # Determine if we generate a Rogue zipfile
+    if 'Rogue' in relData['Types']:
+        zipName = f'rogue_{relName}_{ver}.zip'
+        buildZipFile(zipName,path,cfg,ver,relName,relData,imgList)
+        tagAttach.append(zipName)
+
+    # Determine if we generate a Rogue zipfile
+    if 'CPSW' in relData['Types']:
+        pass
+
+
 
