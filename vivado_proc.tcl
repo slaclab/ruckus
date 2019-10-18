@@ -417,25 +417,6 @@ proc RemoveUnsuedCode { } {
    remove_files [get_files -filter {IS_AUTO_DISABLED}]
 }
 
-## GIT Build TAG   
-proc GitBuildTag { } { 
-   set git_rc [catch {
-      if { $::env(GIT_TAG_MSG) != "" } {
-         set CMD "cd $::env(PROJ_DIR); git tag -a $::env(GIT_TAG_NAME) $::env(GIT_TAG_MSG)"
-         exec bash -c "${CMD}" >@stdout 
-         exec rm -f $::env(PROJ_DIR)/build.info
-         set CMD "cd $::env(PROJ_DIR); git show $::env(GIT_TAG_NAME) -- > $::env(PROJ_DIR)/build.info"
-         exec bash -c "${CMD}" >@stdout
-      }   
-   } _RESULT]
-   if {$git_rc} {
-      puts "\n\n\n\n\n********************************************************"
-      puts "CRITICAL WARNING: Failed to generate the build TAG during GitBuildTag():"
-      puts ${_RESULT}
-      puts "********************************************************\n\n\n\n\n" 
-   }
-}
-
 ## Check if you have write permission
 proc CheckWritePermission { } {
    set src_rc [catch {exec touch $::env(MODULES)/ruckus/LICENSE.txt}]       
