@@ -146,6 +146,9 @@ else
    endif
 endif
 
+# https://www.xilinx.com/support/answers/63253.html
+export XILINX_LOCAL_USER_DATA = no
+
 # SDK Variables
 export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
 export SDK_ELF    = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
@@ -210,6 +213,7 @@ test:
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
+	@echo XILINX_LOCAL_USER_DATA: $(XILINX_LOCAL_USER_DATA)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 	@echo IMAGENAME: $(IMAGENAME)

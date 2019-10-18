@@ -431,7 +431,8 @@ proc CheckWritePermission { } {
 ## Check for unsupported versions that ruckus does NOT support (https://confluence.slac.stanford.edu/x/n4-jCg)
 proc CheckVivadoVersion { } {
    # Check for unsupported versions of ruckus
-   if { [expr { $::env(VIVADO_VERSION) == 2017.1 }] || [expr { $::env(VIVADO_VERSION) < 2014.1 }]} {
+   if { [VersionCompare 2017.1] == 0 ||
+        [VersionCompare 2014.1] < 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus does NOT support Vivado $::env(VIVADO_VERSION)"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -439,7 +440,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [expr { $::env(VIVADO_VERSION) > 2018.3 }] } {
+   if { [VersionCompare 2019.1.3] > 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -449,7 +450,7 @@ proc CheckVivadoVersion { } {
 
 ## Checking Timing Function
 proc CheckTiming { {printTiming true} } {
-   # Check for timing and routing errors 
+   # Get the timing/routing results
    set WNS [get_property STATS.WNS [get_runs impl_1]]
    set TNS [get_property STATS.TNS [get_runs impl_1]]
    set WHS [get_property STATS.WHS [get_runs impl_1]]
@@ -457,10 +458,16 @@ proc CheckTiming { {printTiming true} } {
    set TPWS [get_property STATS.TPWS [get_runs impl_1]]
    set FAILED_NETS [get_property STATS.FAILED_NETS [get_runs impl_1]]
 
-   if { ${WNS}<0.0 || ${TNS}<0.0 \
-      || ${WHS}<0.0 || ${THS}<0.0 \
-      || ${TPWS}<0.0 || ${FAILED_NETS}>0.0 } {
+   # Check for timing and routing errors 
+   if { ${WNS}<0.0 || ${TNS}<0.0 }  { set setupError true } else { set setupError false }
+   if { ${WHS}<0.0 || ${THS}<0.0 }  { set holdError  true } else { set holdError  false }
+   if { ${TPWS}<0.0 }               { set pulseError true } else { set pulseError false }
+   if { ${FAILED_NETS}>0.0 }        { set failedNet  true } else { set failedNet  false }
+
+   # Check if any timing/routing error detected
+   if { ${setupError} || ${holdError} || ${pulseError} || ${failedNet} } {
       
+      # Check if we are printing out the results
       if { ${printTiming} == true } {
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
@@ -477,14 +484,32 @@ proc CheckTiming { {printTiming true} } {
          puts "********************************************************\n\n\n\n\n"  
       }
       
-      # Check the TIG variable
-      set retVar [expr {[info exists ::env(TIG)] && [string is true -strict $::env(TIG)]}]  
-      if { ${retVar} == 1 } {
-         return true
-      } else {
-         return false
-      }    
+      # Get the value of all the timing ignore flags
+      set tigAll   [expr {[info exists ::env(TIG)]       && [string is true -strict $::env(TIG)]}]  
+      set tigSetup [expr {[info exists ::env(TIG_SETUP)] && [string is true -strict $::env(TIG_SETUP)]}]  
+      set tigHold  [expr {[info exists ::env(TIG_HOLD)]  && [string is true -strict $::env(TIG_HOLD)]}]  
+      set tigPulse [expr {[info exists ::env(TIG_PULSE)] && [string is true -strict $::env(TIG_PULSE)]}]  
       
+      # Override the flags
+      if { ${tigSetup} == 1 } { set setupError false }
+      if { ${tigHold}  == 1 } { set holdError  false }
+      if { ${tigPulse} == 1 } { set pulseError false }
+      if { ${tigAll}   == 1 } { 
+         set setupError false 
+         set holdError  false 
+         set pulseError false 
+      }
+      
+      # Recheck the flags after the custom overrides
+      if { ${setupError} || ${holdError} || ${pulseError} || ${failedNet} } {
+         return false
+         
+      # Else overriding the timing error flag
+      } else {
+         return true
+      }    
+   
+   # Else no timing or routing errors detected
    } else {
       return true
    }
@@ -541,7 +566,7 @@ proc CheckPrjConfig { fileset } {
    }   
    
    # Check the Vivado version (check_syntax added to Vivado in 2016.1)
-   if { $::env(VIVADO_VERSION) >= 2016.1 } {   
+   if { [VersionCompare 2016.1] >= 0 } {
       # Check for syntax errors
       set syntaxReport [check_syntax -fileset ${fileset} -return_string -quiet -verbose]
       set syntaxReport [split ${syntaxReport} "\n"]
@@ -750,9 +775,13 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "\t\$ cd ${dirPath}/"    
    puts "\t\$ ./sim_vcs_mx.sh"
    if { ${rogueSim} == true } {
-      puts "\t\$ source setup_env.csh"
+      if { $::env(SHELL) != "/bin/bash" } {
+         puts "\t\$ source setup_env.csh"
+      } else {
+         puts "\t\$ source setup_env.sh"
+      }
    }
-   puts "\t\$ ./simv"   
+   puts "\t\$ ./simv -gui &"   
    puts "********************************************************\n\n" 
 }
 
@@ -921,6 +950,48 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
    }
 }
 
+## Compares currnet vivado version to a argument value
+proc VersionCompare { versionLock } {
+
+   # Check if missing patch version number field
+   if { [expr {[llength [split $::env(VIVADO_VERSION) .]] - 1}] == 1 } {
+      set tag "$::env(VIVADO_VERSION).0"
+   } else {
+      set tag $::env(VIVADO_VERSION)
+   }
+   
+   # Check if missing patch version number field
+   if { [expr {[llength [split ${versionLock} .]] - 1}] == 1 } {
+      set lockTag "${versionLock}.0"
+   } else {
+      set lockTag ${versionLock}
+   }   
+   
+   # Parse the strings
+   scan $tag     "%d.%d.%d" major minor patch  
+   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock   
+   
+   # Compare the tags
+   set validTag [CompareTags ${tag} ${lockTag}]   
+   
+   # # Debug Messages
+   # puts "VIVADO_VERSION: ${tag}"
+   # puts "compareVersion: ${lockTag}"
+   # puts "validTag:       ${validTag}"   
+   
+   # Check the validTag flag
+   if { ${validTag} != 1 } {
+      # compareVersion > VIVADO_VERSION
+      return -1
+   } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
+      # compareVersion = VIVADO_VERSION
+      return 0
+   } else {
+      # compareVersion < VIVADO_VERSION
+      return 1
+   }   
+}
+
 ###############################################################
 #### Partial Reconfiguration Functions ########################
 ###############################################################
@@ -1059,7 +1130,7 @@ proc CreateDebugCore {ilaName} {
    delete_debug_core -quiet [get_debug_cores ${ilaName}]
 
    # Create the debug core
-   if { $::env(VIVADO_VERSION) <= 2017.2 } {   
+   if { [VersionCompare 2017.2] <= 0 } {
       create_debug_core ${ilaName} labtools_ila_v3
    } else {
       create_debug_core ${ilaName} ila
@@ -1111,7 +1182,7 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
    delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
 
    # Check if write_debug_probes is support
-   if { $::env(VIVADO_VERSION) <= 2017.2 } {
+   if { [VersionCompare 2017.2] <= 0 } {
       # Write the port map file
       write_debug_probes -force ${filePath}
    } else {
@@ -1199,6 +1270,7 @@ proc loadSource args {
               ${fileExt} eq {.sv}  ||
               ${fileExt} eq {.dat} ||
               ${fileExt} eq {.coe} ||
+              ${fileExt} eq {.mem} ||
               ${fileExt} eq {.edif}||
               ${fileExt} eq {.dcp} } {
             # Check if file doesn't exist in project
@@ -1229,7 +1301,7 @@ proc loadSource args {
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.edif,.dcp\] file extension"
+            puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.mem,.edif,.dcp\] file extension"
             puts "********************************************************\n\n\n\n\n"
             exit -1
          }
@@ -1246,7 +1318,7 @@ proc loadSource args {
          # Get a list of all RTL files
          set list ""
          set list_rc [catch { 
-            set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.dat *.coe *.edif *.dcp]
+            set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.dat *.coe *.mem *.edif *.dcp]
          } _RESULT]           
          # Load all the RTL files
          if { ${list} != "" } {
@@ -1280,7 +1352,7 @@ proc loadSource args {
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.edif,.dcp\] files"
+            puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.mem,.edif,.dcp\] files"
             puts "********************************************************\n\n\n\n\n"         
             exit -1            
          }
