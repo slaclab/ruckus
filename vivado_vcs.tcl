@@ -104,6 +104,10 @@ if { [CheckPrjConfig sim_1] != true } {
    exit -1
 }
 
+
+# Target specific VCS script
+SourceTclFile ${VIVADO_DIR}/pre_vcs.tcl
+
 # Setup variables
 set simLibOutDir ${OUT_DIR}/vcs_library
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
@@ -191,8 +195,8 @@ if { [file exists ${simLibOutDir}] != 1 } {
 update_compile_order -quiet -fileset sim_1
 
 # Export Xilinx & User IP Cores
-generate_target {simulation} [get_ips]
-export_ip_user_files -no_script
+generate_target -force {simulation} [get_ips]
+export_ip_user_files -force -no_script
 
 # Launch the scripts generator 
 set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
@@ -348,11 +352,11 @@ if { [file exists ${simTbOutDir}/vcs/glbl.v] == 1 } {
    exec cp -f ${simTbOutDir}/vcs/glbl.v ${simTbOutDir}/glbl.v 
 }
 
+# Target specific VCS script
+SourceTclFile ${VIVADO_DIR}/post_vcs.tcl
+
 # Close the project (required for cd function)
 close_project
-
-# Target specific VCS script
-SourceTclFile ${VIVADO_DIR}/vcs.tcl
 
 # VCS Complete Message
 VcsCompleteMessage ${simTbOutDir} ${rogueSimEn}
