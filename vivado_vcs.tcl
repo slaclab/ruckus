@@ -112,7 +112,6 @@ set simTbFileName [get_property top [get_filesets sim_1]]
 # Set the compile/elaborate options
 set vloganOpt "-nc -l +v2k -xlrm -kdb +define+SIM_SPEED_UP"
 set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
-# set elabOpt "+warn=none -kdb -lca -debug_access+all"
 set elabOpt "+warn=none -kdb -lca"
 
 #####################################################################################################
@@ -128,12 +127,18 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Configure the simlib compiler
    config_compile_simlib -simulator vcs_mx \
    -cfgopt {vcs_mx.vhdl.unisim: -nc -l +v2k -xlrm -kdb } \
-   -cfgopt {vcs_mx.verilog.unisim: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.simprim: -sverilog -nc +v2k +define+XIL_TIMING -kdb }
+   -cfgopt {vcs_mx.verilog.unisim:   -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc      +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb }
 
    # Compile the simulation libraries
-   compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
+   if { [info exists ::env(VCS_IP_COMPILE)] != 1 || $::env(VCS_IP_COMPILE) == 0 } {
+      # Compile the simulation libraries without very long IP compile
+      compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
+   } else {
+      # Compile the simulation libraries with very long IP compile
+      compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx
+   }
    
    # Set VCS as target_simulator
    set_property target_simulator "VCS" [current_project]
