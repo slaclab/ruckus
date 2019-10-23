@@ -622,6 +622,7 @@ proc CheckPrjConfig { fileset } {
          puts "********************************************************"
          puts "********************************************************"   
          puts "WARNING: Your top-level firmware is defined as ${PRJ_TOP}"
+         puts "Please double check that ${PRJ_TOP} is actually your top-level HDL"
          puts "********************************************************"
          puts "********************************************************"
          puts "********************************************************\n\n\n\n\n"     
