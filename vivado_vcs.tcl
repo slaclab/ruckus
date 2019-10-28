@@ -104,6 +104,10 @@ if { [CheckPrjConfig sim_1] != true } {
    exit -1
 }
 
+
+# Target specific VCS script
+SourceTclFile ${VIVADO_DIR}/pre_vcs.tcl
+
 # Setup variables
 set simLibOutDir ${OUT_DIR}/vcs_library
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
@@ -112,7 +116,6 @@ set simTbFileName [get_property top [get_filesets sim_1]]
 # Set the compile/elaborate options
 set vloganOpt "-nc -l +v2k -xlrm -kdb +define+SIM_SPEED_UP"
 set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
-# set elabOpt "+warn=none -kdb -lca -debug_access+all"
 set elabOpt "+warn=none -kdb -lca"
 
 #####################################################################################################
@@ -128,12 +131,18 @@ if { [file exists ${simLibOutDir}] != 1 } {
    # Configure the simlib compiler
    config_compile_simlib -simulator vcs_mx \
    -cfgopt {vcs_mx.vhdl.unisim: -nc -l +v2k -xlrm -kdb } \
-   -cfgopt {vcs_mx.verilog.unisim: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.simprim: -sverilog -nc +v2k +define+XIL_TIMING -kdb }
+   -cfgopt {vcs_mx.verilog.unisim:   -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc      +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb }
 
    # Compile the simulation libraries
-   compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
+   if { [info exists ::env(VCS_IP_COMPILE)] != 1 || $::env(VCS_IP_COMPILE) == 0 } {
+      # Compile the simulation libraries without very long IP compile
+      compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
+   } else {
+      # Compile the simulation libraries with very long IP compile
+      compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx
+   }
    
    # Set VCS as target_simulator
    set_property target_simulator "VCS" [current_project]
@@ -186,8 +195,8 @@ if { [file exists ${simLibOutDir}] != 1 } {
 update_compile_order -quiet -fileset sim_1
 
 # Export Xilinx & User IP Cores
-generate_target {simulation} [get_ips]
-export_ip_user_files -no_script
+generate_target -force {simulation} [get_ips]
+export_ip_user_files -force -no_script
 
 # Launch the scripts generator 
 set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
@@ -343,11 +352,11 @@ if { [file exists ${simTbOutDir}/vcs/glbl.v] == 1 } {
    exec cp -f ${simTbOutDir}/vcs/glbl.v ${simTbOutDir}/glbl.v 
 }
 
+# Target specific VCS script
+SourceTclFile ${VIVADO_DIR}/post_vcs.tcl
+
 # Close the project (required for cd function)
 close_project
-
-# Target specific VCS script
-SourceTclFile ${VIVADO_DIR}/vcs.tcl
 
 # VCS Complete Message
 VcsCompleteMessage ${simTbOutDir} ${rogueSimEn}

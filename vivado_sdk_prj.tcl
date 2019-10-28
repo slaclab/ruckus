@@ -19,7 +19,7 @@ set EmptyApp "Empty Application"
 exec rm -rf ${SDK_PRJ}
 
 # Check the Vivado version (Refer to AR#66629)
-if { [VersionCompare 2016.1] < 0 } {
+if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {
    # Setup the project for Vivado 2015.4 (or earlier) ....  Refer to AR#66629
    file mkdir ${SDK_PRJ}
    file copy -force ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.sysdef ${SDK_PRJ}/${PROJECT}.hdf

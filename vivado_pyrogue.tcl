@@ -20,7 +20,6 @@ set ProjPythonDir   "${OUT_DIR}/${PyRogueDirName}"
 
 # Remove old directory and files
 exec rm -rf ${ProjPythonDir}
-exec rm -rf ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz
 exec rm -rf ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip
 
 # Create a new directory
@@ -46,6 +45,20 @@ if { ${dirList} != "" } {
                exec cp -rf ${filePntr} ${ProjPythonDir}/python/.
             }
          }
+      }
+   }
+}
+
+# Always copy TOP_DIR/firmware/python directory if it exists
+if { [file isdirectory ${TOP_DIR}/python/] == 1 } {
+   # Create a list of files
+   set fileList [glob -dir ${TOP_DIR}/python/ *]
+   # check for non-empty list
+   if { ${fileList} != "" } {
+      # Loop through the list
+      foreach filePntr ${fileList} {
+         # Copy all the files
+         exec cp -rf ${filePntr} ${ProjPythonDir}/python/.
       }
    }
 }
@@ -85,10 +98,6 @@ if { [file isdirectory ${defaultsDir}] == 1 } {
 }
 
 # Compress the python directory to the target's image directory
-exec tar -zcvf  ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz -C ${OUT_DIR} ${PyRogueDirName}
-puts "${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz"
-
-# Compress the python directory to the target's image directory
 exec zip -r -9 -q ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip ${PyRogueDirName}
 puts "${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip"
 
@@ -97,6 +106,5 @@ if { [file isdirectory $::env(IMPL_DIR)] == 1 } {
    set onesFile "$::env(IMPL_DIR)/ones.bin"
    exec rm -f ${onesFile}
    exec printf "%b" '\xff\xff' > ${onesFile}
-   exec cat ${onesFile} ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.tar.gz > $::env(IMPL_DIR)/$::env(IMAGENAME).pyrogue.tar.gz
    exec cat ${onesFile} ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip    > $::env(IMPL_DIR)/$::env(IMAGENAME).pyrogue.zip
 }
