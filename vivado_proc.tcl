@@ -346,6 +346,26 @@ proc DcpToVerilogSim {dcpName} {
    }
 }
 
+## Generate .vho files for all .DCP in a project
+proc CreateDcpVhoFiles {} {
+   # Get a list of .bd files
+   set dcpList [get_files {*.dcp}]
+   # Check if any .bd files exist
+   if { ${dcpList} != "" } {
+      # Loop through the has block designs
+      foreach dcppath ${dcpList} {
+         # Get the base name
+          set fbasename [file rootname ${dcppath}]
+         # Open the check point
+         open_checkpoint ${dcppath}
+         # Write the simulation model to the build tree
+         write_vhdl -force -mode pin_planning ${fbasename}.vho
+         # close the check point
+         close_design
+      }
+   }
+}
+
 ## Create .MCS PROM
 proc CreatePromMcs { } {   
    if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
