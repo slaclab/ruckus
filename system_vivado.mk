@@ -120,8 +120,6 @@ export GIT_STATUS = $(shell git diff-index --name-only HEAD)
 
 # Check for non-dirty git clone
 ifeq ($(GIT_STATUS),)
-   export GIT_TAG_NAME   = build-$(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)
-   export GIT_TAG_MSG    = -m "PROJECT: $(PROJECT)" -m "FW_VERSION: $(PRJ_VERSION)" -m "BUILD_STRING: $(BUILD_STRING)"
    export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
    export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
    export GIT_HASH_MSG   = $(GIT_HASH_LONG)
@@ -131,16 +129,13 @@ ifeq ($(GIT_STATUS),)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
    endif
 else
-   export GIT_TAG_MSG    = 
    export GIT_HASH_MSG   = dirty
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
-      export GIT_TAG_NAME   = Uncommitted code detected
       export GIT_HASH_LONG  = 
       export GIT_HASH_SHORT = 
    else
       export GIT_STATUS     = 
-      export GIT_TAG_NAME   = Bypassing Build GIT Tagging
       export GIT_HASH_LONG  = 0
       export GIT_HASH_SHORT = 0
    endif
@@ -178,7 +173,6 @@ define ACTION_HEADER
 @echo    "   Out Dir      = $(OUT_DIR)"
 @echo    "   Version      = $(PRJ_VERSION)"
 @echo    "   Build String = $(BUILD_STRING)"
-@echo    "   GIT Tag      = $(GIT_TAG_NAME)"
 @echo    "   GIT Hash     = $(GIT_HASH_MSG)"
 @echo    "============================================================================="
 @echo
@@ -320,14 +314,6 @@ elf : $(SOURCE_DEPEND)
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
-
-###############################################################
-#### Vivado PyRogue ###########################################
-###############################################################
-.PHONY : pyrogue
-pyrogue : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
-	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_pyrogue.tcl
 
 ###############################################################
 #### Vivado CPSW ##############################################
