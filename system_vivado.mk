@@ -33,7 +33,7 @@ export REMOVE_UNUSED_CODE = 0
 endif
 
 ifndef PARALLEL_SYNTH
-export PARALLEL_SYNTH = 1
+export PARALLEL_SYNTH = $(shell cat /proc/cpuinfo | grep processor | wc -l)
 endif
 
 ifndef GIT_BYPASS
