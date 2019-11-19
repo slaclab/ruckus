@@ -80,6 +80,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">/home/travis/build/slaclab/ruckus/releaseNotes.py File Reference</div>  </div>
@@ -91,6 +92,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <p><a href="releaseNotes_8py_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a035aa834e5e6359d97ce3370c40dc5c0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a035aa834e5e6359d97ce3370c40dc5c0"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.getReleaseNotes</b> (locRepo, remRepo, tagRange)</td></tr>
+<tr class="separator:a035aa834e5e6359d97ce3370c40dc5c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:ac5b395598a848b3120755b2a5b56f8e1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac5b395598a848b3120755b2a5b56f8e1"></a>
@@ -120,8 +127,11 @@ Variables</h2></td></tr>
 <tr class="memitem:a8c4cd42d57fff1676cb421317c528c36"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8c4cd42d57fff1676cb421317c528c36"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.g</b> = git.Git('.')</td></tr>
 <tr class="separator:a8c4cd42d57fff1676cb421317c528c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17aa64b4c13bc36d49a8580d614ca057"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a17aa64b4c13bc36d49a8580d614ca057"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.url</b> = g.remote('get-url','origin')</td></tr>
+<tr class="separator:a17aa64b4c13bc36d49a8580d614ca057"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d94ec73bac60e750110c541c66cfa1f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d94ec73bac60e750110c541c66cfa1f"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.project</b> = g.remote('get-url','origin').strip('git@github.com:/')</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.project</b> = re.compile(r'slaclab/(?P&lt;name&gt;.*?).git').search(url).group('name')</td></tr>
 <tr class="separator:a4d94ec73bac60e750110c541c66cfa1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f5f4c148e254651e2a85dabb74b12cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4f5f4c148e254651e2a85dabb74b12cd"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.token</b> = input(&quot;Enter your github token: &quot;)</td></tr>
@@ -130,25 +140,10 @@ Variables</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.github</b> = Github(token)</td></tr>
 <tr class="separator:a951685fb0329d3782f78661642d63e6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9670270d2c37e989c5b732ec492c8203"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9670270d2c37e989c5b732ec492c8203"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.repo</b> = github.get_repo(f'{project}')</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.repo</b> = github.get_repo(f'slaclab/{project}')</td></tr>
 <tr class="separator:a9670270d2c37e989c5b732ec492c8203"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f62aaa26b1fadb172a3f113efd97442"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6f62aaa26b1fadb172a3f113efd97442"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.loginfo</b> = g.log(tags,'--grep','Merge pull request')</td></tr>
-<tr class="separator:a6f62aaa26b1fadb172a3f113efd97442"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85e43a199a652365a6d4cc951a612cff"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85e43a199a652365a6d4cc951a612cff"></a>
-list&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.records</b> = []</td></tr>
-<tr class="separator:a85e43a199a652365a6d4cc951a612cff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e03633bcfc0860b3897999477b37a85"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0e03633bcfc0860b3897999477b37a85"></a>
-dictionary&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.entry</b> = {}</td></tr>
-<tr class="separator:a0e03633bcfc0860b3897999477b37a85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac27d84c5214fc7747a61062be414a772"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac27d84c5214fc7747a61062be414a772"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.req</b> = repo.get_pull(int(entry['PR'][1:]))</td></tr>
-<tr class="separator:ac27d84c5214fc7747a61062be414a772"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ffab3c7964a469e533a39ab8fee78dc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3ffab3c7964a469e533a39ab8fee78dc"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.url</b> = 'https://jira.slac.stanford.edu/issues/{}'</td></tr>
-<tr class="separator:a3ffab3c7964a469e533a39ab8fee78dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af52dd78a776d3529f99d6b8c9f0676e8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af52dd78a776d3529f99d6b8c9f0676e8"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.md</b> = '# Pull Requests\n'</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.md</b> = getReleaseNotes(g,repo,tags)</td></tr>
 <tr class="separator:af52dd78a776d3529f99d6b8c9f0676e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
