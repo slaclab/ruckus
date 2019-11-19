@@ -51,11 +51,9 @@ lappend linuxVars "RECONFIG_PBLOCK"
 # Set GIT variables
 lappend linuxVars "GIT_BYPASS"
 lappend linuxVars "GIT_STATUS"
-lappend linuxVars "GIT_TAG_NAME"
 lappend linuxVars "GIT_HASH_LONG"
 lappend linuxVars "GIT_HASH_SHORT"
 lappend linuxVars "GIT_HASH_MSG"
-    #lappend linuxVars "GIT_TAG_MSG"
 
 # Set Non-Environmental variables
 lappend linuxVars "vivado_cmd"

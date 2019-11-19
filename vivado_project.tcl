@@ -70,10 +70,11 @@ if { [VersionCompare 2014.2] <= 0 } {
 
 # Enable general project multi-threading
 set cpuNum [GetCpuNumber]
+set_param general.maxThreads ${cpuNum}
 if { ${cpuNum} >= 8 } { 
-   set_param general.maxThreads 8
+   set_param synth.maxThreads 8
 } else {
-   set_param general.maxThreads ${cpuNum}
+   set_param synth.maxThreads ${cpuNum}
 }
 
 # # https://www.xilinx.com/support/answers/62908.html
