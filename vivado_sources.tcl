@@ -70,14 +70,13 @@ set pathToPkg "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfoPkg.vhd"
 exec mkdir -p ${OUT_DIR}/${VIVADO_PROJECT}.srcs
 set out [open ${pathToPkg} w]
 puts ${out} "library ieee;" 
-puts ${out} "use ieee.std_logic_1164.all;"
-puts ${out} "library surf;"
-puts ${out} "use surf.StdRtlPkg.all;" 
+puts ${out} "use ieee.std_logic_1164.all;" 
+puts ${out} "use work.StdRtlPkg.all;" 
 puts ${out} "package BuildInfoPkg is" 
 puts ${out} "constant BUILD_INFO_C : BuildInfoType :=x\"${gitHash}${fwVersion}${buildString}\";"
 puts ${out} "end BuildInfoPkg;" 
 close ${out}
-loadSource -lib ruckus -path ${pathToPkg} 
+loadSource -path ${pathToPkg} 
 
 ########################################################
 ## Check for change in hash or fwVersion between builds
