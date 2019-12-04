@@ -9,10 +9,14 @@
 ##############################################################################
 
 # Detect project name
+ifndef PROJECT
 export PROJECT = $(notdir $(BASE_DIR))
+endif
 
 # Project Build Directory
+ifndef OUT_DIR
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
+endif
 
 # Synthesis Variables
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
@@ -23,16 +27,19 @@ export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
 # Images Directory
+ifndef RTL_DIR
 export RTL_DIR = $(abspath $(PROJ_DIR)/rtl)
+endif
 
 # Source Files
+ifndef SRC_FILE
 export SRC_FILE = $(PROJ_DIR)/sources.tcl
+endif
 
 # HLS Simulation Tool [vcs, xsim, modelsim, ncsim, riviera]
 ifndef HLS_SIM_TOOL
-export HLS_SIM_TOOL = vcs
+export HLS_SIM_TOOL = xsim
 endif
-
 
 define ACTION_HEADER
 @echo 
@@ -48,6 +55,9 @@ endef
 .PHONY : all
 all: target
 
+###############################################################
+#### Printout Env. Variables ##################################
+###############################################################
 .PHONY : test
 test:
 	@echo PROJECT: $(PROJECT)
