@@ -103,12 +103,37 @@ Functions</h2></td></tr>
 <tr class="separator:aae973dd6d3655d4645bebb3f021f3572"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4831837b96bf5f20471b03a118e78cbf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="vivado__hls__proc_8tcl.html#a4831837b96bf5f20471b03a118e78cbf">PrintBuildComplete</a> filename</td></tr>
 <tr class="separator:a4831837b96bf5f20471b03a118e78cbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34665e42d7e28a99ff440e955ce67c02"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="vivado__hls__proc_8tcl.html#a34665e42d7e28a99ff440e955ce67c02">CheckProcRetVal</a> retVal procType tclScript</td></tr>
+<tr class="separator:a34665e42d7e28a99ff440e955ce67c02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This script contains all the custom TLC procedures for Vivado HLS. </p>
 
 <p>Definition in file <a class="el" href="vivado__hls__proc_8tcl_source.html">vivado_hls_proc.tcl</a>.</p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a34665e42d7e28a99ff440e955ce67c02"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CheckProcRetVal</td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">retVal procType tclScript &#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Check if the failed operation </p>
+
+<p>Definition at line <a class="el" href="vivado__hls__proc_8tcl_source.html#l00061">61</a> of file <a class="el" href="vivado__hls__proc_8tcl_source.html">vivado_hls_proc.tcl</a>.</p>
+<div class="fragment"><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword">proc</span> CheckProcRetVal { retVal procType tclScript} {</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;   <span class="keyword">if</span> {$retVal} {</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      <span class="keyword">puts</span> &quot;\n\n\n\n\n********************************************************&quot;<span class="comment"></span></div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;********************************************************&quot;<span class="comment"></span></div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;********************************************************&quot;<span class="comment"></span></div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;Failed ${procType} in submodule/ruckus/${tclScript}!!!&quot;<span class="comment"></span></div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;Execute &#39;make gui&#39; to open up GUI and evaluate error messages&quot;<span class="comment"></span></div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;********************************************************&quot;<span class="comment"></span></div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;********************************************************&quot;<span class="comment"></span></div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment"></span>      <span class="keyword">puts</span> &quot;********************************************************\n\n\n\n\n&quot;<span class="comment">     </span></div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment"></span>      <span class="keyword">exit</span> -1<span class="comment"></span></div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment"></span>   }<span class="comment"></span></div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment"></span>}</div></div><!-- fragment -->
+</div>
+</div>
 <a class="anchor" id="a7474024dc031c9e98757338131107ead"></a>
 <div class="memitem">
 <div class="memproto">
