@@ -29,9 +29,8 @@ source ${PROJ_DIR}/sources.tcl
 open_solution "solution1"
 
 ## Setup the csim ldflags
-set csim_design_rc [catch { 
-   csim_design -O -setup -ldflags ${LDFLAGS} -argv ${ARGV}
-} _RESULT]   
+set retVal [catch { csim_design -O -setup -ldflags ${LDFLAGS} -argv ${ARGV} }]
+CheckProcRetVal ${retVal} "csim setup" "vivado_hls_sources"
 
 ## Target specific solution setup script
 source ${PROJ_DIR}/solution.tcl
