@@ -29,14 +29,17 @@ set TOP [get_top]
 source ${PROJ_DIR}/directives.tcl
 
 # Run C/C++ simulation testbed
-csim_design -clean -O -ldflags ${LDFLAGS} -argv ${ARGV}
+set retVal [catch { csim_design -clean -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} }]
+CheckProcRetVal ${retVal} "csim_design" "vivado_hls_build"
 
 # Synthesis C/C++ code into RTL
-csynth_design
+set retVal [catch { csynth_design }]
+CheckProcRetVal ${retVal} "csynth_design" "vivado_hls_build"
 
 # Run co-simulation (compares the C/C++ code to the RTL)
 if { [info exists ::env(FAST_DCP_GEN)] == 0 } {
-   cosim_design -O -ldflags ${LDFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL)
+   set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) }]
+   CheckProcRetVal ${retVal} "cosim_design" "vivado_hls_build"
 }
 
 # Copy the IP directory to module source tree
@@ -50,7 +53,9 @@ file copy -force {*}$csyn_reports ${PROJ_DIR}/ip/.
 
 # Export the Design
 if { [info exists ::env(SKIP_EXPORT)] == 0 } {
-   export_design -flow syn -rtl verilog -format ip_catalog
+
+   set retVal [catch { export_design -flow syn -rtl verilog -format ip_catalog }]
+   CheckProcRetVal ${retVal} "export_design" "vivado_hls_build"
 
    # Copy over the .DCP file
    exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/${TOP}.dcp
