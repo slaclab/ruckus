@@ -41,6 +41,22 @@ ifndef HLS_SIM_TOOL
 export HLS_SIM_TOOL = xsim
 endif
 
+# Specifies the options passed to the linker for C simulation
+ifndef LDFLAGS
+export LDFLAGS =
+endif
+
+# Specifies the options passed to the compiler for C simulation
+ifndef MFLAGS
+export MFLAGS =
+endif
+
+# Specifies the argument list for the C test bench
+ifndef ARGV
+export ARGV =
+endif
+
+# Build System Header
 define ACTION_HEADER
 @echo 
 @echo    ================================================================

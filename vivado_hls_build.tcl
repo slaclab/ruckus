@@ -29,7 +29,7 @@ set TOP [get_top]
 source ${PROJ_DIR}/directives.tcl
 
 # Run C/C++ simulation testbed
-set retVal [catch { csim_design -clean -O -ldflags ${LDFLAGS} -argv ${ARGV} }]
+set retVal [catch { csim_design -clean -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} }]
 CheckProcRetVal ${retVal} "csim_design" "vivado_hls_build"
 
 # Synthesis C/C++ code into RTL
@@ -38,7 +38,7 @@ CheckProcRetVal ${retVal} "csynth_design" "vivado_hls_build"
 
 # Run co-simulation (compares the C/C++ code to the RTL)
 if { [info exists ::env(FAST_DCP_GEN)] == 0 } {
-   set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) }]
+   set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) }]
    CheckProcRetVal ${retVal} "cosim_design" "vivado_hls_build"
 }
 
