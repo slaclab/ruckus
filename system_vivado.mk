@@ -280,6 +280,14 @@ gui : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado_gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
+#### Vivado No Gui ############################################
+###############################################################
+.PHONY : nogui
+nogui : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado GUI")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_gui.tcl $(VIVADO_PROJECT).xpr
+
+###############################################################
 #### Vivado Sythnesis Only ####################################
 ###############################################################
 .PHONY : syn
