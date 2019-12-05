@@ -204,15 +204,15 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
                exec cp ${SRC} ${DST}
                puts "exec cp ${SRC} ${DST}"
                # Check if copying .DCP output
-               if {copyDcp} {
+               if { ${copyDcp} } {
                   # Overwrite the existing .dcp file in the source tree
                   set SRC [string map {.xci .dcp} ${SRC}]
                   set DST [string map {.xci .dcp} ${DST}]
                   exec cp ${SRC} ${DST}
                   puts "exec cp ${SRC} ${DST}"
                }
-               # Check if copying IP Core's the source tree
-               if {copySourceCode} {
+               # Check if copying IP Core's the source code
+               if { ${copySourceCode} } {
                   set SRC [get_files ${corePntr}.xci]
                   set DST ${coreFilePntr}
                   set SRC  [string trim ${SRC} ${corePntr}.xci]
@@ -227,7 +227,7 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
 }  
 
 ## Copies all block designs from the build tree to source tree
-proc CopyBdCores { {copySourceCode false} } {
+proc CopyBdCores { {createTcl true} {copySourceCode false} } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
@@ -248,8 +248,13 @@ proc CopyBdCores { {copySourceCode false} } {
                set DST ${bdFilePntr}
                exec cp ${SRC} ${DST}
                puts "exec cp ${SRC} ${DST}"
-               # Check if copying block design's the source tree
-               if {copySourceCode} {
+               # Check if creating a .TCL file for the source tree
+               if { ${createTcl} } {
+                  set fbasename [file rootname ${bdFilePntr}]
+                  write_bd_tcl -force ${fbasename}.tcl
+               }
+               # Check if copying block design's the source code
+               if { ${copySourceCode} } {
                   set SRC ${bdPntr}
                   set DST ${bdFilePntr}
                   set SRC  [string trim ${SRC} ${strip}.bd]
