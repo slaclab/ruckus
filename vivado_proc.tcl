@@ -227,13 +227,13 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
 }  
 
 ## Copies all block designs from the build tree to source tree
-proc CopyBdCores { } {
+proc CopyBdCores { {copySourceCode false} } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl   
+   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
    
    # Get the BD list
-   set bdList [read [open ${OUT_DIR}/bdList.txt]]   
+   set bdList [read [open ${OUT_DIR}/bdList.txt]]
    
    # Check if the target project has block designs
    if { ${bdList} != "" } {
@@ -242,43 +242,23 @@ proc CopyBdCores { } {
          # Create a copy of the IP Core in the source tree
          foreach bdFilePntr ${bdList} {
             set strip [file rootname [file tail ${bdPntr}]]
-            if { [ string match *${strip}.bd ${bdFilePntr} ] } { 
+            if { [ string match *${strip}.bd ${bdFilePntr} ] } {
                # Overwrite the existing .bd file in the source tree
                set SRC ${bdPntr}
                set DST ${bdFilePntr}
                exec cp ${SRC} ${DST}
-               puts "exec cp ${SRC} ${DST}"    
+               puts "exec cp ${SRC} ${DST}"
+               # Check if copying block design's the source tree
+               if {copySourceCode} {
+                  set SRC ${bdPntr}
+                  set DST ${bdFilePntr}
+                  set SRC  [string trim ${SRC} ${strip}.bd]
+                  set DST  [string trim ${DST} ${strip}.bd]
+                  exec cp -rf ${SRC} ${DST}
+                  puts "exec cp -rf ${SRC} ${DST}"
+               }
             }
-         }        
-      }
-   }
-} 
-
-## Copies all block designs from the build tree to source tree (with source code)
-proc CopyBdCoresDebug { } {
-   # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl   
-   
-   # Get the BD list
-   set bdList [read [open ${OUT_DIR}/bdList.txt]]   
-   
-   # Check if the target project has block designs
-   if { ${bdList} != "" } {
-      # Loop through the has block designs
-      foreach bdPntr [get_files {*.bd}] {
-         # Create a copy of the IP Core in the source tree
-         foreach bdFilePntr ${bdList} {
-            set strip [file rootname [file tail ${bdPntr}]]
-            if { [ string match *${strip}.bd ${bdFilePntr} ] } { 
-               set SRC ${bdPntr}
-               set DST ${bdFilePntr}         
-               set SRC  [string trim ${SRC} ${strip}.bd]
-               set DST  [string trim ${DST} ${strip}.bd]
-               exec cp -rf ${SRC} ${DST}    
-               puts "exec cp -rf ${SRC} ${DST}"    
-            }
-         }        
+         }
       }
    }
 } 
