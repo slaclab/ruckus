@@ -1512,18 +1512,27 @@ proc loadBlockDesign args {
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
-         if { ${fileExt} eq {.bd} } {
+         if { ${fileExt} eq {.bd} ||
+              ${fileExt} eq {.tcl} } {
             # Update the global list
-            set ::BD_FILES "$::BD_FILES $params(path)"
-            # Check if the block design file has already been loaded
-            if { [get_files -quiet [file tail $params(path)]] == ""} {
-               # Add block design file
-               set locPath [import_files -force -norecurse $params(path)]
-               export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+            set fbasename [file rootname $params(path)]
+            set ::BD_FILES "$::BD_FILES ${fbasename}.bd"
+            # Check for .bd extension
+            if { ${fileExt} eq {.bd} } {
+               # Check if the block design file has already been loaded
+               if { [get_files -quiet [file tail $params(path)]] == ""} {
+                  # Add block design file
+                  set locPath [import_files -force -norecurse $params(path)]
+                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+               }
+            # Else it's a .TCL extension
+            } else {
+               # Always load the block design TCL file
+               source $params(path)
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadBlockDesign: $params(path) does not have a \[.bd\] file extension"
+            puts "loadBlockDesign: $params(path) does not have a \[.bd,.tcl\] file extension"
             puts "********************************************************\n\n\n\n\n"
             exit -1
          }
@@ -1540,23 +1549,32 @@ proc loadBlockDesign args {
          # Get a list of all block design files
          set list ""
          set list_rc [catch { 
-            set list [glob -directory $params(dir) *.bd]
+            set list [glob -directory $params(dir) *.bd *.tcl]
          } _RESULT]           
          # Load all the block design files
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Update the global list
-               set ::BD_FILES "$::BD_FILES ${pntr}"
-               # Check if the block design file has already been loaded
-               if { [get_files -quiet [file tail ${pntr}]] == ""} {
-                  # Add block design file
-                  set locPath [import_files -force -norecurse ${pntr}]
-                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+               set fbasename [file rootname ${pntr}]
+               set ::BD_FILES "$::BD_FILES ${fbasename}.bd"
+               # Check for .bd extension
+               set fileExt [file extension ${pntr}]
+               if { ${fileExt} eq {.bd} } {
+                  # Check if the block design file has already been loaded
+                  if { [get_files -quiet [file tail ${pntr}]] == ""} {
+                     # Add block design file
+                     set locPath [import_files -force -norecurse ${pntr}]
+                     export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+                  }
+               # Else it's a .TCL extension
+               } else {
+                  # Always load the block design TCL file
+                  source ${pntr}
                }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadBlockDesign: $params(dir) directory does not have any \[.bd\] files"
+            puts "loadBlockDesign: $params(dir) directory does not have any \[.bd,.tcl\] file extension"
             puts "********************************************************\n\n\n\n\n"         
             exit -1            
          }
