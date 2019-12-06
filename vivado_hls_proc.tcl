@@ -56,3 +56,18 @@ proc PrintBuildComplete { filename } {
    puts ${filename}
    puts "********************************************************\n\n" 
 }
+
+## Check if the failed operation
+proc CheckProcRetVal { retVal procType tclScript} {
+   if {$retVal} {
+      puts "\n\n\n\n\n********************************************************"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "Failed ${procType} in submodule/ruckus/${tclScript}!!!"
+      puts "Execute 'make gui' to open up GUI and evaluate error messages"
+      puts "********************************************************"
+      puts "********************************************************"
+      puts "********************************************************\n\n\n\n\n"     
+      exit -1
+   }
+}

@@ -355,13 +355,24 @@ proc CreateDcpVhoFiles {} {
       # Loop through the has block designs
       foreach dcppath ${dcpList} {
          # Get the base name
-          set fbasename [file rootname ${dcppath}]
+         set fbasename [file rootname ${dcppath}]
          # Open the check point
          open_checkpoint ${dcppath}
          # Write the simulation model to the build tree
          write_vhdl -force -mode pin_planning ${fbasename}.vho
          # close the check point
          close_design
+         # Put the .vho file in a list and remove "extra" spaces and remove lines with `-`
+         set vhoFile [lsearch -regexp -inline -all [lreplace [split [read [open ${fbasename}.vho r]] "\n"] end end] {^[^-]}]
+         # Format for component declaration
+         set vhoFile [string map {entity component} $vhoFile]
+         set vhoFile [string map {end "end component"} $vhoFile]
+         # Remove the first 3 lines and last 3 lines
+         set vhoFile [lreplace [lreplace $vhoFile 0 3] end-2 end]
+         # Write to overwrite the existing .vho file
+         set fp [open ${fbasename}.vho w]
+         foreach vhoLine ${vhoFile} {puts $fp $vhoLine}
+         close $fp
       }
    }
 }
@@ -471,7 +482,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [VersionCompare 2019.1.3] > 0 } {
+   if { [VersionCompare 2019.2.0] > 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"

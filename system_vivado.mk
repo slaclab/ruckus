@@ -196,7 +196,7 @@ endef
 all: target
 
 ###############################################################
-#### Printout Env. Variables ##################################
+#### Printout Environmental Variables #########################
 ###############################################################
 
 .PHONY : test
@@ -272,11 +272,11 @@ interactive : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado_env_var.tcl
 
 ###############################################################
-#### Vivado Gui ###############################################
+#### Vivado Project GUI mode ##################################
 ###############################################################
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado GUI")
+	$(call ACTION_HEADER,"Vivado Project GUI Mode")
 	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado_gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
@@ -296,7 +296,7 @@ syn : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
 
 ###############################################################
-#### Vivado Sythnesis DCP  ####################################
+#### Vivado Synthesis DCP  ####################################
 ###############################################################
 .PHONY : dcp
 dcp : $(SOURCE_DEPEND)

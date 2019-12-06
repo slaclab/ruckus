@@ -69,9 +69,22 @@ if { [VersionCompare 2014.2] <= 0 } {
 } 
 
 # Enable general project multi-threading
+# general.maxThreads value is Vivado version dependent and can be collected with "report_param" TCL command
 set cpuNum [GetCpuNumber]
-set_param general.maxThreads ${cpuNum}
-if { ${cpuNum} >= 8 } { 
+if { [VersionCompare 2018.2] <= 0 } {
+   if { ${cpuNum} >= 8 } {
+      set_param general.maxThreads 8
+   } else {
+      set_param general.maxThreads ${cpuNum}
+   }
+} else {
+   if { ${cpuNum} >= 32 } {
+      set_param general.maxThreads 32
+   } else {
+      set_param general.maxThreads ${cpuNum}
+   }
+}
+if { ${cpuNum} >= 8 } {
    set_param synth.maxThreads 8
 } else {
    set_param synth.maxThreads ${cpuNum}
