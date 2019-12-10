@@ -15,7 +15,7 @@
 
 ## \file vivado_vcs.tcl
 # \brief This script generates the VCS build scripts using Vivado to determine the 
-# build ordering and other dependencies. 
+# build ordering and other dependencies. This script does NOT run the VCS scripts that it generates
 
 # Get variables and procedures
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
