@@ -386,8 +386,16 @@ proc CreateFpgaBit { } {
       puts "No Debug Probes found"   
    }
    
-   # Try to generate the .HDF file
-   write_hwdef -force -file ${imagePath}.hdf   
+   # Check for Vivado 2019.2 (or newer)
+   if { [VersionCompare 2019.2] > 0 } {
+      # Try to generate the .XSA file
+      write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+   
+   # Else Vivado 2019.1 (or older)
+   } else {
+      # Try to generate the .HDF file
+      write_hwdef -force -file ${imagePath}.hdf   
+   }
    
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs

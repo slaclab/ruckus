@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_sdk_bit.tcl
+## \file sdk_bit.tcl
 # \brief This script rebuild the .bit file with the .elf included
 
 # Get variables and Custom Procedures
@@ -26,7 +26,7 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
 } else {
 
    # Generate .ELF
-   exec xsdk -batch -source ${RUCKUS_DIR}/vivado_sdk_elf.tcl >@stdout
+   exec xsdk -batch -source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/sdk_elf.tcl >@stdout
 
    # Add .ELF to the .bit file properties
    set add_rc [catch {
@@ -44,6 +44,10 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
 
    # Copy over .bit w/ .ELF file to image directory
    exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(IMAGENAME).bit
-   exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
    
+   # Check if gzip-ing the image files
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {    
+      exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
+   }   
+
 }

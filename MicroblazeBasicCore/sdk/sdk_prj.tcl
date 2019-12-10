@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_sdk_prj.tcl
+## \file sdk_prj.tcl
 # \brief This script creates the general Vivado SDK project
 
 #############################

@@ -149,15 +149,8 @@ endif
 # https://www.xilinx.com/support/answers/63253.html
 export XILINX_LOCAL_USER_DATA = no
 
-# SDK Variables
-export SDK_PRJ    = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
-export SDK_ELF    = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
 ifndef LD_PRELOAD
 export LD_PRELOAD = 
-endif
-
-ifndef SDK_LIB
-export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
 endif
 
 # Ubuntu SDK support
@@ -165,6 +158,36 @@ ifndef SWT_GTK3
 export SWT_GTK3 = 0
 endif
 
+###############################################################
+#           Vitis Variables (Vivado 2019.2 or newer)
+###############################################################
+
+export VITIS_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).vitis)
+export VITIS_ELF = $(abspath $(VITIS_PRJ)/$(PROJECT).elf)
+
+ifndef VITIS_LIB
+export VITIS_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
+endif
+
+# Check if SDK_SRC_PATH defined but VITIS_SRC_PATH not (legacy support)
+ifdef SDK_SRC_PATH
+   ifndef VITIS_SRC_PATH
+   export VITIS_SRC_PATH = SDK_SRC_PATH
+   endif
+endif
+
+###############################################################
+#           SDK Variables (Vivado 2019.1 or older)
+###############################################################
+
+export SDK_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).sdk)
+export SDK_ELF = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
+
+ifndef SDK_LIB
+export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
+endif
+
+###############################################################
 define ACTION_HEADER
 @echo
 @echo    "============================================================================="
