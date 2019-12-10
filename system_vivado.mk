@@ -369,6 +369,14 @@ xsim : $(SOURCE_DEPEND)
 vcs : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generating the VCS Simulation scripts")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_vcs.tcl
+   
+###############################################################
+#### Vivado Batch Mode within the Project Environment  ########
+###############################################################
+.PHONY : batch
+batch : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Project Batch")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_batch.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
 #### Makefile Targets #########################################
