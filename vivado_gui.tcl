@@ -9,7 +9,7 @@
 ##############################################################################
 
 ## \file vivado_gui.tcl
-# \brief This script launches the Vivado HLS interface GUI mode with all the 
+# \brief This script launches the Vivado interface GUI mode with all the 
 # ruckus procedures and environmental variables included 
 
 # Get variables and Custom Procedures and common properties
