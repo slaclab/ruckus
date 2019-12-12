@@ -159,13 +159,13 @@ export SWT_GTK3 = 0
 endif
 
 ifneq (, $(shell which vitis))
-   export EMBED_TYPE = vitis
+   export EMBED_TYPE = Vitis
    export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
-   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/elf.tcl
+   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/bit.tcl
 else
-   export EMBED_TYPE = sdk
+   export EMBED_TYPE = SDK
    export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
-   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/elf.tcl
+   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/bit.tcl
 endif
 
 ###############################################################
@@ -175,14 +175,18 @@ endif
 export VITIS_PRJ = $(abspath $(OUT_DIR)/$(VIVADO_PROJECT).vitis)
 export VITIS_ELF = $(abspath $(VITIS_PRJ)/$(PROJECT).elf)
 
-ifndef VITIS_LIB
-export VITIS_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
+ifdef SDK_LIB
+   export VITIS_LIB = $(SDK_LIB)
+else
+   ifndef VITIS_LIB
+      export VITIS_LIB = $(MODULES)/surf/xilinx/general/sdk/common
+   endif
 endif
 
 # Check if SDK_SRC_PATH defined but VITIS_SRC_PATH not (legacy support)
 ifdef SDK_SRC_PATH
    ifndef VITIS_SRC_PATH
-   export VITIS_SRC_PATH = $(SDK_SRC_PATH)
+      export VITIS_SRC_PATH = $(SDK_SRC_PATH)
    endif
 endif
 
@@ -250,6 +254,11 @@ test:
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 	@echo IMAGENAME: $(IMAGENAME)
+	@echo VITIS_PRJ: $(VITIS_PRJ)
+	@echo VITIS_ELF: $(VITIS_ELF)
+	@echo VITIS_LIB: $(VITIS_LIB)
+	@echo VITIS_LIB: $(VITIS_LIB)
+	@echo VITIS_SRC_PATH: $(VITIS_SRC_PATH)
 	@echo Untracked Files:
 	@echo "\t$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
@@ -342,7 +351,7 @@ sdk vitis : $(SOURCE_DEPEND)
 .PHONY : elf
 elf : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado $(EMBED_TYPE) .ELF generation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sdk_bit.tcl
+	@cd $(OUT_DIR); $(EMBED_ELF)
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"

@@ -25,8 +25,14 @@ if { [file exists ${VIVADO_DIR}/vitis.tcl] == 1 } {
    source ${VIVADO_DIR}/vitis.tcl
 } else {
 
+   # Generate the .XSA file  
+   write_hw_platform -fixed -force  -include_bit -file ${OUT_DIR}/${PROJECT}.xsa    
+   
+   # Create the Vitis project
+   set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl >@stdout } _RESULT]
+
    # Generate .ELF
-   exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl >@stdout
+   set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl >@stdout } _RESULT]
 
    # Add .ELF to the .bit file properties
    set add_rc [catch {
@@ -42,12 +48,7 @@ if { [file exists ${VIVADO_DIR}/vitis.tcl] == 1 } {
       wait_on_run impl_1 
    } _RESULT]  
 
-   # Copy over .bit w/ .ELF file to image directory
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(IMAGENAME).bit
-   
-   # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {    
-      exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
-   }   
-   
+   # Copy the .bit file (and create .mcs)
+   CreateFpgaBit
+
 }

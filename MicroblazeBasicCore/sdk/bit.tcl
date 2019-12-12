@@ -42,12 +42,7 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
       wait_on_run impl_1 
    } _RESULT]  
 
-   # Copy over .bit w/ .ELF file to image directory
-   exec cp -f ${IMPL_DIR}/${PROJECT}.bit ${IMAGES_DIR}/$::env(IMAGENAME).bit
-   
-   # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {    
-      exec gzip -c -f -9 ${IMPL_DIR}/${PROJECT}.bit > ${IMAGES_DIR}/$::env(IMAGENAME).bit.gz
-   }   
+   # Copy the .bit file (and create .mcs)
+   CreateFpgaBit   
 
 }

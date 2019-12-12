@@ -43,45 +43,13 @@ if { [CheckTiming false] == true } {
    #########################################################
    # Check for Vivado 2019.2 (or newer)
    #########################################################
-   if { [VersionCompare 2019.2] > 0 } {
+   if { [VersionCompare 2019.2] >= 0 } {
 
       # Check if VITIS_SRC_PATH is a valid path
       if { [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 && ${mbPath} != "" &&
            [file exists ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.hwdef] == 1 } {
-           
-         # Generate the .XSA file  
-         write_hw_platform -fixed -force  -include_bit -file ${OUT_DIR}/${PROJECT}.xsa  
-           
-         # Check if custom Vitis exist
-         if { [file exists ${VIVADO_DIR}/vitis.tcl] == 1 } {   
-            source ${VIVADO_DIR}/vitis.tcl
-         } else {   
-            set VITIS_PRJ_RDY false
-            set VITIS_RETRY_CNT 0
-            while { ${VITIS_PRJ_RDY} != true } {
-               set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl >@stdout} _RESULT]      
-               if {$src_rc} {
-                  puts "\n********************************************************"
-                  puts "Retrying to build VITIS project"
-                  puts ${_RESULT}
-                  puts "********************************************************\n"
-                  # Increment the counter
-                  incr VITIS_RETRY_CNT
-                  # Check for max retries
-                  if { ${VITIS_RETRY_CNT} == 10 } {
-                     puts "Failed to build the VITIS project"
-                     exit -1
-                     # break
-                  }
-               } else {
-                  set VITIS_PRJ_RDY true
-               }         
-            }
-            # Generate .ELF
-            set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl >@stdout}]    
-            # Add .ELF to the .bit file
-            source ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/bit.tcl       
-         }
+         # Add .ELF to the .bit file
+         source ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/bit.tcl 
       }   
       
    #########################################################
@@ -117,8 +85,6 @@ if { [CheckTiming false] == true } {
                   set SDK_PRJ_RDY true
                }         
             }
-            # Generate .ELF
-            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/elf.tcl >@stdout}]    
             # Add .ELF to the .bit file
             source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/bit.tcl       
          }

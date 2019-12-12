@@ -531,6 +531,43 @@ proc CheckTiming { {printTiming true} } {
    }
 }
 
+## Check if SDK_SRC_PATH (or VITIS_SRC_PATH) exist, then it checks for a valid path 
+proc CheckSdkSrcPath { } {
+
+   # Check for Vivado 2019.2 (or newer)
+   if { [VersionCompare 2019.2] > 0 } {
+      if { [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 } {
+         if { [expr [file exists $::env(VITIS_SRC_PATH)]] == 0 } {
+            puts "\n\n\n\n\n********************************************************"
+            puts "********************************************************"
+            puts "********************************************************"   
+            puts "VITIS_SRC_PATH: $::env(VITIS_SRC_PATH) does not exist"
+            puts "********************************************************"
+            puts "********************************************************"
+            puts "********************************************************\n\n\n\n\n"  
+            return false
+         }      
+      }   
+      
+   # Else Vivado 2019.1 (or older)
+   } else {
+      if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
+         if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
+            puts "\n\n\n\n\n********************************************************"
+            puts "********************************************************"
+            puts "********************************************************"   
+            puts "SDK_SRC_PATH: $::env(SDK_SRC_PATH) does not exist"
+            puts "********************************************************"
+            puts "********************************************************"
+            puts "********************************************************\n\n\n\n\n"  
+            return false
+         }      
+      }
+   }
+   
+   return true
+}
+
 ## Check project configuration for errors
 proc CheckPrjConfig { fileset } {
 
