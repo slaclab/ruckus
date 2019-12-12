@@ -8,11 +8,11 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_promgen.tcl
+## \file vivado/promgen.tcl
 # \brief This script builds the .MCS PROM file
 
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 # Target PROMGEN script
 set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]

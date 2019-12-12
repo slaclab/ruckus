@@ -8,14 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_post_synthesis.tcl
+## \file vivado/post_synthesis.tcl
 # \brief This script runs end the synthesis run (outside of synth_1)
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 # Target specific post_synthesis script
 SourceTclFile ${VIVADO_DIR}/post_synthesis.tcl

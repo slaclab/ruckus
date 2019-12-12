@@ -8,14 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_post_route.tcl
+## \file vivado/post_route.tcl
 # \brief This script runs at the end of the place and route (outside of impl_1)
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 ########################################################
 ## Check if passed timing
@@ -31,7 +31,7 @@ if { [CheckTiming false] == true } {
    ## Check if need to include YAML files with build
    #########################################################
    if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] == 1 } {
-      source ${RUCKUS_DIR}/vivado_cpsw.tcl
+      source ${RUCKUS_DIR}/vivado/cpsw.tcl
    }
    
    #########################################################

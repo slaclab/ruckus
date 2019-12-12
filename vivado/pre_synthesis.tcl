@@ -8,14 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_pre_synthesis.tcl
+## \file vivado/pre_synthesis.tcl
 # \brief This script runs before the synthesis run (outside of synth_1)
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 # Check for optional pre-synthesis elaboration to check for sensitivity list errors
 # Note: This step is not added by default to minimize build time (assuming no code errors)

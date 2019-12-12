@@ -8,15 +8,15 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_messages.tcl
+## \file vivado/messages.tcl
 # \brief This script modifies the Vivado messaging configurations
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
 
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 ########################################################
 ## Message Suppression

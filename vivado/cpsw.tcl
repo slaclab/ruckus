@@ -8,11 +8,11 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_cpsw.tcl
+## \file vivado/cpsw.tcl
 # \brief This scripts tarballs all the cpsw yaml source code
 
 # Get variables and Custom Procedures
-source $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 
 # Check for top level YAML file
 if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] != 1 } {

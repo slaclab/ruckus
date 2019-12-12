@@ -8,14 +8,16 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_gui.tcl
-# \brief This script launches the Vivado interface GUI mode with all the 
-# ruckus procedures and environmental variables included 
+## \file vivado/batch.tcl
+# \brief This script launches the Vivado project then runs User batch.tcl script
+# with all the ruckus procedures and environmental variables included 
 
 # Get variables and Custom Procedures and common properties
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_properties.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
-set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado_post_route_run.tcl [get_runs impl_1]
-SourceTclFile ${VIVADO_DIR}/gui.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/properties.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado/post_route_run.tcl [get_runs impl_1]
+
+# Run user's batch script
+source ${VIVADO_DIR}/batch.tcl

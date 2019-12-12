@@ -8,12 +8,12 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_post_route_run.tcl
+## \file vivado/post_route_run.tcl
 # \brief This script runs at the end of the place and route (inside of impl_1)
 
 # Get variables and Custom Procedures
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 ########################################################
 ## Copy the .bit/.mcs image files
