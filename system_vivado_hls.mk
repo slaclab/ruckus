@@ -99,7 +99,7 @@ dir:
 #### Vivado Project ###########################################
 ###############################################################
 $(VIVADO_DEPEND) :
-	vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_version.tcl
+	vivado -mode batch -source $(RUCKUS_DIR)/vivado/hls/version.tcl
 	$(call ACTION_HEADER,"Making output directory")
 	@test -d $(TOP_DIR)/build/ || { \
 			 echo ""; \
@@ -119,7 +119,7 @@ $(VIVADO_DEPEND) :
 ###############################################################
 $(SOURCE_DEPEND) : $(SRC_FILE) $(VIVADO_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Project Creation and Source Setup")
-	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_sources.tcl
+	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado/hls/sources.tcl
 
 ###############################################################
 #### Vivado Batch without design export  ######################
@@ -127,7 +127,7 @@ $(SOURCE_DEPEND) : $(SRC_FILE) $(VIVADO_DEPEND)
 .PHONY : csyn
 csyn : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without design export")
-	@cd $(OUT_DIR); export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl;
+	@cd $(OUT_DIR); export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado/hls/build.tcl;
 
 ######################################################################################
 #### Vivado Batch without co-simulation and without design export ####################
@@ -135,7 +135,7 @@ csyn : $(SOURCE_DEPEND)
 .PHONY : csyn_nocosim
 csyn_nocosim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation and without design export")
-	@cd $(OUT_DIR); export FAST_DCP_GEN=1; export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl;
+	@cd $(OUT_DIR); export FAST_DCP_GEN=1; export SKIP_EXPORT=1; vivado_hls -f $(RUCKUS_DIR)/vivado/hls/build.tcl;
 
 ###############################################################
 #### Vivado Batch #############################################
@@ -143,8 +143,8 @@ csyn_nocosim : $(SOURCE_DEPEND)
 .PHONY : dcp
 dcp : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build")
-	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
+	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado/hls/build.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/hls/dcp.tcl
 
 ###############################################################
 #### Vivado Batch without co-simulation #######################
@@ -152,8 +152,8 @@ dcp : $(SOURCE_DEPEND)
 .PHONY : dcp_nocosim
 dcp_nocosim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Build without co-simulation")
-	@cd $(OUT_DIR); export FAST_DCP_GEN=1; vivado_hls -f $(RUCKUS_DIR)/vivado_hls_build.tcl
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_hls_dcp.tcl
+	@cd $(OUT_DIR); export FAST_DCP_GEN=1; vivado_hls -f $(RUCKUS_DIR)/vivado/hls/build.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/hls/dcp.tcl
 
 ###############################################################
 #### Vivado Interactive #######################################
@@ -161,7 +161,7 @@ dcp_nocosim : $(SOURCE_DEPEND)
 .PHONY : interactive
 interactive : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado HLS Interactive")
-	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado_hls_interactive.tcl
+	@cd $(OUT_DIR); vivado_hls -f $(RUCKUS_DIR)/vivado/hls/interactive.tcl
 
 ###############################################################
 #### Vivado Gui ###############################################

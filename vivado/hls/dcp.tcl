@@ -8,13 +8,13 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_hls_dcp.tcl
+## \file vivado/hls/dcp.tcl
 # \brief This script writes the Vivado HLS .DCP export file
 
 # Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source  -quiet ${RUCKUS_DIR}/vivado_hls_env_var.tcl
-source  -quiet ${RUCKUS_DIR}/vivado_hls_proc.tcl 
+source  -quiet ${RUCKUS_DIR}/vivado/hls/env_var.tcl
+source  -quiet ${RUCKUS_DIR}/vivado/hls/proc.tcl 
 
 # Get the file name and path of the new .dcp file
 set filename [exec ls [glob "${PROJ_DIR}/ip/*.dcp"]]

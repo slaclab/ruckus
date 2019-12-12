@@ -8,13 +8,13 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_hls_build.tcl
+## \file vivado/hls/build.tcl
 # \brief This script builds the Vivado HLS project in batch mode
 
 # Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source ${RUCKUS_DIR}/vivado_hls_env_var.tcl
-source ${RUCKUS_DIR}/vivado_hls_proc.tcl 
+source ${RUCKUS_DIR}/vivado/hls/env_var.tcl
+source ${RUCKUS_DIR}/vivado/hls/proc.tcl 
 
 # Create a Project
 open_project ${PROJECT}_project
@@ -30,16 +30,16 @@ source ${PROJ_DIR}/directives.tcl
 
 # Run C/C++ simulation testbed
 set retVal [catch { csim_design -clean -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} }]
-CheckProcRetVal ${retVal} "csim_design" "vivado_hls_build"
+CheckProcRetVal ${retVal} "csim_design" "vivado/hls/build"
 
 # Synthesis C/C++ code into RTL
 set retVal [catch { csynth_design }]
-CheckProcRetVal ${retVal} "csynth_design" "vivado_hls_build"
+CheckProcRetVal ${retVal} "csynth_design" "vivado/hls/build"
 
 # Run co-simulation (compares the C/C++ code to the RTL)
 if { [info exists ::env(FAST_DCP_GEN)] == 0 } {
    set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) }]
-   CheckProcRetVal ${retVal} "cosim_design" "vivado_hls_build"
+   CheckProcRetVal ${retVal} "cosim_design" "vivado/hls/build"
 }
 
 # Copy the IP directory to module source tree
@@ -55,7 +55,7 @@ file copy -force {*}$csyn_reports ${PROJ_DIR}/ip/.
 if { [info exists ::env(SKIP_EXPORT)] == 0 } {
 
    set retVal [catch { export_design -flow syn -rtl verilog -format ip_catalog }]
-   CheckProcRetVal ${retVal} "export_design" "vivado_hls_build"
+   CheckProcRetVal ${retVal} "export_design" "vivado/hls/build"
 
    # Copy over the .DCP file
    exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/${TOP}.dcp
