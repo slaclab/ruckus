@@ -8,13 +8,13 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_hls_version.tcl
+## \file vivado/hls/version.tcl
 # \brief This script checks the Vivado HLS version for versions supported by ruckus
 
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source -quiet ${RUCKUS_DIR}/vivado_hls_env_var.tcl
-source -quiet ${RUCKUS_DIR}/vivado_hls_proc.tcl 
+source -quiet ${RUCKUS_DIR}/vivado/hls/env_var.tcl
+source -quiet ${RUCKUS_DIR}/vivado/hls/proc.tcl 
 
 ## Check for unsupported Vivado_HLS versions
 exit [HlsVersionCheck]

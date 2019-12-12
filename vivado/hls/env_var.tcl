@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_hls_env_var.tcl
+## \file vivado/hls/env_var.tcl
 # \brief This script set all the common ruckus environmental variables for Vivado HLS
 
 set PROJ_DIR         $::env(PROJ_DIR)

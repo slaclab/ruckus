@@ -8,13 +8,13 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_hls_sources.tcl
+## \file vivado/hls/sources.tcl
 # \brief This script loads the source code into the Vivado HLS project
 
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source ${RUCKUS_DIR}/vivado_hls_env_var.tcl
-source ${RUCKUS_DIR}/vivado_hls_proc.tcl
+source ${RUCKUS_DIR}/vivado/hls/env_var.tcl
+source ${RUCKUS_DIR}/vivado/hls/proc.tcl
 
 ## Create a Project
 open_project ${PROJECT}_project
@@ -30,7 +30,7 @@ open_solution "solution1"
 
 ## Setup the csim ldflags
 set retVal [catch { csim_design -O -setup -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} }]
-CheckProcRetVal ${retVal} "csim setup" "vivado_hls_sources"
+CheckProcRetVal ${retVal} "csim setup" "vivado/hls/sources"
 
 ## Target specific solution setup script
 source ${PROJ_DIR}/solution.tcl

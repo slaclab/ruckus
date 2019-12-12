@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_hls_proc.tcl
+## \file vivado/hls/proc.tcl
 # \brief This script contains all the custom TLC procedures for Vivado HLS
 
 ###############################################################
