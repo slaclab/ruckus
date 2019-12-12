@@ -8,14 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_xsim.tcl
+## \file vivado/xsim.tcl
 # \brief This script performs a Vivado XSIM simulation
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 ########################################################
 ## Open the project
@@ -25,10 +25,10 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
-source -quiet ${RUCKUS_DIR}/vivado_properties.tcl
+source -quiet ${RUCKUS_DIR}/vivado/properties.tcl
 
 # Setup project messaging
-source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
+source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
 
 ########################################################
 ## Update the complie order

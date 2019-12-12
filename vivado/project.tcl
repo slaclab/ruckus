@@ -8,14 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_project.tcl
+## \file vivado/project.tcl
 # \brief This script create the Vivado project
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 # Check for unsupported versions that ruckus does NOT support
 CheckVivadoVersion
@@ -24,7 +24,7 @@ CheckVivadoVersion
 create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
 
 # Message Filtering Script
-source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
+source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
 
 # Set VHDL as preferred language
 set_property target_language VHDL [current_project]
@@ -39,7 +39,7 @@ set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 VivadoRefresh ${VIVADO_PROJECT}
 
 # Setup project properties
-source ${RUCKUS_DIR}/vivado_properties.tcl
+source ${RUCKUS_DIR}/vivado/properties.tcl
 
 # Set the messaging limit
 set_param messaging.defaultLimit 10000

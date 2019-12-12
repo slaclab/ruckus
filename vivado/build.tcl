@@ -8,14 +8,14 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_build.tcl
+## \file vivado/build.tcl
 # \brief This script builds the Vivado project in batch mode
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 ########################################################
 ## Open the project
@@ -25,11 +25,11 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
-source -quiet ${RUCKUS_DIR}/vivado_properties.tcl
+source -quiet ${RUCKUS_DIR}/vivado/properties.tcl
 set_property STEPS.WRITE_BITSTREAM.TCL.POST "" [get_runs impl_1]
 
 # Setup project messaging
-source -quiet ${RUCKUS_DIR}/vivado_messages.tcl
+source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
 
 ########################################################
 ## Update the complie order
@@ -66,7 +66,7 @@ BuildIpCores
 ########################################################
 ## Target Pre synthesis script
 ########################################################
-source ${RUCKUS_DIR}/vivado_pre_synthesis.tcl
+source ${RUCKUS_DIR}/vivado/pre_synthesis.tcl
 
 ########################################################
 ## Synthesize
@@ -104,7 +104,7 @@ if { [CheckSynth printMsg] != true } {
 ########################################################
 ## Target post synthesis script
 ########################################################
-source ${RUCKUS_DIR}/vivado_post_synthesis.tcl
+source ${RUCKUS_DIR}/vivado/post_synthesis.tcl
 
 ########################################################
 ## Check if only doing Synthesize
@@ -119,7 +119,7 @@ if { [info exists ::env(SYNTH_ONLY)] } {
 ## Check if Synthesizen DCP Output
 ########################################################
 if { [info exists ::env(SYNTH_DCP)] } {
-   source ${RUCKUS_DIR}/vivado_dcp.tcl
+   source ${RUCKUS_DIR}/vivado/dcp.tcl
    close_project
    BuildInfo
    exit 0
@@ -162,7 +162,7 @@ if { [CheckTiming] != true } {
 ########################################################
 ## Target post route script
 ########################################################
-source ${RUCKUS_DIR}/vivado_post_route.tcl
+source ${RUCKUS_DIR}/vivado/post_route.tcl
 
 ########################################################
 ## Export static checkpoint for dynamic partial reconfiguration build

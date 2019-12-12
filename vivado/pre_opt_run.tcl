@@ -8,15 +8,15 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_pre_opt_run.tcl
+## \file vivado/pre_opt_run.tcl
 # \brief This script runs at the beginning of the place and route's optimization run (inside of impl_1)
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
 set errorDet false
 

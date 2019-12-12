@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_proc.tcl
+## \file vivado/proc.tcl
 # \brief This script contains all the custom TLC procedures for Vivado
 
 package require cmdline
@@ -130,8 +130,8 @@ proc ListComp { List1 List2 } {
 ## Function to build all the IP cores
 proc BuildIpCores { } {
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
    # Check if the target project has IP cores
    if { [get_ips] != "" } {
@@ -182,8 +182,8 @@ proc BuildIpCores { } {
 ## Copies all IP cores from the build tree to source tree
 proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Make sure the IP Cores have been built
    BuildIpCores
@@ -229,8 +229,8 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
 ## Copies all block designs from the build tree to source tree
 proc CopyBdCores { {createTcl true} {copySourceCode false} } {
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Get the BD list
    set bdList [read [open ${OUT_DIR}/bdList.txt]]
@@ -292,7 +292,7 @@ proc GenerateBdWrappers { } {
 
 ## Generate Verilog simulation models for a specific .dcp file
 proc DcpToVerilogSim {dcpName} {
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    set filePntr [get_files ${dcpName}.dcp]
    if { [file extension ${filePntr}] == ".dcp" } {
       ## Open the check point
@@ -346,15 +346,15 @@ proc CreateDcpVhoFiles {} {
 ## Create .MCS PROM
 proc CreatePromMcs { } {   
    if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
-      source $::env(RUCKUS_DIR)/vivado_promgen.tcl
+      source $::env(RUCKUS_DIR)/vivado/promgen.tcl
    }
 }   
 
 ## Create .BIT file   
 proc CreateFpgaBit { } {   
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
    set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
 
@@ -404,7 +404,7 @@ proc CreateFpgaBit { } {
 ## Create tar.gz of all cpsw files in firmware
 proc CreateCpswTarGz { } {   
    if { [file exists $::env(PROJ_DIR)/yaml/000TopLevel.yaml] == 1 } {
-      source $::env(RUCKUS_DIR)/vivado_cpsw.tcl
+      source $::env(RUCKUS_DIR)/vivado/cpsw.tcl
    } else {
       puts "$::env(PROJ_DIR)/yaml/000TopLevel.yaml does not exist"
    }
@@ -572,7 +572,7 @@ proc CheckSdkSrcPath { } {
 proc CheckPrjConfig { fileset } {
 
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 
    # Check for empty Firwmare Version string
    if { $::env(PRJ_VERSION) == "" } {
@@ -656,7 +656,7 @@ proc PrintOpenGui { errMsg } {
 
 ## Check if the Synthesize is completed
 proc CheckSynth { {flags ""} } {
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    if { ${flags} != "" } {
       # Loop through the synth runs
       foreach sythRun [get_runs {*synth_1}] {
@@ -757,8 +757,8 @@ proc CheckIpSynth { ipSynthRun {flags ""} } {
 
 ## Check if the Implementation is completed
 proc CheckImpl { {flags ""} } {
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    # Check for errors during synthesis
    if { ${flags} != "" } {   
       set NumErr [llength [lsearch -all -regexp [split [read [open ${IMPL_DIR}/runme.log]]] "^ERROR:"]]
@@ -1037,8 +1037,8 @@ proc VersionCompare { versionLock } {
 proc ImportStaticReconfigDcp { } {
 
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Check for valid file path
    if { [file exists ${RECONFIG_CHECKPOINT}] != 1 } {   
@@ -1093,8 +1093,8 @@ proc ImportStaticReconfigDcp { } {
 proc ExportStaticReconfigDcp { } {
 
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Make a copy of the .dcp file with a "_static" suffix
    exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
@@ -1120,8 +1120,8 @@ proc ExportStaticReconfigDcp { } {
 proc ExportPartialReconfigBin { } {
 
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Define the build output .bit file paths
    set partialBinFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bin
@@ -1140,8 +1140,8 @@ proc ExportPartialReconfigBin { } {
 proc ExportPartialReconfigBit { } {
 
    # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Define the build output .bit file paths
    set partialBitFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bit

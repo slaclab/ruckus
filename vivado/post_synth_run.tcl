@@ -8,15 +8,15 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_post_synth_run.tcl
+## \file vivado/post_synth_run.tcl
 # \brief This script runs at the end of the synthesis run (inside of synth_1)
 
 ########################################################
 ## Get variables and Custom Procedures
 ########################################################
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
 # Check if Multi-Driven Nets are not allowed
 set AllowMultiDriven [expr {[info exists ::env(ALLOW_MULTI_DRIVEN)] && [string is true -strict $::env(ALLOW_MULTI_DRIVEN)]}]  

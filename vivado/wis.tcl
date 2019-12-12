@@ -8,15 +8,15 @@
 # the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado_wis.tcl
+## \file vivado/wis.tcl
 # \brief Creates a tcl script that copies the current values of the KotoDpm project's
 # Linux OS environment variables. The purpose of the init.tcl output script is to
 # properly establish the environment variables within the Windows version of Vivado without the need
 # to first load Cygwin. This is useful because while using Vivado with Cygwin, Vivado runs roughly 2x slower.
 
 # Get variables and procedures
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 # Open the project
 open_project -quiet ${VIVADO_PROJECT}
