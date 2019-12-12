@@ -146,28 +146,6 @@ else
    endif
 endif
 
-# https://www.xilinx.com/support/answers/63253.html
-export XILINX_LOCAL_USER_DATA = no
-
-ifndef LD_PRELOAD
-export LD_PRELOAD = 
-endif
-
-# Ubuntu SDK support
-ifndef SWT_GTK3
-export SWT_GTK3 = 0
-endif
-
-ifneq (, $(shell which vitis))
-   export EMBED_TYPE = Vitis
-   export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
-   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/bit.tcl
-else
-   export EMBED_TYPE = SDK
-   export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
-   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/bit.tcl
-endif
-
 ###############################################################
 #           Vitis Variables (Vivado 2019.2 or newer)
 ###############################################################
@@ -199,6 +177,28 @@ export SDK_ELF = $(abspath $(SDK_PRJ)/$(PROJECT).elf)
 
 ifndef SDK_LIB
 export SDK_LIB  =  $(MODULES)/surf/xilinx/general/sdk/common
+endif
+
+###############################################################
+
+ifndef LD_PRELOAD
+export LD_PRELOAD = 
+endif
+
+ifneq (, $(shell which vitis))
+   export EMBED_TYPE = Vitis
+   export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/bit.tcl
+else
+   export EMBED_TYPE = SDK
+   export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/bit.tcl
+   
+   # Ubuntu SDK support
+   ifndef SWT_GTK3
+   export SWT_GTK3 = 0
+   endif   
+   
 endif
 
 ###############################################################
@@ -341,7 +341,7 @@ dcp : $(SOURCE_DEPEND)
 #### Vivado SDK ###############################################
 ###############################################################
 .PHONY : sdk vitis
-sdk vitis : $(SOURCE_DEPEND)
+sdk vitis :
 	$(call ACTION_HEADER,"Vivado $(EMBED_TYPE) GUI")
 	@cd $(OUT_DIR); $(EMBED_GUI)
 
@@ -349,7 +349,7 @@ sdk vitis : $(SOURCE_DEPEND)
 #### Vivado SDK ELF ###########################################
 ###############################################################
 .PHONY : elf
-elf : $(SOURCE_DEPEND)
+elf :
 	$(call ACTION_HEADER,"Vivado $(EMBED_TYPE) .ELF generation")
 	@cd $(OUT_DIR); $(EMBED_ELF)
 	@echo ""
@@ -395,8 +395,6 @@ vcs : $(SOURCE_DEPEND)
 batch : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project Batch")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_batch.tcl $(VIVADO_PROJECT).xpr
-#	@cd $(OUT_DIR); xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl
-#	@cd $(OUT_DIR); xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl
 
 ###############################################################
 #### Makefile Targets #########################################
