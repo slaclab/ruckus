@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file sdk_elf.tcl
+## \file sdk/elf.tcl
 # \brief This script builds the .elf file
 
 # Project SDK Run Script
@@ -32,4 +32,3 @@ if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {
 # Copy over .ELF file to image directory
 exec cp -f ${SDK_PRJ}/app_0/Release/app_0.elf ${SDK_ELF} 
 exec chmod 664 ${SDK_ELF} 
-exec gzip -c -f -9 ${SDK_ELF} > ${SDK_ELF}.gz

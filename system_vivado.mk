@@ -158,6 +158,16 @@ ifndef SWT_GTK3
 export SWT_GTK3 = 0
 endif
 
+ifneq (, $(shell which vitis))
+   export EMBED_TYPE = vitis
+   export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/elf.tcl
+else
+   export EMBED_TYPE = sdk
+   export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/elf.tcl
+endif
+
 ###############################################################
 #           Vitis Variables (Vivado 2019.2 or newer)
 ###############################################################
@@ -172,7 +182,7 @@ endif
 # Check if SDK_SRC_PATH defined but VITIS_SRC_PATH not (legacy support)
 ifdef SDK_SRC_PATH
    ifndef VITIS_SRC_PATH
-   export VITIS_SRC_PATH = SDK_SRC_PATH
+   export VITIS_SRC_PATH = $(SDK_SRC_PATH)
    endif
 endif
 
@@ -321,18 +331,17 @@ dcp : $(SOURCE_DEPEND)
 ###############################################################
 #### Vivado SDK ###############################################
 ###############################################################
-.PHONY : sdk
-sdk : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado SDK GUI")
-	@cd $(OUT_DIR); xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk \
-      -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+.PHONY : sdk vitis
+sdk vitis : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado $(EMBED_TYPE) GUI")
+	@cd $(OUT_DIR); $(EMBED_GUI)
 
 ###############################################################
 #### Vivado SDK ELF ###########################################
 ###############################################################
 .PHONY : elf
 elf : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado SDK .ELF generation")
+	$(call ACTION_HEADER,"Vivado $(EMBED_TYPE) .ELF generation")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sdk_bit.tcl
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
@@ -377,6 +386,8 @@ vcs : $(SOURCE_DEPEND)
 batch : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project Batch")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_batch.tcl $(VIVADO_PROJECT).xpr
+#	@cd $(OUT_DIR); xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl
+#	@cd $(OUT_DIR); xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl
 
 ###############################################################
 #### Makefile Targets #########################################

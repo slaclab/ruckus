@@ -59,7 +59,7 @@ if { [CheckTiming false] == true } {
             set VITIS_PRJ_RDY false
             set VITIS_RETRY_CNT 0
             while { ${VITIS_PRJ_RDY} != true } {
-               set src_rc [catch {exec xsct -eval ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/vitis_prj.tcl >@stdout} _RESULT]      
+               set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl >@stdout} _RESULT]      
                if {$src_rc} {
                   puts "\n********************************************************"
                   puts "Retrying to build VITIS project"
@@ -78,9 +78,9 @@ if { [CheckTiming false] == true } {
                }         
             }
             # Generate .ELF
-            set src_rc [catch {exec xsct -eval ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/vitis_elf.tcl >@stdout}]    
+            set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl >@stdout}]    
             # Add .ELF to the .bit file
-            source ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/vitis_bit.tcl       
+            source ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/bit.tcl       
          }
       }   
       
@@ -99,7 +99,7 @@ if { [CheckTiming false] == true } {
             set SDK_PRJ_RDY false
             set SDK_RETRY_CNT 0
             while { ${SDK_PRJ_RDY} != true } {
-               set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/sdk_prj.tcl >@stdout} _RESULT]      
+               set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/prj.tcl >@stdout} _RESULT]      
                if {$src_rc} {
                   puts "\n********************************************************"
                   puts "Retrying to build SDK project"
@@ -118,9 +118,9 @@ if { [CheckTiming false] == true } {
                }         
             }
             # Generate .ELF
-            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/sdk_elf.tcl >@stdout}]    
+            set src_rc [catch {exec xsdk -batch -source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/elf.tcl >@stdout}]    
             # Add .ELF to the .bit file
-            source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/sdk_bit.tcl       
+            source ${RUCKUS_DIR}/MicroblazeBasicCore/sdk/bit.tcl       
          }
       }
       

@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vitis_elf.tcl
+## \file vitis/elf.tcl
 # \brief This script builds the .elf file
 
 # Get build system variables 
@@ -21,3 +21,6 @@ app build -name app_0
 # Copy over .ELF file to image directory
 exec cp -f ${VITIS_PRJ}/app_0/Release/app_0.elf ${VITIS_ELF} 
 exec chmod 664 ${VITIS_ELF} 
+
+# Exit the `xsct -interactive`
+exit
