@@ -287,14 +287,14 @@ $(VIVADO_DEPEND) :
 	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
 	@cd $(OUT_DIR); rm -f firmware
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_project.tcl -notrace 
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/project.tcl -notrace 
 
 ###############################################################
 #### Vivado Sources ###########################################
 ###############################################################
 $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 	$(call ACTION_HEADER,"Vivado Source Setup")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_sources.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/sources.tcl
 
 ###############################################################
 #### Vivado Batch #############################################
@@ -302,7 +302,7 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 .PHONY : bit mcs prom
 bit mcs prom: $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
 
 ###############################################################
@@ -311,7 +311,7 @@ bit mcs prom: $(SOURCE_DEPEND)
 .PHONY : interactive
 interactive : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Interactive")
-	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado_env_var.tcl
+	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
 
 ###############################################################
 #### Vivado Project GUI mode ##################################
@@ -319,7 +319,7 @@ interactive : $(SOURCE_DEPEND)
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
-	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado_gui.tcl $(VIVADO_PROJECT).xpr
+	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
 #### Vivado Synthesis Only ####################################
@@ -327,7 +327,7 @@ gui : $(SOURCE_DEPEND)
 .PHONY : syn
 syn : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis Only")
-	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
+	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
 ###############################################################
 #### Vivado Synthesis DCP  ####################################
@@ -335,7 +335,7 @@ syn : $(SOURCE_DEPEND)
 .PHONY : dcp
 dcp : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis DCP")
-	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado_build.tcl
+	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
 ###############################################################
 #### Vivado SDK ###############################################
@@ -362,7 +362,7 @@ elf :
 .PHONY : yaml
 yaml : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
-	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado_cpsw.tcl
+	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/cpsw.tcl
 
 ###############################################################
 #### Vivado WIS ###############################################
@@ -370,7 +370,7 @@ yaml : $(SOURCE_DEPEND)
 .PHONY : wis
 wis : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_wis.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/wis.tcl
 
 ###############################################################
 #### Vivado XSIM Simulation ###################################
@@ -378,7 +378,7 @@ wis : $(SOURCE_DEPEND)
 .PHONY : xsim
 xsim : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado XSIM Simulation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_xsim.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/xsim.tcl
 
 ###############################################################
 #### Vivado VCS Simulation ####################################
@@ -386,7 +386,7 @@ xsim : $(SOURCE_DEPEND)
 .PHONY : vcs
 vcs : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generating the VCS Simulation scripts")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_vcs.tcl
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
    
 ###############################################################
 #### Vivado Batch Mode within the Project Environment  ########
@@ -394,7 +394,7 @@ vcs : $(SOURCE_DEPEND)
 .PHONY : batch
 batch : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project Batch")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado_batch.tcl $(VIVADO_PROJECT).xpr
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/batch.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
 #### Makefile Targets #########################################
