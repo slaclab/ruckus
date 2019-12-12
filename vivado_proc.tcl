@@ -386,8 +386,16 @@ proc CreateFpgaBit { } {
       puts "No Debug Probes found"   
    }
    
-   # Try to generate the .HDF file
-   write_hwdef -force -file ${imagePath}.hdf   
+   # Check for Vivado 2019.2 (or newer)
+   if { [VersionCompare 2019.2] > 0 } {
+      # Try to generate the .XSA file
+      write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+   
+   # Else Vivado 2019.1 (or older)
+   } else {
+      # Try to generate the .HDF file
+      write_hwdef -force -file ${imagePath}.hdf   
+   }
    
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs
@@ -523,20 +531,40 @@ proc CheckTiming { {printTiming true} } {
    }
 }
 
-## Check if SDK_SRC_PATH exist, then it checks for a valid path 
+## Check if SDK_SRC_PATH (or VITIS_SRC_PATH) exist, then it checks for a valid path 
 proc CheckSdkSrcPath { } {
-   if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
-      if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
-         puts "\n\n\n\n\n********************************************************"
-         puts "********************************************************"
-         puts "********************************************************"   
-         puts "SDK_SRC_PATH: $::env(SDK_SRC_PATH) does not exist"
-         puts "********************************************************"
-         puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"  
-         return false
-      }      
+
+   # Check for Vivado 2019.2 (or newer)
+   if { [VersionCompare 2019.2] > 0 } {
+      if { [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 } {
+         if { [expr [file exists $::env(VITIS_SRC_PATH)]] == 0 } {
+            puts "\n\n\n\n\n********************************************************"
+            puts "********************************************************"
+            puts "********************************************************"   
+            puts "VITIS_SRC_PATH: $::env(VITIS_SRC_PATH) does not exist"
+            puts "********************************************************"
+            puts "********************************************************"
+            puts "********************************************************\n\n\n\n\n"  
+            return false
+         }      
+      }   
+      
+   # Else Vivado 2019.1 (or older)
+   } else {
+      if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
+         if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
+            puts "\n\n\n\n\n********************************************************"
+            puts "********************************************************"
+            puts "********************************************************"   
+            puts "SDK_SRC_PATH: $::env(SDK_SRC_PATH) does not exist"
+            puts "********************************************************"
+            puts "********************************************************"
+            puts "********************************************************\n\n\n\n\n"  
+            return false
+         }      
+      }
    }
+   
    return true
 }
 

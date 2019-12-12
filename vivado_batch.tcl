@@ -20,4 +20,4 @@ source -quiet $::env(RUCKUS_DIR)/vivado_messages.tcl
 set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado_post_route_run.tcl [get_runs impl_1]
 
 # Run user's batch script
-SourceTclFile ${VIVADO_DIR}/batch.tcl
+source ${VIVADO_DIR}/batch.tcl

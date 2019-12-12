@@ -32,6 +32,11 @@ set RUCKUS_DIR       $::env(RUCKUS_DIR)
 set VIVADO_PROJECT_SIM       $::env(VIVADO_PROJECT_SIM)
 set VIVADO_PROJECT_SIM_TIME  $::env(VIVADO_PROJECT_SIM_TIME)
 
+# Vivado Vitis Variables
+set VITIS_PRJ $::env(VITIS_PRJ)
+set VITIS_LIB $::env(VITIS_LIB)
+set VITIS_ELF $::env(VITIS_ELF)
+
 # Vivado SDK Variables
 set SDK_PRJ $::env(SDK_PRJ)
 set SDK_LIB $::env(SDK_LIB)

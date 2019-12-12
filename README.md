@@ -9,6 +9,12 @@ A Makefile/TCL Vivado build system
 
 [Support Homepage](https://confluence.slac.stanford.edu/display/ppareg/Build+System%3A+Vivado+Support)
 
+# MicroblazeBasicCore
+
+`MicroblazeBasicCore` is a simple Microblaze implementation (BRAM cache).  
+
+Example: https://github.com/slaclab/surf/tree/master/xilinx/general/microblaze/bd
+
 # List of user defined TCL scripts
 
 User defined TCL scripts are located in the target's vivado directory.
