@@ -28,6 +28,13 @@ if { [CheckTiming false] == true } {
    BuildInfo
    
    #########################################################
+   ## Check if need to include python files with build
+   #########################################################   
+   if { [file isdirectory ${PROJ_DIR}/python] == 1 } {
+      source ${RUCKUS_DIR}/vivado/pyrogue.tcl
+   }   
+   
+   #########################################################
    ## Check if need to include YAML files with build
    #########################################################
    if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] == 1 } {
