@@ -357,6 +357,14 @@ elf :
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
+#### Vivado PyRogue ###########################################
+###############################################################
+.PHONY : pyrogue
+pyrogue : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
+	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/pyrogue.tcl
+
+###############################################################
 #### Vivado CPSW ##############################################
 ###############################################################
 .PHONY : yaml

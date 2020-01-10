@@ -410,6 +410,11 @@ proc CreateCpswTarGz { } {
    }
 }
 
+## Create tar.gz of all pyrogue files in firmware
+proc CreatePyRogueTarGz { } {   
+   source $::env(RUCKUS_DIR)/vivado/pyrogue.tcl
+}
+
 ## Remove unused code   
 proc RemoveUnsuedCode { } {
    update_compile_order -quiet -fileset sources_1
