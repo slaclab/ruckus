@@ -1,5 +1,5 @@
 # ruckus
-A Makefile/TCL Vivado build system
+A Makefile/TCL `hybrid` Firmware build system
 
 # Documentation
 
@@ -8,6 +8,12 @@ A Makefile/TCL Vivado build system
 [Doxygen Homepage](https://slaclab.github.io/ruckus/html/index.html)
 
 [Support Homepage](https://confluence.slac.stanford.edu/display/ppareg/Build+System%3A+Vivado+Support)
+
+# MicroblazeBasicCore
+
+`MicroblazeBasicCore` is a simple Microblaze implementation (BRAM cache).  
+
+Example: https://github.com/slaclab/surf/tree/master/xilinx/general/microblaze/bd
 
 # List of user defined TCL scripts
 
@@ -19,13 +25,13 @@ Here's a full list of user defined TCL scripts:
 
 | User Filename      | source .TCL location           | 
 | ------------------ | ------------------------------ | 
-| project_setup.tcl  | vivado_project.tcl             | 
-| properties.tcl     | vivado_properties.tcl          | 
-| messages.tcl       | vivado_messages.tcl            | 
-| sources.tcl        | vivado_sources.tcl             | 
-| pre_synthesis.tcl  | vivado_pre_synthesis.tcl       | 
-| pre_synth_run.tcl  | vivado_pre_synth_run.tcl       | 
-| post_synth_run.tcl | vivado_post_synth_run.tcl      | 
-| post_synthesis.tcl | vivado_post_synthesis.tcl      | 
-| post_route.tcl     | vivado_post_route.tcl          | 
+| project_setup.tcl  | vivado/project.tcl             | 
+| properties.tcl     | vivado/properties.tcl          | 
+| messages.tcl       | vivado/messages.tcl            | 
+| sources.tcl        | vivado/sources.tcl             | 
+| pre_synthesis.tcl  | vivado/pre_synthesis.tcl       | 
+| pre_synth_run.tcl  | vivado/pre_synth_run.tcl       | 
+| post_synth_run.tcl | vivado/post_synth_run.tcl      | 
+| post_synthesis.tcl | vivado/post_synthesis.tcl      | 
+| post_route.tcl     | vivado/post_route.tcl          | 
 | promgen.tcl        | system_vivado.mk               | 
