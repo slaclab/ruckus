@@ -14,7 +14,7 @@
 #############################
 ## Get build system variables 
 #############################
-source $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 set EmptyApp "Empty Application"
 exec rm -rf ${SDK_PRJ}
 
