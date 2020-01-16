@@ -396,7 +396,7 @@ def pushRelease(relName, ver, tagAttach, prev):
     else:
         password = args.password
 
-    if push != "":
+    if prev != "":
         tagRange = f'{relName}_{prev}..{relName}_{ver}'
 
         gh = github.Github(username,password)
