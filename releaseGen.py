@@ -404,7 +404,10 @@ def pushRelease(relName, ver, tagAttach, prev):
 
         print("\nGenerating release notes ...")
         md = releaseNotes.getReleaseNotes(git.Git(args.project), remRepo, tagRange)
-        remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
+    else:
+        md = "No release notes"
+
+    remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 
     print("\nUploading attahments ...")
     for t in tagAttach:
