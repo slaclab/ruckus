@@ -1102,13 +1102,13 @@ proc ExportStaticReconfigDcp { } {
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    
    # Make a copy of the .dcp file with a "_static" suffix
-   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)-static.dcp   
+   exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)_static.dcp
 
    # Get a list of all the clear bin files
    set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bin]
    if { ${clearList} != "" } {   
       foreach clearFile ${clearList} {
-         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bin
       }
    }
    
@@ -1116,7 +1116,7 @@ proc ExportStaticReconfigDcp { } {
    set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bit]
    if { ${clearList} != "" } {   
       foreach clearFile ${clearList} {
-         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
+         exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bit
       }
    }   
 }
@@ -1137,7 +1137,7 @@ proc ExportPartialReconfigBin { } {
    
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
    if { [file exists ${clearBinFile}] == 1 } {
-      exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bin
+      exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bin
    }
 }
 
@@ -1157,7 +1157,7 @@ proc ExportPartialReconfigBit { } {
    
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
    if { [file exists ${clearBitFile}] == 1 } {
-      exec cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)-clear.bit
+      exec cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bit
    }
 }
 
