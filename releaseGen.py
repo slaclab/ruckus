@@ -396,11 +396,11 @@ def pushRelease(relName, ver, tagAttach, prev):
     else:
         password = args.password
 
+    gh = github.Github(username,password)
+    remRepo = gh.get_repo(f'slaclab/{project}')
+
     if prev != "":
         tagRange = f'{relName}_{prev}..{relName}_{ver}'
-
-        gh = github.Github(username,password)
-        remRepo = gh.get_repo(f'slaclab/{project}')
 
         print("\nGenerating release notes ...")
         md = releaseNotes.getReleaseNotes(git.Git(args.project), remRepo, tagRange)
