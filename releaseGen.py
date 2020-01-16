@@ -380,10 +380,6 @@ def pushRelease(relName, ver, tagAttach, prev):
     tag = f'{relName}_{ver}'
     msg = f'{relName} version {ver}'
 
-    print(f"\nCreating and pushing tag {tag} .... ")
-    newTag = locRepo.create_tag(path=tag, message=msg)
-    locRepo.remotes.origin.push(newTag)
-
     print("\nLogging into github....")
 
     if args.user is None:
@@ -398,6 +394,10 @@ def pushRelease(relName, ver, tagAttach, prev):
 
     gh = github.Github(username,password)
     remRepo = gh.get_repo(f'slaclab/{project}')
+
+    print(f"\nCreating and pushing tag {tag} .... ")
+    newTag = locRepo.create_tag(path=tag, message=msg)
+    locRepo.remotes.origin.push(newTag)
 
     if prev != "":
         tagRange = f'{relName}_{prev}..{relName}_{ver}'
