@@ -409,7 +409,7 @@ def pushRelease(relName, ver, tagAttach, prev):
 
     remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 
-    print("\nUploading attahments ...")
+    print("\nUploading attachments ...")
     for t in tagAttach:
         remRel.upload_asset(t)
 
