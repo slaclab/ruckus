@@ -97,7 +97,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Directories
-FirmwareDir = os.path.join(args.project, 'firmware')
+FirmwareDir = args.project
 
 def loadReleaseConfig():
     relFile = os.path.join(FirmwareDir,'releases.yaml')
@@ -428,13 +428,13 @@ if __name__ == "__main__":
 
     # Determine if we generate a Rogue zipfile
     if 'Rogue' in relData['Types']:
-        zipName = os.path.join(FirmwareDir,f'rogue_{relName}_{ver}.zip')
+        zipName = f'rogue_{relName}_{ver}.zip'
         buildRogueFile(zipName,cfg,ver,relName,relData,imgList)
         tagAttach.append(zipName)
 
     # Determine if we generate a CPSW tarball
     if 'CPSW' in relData['Types']:
-        tarName = os.path.join(FirmwareDir,f'cpsw_{relName}_{ver}.tar.gz')
+        tarName = f'cpsw_{relName}_{ver}.tar.gz'
         buildCpswFile(tarName,cfg,ver,relName,relData,imgList)
         tagAttach.append(tarName)
 
