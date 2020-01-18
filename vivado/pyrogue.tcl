@@ -98,7 +98,7 @@ if { [file isdirectory ${defaultsDir}] == 1 } {
 }
 
 # Compress the python directory to the target's image directory
-exec zip -r -9 -q ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip ${PyRogueDirName}
+exec zip -r -9 -q -D ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip ${PyRogueDirName}
 puts "${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip"
 
 # Create a copy of the tar.gz file with ones padding for PROM loading support (prevent Vivado from unzipping from the load)
