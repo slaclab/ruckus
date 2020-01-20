@@ -107,4 +107,6 @@ if { [file isdirectory $::env(IMPL_DIR)] == 1 } {
    exec rm -f ${onesFile}
    exec printf "%b" '\xff\xff' > ${onesFile}
    exec cat ${onesFile} ${OUT_DIR}/$::env(IMAGENAME).pyrogue.zip    > ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip
+} else {
+   exec cp ${OUT_DIR}/$::env(IMAGENAME).pyrogue.zip ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip
 }
