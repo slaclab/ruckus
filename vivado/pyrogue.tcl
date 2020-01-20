@@ -98,7 +98,7 @@ if { [file isdirectory ${defaultsDir}] == 1 } {
 }
 
 # Compress the python directory to the target's image directory
-exec zip -r -9 -q ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip ${PyRogueDirName}
+exec bash -c "cd ${ProjPythonDir}; zip -r ../$::env(IMAGENAME).pyrogue.zip *"
 puts "${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip"
 
 # Create a copy of the tar.gz file with ones padding for PROM loading support (prevent Vivado from unzipping from the load)
@@ -106,5 +106,7 @@ if { [file isdirectory $::env(IMPL_DIR)] == 1 } {
    set onesFile "$::env(IMPL_DIR)/ones.bin"
    exec rm -f ${onesFile}
    exec printf "%b" '\xff\xff' > ${onesFile}
-   exec cat ${onesFile} ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip    > $::env(IMPL_DIR)/$::env(IMAGENAME).pyrogue.zip
+   exec cat ${onesFile} ${OUT_DIR}/$::env(IMAGENAME).pyrogue.zip    > ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip
+} else {
+   exec cp ${OUT_DIR}/$::env(IMAGENAME).pyrogue.zip ${IMAGES_DIR}/$::env(IMAGENAME).pyrogue.zip
 }
