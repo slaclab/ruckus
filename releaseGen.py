@@ -99,6 +99,10 @@ args = parser.parse_args()
 # Directories
 FirmwareDir = args.project
 
+# Detect empty release name
+if args.release == "":
+    args.release = None
+
 def loadReleaseConfig():
     relFile = os.path.join(FirmwareDir,'releases.yaml')
 
