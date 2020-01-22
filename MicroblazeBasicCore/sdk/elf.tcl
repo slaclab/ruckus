@@ -16,7 +16,7 @@
 #############################
 ## Get build system variables 
 #############################
-source $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 
 # Check the Vivado version (Refer to AR#66629)
 if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {

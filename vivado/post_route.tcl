@@ -30,7 +30,7 @@ if { [CheckTiming false] == true } {
    #########################################################
    ## Check if need to include python files with build
    #########################################################   
-   if { [file isdirectory ${PROJ_DIR}/python] == 1 } {
+   if { [expr [info exists ::env(GEN_PYROGUE_ZIP)]] == 1 } {
       source ${RUCKUS_DIR}/vivado/pyrogue.tcl
    }   
    

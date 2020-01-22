@@ -12,7 +12,7 @@
 # \brief This script builds the .elf file
 
 # Get build system variables 
-source $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 
 # Generate .ELF
 setws ${VITIS_PRJ}
