@@ -133,7 +133,6 @@ def getVersion():
     return ver, prev
 
 def selectRelease(cfg):
-
     relName = args.release
 
     print("")
@@ -296,18 +295,26 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     with zipfile.ZipFile(zipName,'w') as zf:
         print(f"\nCreating Rogue zipfile {zipName}")
 
+        # Add license file, should be at top level
+        lFile = os.path.join(args.project,cfg['GitBase'],'LICENSE.txt')
+        zf.write(lFile,'LICENSE.txt')
+
+        # Walk through collected list
         for e in pList:
             dst = 'python/' + e['subPath']
 
             # Don't add raw version of TopRoguePackage/__init__.py
+            # Save path name for later, otherwise add file to zipfile
             if dst == topInit:
                 topPath = e['fullPath']
             else:
                 zf.write(e['fullPath'],dst)
 
+            # Add all package folders to setup.py file
             if e['type'] == 'folder':
                 setupPy +=  "             '{}',\n".format(e['subPath'])
 
+        # Close package section of setup.py
         setupPy +=  "            ],\n"
 
         for e in cList:
@@ -318,7 +325,7 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
             dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
             zf.write(e,dst)
 
-        # Generate setup.py payload
+        # Close up setup.py file
         setupPy +=  "   package_dir={'':'python'},\n"
         setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*']}\n"
         setupPy += ")\n"
@@ -348,6 +355,51 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
 
         with zf.open(topInit,'w') as f:
             f.write(newInit.encode('utf-8'))
+
+        # Create conda-recipe/build.sh
+        tmpTxt =  '#!/usr/bin/bash\n\n'
+        tmpTxt += 'python setup.py install\n\n'
+
+        with zf.open('conda-recipe/build.sh','w') as f:
+            f.write(tmpTxt.encode('utf-8'))
+
+        # Conda names must be all lowercase
+        relNameLower = relName.lower()
+
+        # Create conda-recipe/meta.yaml
+        tmpTxt =  'package:\n'
+        tmpTxt += f'  name: {relNameLower}\n'
+        tmpTxt += f'  version: {ver}\n'
+        tmpTxt += f'\n'
+        tmpTxt += 'source:\n'
+        tmpTxt += f'  path: ..\n'
+        tmpTxt += f'\n'
+        tmpTxt += 'requirements:\n'
+        tmpTxt += f'  build:\n'
+        tmpTxt += f'    - rogue\n'
+        tmpTxt += f'    - python\n'
+        tmpTxt += f'    - setuptools\n'
+        tmpTxt += f'\n'
+        tmpTxt += f'  run:\n'
+        tmpTxt += f'    - rogue\n'
+        tmpTxt += f'    - python\n'
+        tmpTxt += f'\n'
+        tmpTxt += 'about:\n'
+        tmpTxt += f'  license: SLAC Open License\n'
+        tmpTxt += f'  license_file: LICENSE.txt\n'
+        tmpTxt += f'\n'
+
+        with zf.open('conda-recipe/meta.yaml','w') as f:
+            f.write(tmpTxt.encode('utf-8'))
+
+        # Conda build script
+        tmpTxt  = '#!/usr/bin/bash\n\n'
+        tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge -c pydm-tag\n'
+        tmpTxt += '\n'
+
+        # Create conda.sh
+        with zf.open('conda.sh','w') as f:
+            f.write(tmpTxt.encode('utf-8'))
 
 def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
     print("\nFinding CPSW Files...")
