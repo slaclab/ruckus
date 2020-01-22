@@ -245,13 +245,16 @@ def selectBuildImages(cfg, relName, relData):
 def genFileList(base,root,entries,typ):
     retList = []
 
-    for e in entries:
-        fullPath = os.path.join(root,e)
-        subPath  = fullPath.replace(base+'/','')
+    if '__pycache__' not in root:
+        for e in entries:
+            if '__pycache__' not in e:
+                fullPath = os.path.join(root,e)
+                subPath  = fullPath.replace(base+'/','')
 
-        retList.append({'type':typ,
-                        'fullPath':fullPath,
-                        'subPath': subPath})
+                retList.append({'type':typ,
+                                'fullPath':fullPath,
+                                'subPath': subPath})
+
     return retList
 
 def selectFiles(cfg, key):
@@ -287,35 +290,36 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     setupPy += f"   version='{ver}',\n"
     setupPy +=  "   packages=[\n"
 
-    topInit = cfg['TopRoguePackage'] + '/__init__.py'
+    topInit = 'python/' + cfg['TopRoguePackage'] + '/__init__.py'
     topPath = None
 
     with zipfile.ZipFile(zipName,'w') as zf:
         print(f"\nCreating Rogue zipfile {zipName}")
 
         for e in pList:
-            dst = e['subPath']
+            dst = 'python/' + e['subPath']
 
             # Don't add raw version of TopRoguePackage/__init__.py
-            if e['subPath'] == topInit:
+            if dst == topInit:
                 topPath = e['fullPath']
             else:
                 zf.write(e['fullPath'],dst)
 
             if e['type'] == 'folder':
-                setupPy +=  "             '{}',\n".format(dst)
+                setupPy +=  "             '{}',\n".format(e['subPath'])
 
         setupPy +=  "            ],\n"
 
         for e in cList:
-            dst = cfg['TopRoguePackage'] + '/config/' + e['subPath']
+            dst = 'python/' + cfg['TopRoguePackage'] + '/config/' + e['subPath']
             zf.write(e['fullPath'],dst)
 
         for e in imgList:
-            dst = cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
+            dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
             zf.write(e,dst)
 
         # Generate setup.py payload
+        setupPy +=  "   package_dir={'':'python'},\n"
         setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*']}\n"
         setupPy += ")\n"
 

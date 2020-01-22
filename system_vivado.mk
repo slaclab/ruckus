@@ -360,7 +360,7 @@ elf :
 #### Release ##################################################
 ###############################################################
 .PHONY : release
-release : $(SOURCE_DEPEND)
+release : 
 	$(call ACTION_HEADER,"Generaring Release")
 	@cd $(OUT_DIR); python $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE) --push
 
@@ -368,7 +368,7 @@ release : $(SOURCE_DEPEND)
 #### Release Files ############################################
 ###############################################################
 .PHONY : release_files
-release_files : $(SOURCE_DEPEND)
+release_files : 
 	$(call ACTION_HEADER,"Generaring Release Files")
 	@cd $(OUT_DIR); python $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE)
 
