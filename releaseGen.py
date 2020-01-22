@@ -113,6 +113,9 @@ def loadReleaseConfig():
     except Exception as e:
         raise Exception(f"Failed to load project release file {relFile}")
 
+    if not 'GitBase' in cfg or cfg['GitBase'] is None:
+        raise Exception("Invalid release config. GitBase key is missing or empty!")
+
     if not 'Releases' in cfg or cfg['Releases'] is None:
         raise Exception("Invalid release config. Releases key is missing or empty!")
 
@@ -180,15 +183,18 @@ def selectBuildImages(cfg, relName, relData):
     retList = []
 
     for target in relData['Targets']:
-        imageDir = os.path.join(FirmwareDir,'targets',target,'images')
 
         if not target in cfg['Targets']:
             raise Exception(f"Invalid release config. Referenced target {target} is missing in target list.!")
+
+        if not 'ImageDir' in cfg['Targets'][target] or cfg['Targets'][target]['ImageDir'] is None:
+            raise Exception(f"Invalid release config. ImageDir for target {target} is missing or empty!")
 
         if not 'Extensions' in cfg['Targets'][target] or cfg['Targets'][target]['Extensions'] is None:
             raise Exception(f"Invalid release config. Extensions list for target {target} is missing or empty!")
 
         extensions = cfg['Targets'][target]['Extensions']
+        imageDir = os.path.join(FirmwareDir,cfg['Targets'][target]['ImageDir'])
 
         buildName = args.build
         dirList = [f for f in os.listdir(imageDir) if os.path.isfile(os.path.join(imageDir,f))]
