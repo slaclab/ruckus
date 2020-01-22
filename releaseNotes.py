@@ -75,7 +75,7 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
             entry = {}         
             
     # Check if sorting the pull request entries        
-    if nosort is False:
+    if noSort is False:
         records = sorted(records, key=lambda v : v['changes'], reverse=True)
 
     # Generate text
