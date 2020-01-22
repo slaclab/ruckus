@@ -8,6 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+ifndef RELEASE
+export RELEASE = $(notdir $(PWD))
+endif
+
 ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
 endif
