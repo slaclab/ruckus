@@ -411,7 +411,7 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
         tagRange = f'{relName}_{prev}..{relName}_{ver}'
 
         print("\nGenerating release notes ...")
-        md = releaseNotes.getReleaseNotes(git.Git(args.project), remRepo, tagRange)
+        md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, tagRange)
     else:
         md = "No release notes"
 
