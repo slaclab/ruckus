@@ -370,8 +370,12 @@ def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
             if e['type'] == 'file':
                 tf.add(name=e['fullPath'],arcname=baseDir+'/config/'+e['subPath'],recursive=False)
 
-def pushRelease(relName, ver, tagAttach, prev):
-    locRepo = git.Repo(args.project)
+def pushRelease(cfg, relName, ver, tagAttach, prev):
+    gitDir = os.path.join(args.project,cfg['GitBase'])
+
+    print(f"GitDir = {gitDir}")
+
+    locRepo = git.Repo(gitDir)
 
     url = locRepo.remote().url
     if not url.endswith('.git'): url += '.git'
@@ -443,5 +447,5 @@ if __name__ == "__main__":
         tagAttach.append(tarName)
 
     if args.push is not None:
-        pushRelease(relName,ver,tagAttach,prev)
+        pushRelease(cfg,relName,ver,tagAttach,prev)
 
