@@ -7,3 +7,4 @@ latex/
 *.ltx
 *.gz
 *.dcp
+__pycache__

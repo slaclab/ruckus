@@ -97,7 +97,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Directories
-FirmwareDir = os.path.join(args.project, 'firmware')
+FirmwareDir = args.project
 
 def loadReleaseConfig():
     relFile = os.path.join(FirmwareDir,'releases.yaml')
@@ -192,12 +192,20 @@ def selectBuildImages(cfg, relName, relData):
 
         print(f"\nFinding builds for target {target}:")
 
-        # Get a list of images
+        # Get a list of build names with the format: 
+        #   buildName = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
+        # File name will either be:
+        #   buildName.extension
+        # or
+        #   buildName_subType.extension
         baseList = set()
 
         for fn in dirList:
             if target in fn:
-                baseList.add(fn.split('.')[0])
+                if '_' in fn:
+                    baseList.add(fn.split('_')[0])
+                else:
+                    baseList.add(fn.split('.')[0])
 
         sortList = sorted(baseList)
         for idx,val in enumerate(sortList):
@@ -222,58 +230,56 @@ def selectBuildImages(cfg, relName, relData):
             else:
                 buildName = sortList[idx]
 
-        tarList = [f'{buildName}.{ext}' for ext in extensions]
+        tarExp = [re.compile(f'{buildName}\.{ext}') for ext in extensions]
+        tarExp.extend([re.compile(f'{buildName}_.\w*\.{ext}') for ext in extensions])
 
         print(f"\nFinding images for target {target}, build {buildName}...")
         for f in dirList:
-            if f in tarList:
-                retList.append(os.path.join(imageDir,f))
+            for exp in tarExp:
+                if exp.match(f):
+                    print(f"    Found: {f}");
+                    retList.append(os.path.join(imageDir,f))
 
     return retList
 
 def genFileList(base,root,entries,typ):
     retList = []
 
-    for e in entries:
-        fullPath = os.path.join(root,e)
-        subPath  = fullPath.replace(base+'/','')
+    if '__pycache__' not in root:
+        for e in entries:
+            if '__pycache__' not in e:
+                fullPath = os.path.join(root,e)
+                subPath  = fullPath.replace(base+'/','')
 
-        retList.append({'type':typ,
-                        'fullPath':fullPath,
-                        'subPath': subPath})
+                retList.append({'type':typ,
+                                'fullPath':fullPath,
+                                'subPath': subPath})
+
     return retList
 
-def selectFiles(cfg, relData, key):
-    dirList = []
+def selectFiles(cfg, key):
     retList = []
 
-    # Generic files
     if key in cfg and cfg[key] is not None:
-        dirList.extend(cfg[key])
+        for d in cfg[key]:
+            base = os.path.join(FirmwareDir,d)
 
-    # Release specific files
-    if key in relData and relData[key] is not None:
-        dirList.extend(relData[key])
-
-    for d in dirList:
-        base = os.path.join(FirmwareDir,d)
-
-        for root, folders, files in os.walk(base):
-            retList.extend(genFileList(base,root,folders,'folder'))
-            retList.extend(genFileList(base,root,files,'file'))
+            for root, folders, files in os.walk(base):
+                retList.extend(genFileList(base,root,folders,'folder'))
+                retList.extend(genFileList(base,root,files,'file'))
 
     return retList
 
 def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     print("\nFinding Rogue Files...")
-    pList = selectFiles(cfg, relData, 'RoguePackages')
-    cList = selectFiles(cfg, relData, 'RogueConfig')
+    pList = selectFiles(cfg, 'RoguePackages')
+    cList = selectFiles(cfg, 'RogueConfig')
 
     if len(pList) == 0:
         raise Exception(f"Invalid release config. Rogue packages list is empty!")
 
-    if not 'TopPackage' in cfg or cfg['TopPackage'] is None:
-        raise Exception("Invalid release config. TopPackage is not defined!")
+    if not 'TopRoguePackage' in cfg or cfg['TopRoguePackage'] is None:
+        raise Exception("Invalid release config. TopRoguePackage is not defined!")
 
     # setuptools version creates and installs a .egg file which will not work with
     # our image and config data! Use distutils version for now.
@@ -284,39 +290,43 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     setupPy += f"   version='{ver}',\n"
     setupPy +=  "   packages=[\n"
 
-    topInit = cfg['TopPackage'] + '/__init__.py'
+    topInit = 'python/' + cfg['TopRoguePackage'] + '/__init__.py'
     topPath = None
 
     with zipfile.ZipFile(zipName,'w') as zf:
         print(f"\nCreating Rogue zipfile {zipName}")
 
         for e in pList:
-            dst = e['subPath']
+            dst = 'python/' + e['subPath']
 
-            # Don't add raw version of TopPackage/__init__.py
-            if e['subPath'] == topInit:
+            # Don't add raw version of TopRoguePackage/__init__.py
+            if dst == topInit:
                 topPath = e['fullPath']
             else:
                 zf.write(e['fullPath'],dst)
 
             if e['type'] == 'folder':
-                setupPy +=  "             '{}',\n".format(dst)
+                setupPy +=  "             '{}',\n".format(e['subPath'])
 
         setupPy +=  "            ],\n"
 
         for e in cList:
-            dst = cfg['TopPackage'] + '/config/' + e['subPath']
+            dst = 'python/' + cfg['TopRoguePackage'] + '/config/' + e['subPath']
             zf.write(e['fullPath'],dst)
 
         for e in imgList:
-            dst = cfg['TopPackage'] + '/images/' + os.path.basename(e)
+            dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
             zf.write(e,dst)
 
         # Generate setup.py payload
-        setupPy +=  "   package_data={'" + cfg['TopPackage'] + "':['config/*','images/*']}\n"
+        setupPy +=  "   package_dir={'':'python'},\n"
+        setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*']}\n"
         setupPy += ")\n"
 
         with zf.open('setup.py','w') as sf: sf.write(setupPy.encode('utf-8'))
+
+        if topPath is None:
+            raise Exception(f"Failed to find file: firmware/python/{topInit}")
 
         with open(topPath,'r') as f:
             newInit = ""
@@ -341,8 +351,8 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
 
 def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
     print("\nFinding CPSW Files...")
-    sList = selectFiles(cfg, relData, 'CpswSource')
-    cList = selectFiles(cfg, relData, 'CpswConfig')
+    sList = selectFiles(cfg, 'CpswSource')
+    cList = selectFiles(cfg, 'CpswConfig')
 
     baseDir = relName + '_project.yaml'
 
@@ -360,8 +370,12 @@ def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
             if e['type'] == 'file':
                 tf.add(name=e['fullPath'],arcname=baseDir+'/config/'+e['subPath'],recursive=False)
 
-def pushRelease(relName, ver, tagAttach, prev):
-    locRepo = git.Repo(args.project)
+def pushRelease(cfg, relName, ver, tagAttach, prev):
+    gitDir = os.path.join(args.project,cfg['GitBase'])
+
+    print(f"GitDir = {gitDir}")
+
+    locRepo = git.Repo(gitDir)
 
     url = locRepo.remote().url
     if not url.endswith('.git'): url += '.git'
@@ -373,10 +387,6 @@ def pushRelease(relName, ver, tagAttach, prev):
 
     tag = f'{relName}_{ver}'
     msg = f'{relName} version {ver}'
-
-    print(f"\nCreating and pushing tag {tag} .... ")
-    newTag = locRepo.create_tag(path=tag, message=msg)
-    locRepo.remotes.origin.push(newTag)
 
     print("\nLogging into github....")
 
@@ -390,16 +400,24 @@ def pushRelease(relName, ver, tagAttach, prev):
     else:
         password = args.password
 
-    tagRange = f'{relName}_{prev}..{relName}_{ver}'
-
     gh = github.Github(username,password)
     remRepo = gh.get_repo(f'slaclab/{project}')
 
-    print("\nGenerating release notes ...")
-    md = releaseNotes.getReleaseNotes(git.Git(args.project), remRepo, tagRange)
+    print(f"\nCreating and pushing tag {tag} .... ")
+    newTag = locRepo.create_tag(path=tag, message=msg)
+    locRepo.remotes.origin.push(newTag)
+
+    if prev != "":
+        tagRange = f'{relName}_{prev}..{relName}_{ver}'
+
+        print("\nGenerating release notes ...")
+        md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, tagRange)
+    else:
+        md = "No release notes"
+
     remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 
-    print("\nUploading attahments ...")
+    print("\nUploading attachments ...")
     for t in tagAttach:
         remRel.upload_asset(t)
 
@@ -418,16 +436,16 @@ if __name__ == "__main__":
 
     # Determine if we generate a Rogue zipfile
     if 'Rogue' in relData['Types']:
-        zipName = os.path.join(FirmwareDir,f'rogue_{relName}_{ver}.zip')
+        zipName = f'rogue_{relName}_{ver}.zip'
         buildRogueFile(zipName,cfg,ver,relName,relData,imgList)
         tagAttach.append(zipName)
 
     # Determine if we generate a CPSW tarball
     if 'CPSW' in relData['Types']:
-        tarName = os.path.join(FirmwareDir,f'cpsw_{relName}_{ver}.tar.gz')
+        tarName = f'cpsw_{relName}_{ver}.tar.gz'
         buildCpswFile(tarName,cfg,ver,relName,relData,imgList)
         tagAttach.append(tarName)
 
     if args.push is not None:
-        pushRelease(relName,ver,tagAttach,prev)
+        pushRelease(cfg,relName,ver,tagAttach,prev)
 

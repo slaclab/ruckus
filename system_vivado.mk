@@ -357,6 +357,22 @@ elf :
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
+#### Release ##################################################
+###############################################################
+.PHONY : release
+release : 
+	$(call ACTION_HEADER,"Generaring Release")
+	@cd $(OUT_DIR); python $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE) --push
+
+###############################################################
+#### Release Files ############################################
+###############################################################
+.PHONY : release_files
+release_files : 
+	$(call ACTION_HEADER,"Generaring Release Files")
+	@cd $(OUT_DIR); python $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE)
+
+###############################################################
 #### Vivado PyRogue ###########################################
 ###############################################################
 .PHONY : pyrogue
