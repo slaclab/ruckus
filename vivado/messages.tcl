@@ -105,7 +105,6 @@ set_msg_config -id {Power 33-332}       -new_severity INFO;# Route: Found switch
 set_msg_config -id {Synth 8-614}      -new_severity ERROR;# SYNTH: Signal not in the sensitivity list
 set_msg_config -id {Synth 8-3512}     -new_severity ERROR;# SYNTH: Assigned value in logic is out of range 
 set_msg_config -id {Synth 8-327}      -new_severity ERROR;# SYNTH: Inferred latch
-set_msg_config -id {Synth 8-5835}     -new_severity ERROR;# SYNTH: Resources of type BRAM have been overutilized
 set_msg_config -id {VRFC 10-664}      -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found in the same library
 
@@ -123,6 +122,7 @@ set_msg_config -id {Synth 8-3330}      -new_severity "CRITICAL WARNING";# SYNTH:
 set_msg_config -id {Synth 8-3919}      -new_severity "CRITICAL WARNING";# SYNTH: Null Assignment in logic
 set_msg_config -id {Synth 8-153}       -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
 set_msg_config -id {Synth 8-3295}      -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
+set_msg_config -id {Synth 8-5835}      -new_severity "CRITICAL WARNING";# SYNTH: Resources of type BRAM have been overutilized. Will try to implement using LUT-RAM.
 
 ########################################################
 ## Modifying CRITICAL_WARNING messaging
