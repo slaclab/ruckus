@@ -185,6 +185,10 @@ ifndef LD_PRELOAD
 export LD_PRELOAD = 
 endif
 
+ifndef EMBED_PROC
+export EMBED_PROC = microblaze_0
+endif
+
 ifneq (, $(shell which vitis 2>/dev/null))
    export EMBED_TYPE = Vitis
    export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
@@ -254,6 +258,7 @@ test:
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 	@echo IMAGENAME: $(IMAGENAME)
+	@echo EMBED_PROC: $(EMBED_PROC)
 	@echo EMBED_TYPE: $(EMBED_TYPE)
 	@echo EMBED_GUI: $(EMBED_GUI)
 	@echo EMBED_ELF: $(EMBED_ELF)

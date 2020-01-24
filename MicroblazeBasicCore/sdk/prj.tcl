@@ -25,8 +25,8 @@ if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {
    file copy -force ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.sysdef ${SDK_PRJ}/${PROJECT}.hdf
    sdk set_workspace ${SDK_PRJ}
    sdk create_hw_project  -name hw_0  -hwspec ${SDK_PRJ}/${PROJECT}.hdf
-   sdk create_bsp_project -name bsp_0 -proc microblaze_0 -hwproject hw_0 -os standalone
-   sdk create_app_project -name app_0 -app ${EmptyApp} -proc microblaze_0 -hwproject hw_0 -bsp bsp_0 -os standalone -lang c++
+   sdk create_bsp_project -name bsp_0 -proc $::env(EMBED_PROC) -hwproject hw_0 -os standalone
+   sdk create_app_project -name app_0 -app ${EmptyApp} -proc $::env(EMBED_PROC) -hwproject hw_0 -bsp bsp_0 -os standalone -lang c++
    file delete -force ${SDK_PRJ}/app_0/src/main.cc
    # Configure the release build
    sdk get_build_config -app app_0 build-config release
@@ -43,8 +43,8 @@ if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {
    exec cp -f ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}.sysdef ${SDK_PRJ}/${PROJECT}.hdf
    sdk setws ${SDK_PRJ}
    sdk createhw  -name hw_0  -hwspec ${SDK_PRJ}/${PROJECT}.hdf
-   sdk createbsp -name bsp_0 -proc microblaze_0 -hwproject hw_0 -os standalone
-   sdk createapp -name app_0 -app ${EmptyApp} -proc microblaze_0 -hwproject hw_0 -bsp bsp_0 -os standalone -lang c++
+   sdk createbsp -name bsp_0 -proc $::env(EMBED_PROC) -hwproject hw_0 -os standalone
+   sdk createapp -name app_0 -app ${EmptyApp} -proc $::env(EMBED_PROC) -hwproject hw_0 -bsp bsp_0 -os standalone -lang c++
    exec rm -f ${SDK_PRJ}/app_0/src/main.cc
    # Configure the debug build
    sdk configapp -app app_0 build-config debug
