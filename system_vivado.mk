@@ -126,7 +126,7 @@ ifeq ($(GIT_STATUS),)
    ifeq ($(RECONFIG_STATIC_HASH), 0)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
    else
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)_$(RECONFIG_STATIC_HASH)
    endif
 else
    export GIT_HASH_MSG   = dirty
@@ -142,7 +142,7 @@ else
    ifeq ($(RECONFIG_STATIC_HASH), 0)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
    else
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty_$(RECONFIG_STATIC_HASH)
    endif
 endif
 
@@ -185,7 +185,11 @@ ifndef LD_PRELOAD
 export LD_PRELOAD = 
 endif
 
-ifneq (, $(shell which vitis))
+ifndef EMBED_PROC
+export EMBED_PROC = microblaze_0
+endif
+
+ifneq (, $(shell which vitis 2>/dev/null))
    export EMBED_TYPE = Vitis
    export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
    export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/bit.tcl
@@ -254,11 +258,10 @@ test:
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 	@echo IMAGENAME: $(IMAGENAME)
-	@echo VITIS_PRJ: $(VITIS_PRJ)
-	@echo VITIS_ELF: $(VITIS_ELF)
-	@echo VITIS_LIB: $(VITIS_LIB)
-	@echo VITIS_LIB: $(VITIS_LIB)
-	@echo VITIS_SRC_PATH: $(VITIS_SRC_PATH)
+	@echo EMBED_PROC: $(EMBED_PROC)
+	@echo EMBED_TYPE: $(EMBED_TYPE)
+	@echo EMBED_GUI: $(EMBED_GUI)
+	@echo EMBED_ELF: $(EMBED_ELF)
 	@echo Untracked Files:
 	@echo "\t$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
 
@@ -355,6 +358,22 @@ elf :
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
 	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
+
+###############################################################
+#### Release ##################################################
+###############################################################
+.PHONY : release
+release : 
+	$(call ACTION_HEADER,"Generaring Release")
+	@cd $(OUT_DIR); python $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE) --push
+
+###############################################################
+#### Release Files ############################################
+###############################################################
+.PHONY : release_files
+release_files : 
+	$(call ACTION_HEADER,"Generaring Release Files")
+	@cd $(OUT_DIR); python $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE)
 
 ###############################################################
 #### Vivado PyRogue ###########################################

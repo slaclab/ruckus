@@ -12,8 +12,8 @@
 # \brief This script rebuild the .bit file with the .elf included
 
 # Get variables and Custom Procedures
-source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 # Open the project (in case not already opened)
 set open_rc [catch { 

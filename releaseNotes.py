@@ -35,7 +35,7 @@
 # @file releaseNotes.py
 # Generate release notes for pull requests relative to a tag.
 
-def getReleaseNotes(locRepo, remRepo, tagRange):
+def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
 
     # Collect all the pull request with request to the tagging
     loginfo = locRepo.log(tagRange,'--grep','Merge pull request')
@@ -75,7 +75,7 @@ def getReleaseNotes(locRepo, remRepo, tagRange):
             entry = {}         
             
     # Check if sorting the pull request entries        
-    if args.nosort is False:
+    if noSort is False:
         records = sorted(records, key=lambda v : v['changes'], reverse=True)
 
     # Generate text
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     # Get the repo information
     repo = github.get_repo(f'slaclab/{project}')
 
-    md = getReleaseNotes(g,repo,tags)
+    md = getReleaseNotes(g,repo,tags,args.noSort)
 
     print(md)
 

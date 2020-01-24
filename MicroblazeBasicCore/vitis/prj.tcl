@@ -12,7 +12,7 @@
 # \brief This script creates the general Vivado Vitis project
 
 # Get build system variables 
-source $::env(RUCKUS_DIR)/vivado_env_var.tcl
+source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 
 # Remove the Vitis project directory
 exec rm -rf ${VITIS_PRJ}
@@ -27,7 +27,7 @@ setws ${VITIS_PRJ}
 app create \
    -name app_0 \
    -hw ${OUT_DIR}/${PROJECT}.xsa  \
-   -proc microblaze_0 \
+   -proc $::env(EMBED_PROC) \
    -template {Empty Application} \
    -os standalone \
    -lang {c++}
