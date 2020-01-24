@@ -460,6 +460,18 @@ proc CheckVivadoVersion { } {
       puts "********************************************************\n\n\n\n\n"
       return -code error
    }
+   # Check for unsupported versions of ruckus + Vitis
+   if { [VersionCompare 2019.1] > 0 &&
+        [VersionCompare 2020.1] < 0 &&
+        [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 } {
+      # Here's why Vitis 2019.2 not supported in ruckus
+      # https://forums.xilinx.com/t5/Embedded-Development-Tools/SDK-banned-from-Vivado-2019-2/td-p/1042059
+      puts "\n\n\n\n\n********************************************************"
+      puts "ruckus does NOT support Vitis $::env(VIVADO_VERSION)"
+      puts "https://confluence.slac.stanford.edu/x/n4-jCg"
+      puts "********************************************************\n\n\n\n\n"
+      return -code error
+   }
    # Check if version is newer than what official been tested
    if { [VersionCompare 2019.2.0] > 0 } {
       puts "\n\n\n\n\n********************************************************"

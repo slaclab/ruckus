@@ -27,7 +27,7 @@ setws ${VITIS_PRJ}
 app create \
    -name app_0 \
    -hw ${OUT_DIR}/${PROJECT}.xsa  \
-   -proc microblaze_0 \
+   -proc $::env(EMBED_PROC) \
    -template {Empty Application} \
    -os standalone \
    -lang {c++}
