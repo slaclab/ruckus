@@ -1347,7 +1347,11 @@ proc loadSource args {
                   exit -1
                }
                if { ${has_lib} } {
-                  set_property LIBRARY $params(lib) [get_files $params(path)]
+                  # Check if VHDL file
+                  if { ${fileExt} eq {.vhd} ||
+                       ${fileExt} eq {.vhdl} } {
+                     set_property LIBRARY $params(lib) [get_files $params(path)]
+                  }
                }
                if { ${has_fileType} } {
                   set_property FILE_TYPE $params(fileType) [get_files $params(path)]
@@ -1397,7 +1401,12 @@ proc loadSource args {
                      exit -1
                   }
                   if { ${has_lib} } {
-                     set_property LIBRARY $params(lib) [get_files ${pntr}]
+                     # Check if VHDL file
+                     set fileExt [file extension ${pntr}]
+                     if { ${fileExt} eq {.vhd} ||
+                          ${fileExt} eq {.vhdl} } {
+                        set_property LIBRARY $params(lib) [get_files ${pntr}]
+                     }
                   }
                   if { ${has_fileType} } {
                      set_property FILE_TYPE $params(fileType) [get_files ${pntr}]
