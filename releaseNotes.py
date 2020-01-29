@@ -135,7 +135,7 @@ if __name__ == "__main__":
     ) 
 
     parser.add_argument(
-        "--nosort", 
+        "--noSort",
         type     = argBool,
         required = False,
         default  = False,
@@ -178,7 +178,12 @@ if __name__ == "__main__":
     # Get the repo information
     repo = github.get_repo(f'slaclab/{project}')
 
-    md = getReleaseNotes(g,repo,tags,args.noSort)
+    md = getReleaseNotes(
+        locRepo  = g,
+        remRepo  = repo,
+        tagRange = tags,
+        noSort   = args.noSort,
+    )
 
     print(md)
 
