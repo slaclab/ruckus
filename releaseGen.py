@@ -72,19 +72,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--user", 
+    "--token", 
     type     = str, 
     required = False,
     default  = None,
-    help     = "Username for github"
-)
-
-parser.add_argument(
-    "--password",
-    type     = str, 
-    required = False,
-    default  = None,
-    help     = "Password for github"
+    help     = "Token for github"
 )
 
 parser.add_argument(
@@ -450,19 +442,16 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
     tag = f'{relName}_{ver}'
     msg = f'{relName} version {ver}'
 
-    print("\nLogging into github....")
+    print("\nLogging into github....\n")
 
-    if args.user is None:
-        username = input("Username for github: ")
+    if args.token is None:
+        print("Enter your github token. If you do no have one you can generate it here:");
+        print("    https://github.com/settings/tokens");
+        token = input("\nGithub token: ");
     else:
-        username = args.user
+        token = args.token
 
-    if args.password is None:
-        password = getpass("Password for github: ")
-    else:
-        password = args.password
-
-    gh = github.Github(username,password)
+    gh = github.Github(token)
     remRepo = gh.get_repo(f'slaclab/{project}')
 
     print(f"\nCreating and pushing tag {tag} .... ")
@@ -476,6 +465,8 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
         md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, tagRange)
     else:
         md = "No release notes"
+
+    md += "\n\nRelease generated with SLAC ruckus releaseGen script\n"
 
     remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 
