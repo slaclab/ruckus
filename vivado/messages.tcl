@@ -162,11 +162,12 @@ set_property SEVERITY {Warning} [get_drc_checks {UCIO-1}];  # DRC: using the XAD
 ########################################################
 # Check if Multi-Driven Nets are allowed
 ########################################################
-
 if { [info exists ::env(ALLOW_MULTI_DRIVEN)] != 1 || $::env(ALLOW_MULTI_DRIVEN) == 0 } {
+    set_msg_config -id {Synth 8-6859} -new_severity ERROR;  # SYNTH: multi-driven pin	
     set_msg_config -id {Synth 8-3352} -new_severity ERROR;  # SYNTH: multi-driven net	
     set_msg_config -id {MDRV-1}       -new_severity ERROR;  # DRC: multi-driven net		
 } else {
+    set_msg_config -id {Synth 8-6859} -new_severity INFO;   # SYNTH: multi-driven pin
     set_msg_config -id {Synth 8-3352} -new_severity INFO;   # SYNTH: multi-driven net
     set_msg_config -id {MDRV-1}       -new_severity INFO;   # DRC: multi-driven net	
 }
