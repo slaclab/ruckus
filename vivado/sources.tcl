@@ -137,9 +137,6 @@ if { [get_files -of_objects [get_filesets {constrs_1}]] != "" } {
    set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {constrs_1}]]
 }
 
-# Close and reopen project
-VivadoRefresh ${VIVADO_PROJECT}
-
 # Check if we can upgrade IP cores
 if { $::IP_LIST != "" } {
    foreach ipPntr $::IP_LIST {
@@ -157,7 +154,6 @@ if { $::IP_LIST != "" } {
 }
 
 # Target specific source setup script
-VivadoRefresh ${VIVADO_PROJECT}
 SourceTclFile ${VIVADO_DIR}/sources.tcl
 
 # Remove all unused code

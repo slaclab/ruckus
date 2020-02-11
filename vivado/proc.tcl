@@ -176,7 +176,7 @@ proc BuildIpCores { } {
       }
    }
    # Refresh the project
-   VivadoRefresh ${VIVADO_PROJECT}   
+   update_compile_order -quiet -fileset sources_1 
 }
 
 ## Copies all IP cores from the build tree to source tree
