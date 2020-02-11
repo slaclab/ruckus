@@ -35,9 +35,6 @@ config_webtalk -user off
 # Default to no flattening of the hierarchy
 set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 
-# Close and reopen project to force the physical path of ${RUCKUS_DIR} (bug in Vivado 2014.1)
-VivadoRefresh ${VIVADO_PROJECT}
-
 # Setup project properties
 source ${RUCKUS_DIR}/vivado/properties.tcl
 
@@ -90,11 +87,7 @@ if { ${cpuNum} >= 8 } {
    set_param synth.maxThreads ${cpuNum}
 }
 
-# # https://www.xilinx.com/support/answers/62908.html
-# tclapp::reset_tclstore
-
 # Target specific project setup script
-VivadoRefresh ${VIVADO_PROJECT}
 SourceTclFile ${VIVADO_DIR}/project_setup.tcl
 
 # Close the project
