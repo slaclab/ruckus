@@ -203,7 +203,8 @@ def selectBuildImages(cfg, relName, relData):
 
         for fn in dirList:
             if target in fn:
-                if '_' in fn:
+                fileName = fn[len(target):]
+                if '_' in fileName:
                     baseList.add(fn.split('_')[0])
                 else:
                     baseList.add(fn.split('.')[0])
