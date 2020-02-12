@@ -125,7 +125,7 @@ def getVersion():
 
     if args.push is not None:
         if prev is None:
-            prev = input('\nEnter previous version for compare (i.e. v1.2.3): ')
+            prev = input('\nEnter previous version for compare (i.e. v1.2.3) or enter for none: ')
 
     print(f'\nUsing version {ver} and previous version {prev}\n')
 
