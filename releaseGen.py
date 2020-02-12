@@ -125,7 +125,7 @@ def getVersion():
 
     if args.push is not None:
         if prev is None:
-            prev = input('\nEnter previous version for compare (i.e. v1.2.3): ')
+            prev = input('\nEnter previous version for compare (i.e. v1.2.3) or enter for none: ')
 
     print(f'\nUsing version {ver} and previous version {prev}\n')
 
@@ -258,7 +258,7 @@ def genFileList(base,root,entries,typ):
 
     return retList
 
-def selectFiles(cfg, key):
+def selectDirectories(cfg, key):
     retList = []
 
     if key in cfg and cfg[key] is not None:
@@ -271,16 +271,68 @@ def selectFiles(cfg, key):
 
     return retList
 
-def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
-    print("\nFinding Rogue Files...")
-    pList = selectFiles(cfg, 'RoguePackages')
-    cList = selectFiles(cfg, 'RogueConfig')
+def selectFiles(cfg, key):
+    retList = []
 
-    if len(pList) == 0:
-        raise Exception(f"Invalid release config. Rogue packages list is empty!")
+    if key in cfg and cfg[key] is not None:
+        for f in cfg[key]:
+            retList.append(os.path.join(FirmwareDir,f))
 
-    if not 'TopRoguePackage' in cfg or cfg['TopRoguePackage'] is None:
-        raise Exception("Invalid release config. TopRoguePackage is not defined!")
+    return retList
+
+def buildCondaFiles(cfg,zipFile,ver,relName):
+
+    # Create conda-recipe/build.sh
+    tmpTxt =  '#!/usr/bin/bash\n\n'
+    tmpTxt += 'python setup.py install\n\n'
+
+    with zipFile.open('conda-recipe/build.sh','w') as f:
+        f.write(tmpTxt.encode('utf-8'))
+
+    # Conda names must be all lowercase
+    relNameLower = relName.lower()
+
+    # Create conda-recipe/meta.yaml
+    tmpTxt =  'package:\n'
+    tmpTxt += f'  name: {relNameLower}\n'
+    tmpTxt += f'  version: {ver}\n'
+    tmpTxt += f'\n'
+    tmpTxt += 'source:\n'
+    tmpTxt += f'  path: ..\n'
+    tmpTxt += f'\n'
+    tmpTxt += 'requirements:\n'
+    tmpTxt += f'  build:\n'
+    tmpTxt += f'    - rogue\n'
+    tmpTxt += f'    - python\n'
+    tmpTxt += f'    - setuptools\n'
+    tmpTxt += f'\n'
+    tmpTxt += f'  run:\n'
+    tmpTxt += f'    - rogue\n'
+    tmpTxt += f'    - python\n'
+
+    if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
+        for f in cfg['CondaDependencies']:
+            tmpTxt += f'    - {f}\n'
+
+    tmpTxt += f'\n'
+    tmpTxt += 'about:\n'
+    tmpTxt += f'  license: SLAC Open License\n'
+    tmpTxt += f'  license_file: LICENSE.txt\n'
+    tmpTxt += f'\n'
+
+    with zipFile.open('conda-recipe/meta.yaml','w') as f:
+        f.write(tmpTxt.encode('utf-8'))
+
+    # Conda build script
+    tmpTxt  = '#!/usr/bin/bash\n\n'
+    tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge\n'
+    tmpTxt += '\n'
+
+    # Create conda.sh
+    with zipFile.open('conda.sh','w') as f:
+        f.write(tmpTxt.encode('utf-8'))
+
+def buildSetupPy(zipFile,ver,relName,packList,sList):
 
     # setuptools version creates and installs a .egg file which will not work with
     # our image and config data! Use distutils version for now.
@@ -291,8 +343,45 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     setupPy += f"   version='{ver}',\n"
     setupPy +=  "   packages=[\n"
 
+    for f in packList:
+        setupPy += f"             '{f}',\n"
+
+    # Close package section of setup.py
+    setupPy +=  "            ],\n"
+
+    # Close up setup.py file
+    setupPy +=  "   package_dir={'':'python'},\n"
+    setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*']},\n"
+
+    if len(sList) != 0:
+        setupPy +=  "   scripts=[\n"
+
+        for f in sList:
+            fn = 'scripts/' + os.path.basename(f)
+            setupPy += f"             '{fn}',\n"
+
+        setupPy +=  "            ],\n"
+
+    setupPy += ")\n"
+
+    with zipFile.open('setup.py','w') as sf: sf.write(setupPy.encode('utf-8'))
+
+
+def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
+    print("\nFinding Rogue Files...")
+    pList = selectDirectories(cfg, 'RoguePackages')
+    cList = selectDirectories(cfg, 'RogueConfig')
+    sList = selectFiles(cfg,       'RogueScripts')
+
+    if len(pList) == 0:
+        raise Exception(f"Invalid release config. Rogue packages list is empty!")
+
+    if not 'TopRoguePackage' in cfg or cfg['TopRoguePackage'] is None:
+        raise Exception("Invalid release config. TopRoguePackage is not defined!")
+
     topInit = 'python/' + cfg['TopRoguePackage'] + '/__init__.py'
     topPath = None
+    packList = []
 
     with zipfile.ZipFile(file=zipName, mode='w', compression=zipfile.ZIP_BZIP2, compresslevel=9) as zf:
         print(f"\nCreating Rogue zipfile {zipName}")
@@ -314,10 +403,7 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
 
             # Add all package folders to setup.py file
             if e['type'] == 'folder':
-                setupPy +=  "             '{}',\n".format(e['subPath'])
-
-        # Close package section of setup.py
-        setupPy +=  "            ],\n"
+                packList.append(e['subPath'])
 
         for e in cList:
             dst = 'python/' + cfg['TopRoguePackage'] + '/config/' + e['subPath']
@@ -327,12 +413,9 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
             dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
             zf.write(e,dst)
 
-        # Close up setup.py file
-        setupPy +=  "   package_dir={'':'python'},\n"
-        setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*']}\n"
-        setupPy += ")\n"
-
-        with zf.open('setup.py','w') as sf: sf.write(setupPy.encode('utf-8'))
+        for e in sList:
+            dst = 'scripts/' + os.path.basename(e)
+            zf.write(e,dst)
 
         if topPath is None:
             raise Exception(f"Failed to find file: firmware/python/{topInit}")
@@ -358,55 +441,17 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
         with zf.open(topInit,'w') as f:
             f.write(newInit.encode('utf-8'))
 
-        # Create conda-recipe/build.sh
-        tmpTxt =  '#!/usr/bin/bash\n\n'
-        tmpTxt += 'python setup.py install\n\n'
+        # Add setup.py file
+        buildSetupPy(zf,ver,relName,packList,sList)
 
-        with zf.open('conda-recipe/build.sh','w') as f:
-            f.write(tmpTxt.encode('utf-8'))
+        # Add conda files
+        buildCondaFiles(cfg,zf,ver,relName)
 
-        # Conda names must be all lowercase
-        relNameLower = relName.lower()
-
-        # Create conda-recipe/meta.yaml
-        tmpTxt =  'package:\n'
-        tmpTxt += f'  name: {relNameLower}\n'
-        tmpTxt += f'  version: {ver}\n'
-        tmpTxt += f'\n'
-        tmpTxt += 'source:\n'
-        tmpTxt += f'  path: ..\n'
-        tmpTxt += f'\n'
-        tmpTxt += 'requirements:\n'
-        tmpTxt += f'  build:\n'
-        tmpTxt += f'    - rogue\n'
-        tmpTxt += f'    - python\n'
-        tmpTxt += f'    - setuptools\n'
-        tmpTxt += f'\n'
-        tmpTxt += f'  run:\n'
-        tmpTxt += f'    - rogue\n'
-        tmpTxt += f'    - python\n'
-        tmpTxt += f'\n'
-        tmpTxt += 'about:\n'
-        tmpTxt += f'  license: SLAC Open License\n'
-        tmpTxt += f'  license_file: LICENSE.txt\n'
-        tmpTxt += f'\n'
-
-        with zf.open('conda-recipe/meta.yaml','w') as f:
-            f.write(tmpTxt.encode('utf-8'))
-
-        # Conda build script
-        tmpTxt  = '#!/usr/bin/bash\n\n'
-        tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge -c pydm-tag\n'
-        tmpTxt += '\n'
-
-        # Create conda.sh
-        with zf.open('conda.sh','w') as f:
-            f.write(tmpTxt.encode('utf-8'))
 
 def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
     print("\nFinding CPSW Files...")
-    sList = selectFiles(cfg, 'CpswSource')
-    cList = selectFiles(cfg, 'CpswConfig')
+    sList = selectDirectories(cfg, 'CpswSource')
+    cList = selectDirectories(cfg, 'CpswConfig')
 
     baseDir = relName + '_project.yaml'
 
