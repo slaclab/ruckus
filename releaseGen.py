@@ -480,15 +480,20 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
     url = locRepo.remote().url
     if not url.endswith('.git'): url += '.git'
 
+    # Get the git repo's name (assumption that exists in the github.com/slaclab organization)
     project = re.compile(r'slaclab/(?P<name>.*?)(?P<ext>\.git?)').search(url).group('name')
 
+    # Prevent "dirty" git clone (uncommitted code) from pushing tags
     if locRepo.is_dirty():
         raise(Exception("Cannot create tag! Git repo is dirty!"))
 
-    if relName != 'all':
+    # Check the release name does NOT match git repo name
+    if relName != project:
+        # Target Level Release
         tag = f'{relName}_{ver}'
         msg = f'{relName} version {ver} Release'
     else:
+        # Repo Level Release
         tag = f'{ver}'
         msg = f'version {ver} Release'
 
