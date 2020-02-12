@@ -203,10 +203,11 @@ def selectBuildImages(cfg, relName, relData):
 
         for fn in dirList:
             if target in fn:
-                if '_' in fn:
-                    baseList.add(fn.split('_')[0])
+                fileName = fn[len(target):]
+                if '_' in fileName:
+                    baseList.add(target+fileName.split('_')[0])
                 else:
-                    baseList.add(fn.split('.')[0])
+                    baseList.add(target+fileName.split('.')[0])
 
         sortList = sorted(baseList)
         for idx,val in enumerate(sortList):
@@ -479,13 +480,22 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
     url = locRepo.remote().url
     if not url.endswith('.git'): url += '.git'
 
+    # Get the git repo's name (assumption that exists in the github.com/slaclab organization)
     project = re.compile(r'slaclab/(?P<name>.*?)(?P<ext>\.git?)').search(url).group('name')
 
+    # Prevent "dirty" git clone (uncommitted code) from pushing tags
     if locRepo.is_dirty():
         raise(Exception("Cannot create tag! Git repo is dirty!"))
 
-    tag = f'{relName}_{ver}'
-    msg = f'{relName} version {ver}'
+    # Check the release name does NOT match git repo name
+    if relName != project:
+        # Target Level Release
+        tag = f'{relName}_{ver}'
+        msg = f'{relName} version {ver} Release'
+    else:
+        # Repo Level Release
+        tag = f'{ver}'
+        msg = f'version {ver} Release'
 
     print("\nLogging into github....\n")
 
@@ -527,8 +537,10 @@ if __name__ == "__main__":
     ver, prev = getVersion()
 
     print("Release = {}".format(relName))
-    print("Images = {}".format(imgList))
     print("Version = {}".format(ver))
+    print("Images  = ")
+    for imgName in imgList:
+        print("\t{}".format(imgName))
 
     tagAttach = imgList
 
