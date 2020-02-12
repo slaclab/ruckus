@@ -528,8 +528,10 @@ if __name__ == "__main__":
     ver, prev = getVersion()
 
     print("Release = {}".format(relName))
-    print("Images = {}".format(imgList))
     print("Version = {}".format(ver))
+    print("Images  = ")
+    for imgName in imgList:
+        print("\t{}".format(imgName))
 
     tagAttach = imgList
 
