@@ -384,7 +384,8 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     topPath = None
     packList = []
 
-    with zipfile.ZipFile(file=zipName, mode='w', compression=zipfile.ZIP_LZMA) as zf:
+    # zipimport does not support compression: https://bugs.python.org/issue21751
+    with zipfile.ZipFile(file=zipName, mode='w', compression=zipfile.ZIP_STORED, compresslevel=None) as zf:
         print(f"\nCreating Rogue zipfile {zipName}")
 
         # Add license file, should be at top level
