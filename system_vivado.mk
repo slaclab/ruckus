@@ -21,7 +21,7 @@ export TOP_DIR  = $(abspath $(PROJ_DIR)/../..)
 endif
 
 ifndef RELEASE_DIR
-export RELEASE_DIR  = $(abspath $(TOP_DIR)/release)
+export RELEASE_DIR = $(TOP_DIR)/release
 endif
 
 ifndef MODULES
