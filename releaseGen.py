@@ -205,9 +205,9 @@ def selectBuildImages(cfg, relName, relData):
             if target in fn:
                 fileName = fn[len(target):]
                 if '_' in fileName:
-                    baseList.add(fn.split('_')[0])
+                    baseList.add(target+fileName.split('_')[0])
                 else:
-                    baseList.add(fn.split('.')[0])
+                    baseList.add(target+fileName.split('.')[0])
 
         sortList = sorted(baseList)
         for idx,val in enumerate(sortList):
