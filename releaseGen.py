@@ -485,8 +485,12 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
     if locRepo.is_dirty():
         raise(Exception("Cannot create tag! Git repo is dirty!"))
 
-    tag = f'{relName}_{ver}'
-    msg = f'{relName} version {ver}'
+    if relName != 'all':
+        tag = f'{relName}_{ver}'
+        msg = f'{relName} version {ver} Release'
+    else:
+        tag = f'{ver}'
+        msg = f'version {ver} Release'
 
     print("\nLogging into github....\n")
 
