@@ -162,7 +162,7 @@ def selectRelease(cfg):
             relName = keyList[idx]
 
     if '-' in relName:
-        raise Exception(f"Invalid release names. Release names with '-' are not support in python!")
+        raise Exception(f"Invalid release name. Release names with '-' are not support in python!")
 
     relData = cfg['Releases'][relName]
 
