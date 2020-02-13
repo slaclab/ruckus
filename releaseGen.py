@@ -161,6 +161,9 @@ def selectRelease(cfg):
         else:
             relName = keyList[idx]
 
+    if '-' in relName:
+        raise Exception(f"Invalid release name. Release names with '-' are not support in python!")
+
     relData = cfg['Releases'][relName]
 
     if not 'Targets' in relData or relData['Targets'] is None:
@@ -168,6 +171,9 @@ def selectRelease(cfg):
 
     if not 'Types' in relData or relData['Types'] is None:
         raise Exception(f"Invalid release config. Types list in release {relName} is missing or empty!")
+
+    if not 'Primary' in relData or relData['Primary'] is None:
+        relData['Primary'] = False
 
     return relName, relData
 
@@ -471,7 +477,7 @@ def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
             if e['type'] == 'file':
                 tf.add(name=e['fullPath'],arcname=baseDir+'/config/'+e['subPath'],recursive=False)
 
-def pushRelease(cfg, relName, ver, tagAttach, prev):
+def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     gitDir = os.path.join(args.project,cfg['GitBase'])
 
     print(f"GitDir = {gitDir}")
@@ -488,15 +494,13 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
     if locRepo.is_dirty():
         raise(Exception("Cannot create tag! Git repo is dirty!"))
 
-    # Check the release name does NOT match git repo name
-    if relName != project:
-        # Target Level Release
-        tag = f'{relName}_{ver}'
-        msg = f'{relName} version {ver} Release'
-    else:
-        # Repo Level Release
+    # Check if this is a primary release
+    if relData['Primary']:
         tag = f'{ver}'
         msg = f'version {ver} Release'
+    else:
+        tag = f'{relName}_{ver}'
+        msg = f'{relName} version {ver} Release'
 
     print("\nLogging into github....\n")
 
@@ -515,7 +519,8 @@ def pushRelease(cfg, relName, ver, tagAttach, prev):
     locRepo.remotes.origin.push(newTag)
 
     if prev != "":
-        tagRange = f'{relName}_{prev}..{relName}_{ver}'
+        if relData['Primary']: tagRange = f'{prev}..{ver}'
+        else: tagRange = f'{relName}_{prev}..{relName}_{ver}'
 
         print("\nGenerating release notes ...")
         md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, tagRange)
@@ -547,7 +552,10 @@ if __name__ == "__main__":
 
     # Determine if we generate a Rogue zipfile
     if 'Rogue' in relData['Types']:
-        zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
+
+        if relData['Primary']: zipName = os.path.join(os.getcwd(),f'rogue_{ver}.zip')
+        else: zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
+
         buildRogueFile(zipName,cfg,ver,relName,relData,imgList)
         tagAttach.append(zipName)
 
@@ -558,5 +566,5 @@ if __name__ == "__main__":
         tagAttach.append(tarName)
 
     if args.push is not None:
-        pushRelease(cfg,relName,ver,tagAttach,prev)
+        pushRelease(cfg,relName,relData,ver,tagAttach,prev)
 
