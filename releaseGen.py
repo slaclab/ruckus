@@ -428,7 +428,10 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
                 # Using non-compressed version of the file
                 img = e
             dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(img)
-            zf.write(img,dst)
+
+            # Check that the file does NOT already exists
+            if dst not in zf.namelist():
+                zf.write(img,dst)
 
         # Walk through collected script list
         for e in sList:
