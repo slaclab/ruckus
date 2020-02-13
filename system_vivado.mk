@@ -311,7 +311,6 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 bit mcs prom: $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
-	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
 
 ###############################################################
 #### Vivado Interactive #######################################
@@ -362,7 +361,6 @@ elf :
 	@cd $(OUT_DIR); $(EMBED_ELF)
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
 #### Release ##################################################
