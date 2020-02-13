@@ -238,8 +238,8 @@ def selectBuildImages(cfg, relName, relData):
             else:
                 buildName = sortList[idx]
 
-        tarExp = [re.compile(f'{buildName}\.{ext}') for ext in extensions]
-        tarExp.extend([re.compile(f'{buildName}_.\w*\.{ext}') for ext in extensions])
+        tarExp = [re.compile(f'{buildName}\.{ext}$') for ext in extensions]
+        tarExp.extend([re.compile(f'{buildName}_.\w*\.{ext}$') for ext in extensions])
 
         print(f"\nFinding images for target {target}, build {buildName}...")
         for f in dirList:
@@ -421,9 +421,9 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
         # Walk through collected image list
         for e in imgList:
             # Check if a .gz version exists
-            if os.path.isfile(e+'.gz'):
+            if os.path.isfile(e + '.gz'):
                 # Write the compressed version into the rogue_XXX.zip instead
-                img = e+'.gz'
+                img = e + '.gz'
             else:
                 # Using non-compressed version of the file
                 img = e
