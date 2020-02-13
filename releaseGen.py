@@ -398,7 +398,7 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
         lFile = os.path.join(args.project,cfg['GitBase'],'LICENSE.txt')
         zf.write(lFile,'LICENSE.txt')
 
-        # Walk through collected list
+        # Walk through collected python list
         for e in pList:
             dst = 'python/' + e['subPath']
 
@@ -413,14 +413,24 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
             if e['type'] == 'folder':
                 packList.append(e['subPath'])
 
+        # Walk through collected configuration list
         for e in cList:
             dst = 'python/' + cfg['TopRoguePackage'] + '/config/' + e['subPath']
             zf.write(e['fullPath'],dst)
 
+        # Walk through collected image list
         for e in imgList:
-            dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
-            zf.write(e,dst)
+            # Check if a .gz version exists
+            if os.path.isfile(e+'.gz'):
+                # Write the compressed version into the rogue_XXX.zip instead
+                img = e+'.gz'
+            else:
+                # Using non-compressed version of the file
+                img = e
+            dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(img)
+            zf.write(img,dst)
 
+        # Walk through collected script list
         for e in sList:
             dst = 'scripts/' + os.path.basename(e)
             zf.write(e,dst)
