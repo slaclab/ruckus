@@ -189,6 +189,11 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
 CreateFpgaBit
 
 ########################################################
+# Target Post Build script
+########################################################
+SourceTclFile ${VIVADO_DIR}/post_build.tcl
+
+########################################################
 ## Close the project and return sucessful flag
 ########################################################
 close_project

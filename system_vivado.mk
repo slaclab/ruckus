@@ -20,6 +20,10 @@ ifndef TOP_DIR
 export TOP_DIR  = $(abspath $(PROJ_DIR)/../..)
 endif
 
+ifndef RELEASE_DIR
+export RELEASE_DIR = $(TOP_DIR)/release
+endif
+
 ifndef MODULES
 export MODULES = $(TOP_DIR)/submodules
 endif
@@ -270,12 +274,6 @@ test:
 ###############################################################
 .PHONY : dir
 dir:
-
-###############################################################
-#### Vivado Project ###########################################
-###############################################################
-$(VIVADO_DEPEND) :
-	$(call ACTION_HEADER,"Vivado Project Creation")
 	@test -d $(TOP_DIR)/build/ || { \
 			 echo ""; \
 			 echo "Build directory missing!"; \
@@ -287,9 +285,16 @@ $(VIVADO_DEPEND) :
 			 echo "Or by creating a symbolic link to a directory on another disk:"; \
 			 echo "   ln -s $(TMP_DIR) $(TOP_DIR)/build"; \
 			 echo ""; false; }
-	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
+	@test -d $(OUT_DIR)     || mkdir $(OUT_DIR)
+	@test -d $(RELEASE_DIR) || mkdir $(RELEASE_DIR)
 	@cd $(OUT_DIR); rm -f firmware
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
+
+###############################################################
+#### Vivado Project ###########################################
+###############################################################
+$(VIVADO_DEPEND) : dir
+	$(call ACTION_HEADER,"Vivado Project Creation")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/project.tcl -notrace 
 
 ###############################################################
@@ -306,7 +311,6 @@ $(SOURCE_DEPEND) : $(VIVADO_DEPEND)
 bit mcs prom: $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
-	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
 
 ###############################################################
 #### Vivado Interactive #######################################
@@ -357,23 +361,22 @@ elf :
 	@cd $(OUT_DIR); $(EMBED_ELF)
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
 #### Release ##################################################
 ###############################################################
 .PHONY : release
-release : 
+release : dir
 	$(call ACTION_HEADER,"Generaring Release")
-	@cd $(OUT_DIR); python3 $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE) --push
+	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE) --push
 
 ###############################################################
 #### Release Files ############################################
 ###############################################################
 .PHONY : release_files
-release_files : 
+release_files : dir
 	$(call ACTION_HEADER,"Generaring Release Files")
-	@cd $(OUT_DIR); python3 $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE)
+	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE)
 
 ###############################################################
 #### Vivado PyRogue ###########################################
