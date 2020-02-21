@@ -45,7 +45,7 @@ export GIT_BYPASS = 1
 endif
 
 ifndef GZIP_BUILD_IMAGE
-export GZIP_BUILD_IMAGE = 0
+export GZIP_BUILD_IMAGE = 1
 endif
 
 ifndef GEN_BIN_IMAGE
