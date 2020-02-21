@@ -131,6 +131,14 @@ def getVersion():
 
     return ver, prev
 
+def releaseType(ver):
+    parts = str.split(ver.replace('v', ''), '.')
+    if parts[-1] != '0':
+        return 'Patch'
+    if parts[-2] != '0':
+        return 'Minor'
+    return 'Major'
+
 def selectRelease(cfg):
     relName = args.release
 
@@ -510,10 +518,10 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     # Check if this is a primary release
     if relData['Primary']:
         tag = f'{ver}'
-        msg = f'version {ver} Release'
+        msg = f'{releaseType(ver)} Release {ver}'
     else:
         tag = f'{relName}_{ver}'
-        msg = f'{relName} version {ver} Release'
+        msg = f'{relName} {releaseType(ver)} Release {ver}'
 
     print("\nLogging into github....\n")
 

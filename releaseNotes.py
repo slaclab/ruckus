@@ -71,7 +71,9 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
             else:
                 entry['Jira'] = None
 
-            records.append(entry)
+            if 'release candidate' not in req.title.lower():
+                records.append(entry)
+                
             entry = {}         
             
     # Check if sorting the pull request entries        
@@ -188,9 +190,9 @@ if __name__ == "__main__":
     print(md)
 
     if args.copy:
-        try:	
-            pyperclip.copy(md)	
-            print('Release notes copied to clipboard')	
-        except:	
+        try:
+            pyperclip.copy(md)
+            print('Release notes copied to clipboard')
+        except:
             print("Copy to clipboard failed!")
 
