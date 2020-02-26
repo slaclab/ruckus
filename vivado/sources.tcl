@@ -29,11 +29,9 @@ if { [file exists ${IMAGES_DIR}] != 1 } {
    exec mkdir ${IMAGES_DIR}
 }
 
-## Copy over the default .gitignore (prevent beginner git users from accidentally committing/pushing code
-#exec cp -f ${RUCKUS_DIR}/.gitignore ${IMAGES_DIR}/.
-
 # Open the project
-open_project -quiet ${VIVADO_PROJECT}
+source ${RUCKUS_DIR}/vivado/project.tcl
+VivadoRefresh ${VIVADO_PROJECT}
 
 ########################################################
 ## Setup the top-level generics

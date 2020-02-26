@@ -291,34 +291,11 @@ dir:
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
 
 ###############################################################
-#### Vivado Project ###########################################
-###############################################################
-$(VIVADO_DEPEND) : dir
-	$(call ACTION_HEADER,"Vivado Project Creation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/project.tcl -notrace 
-
-###############################################################
 #### Vivado Sources ###########################################
 ###############################################################
-$(SOURCE_DEPEND) : $(VIVADO_DEPEND)
+$(SOURCE_DEPEND) : dir
 	$(call ACTION_HEADER,"Vivado Source Setup")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/sources.tcl
-
-###############################################################
-#### Vivado Batch #############################################
-###############################################################
-.PHONY : bit mcs prom
-bit mcs prom: $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
-
-###############################################################
-#### Vivado Interactive #######################################
-###############################################################
-.PHONY : interactive
-interactive : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Interactive")
-	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
 
 ###############################################################
 #### Vivado Project GUI mode ##################################
@@ -327,6 +304,14 @@ interactive : $(SOURCE_DEPEND)
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
 	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
+
+###############################################################
+#### Vivado Batch #############################################
+###############################################################
+.PHONY : bit mcs prom
+bit mcs prom : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
 ###############################################################
 #### Vivado Synthesis Only ####################################
@@ -343,6 +328,14 @@ syn : $(SOURCE_DEPEND)
 dcp : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Synthesis DCP")
 	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
+
+###############################################################
+#### Vivado Interactive #######################################
+###############################################################
+.PHONY : interactive
+interactive : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Interactive")
+	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
 
 ###############################################################
 #### Vivado SDK ###############################################
@@ -429,9 +422,6 @@ batch : $(SOURCE_DEPEND)
 ###############################################################
 #### Makefile Targets #########################################
 ###############################################################
-.PHONY      : depend
-depend      : $(VIVADO_DEPEND)
-
 .PHONY      : sources
 sources     : $(SOURCE_DEPEND)
 
