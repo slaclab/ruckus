@@ -31,6 +31,7 @@ if { [file exists ${IMAGES_DIR}] != 1 } {
 
 # Open the project
 source ${RUCKUS_DIR}/vivado/project.tcl
+VivadoRefresh ${VIVADO_PROJECT}
 
 ########################################################
 ## Setup the top-level generics
