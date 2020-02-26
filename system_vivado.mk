@@ -291,48 +291,34 @@ dir:
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
 
 ###############################################################
-#### Vivado Project ###########################################
-###############################################################
-$(VIVADO_DEPEND) : dir
-	$(call ACTION_HEADER,"Vivado Project Creation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/project.tcl -notrace 
-
-###############################################################
 #### Vivado Sources ###########################################
 ###############################################################
-$(SOURCE_DEPEND) : $(VIVADO_DEPEND)
+.PHONY : sources
+sources: dir
 	$(call ACTION_HEADER,"Vivado Source Setup")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/sources.tcl
-
-###############################################################
-#### Vivado Batch #############################################
-###############################################################
-.PHONY : bit mcs prom
-bit mcs prom: $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
-
-###############################################################
-#### Vivado Interactive #######################################
-###############################################################
-.PHONY : interactive
-interactive : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Interactive")
-	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
 
 ###############################################################
 #### Vivado Project GUI mode ##################################
 ###############################################################
 .PHONY : gui
-gui : $(SOURCE_DEPEND)
+gui : sources
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
 	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
+
+###############################################################
+#### Vivado Batch #############################################
+###############################################################
+.PHONY : bit mcs prom
+bit mcs prom: sources
+	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
 ###############################################################
 #### Vivado Synthesis Only ####################################
 ###############################################################
 .PHONY : syn
-syn : $(SOURCE_DEPEND)
+syn : sources
 	$(call ACTION_HEADER,"Vivado Synthesis Only")
 	@cd $(OUT_DIR); export SYNTH_ONLY=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
@@ -340,9 +326,17 @@ syn : $(SOURCE_DEPEND)
 #### Vivado Synthesis DCP  ####################################
 ###############################################################
 .PHONY : dcp
-dcp : $(SOURCE_DEPEND)
+dcp : sources
 	$(call ACTION_HEADER,"Vivado Synthesis DCP")
 	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
+
+###############################################################
+#### Vivado Interactive #######################################
+###############################################################
+.PHONY : interactive
+interactive : sources
+	$(call ACTION_HEADER,"Vivado Interactive")
+	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
 
 ###############################################################
 #### Vivado SDK ###############################################
@@ -382,7 +376,7 @@ release_files : dir
 #### Vivado PyRogue ###########################################
 ###############################################################
 .PHONY : pyrogue
-pyrogue : $(SOURCE_DEPEND)
+pyrogue : sources
 	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/pyrogue.tcl
 
@@ -390,7 +384,7 @@ pyrogue : $(SOURCE_DEPEND)
 #### Vivado CPSW ##############################################
 ###############################################################
 .PHONY : yaml
-yaml : $(SOURCE_DEPEND)
+yaml : sources
 	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/cpsw.tcl
 
@@ -398,7 +392,7 @@ yaml : $(SOURCE_DEPEND)
 #### Vivado WIS ###############################################
 ###############################################################
 .PHONY : wis
-wis : $(SOURCE_DEPEND)
+wis : sources
 	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/wis.tcl
 
@@ -406,7 +400,7 @@ wis : $(SOURCE_DEPEND)
 #### Vivado XSIM Simulation ###################################
 ###############################################################
 .PHONY : xsim
-xsim : $(SOURCE_DEPEND)
+xsim : sources
 	$(call ACTION_HEADER,"Vivado XSIM Simulation")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/xsim.tcl
 
@@ -414,7 +408,7 @@ xsim : $(SOURCE_DEPEND)
 #### Vivado VCS Simulation ####################################
 ###############################################################
 .PHONY : vcs
-vcs : $(SOURCE_DEPEND)
+vcs : sources
 	$(call ACTION_HEADER,"Generating the VCS Simulation scripts")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
    
@@ -422,18 +416,9 @@ vcs : $(SOURCE_DEPEND)
 #### Vivado Batch Mode within the Project Environment  ########
 ###############################################################
 .PHONY : batch
-batch : $(SOURCE_DEPEND)
+batch : sources
 	$(call ACTION_HEADER,"Vivado Project Batch")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/batch.tcl $(VIVADO_PROJECT).xpr
-
-###############################################################
-#### Makefile Targets #########################################
-###############################################################
-.PHONY      : depend
-depend      : $(VIVADO_DEPEND)
-
-.PHONY      : sources
-sources     : $(SOURCE_DEPEND)
 
 ###############################################################
 #### Clean ####################################################

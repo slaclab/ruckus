@@ -9,7 +9,7 @@
 ##############################################################################
 
 ## \file vivado/project.tcl
-# \brief This script create the Vivado project
+# \brief This script create or open the Vivado project
 
 ########################################################
 ## Get variables and Custom Procedures
@@ -20,8 +20,13 @@ source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 # Check for unsupported versions that ruckus does NOT support
 CheckVivadoVersion
 
-# Create a Project
-create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
+set try_to_open [catch { open_project -quiet ${VIVADO_PROJECT} }]
+if { [file exists ${VIVADO_PROJECT}.xpr]} {
+   open_project -quiet ${VIVADO_PROJECT}
+} else {
+   # Create a Project
+   create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
+}
 
 # Message Filtering Script
 source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
@@ -89,6 +94,3 @@ if { ${cpuNum} >= 8 } {
 
 # Target specific project setup script
 SourceTclFile ${VIVADO_DIR}/project_setup.tcl
-
-# Close the project
-close_project
