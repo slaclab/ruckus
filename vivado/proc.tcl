@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -46,8 +46,8 @@ proc ArchiveProject { } {
    ## Remove the TCL configurations
    set_property STEPS.SYNTH_DESIGN.TCL.PRE                 "" [get_runs synth_1]
    set_property STEPS.SYNTH_DESIGN.TCL.POST                "" [get_runs synth_1]
-   set_property STEPS.OPT_DESIGN.TCL.PRE                   "" [get_runs impl_1] 
-   set_property STEPS.OPT_DESIGN.TCL.POST                  "" [get_runs impl_1] 
+   set_property STEPS.OPT_DESIGN.TCL.PRE                   "" [get_runs impl_1]
+   set_property STEPS.OPT_DESIGN.TCL.POST                  "" [get_runs impl_1]
    set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             "" [get_runs impl_1]
    set_property STEPS.POWER_OPT_DESIGN.TCL.POST            "" [get_runs impl_1]
    set_property STEPS.PLACE_DESIGN.TCL.PRE                 "" [get_runs impl_1]
@@ -60,10 +60,10 @@ proc ArchiveProject { } {
    set_property STEPS.ROUTE_DESIGN.TCL.POST                "" [get_runs impl_1]
    set_property STEPS.WRITE_BITSTREAM.TCL.PRE              "" [get_runs impl_1]
    set_property STEPS.WRITE_BITSTREAM.TCL.POST             "" [get_runs impl_1]
-   
+
    ## Archive the project
    archive_project $::env(IMAGES_DIR)/$::env(PROJECT)_project.xpr.zip -force -include_config_settings
-   
+
    ## Restore the TCL configurations
    set_property STEPS.SYNTH_DESIGN.TCL.PRE                 ${SYNTH_PRE}     [get_runs synth_1]
    set_property STEPS.SYNTH_DESIGN.TCL.POST                ${SYNTH_POST}    [get_runs synth_1]
@@ -79,8 +79,8 @@ proc ArchiveProject { } {
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             ${PHYS_OPT_POST} [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 ${ROUTE_PRE}     [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.POST                ${ROUTE_POST}    [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              ${WRITE_PRE}     [get_runs impl_1]   
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}    [get_runs impl_1]     
+   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              ${WRITE_PRE}     [get_runs impl_1]
+   set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}    [get_runs impl_1]
 }
 
 ## Custom TLC source function
@@ -148,7 +148,7 @@ proc BuildIpCores { } {
                reset_run  ${ipSynthRun}
                append ipSynthRun " "
                append ipCoreList ${ipSynthRun}
-               append ipList ${corePntr}            
+               append ipList ${corePntr}
                append ipList " "
             }
          }
@@ -158,25 +158,25 @@ proc BuildIpCores { } {
          # Build the IP Core
          launch_runs -quiet ${ipCoreList} -jobs [GetCpuNumber]
          foreach waitPntr ${ipCoreList} {
-            set src_rc [catch { 
-               wait_on_run ${waitPntr} 
-            } _RESULT]   
+            set src_rc [catch {
+               wait_on_run ${waitPntr}
+            } _RESULT]
          }
-      }      
+      }
       foreach corePntr ${ipList} {
          # Disable the IP Core's XDC (so it doesn't get implemented at the project level)
          set xdcPntr [get_files -quiet -of_objects [get_files ${corePntr}.xci] -filter {FILE_TYPE == XDC}]
          if { ${xdcPntr} != "" } {
-            set_property is_enabled false [get_files ${xdcPntr}] 
-         }         
+            set_property is_enabled false [get_files ${xdcPntr}]
+         }
          # Set the IP core synthesis run name
-         set ipSynthRun ${corePntr}_synth_1         
+         set ipSynthRun ${corePntr}_synth_1
          # Reset the "needs_refresh" flag
          set_property needs_refresh false [get_runs ${ipSynthRun}]
       }
    }
    # Refresh the project
-   update_compile_order -quiet -fileset sources_1 
+   update_compile_order -quiet -fileset sources_1
 }
 
 ## Copies all IP cores from the build tree to source tree
@@ -184,13 +184,13 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   
+
    # Make sure the IP Cores have been built
    BuildIpCores
-   
+
    # Get the IP list
    set ipList [read [open ${OUT_DIR}/ipList.txt]]
-   
+
    # Check if the target project has IP cores
    if { ${ipList} != "" } {
       # Loop through the IP cores
@@ -224,17 +224,17 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
          }
       }
    }
-}  
+}
 
 ## Copies all block designs from the build tree to source tree
 proc CopyBdCores { {createTcl true} {copySourceCode false} } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   
+
    # Get the BD list
    set bdList [read [open ${OUT_DIR}/bdList.txt]]
-   
+
    # Check if the target project has block designs
    if { ${bdList} != "" } {
       # Loop through the has block designs
@@ -266,7 +266,7 @@ proc CopyBdCores { {createTcl true} {copySourceCode false} } {
          }
       }
    }
-} 
+}
 
 ## Generate the wrappers for all the BD files and add them to sources_1 fileset
 proc GenerateBdWrappers { } {
@@ -279,7 +279,7 @@ proc GenerateBdWrappers { } {
       # Loop through the has block designs
       foreach bdpath ${bdList} {
          # Create the wrapper
-         make_wrapper -force -files [get_files $bdpath] -top   
+         make_wrapper -force -files [get_files $bdpath] -top
          # Get the base dir and file name
          set bd_wrapper_path [file dirname [lindex ${bdpath} 0]]
          set wrapperFileName [lsearch -inline [exec ls ${bd_wrapper_path}/hdl/] *_wrapper.vhd]
@@ -287,7 +287,7 @@ proc GenerateBdWrappers { } {
          add_files -force -fileset sources_1 ${bd_wrapper_path}/hdl/${wrapperFileName}
       }
    }
-   
+
 }
 
 ## Generate Verilog simulation models for a specific .dcp file
@@ -296,17 +296,17 @@ proc DcpToVerilogSim {dcpName} {
    set filePntr [get_files ${dcpName}.dcp]
    if { [file extension ${filePntr}] == ".dcp" } {
       ## Open the check point
-      open_checkpoint ${filePntr}     
+      open_checkpoint ${filePntr}
       ## Generate the output file path
       set simName [file tail ${filePntr}]
-      set simName [string map {".dcp" "_sim.v"} ${simName}] 
+      set simName [string map {".dcp" "_sim.v"} ${simName}]
       set simFile ${OUT_DIR}/${PROJECT}_project.sim/${simName}
       ## Write the simulation model to the build tree
-      write_verilog -force -mode funcsim -file ${simFile}     
+      write_verilog -force -mode funcsim -file ${simFile}
       ## close the check point
       close_design
       # Add the Simulation Files
-      add_files -quiet -fileset sim_1 ${simFile} 
+      add_files -quiet -fileset sim_1 ${simFile}
       # Force Absolute Path (not relative to project)
       set_property PATH_MODE AbsoluteFirst [get_files ${simFile}]
    }
@@ -344,14 +344,14 @@ proc CreateDcpVhoFiles {} {
 }
 
 ## Create .MCS PROM
-proc CreatePromMcs { } {   
+proc CreatePromMcs { } {
    if { [file exists $::env(PROJ_DIR)/vivado/promgen.tcl] == 1 } {
       source $::env(RUCKUS_DIR)/vivado/promgen.tcl
    }
-}   
+}
 
-## Create .BIT file   
-proc CreateFpgaBit { } {   
+## Create .BIT file
+proc CreateFpgaBit { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
@@ -361,18 +361,18 @@ proc CreateFpgaBit { } {
    # Copy the .BIT file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
    puts "Bit file copied to ${imagePath}.bit"
-   
+
    # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {    
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
       exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
    }
-   
+
    # Copy the .BIN file to image directory
    if { $::env(GEN_BIN_IMAGE) != 0 } {
       exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
-      if { $::env(GZIP_BUILD_IMAGE) != 0 } {  
-         exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz 
-      }   
+      if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+         exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
+      }
    }
 
    # Copy the .ltx file (if it exists)
@@ -381,28 +381,28 @@ proc CreateFpgaBit { } {
       puts "Debug Probes file copied to ${imagePath}.ltx"
    } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
       exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"   
+      puts "Debug Probes file copied to ${imagePath}.ltx"
    } else {
-      puts "No Debug Probes found"   
+      puts "No Debug Probes found"
    }
-   
+
    # Check for Vivado 2019.2 (or newer)
    if { [VersionCompare 2019.2] > 0 } {
       # Try to generate the .XSA file
       write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
-   
+
    # Else Vivado 2019.1 (or older)
    } else {
       # Try to generate the .HDF file
-      write_hwdef -force -file ${imagePath}.hdf   
+      write_hwdef -force -file ${imagePath}.hdf
    }
-   
+
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs
 }
 
 ## Create tar.gz of all cpsw files in firmware
-proc CreateCpswTarGz { } {   
+proc CreateCpswTarGz { } {
    if { [file exists $::env(PROJ_DIR)/yaml/000TopLevel.yaml] == 1 } {
       source $::env(RUCKUS_DIR)/vivado/cpsw.tcl
    } else {
@@ -411,19 +411,19 @@ proc CreateCpswTarGz { } {
 }
 
 ## Create tar.gz of all pyrogue files in firmware
-proc CreatePyRogueTarGz { } {   
+proc CreatePyRogueTarGz { } {
    source $::env(RUCKUS_DIR)/vivado/pyrogue.tcl
 }
 
-## Remove unused code   
+## Remove unused code
 proc RemoveUnsuedCode { } {
    update_compile_order -quiet -fileset sources_1
    update_compile_order -quiet -fileset sim_1
    remove_files [get_files -filter {IS_AUTO_DISABLED}]
 }
 
-## Build INFO  
-proc BuildInfo { } { 
+## Build INFO
+proc BuildInfo { } {
    exec rm -f $::env(PROJ_DIR)/build.info
    set fp [open "$::env(PROJ_DIR)/build.info" w+]
    puts $fp "PROJECT: $::env(PROJECT)"
@@ -435,7 +435,7 @@ proc BuildInfo { } {
 
 ## Check if you have write permission
 proc CheckWritePermission { } {
-   set src_rc [catch {exec touch $::env(MODULES)/ruckus/LICENSE.txt}]       
+   set src_rc [catch {exec touch $::env(MODULES)/ruckus/LICENSE.txt}]
    if {$src_rc} {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
@@ -444,10 +444,10 @@ proc CheckWritePermission { } {
       puts "Please verify that your Unix session has not expired"
       puts "********************************************************"
       puts "********************************************************"
-      puts "********************************************************\n\n\n\n\n"     
+      puts "********************************************************\n\n\n\n\n"
       exit -1
-   } 
-} 
+   }
+}
 
 ## Check for unsupported versions that ruckus does NOT support (https://confluence.slac.stanford.edu/x/n4-jCg)
 proc CheckVivadoVersion { } {
@@ -478,8 +478,8 @@ proc CheckVivadoVersion { } {
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
       puts "********************************************************\n\n\n\n\n"
-   }   
-} 
+   }
+}
 
 ## Checking Timing Function
 proc CheckTiming { {printTiming true} } {
@@ -491,7 +491,7 @@ proc CheckTiming { {printTiming true} } {
    set TPWS [get_property STATS.TPWS [get_runs impl_1]]
    set FAILED_NETS [get_property STATS.FAILED_NETS [get_runs impl_1]]
 
-   # Check for timing and routing errors 
+   # Check for timing and routing errors
    if { ${WNS}<0.0 || ${TNS}<0.0 }  { set setupError true } else { set setupError false }
    if { ${WHS}<0.0 || ${THS}<0.0 }  { set holdError  true } else { set holdError  false }
    if { ${TPWS}<0.0 }               { set pulseError true } else { set pulseError false }
@@ -499,7 +499,7 @@ proc CheckTiming { {printTiming true} } {
 
    # Check if any timing/routing error detected
    if { ${setupError} || ${holdError} || ${pulseError} || ${failedNet} } {
-      
+
       # Check if we are printing out the results
       if { ${printTiming} == true } {
          puts "\n\n\n\n\n********************************************************"
@@ -509,46 +509,46 @@ proc CheckTiming { {printTiming true} } {
          puts "\tSetup: Worst Negative Slack (WNS): ${WNS} ns"
          puts "\tSetup: Total Negative Slack (TNS): ${TNS} ns"
          puts "\tHold: Worst Hold Slack (WHS): ${WHS} ns"
-         puts "\tHold: Total Hold Slack (THS): ${THS} ns"  
-         puts "\tPulse Width: Total Pulse Width Negative Slack (TPWS): ${TPWS} ns"   
-         puts "\tRouting: Number of Failed Nets: ${FAILED_NETS}"       
+         puts "\tHold: Total Hold Slack (THS): ${THS} ns"
+         puts "\tPulse Width: Total Pulse Width Negative Slack (TPWS): ${TPWS} ns"
+         puts "\tRouting: Number of Failed Nets: ${FAILED_NETS}"
          puts "********************************************************"
          puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"  
+         puts "********************************************************\n\n\n\n\n"
       }
-      
+
       # Get the value of all the timing ignore flags
-      set tigAll   [expr {[info exists ::env(TIG)]       && [string is true -strict $::env(TIG)]}]  
-      set tigSetup [expr {[info exists ::env(TIG_SETUP)] && [string is true -strict $::env(TIG_SETUP)]}]  
-      set tigHold  [expr {[info exists ::env(TIG_HOLD)]  && [string is true -strict $::env(TIG_HOLD)]}]  
-      set tigPulse [expr {[info exists ::env(TIG_PULSE)] && [string is true -strict $::env(TIG_PULSE)]}]  
-      
+      set tigAll   [expr {[info exists ::env(TIG)]       && [string is true -strict $::env(TIG)]}]
+      set tigSetup [expr {[info exists ::env(TIG_SETUP)] && [string is true -strict $::env(TIG_SETUP)]}]
+      set tigHold  [expr {[info exists ::env(TIG_HOLD)]  && [string is true -strict $::env(TIG_HOLD)]}]
+      set tigPulse [expr {[info exists ::env(TIG_PULSE)] && [string is true -strict $::env(TIG_PULSE)]}]
+
       # Override the flags
       if { ${tigSetup} == 1 } { set setupError false }
       if { ${tigHold}  == 1 } { set holdError  false }
       if { ${tigPulse} == 1 } { set pulseError false }
-      if { ${tigAll}   == 1 } { 
-         set setupError false 
-         set holdError  false 
-         set pulseError false 
+      if { ${tigAll}   == 1 } {
+         set setupError false
+         set holdError  false
+         set pulseError false
       }
-      
+
       # Recheck the flags after the custom overrides
       if { ${setupError} || ${holdError} || ${pulseError} || ${failedNet} } {
          return false
-         
+
       # Else overriding the timing error flag
       } else {
          return true
-      }    
-   
+      }
+
    # Else no timing or routing errors detected
    } else {
       return true
    }
 }
 
-## Check if SDK_SRC_PATH (or VITIS_SRC_PATH) exist, then it checks for a valid path 
+## Check if SDK_SRC_PATH (or VITIS_SRC_PATH) exist, then it checks for a valid path
 proc CheckSdkSrcPath { } {
 
    # Check for Vivado 2019.2 (or newer)
@@ -557,31 +557,31 @@ proc CheckSdkSrcPath { } {
          if { [expr [file exists $::env(VITIS_SRC_PATH)]] == 0 } {
             puts "\n\n\n\n\n********************************************************"
             puts "********************************************************"
-            puts "********************************************************"   
+            puts "********************************************************"
             puts "VITIS_SRC_PATH: $::env(VITIS_SRC_PATH) does not exist"
             puts "********************************************************"
             puts "********************************************************"
-            puts "********************************************************\n\n\n\n\n"  
+            puts "********************************************************\n\n\n\n\n"
             return false
-         }      
-      }   
-      
+         }
+      }
+
    # Else Vivado 2019.1 (or older)
    } else {
       if { [expr [info exists ::env(SDK_SRC_PATH)]] == 1 } {
          if { [expr [file exists $::env(SDK_SRC_PATH)]] == 0 } {
             puts "\n\n\n\n\n********************************************************"
             puts "********************************************************"
-            puts "********************************************************"   
+            puts "********************************************************"
             puts "SDK_SRC_PATH: $::env(SDK_SRC_PATH) does not exist"
             puts "********************************************************"
             puts "********************************************************"
-            puts "********************************************************\n\n\n\n\n"  
+            puts "********************************************************\n\n\n\n\n"
             return false
-         }      
+         }
       }
    }
-   
+
    return true
 }
 
@@ -595,11 +595,11 @@ proc CheckPrjConfig { fileset } {
    if { $::env(PRJ_VERSION) == "" } {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
-      puts "********************************************************"   
+      puts "********************************************************"
       puts "Error: PRJ_VERSION is not defined in the Makefile"
       puts "********************************************************"
       puts "********************************************************"
-      puts "********************************************************\n\n\n\n\n"  
+      puts "********************************************************\n\n\n\n\n"
       return false
    }
 
@@ -607,17 +607,17 @@ proc CheckPrjConfig { fileset } {
    if { $::env(GIT_HASH_LONG) == "" && [info exists ::env(SYNTH_ONLY)] != 1} {
       puts "\n\n\n\n\n********************************************************"
       puts "********************************************************"
-      puts "********************************************************"   
+      puts "********************************************************"
       puts "Error: The following files are not committed in GIT:"
       foreach filePath $::env(GIT_STATUS) {
          puts "\t${filePath}"
       }
       puts "********************************************************"
       puts "********************************************************"
-      puts "********************************************************\n\n\n\n\n"  
+      puts "********************************************************\n\n\n\n\n"
       return false
-   }   
-   
+   }
+
    # Check the Vivado version (check_syntax added to Vivado in 2016.1)
    if { [VersionCompare 2016.1] >= 0 } {
       # Check for syntax errors
@@ -631,34 +631,34 @@ proc CheckPrjConfig { fileset } {
       }
       if { ${listErr} != "" } {
          set listErr [string map {"ERROR: \[#UNDEF\]" ""} ${listErr} ]
-         set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]      
+         set listErr [string map {"CRITICAL WARNING: \[HDL 9-806\]" ""} ${listErr} ]
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
-         puts "********************************************************"   
+         puts "********************************************************"
          puts "The following syntax error(s) were detected before synthesis:${listErr}"
          puts "********************************************************"
          puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"  
+         puts "********************************************************\n\n\n\n\n"
          return false
-      } 
-   } 
-   
+      }
+   }
+
    if { ${PRJ_TOP} != $::env(PROJECT) } {
-      # Check if not a dynamic build of partial reconfiguration, 
+      # Check if not a dynamic build of partial reconfiguration,
       # which usually ${PRJ_TOP} != $::env(PROJECT)
       if { ${RECONFIG_CHECKPOINT} == 0 } {
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
-         puts "********************************************************"   
+         puts "********************************************************"
          puts "WARNING: Your top-level firmware is defined as ${PRJ_TOP}"
          puts "Please double check that ${PRJ_TOP} is actually your top-level HDL"
          puts "********************************************************"
          puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"     
+         puts "********************************************************\n\n\n\n\n"
          sleep 5
       }
    }
-   
+
    # Check SDK
    return [CheckSdkSrcPath]
 }
@@ -693,29 +693,29 @@ proc CheckSynth { {flags ""} } {
                      set trim2 ""
                      regexp {([^\]]+):?(/.*)} "${msg}" trim1 trim2
                      if { ${trim1} != "" } {
-                        set listErr "${listErr}\n${trim1}"       
+                        set listErr "${listErr}\n${trim1}"
                      } else {
-                        set listErr "${listErr}\n${msg}"  
+                        set listErr "${listErr}\n${msg}"
                      }
                   }
-               }   
+               }
                puts "\n\n\n\n\n********************************************************"
                puts "********************************************************"
-               puts "********************************************************"   
+               puts "********************************************************"
                puts "The following error(s) were detected during synthesis:${listErr}"
                puts "********************************************************"
                puts "********************************************************"
-               puts "********************************************************\n\n\n\n\n"     
+               puts "********************************************************\n\n\n\n\n"
                return false
             }
          }
       }
    }
    if { [get_property NEEDS_REFRESH [get_runs synth_1]] == 1 } {
-      set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs synth_1\]\] == 1,\n"  
+      set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs synth_1\]\] == 1,\n"
       set errmsg "${errmsg}\twhich means the synthesis is now \"out-of-date\".\n"
       set errmsg "${errmsg}\t\"out-of-date\" typically happens when editing\n"
-      set errmsg "${errmsg}\tsource code during synthesis process."   
+      set errmsg "${errmsg}\tsource code during synthesis process."
    } elseif { [get_property PROGRESS [get_runs synth_1]] != "100\%" } {
       set errmsg "\t\[get_property PROGRESS \[get_runs synth_1\]\] != 100\%\n"
    } elseif { [get_property STATUS [get_runs synth_1]] != "synth_design Complete!" } {
@@ -730,15 +730,15 @@ proc CheckSynth { {flags ""} } {
             # Compare the file's hash to current Makefile hash
             if { [string match $::env(GIT_HASH_LONG) ${gitHash}] != 1 } {
                # puts "GIT HASH mismatch detected"
-               return false     
+               return false
             } else {
                # puts "GIT HASH match detected"
                return true
-            }            
+            }
          } else {
             # Error: File does not exist
             return false;
-         }                  
+         }
       } else {
          # Bypassing GIT hash tracking
          return true
@@ -754,10 +754,10 @@ proc CheckSynth { {flags ""} } {
 ## Check if the Synthesize is completed
 proc CheckIpSynth { ipSynthRun {flags ""} } {
    if { [get_property NEEDS_REFRESH [get_runs ${ipSynthRun}]] == 1 } {
-      set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs ${ipSynthRun}\]\] == 1,\n"  
+      set errmsg "\t\[get_property NEEDS_REFRESH \[get_runs ${ipSynthRun}\]\] == 1,\n"
       set errmsg "${errmsg}\twhich means the synthesis is now \"out-of-date\".\n"
       set errmsg "${errmsg}\t\"out-of-date\" typically happens when editing\n"
-      set errmsg "${errmsg}\tsource code during synthesis process."        
+      set errmsg "${errmsg}\tsource code during synthesis process."
    } elseif { [get_property PROGRESS [get_runs ${ipSynthRun}]] != "100\%" } {
       set errmsg "\t\[get_property PROGRESS \[get_runs ${ipSynthRun}\]\] != 100\%\n"
    } elseif { [get_property STATUS [get_runs ${ipSynthRun}]] != "synth_design Complete!" } {
@@ -765,11 +765,11 @@ proc CheckIpSynth { ipSynthRun {flags ""} } {
    } else {
       return true
    }
-   if { ${flags} != "" } {   
+   if { ${flags} != "" } {
       puts "\n\nSynthesize's ${ipSynthRun} run is incompleted due to the following:"
       puts "${errmsg}\n\n"
    }
-   return false     
+   return false
 }
 
 ## Check if the Implementation is completed
@@ -777,7 +777,7 @@ proc CheckImpl { {flags ""} } {
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
    # Check for errors during synthesis
-   if { ${flags} != "" } {   
+   if { ${flags} != "" } {
       set NumErr [llength [lsearch -all -regexp [split [read [open ${IMPL_DIR}/runme.log]]] "^ERROR:"]]
       if { ${NumErr} != 0 } {
          set errReport [read [open ${IMPL_DIR}/runme.log]]
@@ -785,15 +785,15 @@ proc CheckImpl { {flags ""} } {
          set listErr ""
          foreach msg ${errReport} {
             if { [string match {*ERROR:*} ${msg}] == 1 } {
-               set listErr "${listErr}\n${msg}"       
+               set listErr "${listErr}\n${msg}"
             }
-         }   
+         }
          puts "\n\n\n\n\n********************************************************"
          puts "********************************************************"
-         puts "********************************************************"   
+         puts "********************************************************"
          puts "The following error(s) were detected during implementation:${listErr}"
          # Check for DRC error during routing
-         if { [string match {*\[Vivado_Tcl 4-16\]*} ${listErr}] == 1 } { 
+         if { [string match {*\[Vivado_Tcl 4-16\]*} ${listErr}] == 1 } {
             puts "# open_checkpoint ${IMPL_DIR}/${PROJECT}_routed_error.dcp"
             open_checkpoint -quiet ${IMPL_DIR}/${PROJECT}_routed_error.dcp
             puts "# report_drc -ruledecks {default}"
@@ -803,8 +803,8 @@ proc CheckImpl { {flags ""} } {
          }
          puts "********************************************************"
          puts "********************************************************"
-         puts "********************************************************\n\n\n\n\n"     
-         return false 
+         puts "********************************************************\n\n\n\n\n"
+         return false
       }
    }
    if { [get_property PROGRESS [get_runs impl_1]] != "100\%" } {
@@ -818,7 +818,7 @@ proc CheckImpl { {flags ""} } {
       puts "\n\nImplementation is incompleted due to the following:"
       puts "${errmsg}\n\n"
    }
-   return false   
+   return false
 }
 
 ## Print the VCS build complete message
@@ -826,7 +826,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "\n\n********************************************************"
    puts "The VCS simulation script has been generated."
    puts "To compile and run the simulation:"
-   puts "\t\$ cd ${dirPath}/"    
+   puts "\t\$ cd ${dirPath}/"
    puts "\t\$ ./sim_vcs_mx.sh"
    if { ${rogueSim} == true } {
       if { $::env(SHELL) != "/bin/bash" } {
@@ -835,8 +835,8 @@ proc VcsCompleteMessage {dirPath rogueSim} {
          puts "\t\$ source setup_env.sh"
       }
    }
-   puts "\t\$ ./simv -gui &"   
-   puts "********************************************************\n\n" 
+   puts "\t\$ ./simv -gui &"
+   puts "********************************************************\n\n"
 }
 
 ## Print the DCP build complete message
@@ -844,7 +844,7 @@ proc DcpCompleteMessage { filename } {
    puts "\n\n********************************************************"
    puts "The new .dcp file is located here:"
    puts ${filename}
-   puts "********************************************************\n\n" 
+   puts "********************************************************\n\n"
 }
 
 ## Check the Vivado version number to a user defined value
@@ -856,7 +856,7 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
    set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
    set errMsg "${errMsg}However, Vivado Version Lock = ${lockVersion}\n"
    set errMsg "${errMsg}You need to change your Vivado software to Version ${lockVersion}\n"
-   set errMsg "${errMsg}*********************************************************\n\n"   
+   set errMsg "${errMsg}*********************************************************\n\n"
    # Check for less than
    if { ${VersionNumber} < ${lockVersion} } {
       puts ${errMsg}
@@ -869,7 +869,7 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
       puts ${errMsg}
       return -1
    # Else for greater than and not exact
-   } else { 
+   } else {
       return 1
    }
 }
@@ -907,19 +907,19 @@ proc CompareTags { tag lockTag } {
          } elseif { [expr { ${patch} == ${patchLock} }] } {
             set validTag 1
          # major.minor.patch > major.minor.patchLock
-         } else { 
+         } else {
             set validTag 1
-         }     
+         }
       ################################################################
       # major.minor.X > major.minorLock.X
-      } else { 
+      } else {
          set validTag 1
-      }   
+      }
    ###################################################################
    # major.X.X > majorLock.X.X
-   } else { 
+   } else {
       set validTag 1
-   } 
+   }
 
    return ${validTag}
 }
@@ -932,18 +932,18 @@ proc CheckGitVersion { } {
    set gitLockTag    {2.9.0}
    set gitLfsLockTag {2.1.1}
    ######################################
-   
+
    # Get the git version
    set gitStr [exec git version]
    scan $gitStr "%s %s %s" name temp gitTag
-   
+
    # Get the git-lfs version
    set gitStr [exec git-lfs version]
    scan $gitStr "git-lfs/%s %s" gitLfsTag temp
-   
+
    # Compare the tags
-   set validGitTag    [CompareTags ${gitTag}    ${gitLockTag}]  
-   set validGitLfsTag [CompareTags ${gitLfsTag} ${gitLfsLockTag}]  
+   set validGitTag    [CompareTags ${gitTag}    ${gitLockTag}]
+   set validGitLfsTag [CompareTags ${gitLfsTag} ${gitLfsLockTag}]
 
    # Check the validGitTag flag
    if { ${validGitTag} == 0 } {
@@ -951,7 +951,7 @@ proc CheckGitVersion { } {
       puts "Your git version = v${gitTag}"
       puts "However, ruckus git version Lock = v${gitLockTag}"
       puts "Please update this git version v${gitLockTag} (or later)"
-      puts "*********************************************************\n\n" 
+      puts "*********************************************************\n\n"
       exit -1
    }
 
@@ -961,9 +961,9 @@ proc CheckGitVersion { } {
       puts "Your git-lfs version = v${gitLfsTag}"
       puts "However, ruckus git-lfs version Lock = v${gitLfsLockTag}"
       puts "Please update this git-lfs version v${gitLfsLockTag} (or later)"
-      puts "*********************************************************\n\n" 
+      puts "*********************************************************\n\n"
       exit -1
-   }     
+   }
 }
 
 ## Checks the submodule tag release to a user defined value
@@ -975,10 +975,10 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
    # Scan for the hash, name, and tag portions of the string
    scan $submodule "%s %s (v%s)" hash temp tag
    scan $tag "%d.%d.%d%s" major minor patch d
-   set tag [string map [list $d ""] $tag]   
+   set tag [string map [list $d ""] $tag]
    set tag "${major}.${minor}.${patch}"
    scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
-   
+
    # Compare the tags
    set validTag [CompareTags ${tag} ${lockTag}]
 
@@ -1013,26 +1013,26 @@ proc VersionCompare { versionLock } {
    } else {
       set tag $::env(VIVADO_VERSION)
    }
-   
+
    # Check if missing patch version number field
    if { [expr {[llength [split ${versionLock} .]] - 1}] == 1 } {
       set lockTag "${versionLock}.0"
    } else {
       set lockTag ${versionLock}
-   }   
-   
+   }
+
    # Parse the strings
-   scan $tag     "%d.%d.%d" major minor patch  
-   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock   
-   
+   scan $tag     "%d.%d.%d" major minor patch
+   scan $lockTag "%d.%d.%d" majorLock minorLock patchLock
+
    # Compare the tags
-   set validTag [CompareTags ${tag} ${lockTag}]   
-   
+   set validTag [CompareTags ${tag} ${lockTag}]
+
    # # Debug Messages
    # puts "VIVADO_VERSION: ${tag}"
    # puts "compareVersion: ${lockTag}"
-   # puts "validTag:       ${validTag}"   
-   
+   # puts "validTag:       ${validTag}"
+
    # Check the validTag flag
    if { ${validTag} != 1 } {
       # compareVersion > VIVADO_VERSION
@@ -1043,7 +1043,7 @@ proc VersionCompare { versionLock } {
    } else {
       # compareVersion < VIVADO_VERSION
       return 1
-   }   
+   }
 }
 
 ###############################################################
@@ -1056,52 +1056,52 @@ proc ImportStaticReconfigDcp { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   
+
    # Check for valid file path
-   if { [file exists ${RECONFIG_CHECKPOINT}] != 1 } {   
+   if { [file exists ${RECONFIG_CHECKPOINT}] != 1 } {
       puts "\n\n\n\n\n********************************************************"
       puts "${RECONFIG_CHECKPOINT} doesn't exist"
-      puts "********************************************************\n\n\n\n\n"   
+      puts "********************************************************\n\n\n\n\n"
    }
-   
+
    # Backup the Partial Reconfiguration RTL Block checkpoint and reports
    exec cp -f ${SYN_DIR}/${PRJ_TOP}.dcp                   ${SYN_DIR}/${PRJ_TOP}_backup.dcp
    exec mv -f ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt ${SYN_DIR}/${PRJ_TOP}_utilization_synth_backup.rpt
    exec mv -f ${SYN_DIR}/${PRJ_TOP}_utilization_synth.pb  ${SYN_DIR}/${PRJ_TOP}_utilization_synth_backup.pb
-   
+
    # Open the static design check point
-   open_checkpoint ${RECONFIG_CHECKPOINT}   
-   
+   open_checkpoint ${RECONFIG_CHECKPOINT}
+
    # Clear out the targeted reconfigurable module logic
    if { [get_property IS_BLACKBOX [get_cells ${RECONFIG_ENDPOINT}]]  != 1 } {
-      update_design -cell ${RECONFIG_ENDPOINT} -black_box 
+      update_design -cell ${RECONFIG_ENDPOINT} -black_box
    }
-   
+
    # Lock down all placement and routing of the static design
-   lock_design -level routing     
+   lock_design -level routing
 
    # Read the targeted reconfiguration RTL block's checkpoint
-   read_checkpoint -cell ${RECONFIG_ENDPOINT} ${SYN_DIR}/${PRJ_TOP}.dcp   
-   
-   # Check for DRC
-   report_drc -file ${SYN_DIR}/${PRJ_TOP}_reconfig_drc.txt   
+   read_checkpoint -cell ${RECONFIG_ENDPOINT} ${SYN_DIR}/${PRJ_TOP}.dcp
 
-   # Overwrite the existing synth_1 checkpoint, which is the 
+   # Check for DRC
+   report_drc -file ${SYN_DIR}/${PRJ_TOP}_reconfig_drc.txt
+
+   # Overwrite the existing synth_1 checkpoint, which is the
    # checkpoint that impl_1 will refer to
-   write_checkpoint -force ${SYN_DIR}/${PRJ_TOP}.dcp   
-   
+   write_checkpoint -force ${SYN_DIR}/${PRJ_TOP}.dcp
+
    # Generate new top level reports to update GUI display
    report_utilization -file ${SYN_DIR}/${PRJ_TOP}_utilization_synth.rpt -pb ${SYN_DIR}/${PRJ_TOP}_utilization_synth.pb
-   
+
    # Get the name of the static build before closing .DCP file
    set staticTop [get_property  TOP [current_design]]
-   
+
    # Close the opened design before launching the impl_1
    close_design
-   
+
    # Set the top-level RTL (required for Ultrascale)
-   set_property top ${staticTop} [current_fileset]   
-   
+   set_property top ${staticTop} [current_fileset]
+
    # SYNTH is not out-of-date
    set_property NEEDS_REFRESH false [get_runs synth_1]
 }
@@ -1112,25 +1112,25 @@ proc ExportStaticReconfigDcp { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   
+
    # Make a copy of the .dcp file with a "_static" suffix
    exec cp -f ${IMPL_DIR}/${PROJECT}_routed.dcp ${IMAGES_DIR}/$::env(IMAGENAME)_static.dcp
 
    # Get a list of all the clear bin files
    set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bin]
-   if { ${clearList} != "" } {   
+   if { ${clearList} != "" } {
       foreach clearFile ${clearList} {
          exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bin
       }
    }
-   
+
    # Get a list of all the clear bit files
    set clearList [glob -nocomplain ${IMPL_DIR}/*_partial_clear.bit]
-   if { ${clearList} != "" } {   
+   if { ${clearList} != "" } {
       foreach clearFile ${clearList} {
          exec cp -f ${clearFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bit
       }
-   }   
+   }
 }
 
 ## Export partial configuration bin file
@@ -1139,14 +1139,14 @@ proc ExportPartialReconfigBin { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   
+
    # Define the build output .bit file paths
    set partialBinFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bin
    set clearBinFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bin
-   
+
    # Overwrite the build output's ${PROJECT}.bit
    exec cp -f ${partialBinFile} ${IMPL_DIR}/${PROJECT}.bin
-   
+
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
    if { [file exists ${clearBinFile}] == 1 } {
       exec cp -f ${clearBinFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bin
@@ -1159,14 +1159,14 @@ proc ExportPartialReconfigBit { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   
+
    # Define the build output .bit file paths
    set partialBitFile ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial.bit
    set clearBitFile   ${IMPL_DIR}/${PRJ_TOP}_${RECONFIG_PBLOCK}_partial_clear.bit
-   
+
    # Overwrite the build output's ${PROJECT}.bit
    exec cp -f ${partialBitFile} ${IMPL_DIR}/${PROJECT}.bit
-   
+
    # Check for partial_clear.bit (generated for Ultrascale FPGAs)
    if { [file exists ${clearBitFile}] == 1 } {
       exec cp -f ${clearBitFile} ${IMAGES_DIR}/$::env(IMAGENAME)_clear.bit
@@ -1179,7 +1179,7 @@ proc ExportPartialReconfigBit { } {
 
 ## Create a Debug Core Function
 proc CreateDebugCore {ilaName} {
-   
+
    # Delete the Core if it already exist
    delete_debug_core -quiet [get_debug_cores ${ilaName}]
 
@@ -1209,19 +1209,19 @@ proc GetCurrentProbe {ilaName} {
 
 ## Probe Configuring function
 proc ConfigProbe {ilaName netName} {
-   
+
    # determine the probe index
    set probeIndex ${ilaName}/probe[expr [llength [get_debug_ports ${ilaName}/probe*]] - 1]
-   
+
    # get the list of netnames
    set probeNet [lsort -increasing -dictionary [get_nets ${netName}]]
-   
+
    # calculate the probe width
    set probeWidth [llength ${probeNet}]
-   
+
    # set the width of the probe
-   set_property port_width ${probeWidth} [get_debug_ports ${probeIndex}]   
-   
+   set_property port_width ${probeWidth} [get_debug_ports ${probeIndex}]
+
    # connect the probe to the ila module
    connect_debug_port ${probeIndex} ${probeNet}
 
@@ -1245,7 +1245,7 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
          puts "\n\n\n\n\n********************************************************"
          puts "WriteDebugProbes(): Vivado's 'write_debug_probes' procedure has been deprecated in 2017.3"
          puts "Instead the debug_probe file will automatically get copied in the ruckus/system_vivado.mk COPY_PROBES_FILE() function"
-         puts "********************************************************\n\n\n\n\n"         
+         puts "********************************************************\n\n\n\n\n"
       }
    }
 }
@@ -1295,10 +1295,10 @@ proc loadSource args {
    set has_dir       [expr {[string length $params(dir)]      > 0}]
    set has_lib       [expr {[string length $params(lib)]      > 0}]
    set has_fileType  [expr {[string length $params(fileType)] > 0}]
-   if { $params(sim_only) } { 
-      set fileset "sim_1" 
+   if { $params(sim_only) } {
+      set fileset "sim_1"
    } else {
-      set fileset "sources_1" 
+      set fileset "sources_1"
    }
    # Check for error state
    if {${has_path} && ${has_dir}} {
@@ -1328,7 +1328,7 @@ proc loadSource args {
               ${fileExt} eq {.edif}||
               ${fileExt} eq {.dcp} } {
             # Check if file doesn't exist in project
-            if { [get_files -quiet $params(path)] == "" } {              
+            if { [get_files -quiet $params(path)] == "" } {
                # Add the RTL Files
                set src_rc [catch {add_files -fileset ${fileset} $params(path)} _RESULT]
                if {$src_rc} {
@@ -1342,8 +1342,8 @@ proc loadSource args {
                      puts "$ git-lfs install"
                      puts "$ git-lfs pull"
                      puts "$ git submodule foreach git-lfs pull"
-                  }                  
-                  puts "********************************************************\n\n\n\n\n"    
+                  }
+                  puts "********************************************************\n\n\n\n\n"
                   exit -1
                }
                if { ${has_lib} } {
@@ -1355,7 +1355,7 @@ proc loadSource args {
                }
                if { ${has_fileType} } {
                   set_property FILE_TYPE $params(fileType) [get_files $params(path)]
-               }               
+               }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
@@ -1367,17 +1367,17 @@ proc loadSource args {
    # Load all files from a directory
    } elseif {$has_dir} {
       # Check if directory doesn't exist
-      if { [file exists $params(dir)] != 1 } {   
+      if { [file exists $params(dir)] != 1 } {
          puts "\n\n\n\n\n********************************************************"
          puts "loadSource: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
          exit -1
-      } else {  
+      } else {
          # Get a list of all RTL files
          set list ""
-         set list_rc [catch { 
+         set list_rc [catch {
             set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.dat *.coe *.mem *.edif *.dcp]
-         } _RESULT]           
+         } _RESULT]
          # Load all the RTL files
          if { ${list} != "" } {
             foreach pntr ${list} {
@@ -1397,7 +1397,7 @@ proc loadSource args {
                         puts "$ git-lfs pull"
                         puts "$ git submodule foreach git-lfs pull"
                      }
-                     puts "********************************************************\n\n\n\n\n"    
+                     puts "********************************************************\n\n\n\n\n"
                      exit -1
                   }
                   if { ${has_lib} } {
@@ -1410,18 +1410,18 @@ proc loadSource args {
                   }
                   if { ${has_fileType} } {
                      set_property FILE_TYPE $params(fileType) [get_files ${pntr}]
-                  }                  
+                  }
                }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.mem,.edif,.dcp\] files"
-            puts "********************************************************\n\n\n\n\n"         
-            exit -1            
+            puts "********************************************************\n\n\n\n\n"
+            exit -1
          }
       }
    }
-} 
+}
 
 ## Function to load IP core files
 proc loadIpCore args {
@@ -1453,7 +1453,7 @@ proc loadIpCore args {
          if { ${fileExt} eq {.xci} ||
               ${fileExt} eq {.xcix} } {
             # Check if file doesn't exist in project
-            if { [get_files -quiet $params(path)] == "" } {           
+            if { [get_files -quiet $params(path)] == "" } {
                # Add the IP core file
                import_ip -quiet -srcset sources_1 $params(path)
             }
@@ -1475,18 +1475,18 @@ proc loadIpCore args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadIpCore: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         exit -1            
+         exit -1
       } else {
          # Get a list of all IP core files
          set list ""
-         set list_rc [catch { 
+         set list_rc [catch {
             set list [glob -directory $params(dir) *.xci *.xcix]
-         } _RESULT]             
+         } _RESULT]
          # Load all the IP core files
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Check if file doesn't exist in project
-               if { [get_files -quiet ${pntr}] == "" } {            
+               if { [get_files -quiet ${pntr}] == "" } {
                   # Add the IP core file
                   import_ip -quiet -srcset sources_1 ${pntr}
                }
@@ -1498,12 +1498,12 @@ proc loadIpCore args {
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadIpCore: $params(dir) directory does not have any \[.xci,.xcix\] files"
-            puts "********************************************************\n\n\n\n\n"         
-            exit -1            
+            puts "********************************************************\n\n\n\n\n"
+            exit -1
          }
       }
    }
-} 
+}
 
 ## Function to load block design files
 proc loadBlockDesign args {
@@ -1520,7 +1520,7 @@ proc loadBlockDesign args {
       puts "\n\n\n\n\n********************************************************"
       puts "loadBlockDesign: Cannot specify both -path and -dir"
       puts "********************************************************\n\n\n\n\n"
-      exit -1            
+      exit -1
    # Load a single file
    } elseif {$has_path} {
       # Check if file doesn't exist
@@ -1528,7 +1528,7 @@ proc loadBlockDesign args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadBlockDesign: $params(path) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         exit -1            
+         exit -1
       } else {
          # Check the file extension
          set fileExt [file extension $params(path)]
@@ -1564,13 +1564,13 @@ proc loadBlockDesign args {
          puts "\n\n\n\n\n********************************************************"
          puts "loadBlockDesign: $params(dir) doesn't exist"
          puts "********************************************************\n\n\n\n\n"
-         exit -1            
+         exit -1
       } else {
          # Get a list of all block design files
          set list ""
-         set list_rc [catch { 
+         set list_rc [catch {
             set list [glob -directory $params(dir) *.bd *.tcl]
-         } _RESULT]           
+         } _RESULT]
          # Load all the block design files
          if { ${list} != "" } {
             foreach pntr ${list} {
@@ -1595,8 +1595,8 @@ proc loadBlockDesign args {
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadBlockDesign: $params(dir) directory does not have any \[.bd,.tcl\] file extension"
-            puts "********************************************************\n\n\n\n\n"         
-            exit -1            
+            puts "********************************************************\n\n\n\n\n"
+            exit -1
          }
       }
    }
@@ -1632,7 +1632,7 @@ proc loadConstraints args {
          if { ${fileExt} eq {.xdc} ||
               ${fileExt} eq {.tcl} } {
             # Check if file doesn't exist in project
-            if { [get_files -quiet $params(path)] == "" } {                   
+            if { [get_files -quiet $params(path)] == "" } {
                # Add the constraint Files
                add_files -fileset constrs_1 $params(path)
             }
@@ -1654,26 +1654,26 @@ proc loadConstraints args {
       } else {
          # Get a list of all constraint files
          set list ""
-         set list_rc [catch { 
+         set list_rc [catch {
             set list [glob -directory $params(dir) *.xdc *.tcl]
-         } _RESULT]           
+         } _RESULT]
          # Load all the block design files
          if { ${list} != "" } {
             # Load all the constraint files
             foreach pntr ${list} {
                # Check if file doesn't exist in project
-               if { [get_files -quiet ${pntr}] == "" } {            
+               if { [get_files -quiet ${pntr}] == "" } {
                   # Add the RTL Files
                   add_files -fileset constrs_1 ${pntr}
-               }  
-            }  
+               }
+            }
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadConstraints: $params(dir) directory does not have any \[.xdc,.tcl\] files"
-            puts "********************************************************\n\n\n\n\n"         
-            exit -1            
+            puts "********************************************************\n\n\n\n\n"
+            exit -1
          }
       }
    }
-} 
+}
 

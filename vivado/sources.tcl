@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -24,7 +24,7 @@ CheckWritePermission
 CheckGitVersion
 
 # Check if image directory doesn't exist
-if { [file exists ${IMAGES_DIR}] != 1 } {   
+if { [file exists ${IMAGES_DIR}] != 1 } {
    # Make image dir
    exec mkdir ${IMAGES_DIR}
 }
@@ -37,7 +37,7 @@ VivadoRefresh ${VIVADO_PROJECT}
 ## Setup the top-level generics
 ########################################################
 
-# Generate the build string 
+# Generate the build string
 binary scan [encoding convertto ascii $::env(BUILD_STRING)] c* bstrAsic
 set buildString ""
 foreach decChar ${bstrAsic} {
@@ -67,15 +67,15 @@ set_property generic ${buildInfo} -objects [current_fileset]
 set pathToPkg "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfoPkg.vhd"
 exec mkdir -p ${OUT_DIR}/${VIVADO_PROJECT}.srcs
 set out [open ${pathToPkg} w]
-puts ${out} "library ieee;" 
-puts ${out} "use ieee.std_logic_1164.all;" 
-puts ${out} "library surf;" 
-puts ${out} "use surf.StdRtlPkg.all;" 
-puts ${out} "package BuildInfoPkg is" 
+puts ${out} "library ieee;"
+puts ${out} "use ieee.std_logic_1164.all;"
+puts ${out} "library surf;"
+puts ${out} "use surf.StdRtlPkg.all;"
+puts ${out} "package BuildInfoPkg is"
 puts ${out} "constant BUILD_INFO_C : BuildInfoType :=x\"${gitHash}${fwVersion}${buildString}\";"
-puts ${out} "end BuildInfoPkg;" 
+puts ${out} "end BuildInfoPkg;"
 close ${out}
-loadSource -lib ruckus -path ${pathToPkg} 
+loadSource -lib ruckus -path ${pathToPkg}
 
 ########################################################
 ## Check for change in hash or fwVersion between builds
@@ -86,13 +86,13 @@ set pathToLog "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfo.log"
 if { [expr [file exists ${pathToLog}]] == 0 } {
    reset_run synth_1
 } else {
-   
+
    # Get the previous build info
    set in [open ${pathToLog} r]
    gets ${in} oldGitHash
    gets ${in} oldFwVersion
    close ${in}
-  
+
    # Compare the old to current
    if { ${oldGitHash}   != ${gitHash} ||
         ${oldFwVersion} != ${fwVersion}} {
@@ -101,9 +101,9 @@ if { [expr [file exists ${pathToLog}]] == 0 } {
 }
 
 # Write the current build info
-set out [open ${pathToLog} w]   
-puts ${out} ${gitHash}   
-puts ${out} ${fwVersion}   
+set out [open ${pathToLog} w]
+puts ${out} ${gitHash}
+puts ${out} ${fwVersion}
 close ${out}
 
 ########################################################
@@ -146,7 +146,7 @@ if { $::IP_LIST != "" } {
       # Check if we need to create the IP_run
       set ipSynthRun ${ipPntr}_synth_1
       if { [get_runs ${ipSynthRun}] != ${ipSynthRun}} {
-         create_ip_run [get_ips ${ipPntr}]      
+         create_ip_run [get_ips ${ipPntr}]
       }
    }
 }

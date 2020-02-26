@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -18,8 +18,8 @@ source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 if { [file exists ${PROJ_DIR}/yaml/000TopLevel.yaml] != 1 } {
    puts "\n\nERROR: ${PROJ_DIR}/yaml/000TopLevel.yaml does NOT exist\n\n"
    exit -1
-} 
-   
+}
+
 # Common Variable
 set ProjYamlDir "${OUT_DIR}/${PROJECT}_project.yaml"
 
@@ -31,7 +31,7 @@ exec rm -rf ${IMAGES_DIR}/$::env(IMAGENAME).cpsw.tar.gz
 exec mkdir ${ProjYamlDir}
 
 # Get the ruckus.tcl directory list
-set dirList [read [open ${OUT_DIR}/dirList.txt]] 
+set dirList [read [open ${OUT_DIR}/dirList.txt]]
 
 # check for non-empty list
 if { ${dirList} != "" } {
@@ -44,7 +44,7 @@ if { ${dirList} != "" } {
          # check for non-empty list
          if { ${fileList} != "" } {
             # Loop through the list
-            foreach filePntr ${fileList} {      
+            foreach filePntr ${fileList} {
                # Copy all the files
                exec cp -f ${filePntr} ${ProjYamlDir}/
             }
@@ -60,8 +60,8 @@ exec cp -f ${RUCKUS_DIR}/LICENSE.txt ${ProjYamlDir}/.
 if { $::env(GIT_HASH_LONG) != "" } {
    if { [file exists ${PROJ_DIR}/build.info] == 1 } {
       exec cp -f ${PROJ_DIR}/build.info ${ProjYamlDir}/.
-   } 
-} 
+   }
+}
 
 # Copy the .ltx file
 set filePath "$::env(OUT_DIR)/debugProbes.ltx"; # Vivado 2016 (or earlier)

@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -71,7 +71,7 @@ source ${RUCKUS_DIR}/vivado/pre_synthesis.tcl
 ########################################################
 ## Synthesize
 ########################################################
-set syn_rc [catch { 
+set syn_rc [catch {
    if { [CheckSynth] != true } {
       ## Check for DCP only synthesis run
       if { [info exists ::env(SYNTH_DCP)] } {
@@ -79,11 +79,11 @@ set syn_rc [catch {
       }
       ## Launch the run
       launch_runs synth_1 -jobs $::env(PARALLEL_SYNTH)
-      set src_rc [catch { 
+      set src_rc [catch {
          wait_on_run synth_1
-      } _RESULT]     
+      } _RESULT]
    }
-} _SYN_RESULT]    
+} _SYN_RESULT]
 
 ########################################################
 # Check for error return code during synthesis process
@@ -96,7 +96,7 @@ if { ${syn_rc} } {
 ########################################################
 ## Check that the Synthesize is completed
 ########################################################
-if { [CheckSynth printMsg] != true } {  
+if { [CheckSynth printMsg] != true } {
    close_project
    exit -1
 }
@@ -137,9 +137,9 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
 ########################################################
 if { [CheckImpl] != true } {
    launch_runs -to_step write_bitstream impl_1
-   set src_rc [catch { 
-      wait_on_run impl_1 
-   } _RESULT]     
+   set src_rc [catch {
+      wait_on_run impl_1
+   } _RESULT]
 }
 
 ########################################################
@@ -151,7 +151,7 @@ if { [CheckImpl printMsg] != true } {
 }
 
 ########################################################
-## Check if there were timing 
+## Check if there were timing
 ## or routing errors during implement
 ########################################################
 if { [CheckTiming] != true } {
