@@ -17,5 +17,14 @@ source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/properties.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+
+# Update the bitstream post script
 set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado/post_route_run.tcl [get_runs impl_1]
+
+# Call the user script
 SourceTclFile ${VIVADO_DIR}/gui.tcl
+
+# Bug fix work around for Vivado due to post script changes
+if { [CheckSynth] == true } {
+   set_property NEEDS_REFRESH 0 [get_runs impl_1]
+}
