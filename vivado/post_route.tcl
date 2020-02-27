@@ -103,4 +103,7 @@ if { [CheckTiming false] == true } {
    # Target specific post_route script
    #########################################################
    SourceTclFile ${VIVADO_DIR}/post_route.tcl
+
+   # Bug fix work around for Vivado thinking impl_1 not up-to-date
+   set_property NEEDS_REFRESH 0 [get_runs impl_1]
 }
