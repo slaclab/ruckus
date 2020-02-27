@@ -17,17 +17,17 @@
 #       > git merge origin/master
 #       > git merge origin/pre-release
 #       > git push
-#    - Tag the release in master: 
+#    - Tag the release in master:
 #       > git tag -a vMAJOR.MINOR.0
 #       > git push --tags
 #    - Create release using tag on github.com, use this script to generate notes
 # ----------------------------------------------------------------------------
-# This file is part of the 'SLAC Firmware Standard Library'. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the 'SLAC Firmware Standard Library', including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the 'SLAC Firmware Standard Library'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'SLAC Firmware Standard Library', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
@@ -73,10 +73,10 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
 
             if 'release candidate' not in req.title.lower():
                 records.append(entry)
-                
-            entry = {}         
-            
-    # Check if sorting the pull request entries        
+
+            entry = {}
+
+    # Check if sorting the pull request entries
     if noSort is False:
         records = sorted(records, key=lambda v : v['changes'], reverse=True)
 
@@ -101,14 +101,14 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
         md += '\n**Notes:**\n'
         for line in entry['body'].splitlines():
             md += '> ' + line + '\n'
-        md += '\n-------\n'         
+        md += '\n-------\n'
         md += '\n\n'
 
     # Deal with potential UNICODE in the md
     # Note: Markup language uses the XML # character for unicode
-    md = md.encode('ascii', 'xmlcharrefreplace')  
-    md = str(md)[2:-1]      
-    md = md.replace('\\n', '\n') 
+    md = md.encode('ascii', 'xmlcharrefreplace')
+    md = str(md)[2:-1]
+    md = md.replace('\\n', '\n')
 
     return md
 
@@ -131,10 +131,10 @@ if __name__ == "__main__":
 
     # Add arguments
     parser.add_argument(
-        "tag", 
+        "tag",
         type     = str,
         help     = 'reference tag or range. (i.e. v2.5.0 or v2.5.0..v2.6.0)',
-    ) 
+    )
 
     parser.add_argument(
         "--noSort",
@@ -142,15 +142,15 @@ if __name__ == "__main__":
         required = False,
         default  = False,
         help     = "Disable sort by change counts",
-    )  
+    )
 
     parser.add_argument(
-        "--copy", 
+        "--copy",
         type     = argBool,
         required = False,
         default  = False,
         help     = "Copy to clipboard",
-    )  
+    )
 
     # Get the arguments
     args = parser.parse_args()

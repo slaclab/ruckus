@@ -3,15 +3,15 @@
 # Title      : Release Generation
 # ----------------------------------------------------------------------------
 # Description:
-# Script to generate rogue.zip and cpsw.tar.gz files as well as creating 
+# Script to generate rogue.zip and cpsw.tar.gz files as well as creating
 # a github release with proper release attachments.
 # ----------------------------------------------------------------------------
-# This file is part of the 'SLAC Firmware Standard Library'. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the 'SLAC Firmware Standard Library', including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the 'SLAC Firmware Standard Library'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'SLAC Firmware Standard Library', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
@@ -33,14 +33,14 @@ parser = argparse.ArgumentParser('Release Generation')
 
 # Add arguments
 parser.add_argument(
-    "--project", 
+    "--project",
     type     = str,
     required = True,
     help     = "Project directory path"
 )
 
 parser.add_argument(
-    "--release", 
+    "--release",
     type     = str,
     required = False,
     default  = None,
@@ -48,7 +48,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--build", 
+    "--build",
     type     = str,
     required = False,
     default  = None,
@@ -56,7 +56,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--version", 
+    "--version",
     type     = str,
     required = False,
     default  = None,
@@ -64,7 +64,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--prev", 
+    "--prev",
     type     = str,
     required = False,
     default  = None,
@@ -72,15 +72,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--token", 
-    type     = str, 
+    "--token",
+    type     = str,
     required = False,
     default  = None,
     help     = "Token for github"
 )
 
 parser.add_argument(
-    "--push", 
+    "--push",
     action   = 'count',
     help     = "Add --push arg to tag repository and push release to github"
 )
@@ -207,7 +207,7 @@ def selectBuildImages(cfg, relName, relData):
 
         print(f"\nFinding builds for target {target}:")
 
-        # Get a list of build names with the format: 
+        # Get a list of build names with the format:
         #   buildName = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
         # File name will either be:
         #   buildName.extension

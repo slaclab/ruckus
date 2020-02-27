@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is an addition to the 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -51,23 +51,23 @@ export_ip_user_files -no_script
 ########################################################
 ## Simulate Process
 ########################################################
-set sim_rc [catch { 
-   
+set sim_rc [catch {
+
    # Set sim properties
    set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
    set_property top_lib xil_defaultlib [get_filesets sim_1]
-   
+
    # Launch the xsim
    launch_simulation
-   
+
    # Run simulation for time specified
    set VIVADO_PROJECT_SIM_TIME "run ${VIVADO_PROJECT_SIM_TIME}"; # set cmd
    eval ${VIVADO_PROJECT_SIM_TIME}; # run cmd
-   set src_rc [catch { 
+   set src_rc [catch {
       wait_on_run sim_1
-   } _RESULT]     
-   
-} _SIM_RESULT]    
+   } _RESULT]
+
+} _SIM_RESULT]
 
 ########################################################
 # Target specific XSIM script

@@ -136,10 +136,10 @@ else
    export GIT_HASH_MSG   = dirty
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
-      export GIT_HASH_LONG  = 
-      export GIT_HASH_SHORT = 
+      export GIT_HASH_LONG  =
+      export GIT_HASH_SHORT =
    else
-      export GIT_STATUS     = 
+      export GIT_STATUS     =
       export GIT_HASH_LONG  = 0
       export GIT_HASH_SHORT = 0
    endif
@@ -186,7 +186,7 @@ endif
 ###############################################################
 
 ifndef LD_PRELOAD
-export LD_PRELOAD = 
+export LD_PRELOAD =
 endif
 
 ifndef EMBED_PROC
@@ -201,12 +201,12 @@ else
    export EMBED_TYPE = SDK
    export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
    export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/bit.tcl
-   
+
    # Ubuntu SDK support
    ifndef SWT_GTK3
    export SWT_GTK3 = 0
-   endif   
-   
+   endif
+
 endif
 
 ###############################################################
@@ -410,7 +410,7 @@ xsim : $(SOURCE_DEPEND)
 vcs : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generating the VCS Simulation scripts")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
-   
+
 ###############################################################
 #### Vivado Batch Mode within the Project Environment  ########
 ###############################################################

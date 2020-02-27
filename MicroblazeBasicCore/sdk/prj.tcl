@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -12,7 +12,7 @@
 # \brief This script creates the general Vivado SDK project
 
 #############################
-## Get build system variables 
+## Get build system variables
 #############################
 source $::env(RUCKUS_DIR)/vivado/env_var.tcl
 set EmptyApp "Empty Application"
@@ -51,14 +51,14 @@ if { [expr { ${VIVADO_VERSION} < 2016.1 }] } {
    sdk configapp -app  app_0 -set compiler-optimization {Optimize for size (-Os)}
    foreach sdkLib ${SDK_LIB} {
       sdk configapp -app app_0 -add include-path ${sdkLib}
-   }        
+   }
    # Configure the release build
    sdk configapp -app app_0 build-config release
    sdk configapp -app  app_0 -set compiler-optimization {Optimize for size (-Os)}
    foreach sdkLib ${SDK_LIB} {
       set dirName  [file tail ${sdkLib}]
       set softLink ${SDK_PRJ}/app_0/${dirName}
-    exec ls -lath 
+    exec ls -lath
       exec ln -s ${sdkLib} ${softLink}
       sdk configapp -app app_0 -add include-path ${sdkLib}
    }

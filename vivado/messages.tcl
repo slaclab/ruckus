@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -29,20 +29,20 @@ set_msg_config -suppress -id {Synth 8-226}; # SYNTH: Default block is never used
 set_msg_config -suppress -id {Synth 8-312}; # SYNTH: Ignoring "unsynthesizable construct" message due to assert error checking
 set_msg_config -suppress -id {Synth 8-4472};# SYNTH: Detected and applied attribute shreg_extract = no
 set_msg_config -suppress -id {Synth 8-4480};# SYNTH: BRAM: Providing additional output register may help in improving timing
-set_msg_config -suppress -id {Synth 8-3331};# SYNTH: Unconnected port 
-set_msg_config -suppress -id {Synth 8-3332};# SYNTH: Sequential element is unused and will be removed from module 
+set_msg_config -suppress -id {Synth 8-3331};# SYNTH: Unconnected port
+set_msg_config -suppress -id {Synth 8-3332};# SYNTH: Sequential element is unused and will be removed from module
 set_msg_config -suppress -id {Synth 8-5544};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5545};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Synth 8-5546};# SYNTH: ROM wont be mapped to block ram
 set_msg_config -suppress -id {Opt   31-422};# SYNTH: BRAM changed from INDEPENDENT to COMMON
 
 set_msg_config -suppress -id {HDL 9-2216};  # SIM: Analyzing SystemVerilog file into library work
-set_msg_config -suppress -id {HDL 9-1061};  # SIM: Parsing VHDL file 
+set_msg_config -suppress -id {HDL 9-1061};  # SIM: Parsing VHDL file
 set_msg_config -suppress -id {Runs 36-5};   # SIM: Copied auxiliary file
 set_msg_config -suppress -id {VRFC 10-163}; # SIM: Analyzing VHDL file
 set_msg_config -suppress -id {VRFC 10-165}; # SIM: Analyzing VERILOG file
-set_msg_config -suppress -id {Simtcl 6-16}; # SIM: Simulation closed 
-set_msg_config -suppress -id {Simtcl 6-17}; # SIM: Simulation restarted 
+set_msg_config -suppress -id {Simtcl 6-16}; # SIM: Simulation closed
+set_msg_config -suppress -id {Simtcl 6-17}; # SIM: Simulation restarted
 
 set_msg_config -suppress -id {Constraints 18-4434}; # XDC: Using a LOC constraint to assign the placement of a Global Clock Buffer can result in sub-optimal placement results in UltraScale
 
@@ -90,20 +90,20 @@ set_msg_config -suppress -id {Project 1-840};   # Using .DCP instead of .XCI
 ########################################################
 ## Modifying WARNING messaging
 ########################################################
- 
+
 # Messages: Change from WARNING to INFO
 set_msg_config -id {Timing 38-3}        -new_severity INFO;# User defined clocks are common and should be info, not warning.
 set_msg_config -id {Synth 8-3848}       -new_severity INFO;# SYNTH: Signal does not have driver
 set_msg_config -id {Synth 8-3936}       -new_severity INFO;# SYNTH: BRAM byte write enable found unconnected
 set_msg_config -id {Synth 8-5733}       -new_severity INFO;# SYNTH: ignoring attributes on constant declaration STRING_ROM_C
-set_msg_config -id {Synth 8-5858}       -new_severity INFO;# SYNTH: Abstract Data Type (record/struct) for this pattern/configuration is not supported. This will most likely be implemented in registers 
+set_msg_config -id {Synth 8-5858}       -new_severity INFO;# SYNTH: Abstract Data Type (record/struct) for this pattern/configuration is not supported. This will most likely be implemented in registers
 set_msg_config -id {Constraints 18-550} -new_severity INFO;# Design Init: Could not drive constant because not directly connected to top level port
-set_msg_config -id {Vivado 12-1008}     -new_severity INFO;# Design Init: No clocks found for command 
+set_msg_config -id {Vivado 12-1008}     -new_severity INFO;# Design Init: No clocks found for command
 set_msg_config -id {Power 33-332}       -new_severity INFO;# Route: Found switching activity that implies high-fanout reset nets being asserted for excessive periods of time which may result in inaccurate power analysis.
 
 # Messages: Change from WARNING to ERROR
 set_msg_config -id {Synth 8-614}      -new_severity ERROR;# SYNTH: Signal not in the sensitivity list
-set_msg_config -id {Synth 8-3512}     -new_severity ERROR;# SYNTH: Assigned value in logic is out of range 
+set_msg_config -id {Synth 8-3512}     -new_severity ERROR;# SYNTH: Assigned value in logic is out of range
 set_msg_config -id {Synth 8-327}      -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}      -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found in the same library
@@ -114,8 +114,8 @@ if { [VersionCompare 2015.3] <= 0 } {
 }
 
 # Messages: Change from WARNING to CRITICAL_WARNING
-set_msg_config -id {Vivado 12-508}     -new_severity "CRITICAL WARNING";# XDC: No pins matched 
-set_msg_config -id {Vivado 12-507}     -new_severity "CRITICAL WARNING";# XDC: No netname matched 
+set_msg_config -id {Vivado 12-508}     -new_severity "CRITICAL WARNING";# XDC: No pins matched
+set_msg_config -id {Vivado 12-507}     -new_severity "CRITICAL WARNING";# XDC: No netname matched
 set_msg_config -id {Vivado 12-627}     -new_severity "CRITICAL WARNING";# XDC: No clock matched
 set_msg_config -id {Project 1-498}     -new_severity "CRITICAL WARNING";# XDC: One or more constraints failed evaluation while reading constraint file
 set_msg_config -id {Synth 8-3330}      -new_severity "CRITICAL WARNING";# SYNTH: an empty top module top detected
@@ -163,13 +163,13 @@ set_property SEVERITY {Warning} [get_drc_checks {UCIO-1}];  # DRC: using the XAD
 # Check if Multi-Driven Nets are allowed
 ########################################################
 if { [info exists ::env(ALLOW_MULTI_DRIVEN)] != 1 || $::env(ALLOW_MULTI_DRIVEN) == 0 } {
-    set_msg_config -id {Synth 8-6859} -new_severity ERROR;  # SYNTH: multi-driven pin	
-    set_msg_config -id {Synth 8-3352} -new_severity ERROR;  # SYNTH: multi-driven net	
-    set_msg_config -id {MDRV-1}       -new_severity ERROR;  # DRC: multi-driven net		
+    set_msg_config -id {Synth 8-6859} -new_severity ERROR;  # SYNTH: multi-driven pin
+    set_msg_config -id {Synth 8-3352} -new_severity ERROR;  # SYNTH: multi-driven net
+    set_msg_config -id {MDRV-1}       -new_severity ERROR;  # DRC: multi-driven net
 } else {
     set_msg_config -id {Synth 8-6859} -new_severity INFO;   # SYNTH: multi-driven pin
     set_msg_config -id {Synth 8-3352} -new_severity INFO;   # SYNTH: multi-driven net
-    set_msg_config -id {MDRV-1}       -new_severity INFO;   # DRC: multi-driven net	
+    set_msg_config -id {MDRV-1}       -new_severity INFO;   # DRC: multi-driven net
 }
 
 ########################################################
@@ -178,7 +178,7 @@ if { [info exists ::env(ALLOW_MULTI_DRIVEN)] != 1 || $::env(ALLOW_MULTI_DRIVEN) 
 if { [info exists ::env(ALLOW_UN_DRIVEN)] != 1 || $::env(ALLOW_UN_DRIVEN) == 1 } {
     set_msg_config -id {Synth 8-3848} -new_severity "CRITICAL WARNING"; # SYNTH: un-driven net
 } else {
-    set_msg_config -id {Synth 8-3848} -new_severity ERROR; # SYNTH: un-driven net	
+    set_msg_config -id {Synth 8-3848} -new_severity ERROR; # SYNTH: un-driven net
 }
 
 ########################################################

@@ -1,12 +1,12 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Description: 
+# Description:
 #       This script is designed to parse the Vivado "write_vhdl -mode synth_stub"
 #       output file back into the user friendly record types.
 #
 # Here's an example of what the "write_vhdl -mode synth_stub" output file looks like:
 #        entity DcpCore is
-#          Port ( 
+#          Port (
 #            \dataIn[1][tData]\ : in STD_LOGIC_VECTOR ( 7 downto 0 );
 #            \dataIn[0][tData]\ : in STD_LOGIC_VECTOR ( 7 downto 0 );
 #            \dataout[1][toggle]\ : out STD_LOGIC;
@@ -35,11 +35,11 @@
 #
 #-----------------------------------------------------------------------------
 # This file is part of 'SLAC Firmware Standard Library'.
-# It is subject to the license terms in the LICENSE.txt file found in the 
-# top-level directory of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of 'SLAC Firmware Standard Library', including this file, 
-# may be copied, modified, propagated, or distributed except according to 
+# It is subject to the license terms in the LICENSE.txt file found in the
+# top-level directory of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of 'SLAC Firmware Standard Library', including this file,
+# may be copied, modified, propagated, or distributed except according to
 # the terms contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 ##
@@ -55,10 +55,10 @@ def proc(line):
     """Function that processes a line of the VHDL synth_stub file"""
     # Get the port name
     port = line.split(":")[0]
-    
+
     # check for record type
     if re.search(r'\\', line):
-        retVar = (port + "=> ")    
+        retVar = (port + "=> ")
         # strip off the \ char
         convt  = port.replace('\\','')
         # strip off the ] char
@@ -68,26 +68,26 @@ def proc(line):
         # loop through the array
         for i in range(len(convt)):
             # strip off the space char
-            convt[i] = convt[i].replace(' ','')        
+            convt[i] = convt[i].replace(' ','')
             # Check for first element
             if (i==0):
                 retVar += convt[0]
-            else: 
+            else:
                 # Check if array index
                 if convt[i].isdigit():
                     retVar += ('('+convt[i]+')')
-                else: 
+                else:
                     retVar += ('.'+convt[i])
     else:
         retVar = (port + "=> " + port.replace(' ','') )
-        
+
     # Check if last port mapping
     if re.search(r';', line):
         retVar += ",\n"
     else:
         retVar += ");\n"
-        
-    # Return the results    
+
+    # Return the results
     return retVar
 
 def vho(arg):
@@ -99,8 +99,8 @@ def vho(arg):
 
     # Open the input/output files
     ifd = open(arg)
-    ofd = open(fname, 'w')  
-    
+    ofd = open(fname, 'w')
+
     # strip out the input files header
     while (not re.search('Port', line)):
         line = ifd.readline()
@@ -109,10 +109,10 @@ def vho(arg):
             entity = entity.replace('is','')
             entity = entity.replace(' ','')
             entity = entity.replace('\n','')
-            
+
     # Output file header
     ofd.write('U_Core: entity work.'+entity+'\n')
-    ofd.write('  port map (\n') 
+    ofd.write('  port map (\n')
 
     # Loop through the ports
     line = ifd.readline()
@@ -120,14 +120,14 @@ def vho(arg):
         # Process the line and write to file
         ofd.write(proc(line))
         # Read the file
-        line = ifd.readline()  
-      
+        line = ifd.readline()
+
     # Close the files
     ifd.close()
     ofd.close()
-    
+
     # # Print the output files
     # os.system('cat ' + fname)
-    
+
 if __name__ == '__main__':
     vho(sys.argv[1])
