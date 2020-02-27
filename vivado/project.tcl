@@ -94,6 +94,3 @@ if { ${cpuNum} >= 8 } {
 
 # Target specific project setup script
 SourceTclFile ${VIVADO_DIR}/project_setup.tcl
-
-# Bug fix work around for Vivado thinking impl_1 not up-to-date
-set_property NEEDS_REFRESH 0 [get_runs impl_1]
