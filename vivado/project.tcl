@@ -1,15 +1,15 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
 ## \file vivado/project.tcl
-# \brief This script create the Vivado project
+# \brief This script create or open the Vivado project
 
 ########################################################
 ## Get variables and Custom Procedures
@@ -20,8 +20,13 @@ source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 # Check for unsupported versions that ruckus does NOT support
 CheckVivadoVersion
 
-# Create a Project
-create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
+set try_to_open [catch { open_project -quiet ${VIVADO_PROJECT} }]
+if { [file exists ${VIVADO_PROJECT}.xpr]} {
+   open_project -quiet ${VIVADO_PROJECT}
+} else {
+   # Create a Project
+   create_project ${VIVADO_PROJECT} -force ${OUT_DIR} -part ${PRJ_PART}
+}
 
 # Message Filtering Script
 source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
@@ -61,9 +66,9 @@ if { [VersionCompare 2014.2] <= 0 } {
    set_property xsim.sdf_delay sdfmin     [get_filesets sim_1]
    set_property xsim.rangecheck false     [get_filesets sim_1]
    set_property xsim.unifast false        [get_filesets sim_1]
-   
-   set_property -name {xsim.compile.xvlog.more_options} -value {-d SIM_SPEED_UP} -objects [get_filesets sim_1]   
-} 
+
+   set_property -name {xsim.compile.xvlog.more_options} -value {-d SIM_SPEED_UP} -objects [get_filesets sim_1]
+}
 
 # Enable general project multi-threading
 # general.maxThreads value is Vivado version dependent and can be collected with "report_param" TCL command
@@ -89,6 +94,3 @@ if { ${cpuNum} >= 8 } {
 
 # Target specific project setup script
 SourceTclFile ${VIVADO_DIR}/project_setup.tcl
-
-# Close the project
-close_project

@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -32,8 +32,8 @@ source ${VIVADO_DIR}/promgen.tcl
 if { ${loaddata} != "" } {
    puts ${inputFile}
    puts ${outputFile}
-   puts ${loadbit}   
-   puts ${loaddata}   
+   puts ${loadbit}
+   puts ${loaddata}
    write_cfgmem -force \
       -format ${format} \
       -interface ${inteface} \
@@ -41,16 +41,16 @@ if { ${loaddata} != "" } {
       -loadbit ${loadbit} \
       -loaddata ${loaddata} \
       -file ${outputFile}
-} else {   
+} else {
    puts ${inputFile}
    puts ${outputFile}
-   puts ${loadbit}   
+   puts ${loadbit}
    write_cfgmem -force \
       -format ${format} \
       -interface ${inteface} \
       -size ${size} \
       -loadbit ${loadbit} \
-      -file ${outputFile}   
+      -file ${outputFile}
 }
 
 # Check for SPIx8
@@ -61,25 +61,25 @@ if { ${inteface} == "SPIx8" } {
    exec cp -f ${outputFileSec} ${imagesFileSec}
    puts "PROM file copied to ${imagesFilePri}"
    puts "PROM file copied to ${imagesFileSec}"
-   
+
    # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {   
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
       # Create a compressed version of the image files
-      exec gzip -c -f -9 ${imagesFilePri} > ${imagesFilePri}.gz   
-      exec gzip -c -f -9 ${imagesFileSec} > ${imagesFileSec}.gz   
+      exec gzip -c -f -9 ${imagesFilePri} > ${imagesFilePri}.gz
+      exec gzip -c -f -9 ${imagesFileSec} > ${imagesFileSec}.gz
    }
-   
+
 # Else single file PROM format
 } else {
 
    # Copy the image from build tree to source tree
    exec cp -f ${outputFile} ${imagesFile}
    puts "PROM file copied to ${imagesFile}"
-   
+
    # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {   
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
       # Create a compressed version of the image file
       exec gzip -c -f -9 ${imagesFile} > ${imagesFile}.gz
-   }   
+   }
 
 }

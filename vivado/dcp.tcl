@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of 'SLAC Firmware Standard Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of 'SLAC Firmware Standard Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -22,7 +22,7 @@ set filepath "${IMAGES_DIR}/${PRJ_TOP}"
 open_run synth_1 -name synth_1
 
 ## Check if we need to remove the timing cosntraints
-set RemoveTimingConstraints [expr {[info exists ::env(DCP_REMOVE_TIMING_CONSTRAINT)] && [string is true -strict $::env(DCP_REMOVE_TIMING_CONSTRAINT)]}]  
+set RemoveTimingConstraints [expr {[info exists ::env(DCP_REMOVE_TIMING_CONSTRAINT)] && [string is true -strict $::env(DCP_REMOVE_TIMING_CONSTRAINT)]}]
 puts "RemoveTimingConstraints = ${RemoveTimingConstraints}"
 if { ${RemoveTimingConstraints} == 1 } {
    ## Delete all timing constraint for importing into a target vivado project
@@ -33,7 +33,7 @@ if { ${RemoveTimingConstraints} == 1 } {
 write_vhdl    -force -mode synth_stub ${filepath}_stub.vhd
 write_verilog -force -mode synth_stub ${filepath}_stub.v
 
-## Overwrite the checkpoint   
+## Overwrite the checkpoint
 write_checkpoint -force ${filepath}.dcp
 
 ## Close the checkpoint

@@ -3,15 +3,15 @@
 # Title      : Release Generation
 # ----------------------------------------------------------------------------
 # Description:
-# Script to generate rogue.zip and cpsw.tar.gz files as well as creating 
+# Script to generate rogue.zip and cpsw.tar.gz files as well as creating
 # a github release with proper release attachments.
 # ----------------------------------------------------------------------------
-# This file is part of the 'SLAC Firmware Standard Library'. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the 'SLAC Firmware Standard Library', including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the 'SLAC Firmware Standard Library'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'SLAC Firmware Standard Library', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
@@ -33,14 +33,14 @@ parser = argparse.ArgumentParser('Release Generation')
 
 # Add arguments
 parser.add_argument(
-    "--project", 
+    "--project",
     type     = str,
     required = True,
     help     = "Project directory path"
 )
 
 parser.add_argument(
-    "--release", 
+    "--release",
     type     = str,
     required = False,
     default  = None,
@@ -48,7 +48,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--build", 
+    "--build",
     type     = str,
     required = False,
     default  = None,
@@ -56,7 +56,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--version", 
+    "--version",
     type     = str,
     required = False,
     default  = None,
@@ -64,7 +64,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--prev", 
+    "--prev",
     type     = str,
     required = False,
     default  = None,
@@ -72,15 +72,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--token", 
-    type     = str, 
+    "--token",
+    type     = str,
     required = False,
     default  = None,
     help     = "Token for github"
 )
 
 parser.add_argument(
-    "--push", 
+    "--push",
     action   = 'count',
     help     = "Add --push arg to tag repository and push release to github"
 )
@@ -130,6 +130,14 @@ def getVersion():
     print(f'\nUsing version {ver} and previous version {prev}\n')
 
     return ver, prev
+
+def releaseType(ver):
+    parts = str.split(ver.replace('v', ''), '.')
+    if parts[-1] != '0':
+        return 'Patch'
+    if parts[-2] != '0':
+        return 'Minor'
+    return 'Major'
 
 def selectRelease(cfg):
     relName = args.release
@@ -199,7 +207,7 @@ def selectBuildImages(cfg, relName, relData):
 
         print(f"\nFinding builds for target {target}:")
 
-        # Get a list of build names with the format: 
+        # Get a list of build names with the format:
         #   buildName = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
         # File name will either be:
         #   buildName.extension
@@ -238,8 +246,8 @@ def selectBuildImages(cfg, relName, relData):
             else:
                 buildName = sortList[idx]
 
-        tarExp = [re.compile(f'{buildName}\.{ext}') for ext in extensions]
-        tarExp.extend([re.compile(f'{buildName}_.\w*\.{ext}') for ext in extensions])
+        tarExp = [re.compile(f'{buildName}\.{ext}$') for ext in extensions]
+        tarExp.extend([re.compile(f'{buildName}_.\w*\.{ext}$') for ext in extensions])
 
         print(f"\nFinding images for target {target}, build {buildName}...")
         for f in dirList:
@@ -398,7 +406,7 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
         lFile = os.path.join(args.project,cfg['GitBase'],'LICENSE.txt')
         zf.write(lFile,'LICENSE.txt')
 
-        # Walk through collected list
+        # Walk through collected python list
         for e in pList:
             dst = 'python/' + e['subPath']
 
@@ -413,14 +421,27 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
             if e['type'] == 'folder':
                 packList.append(e['subPath'])
 
+        # Walk through collected configuration list
         for e in cList:
             dst = 'python/' + cfg['TopRoguePackage'] + '/config/' + e['subPath']
             zf.write(e['fullPath'],dst)
 
+        # Walk through collected image list
         for e in imgList:
-            dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(e)
-            zf.write(e,dst)
+            # Check if a .gz version exists
+            if os.path.isfile(e + '.gz'):
+                # Write the compressed version into the rogue_XXX.zip instead
+                img = e + '.gz'
+            else:
+                # Using non-compressed version of the file
+                img = e
+            dst = 'python/' + cfg['TopRoguePackage'] + '/images/' + os.path.basename(img)
 
+            # Check that the file does NOT already exists
+            if dst not in zf.namelist():
+                zf.write(img,dst)
+
+        # Walk through collected script list
         for e in sList:
             dst = 'scripts/' + os.path.basename(e)
             zf.write(e,dst)
@@ -497,10 +518,10 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     # Check if this is a primary release
     if relData['Primary']:
         tag = f'{ver}'
-        msg = f'version {ver} Release'
+        msg = f'{releaseType(ver)} Release {ver}'
     else:
         tag = f'{relName}_{ver}'
-        msg = f'{relName} version {ver} Release'
+        msg = f'{relName} {releaseType(ver)} Release {ver}'
 
     print("\nLogging into github....\n")
 
