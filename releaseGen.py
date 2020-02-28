@@ -525,12 +525,19 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
 
     print("\nLogging into github....\n")
 
-    if args.token is None:
-        print("Enter your github token. If you do no have one you can generate it here:");
-        print("    https://github.com/settings/tokens");
-        token = input("\nGithub token: ");
-    else:
+    if args.token is not None:
+        print("Using github token from command line arg.")
         token = args.token
+    else:
+        token = os.environ.get('GITHUB_TOKEN')
+
+        if token is None:
+            print("Enter your github token. If you do no have one you can generate it here:");
+            print("    https://github.com/settings/tokens");
+            print("You may set it in your environment as GITHUB_TOKEN")
+            token = input("\nGithub token: ");
+        else:
+            print("Using github token from user's environment.")
 
     gh = github.Github(token)
     remRepo = gh.get_repo(f'slaclab/{project}')
