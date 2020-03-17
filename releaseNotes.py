@@ -124,6 +124,7 @@ if __name__ == "__main__":
     import pyperclip
     from getpass import getpass
     import re
+    import os
 
     import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
     from github import Github # https://pygithub.readthedocs.io/en/latest/introduction.html
@@ -181,7 +182,17 @@ if __name__ == "__main__":
     project = re.compile(r'slaclab/(?P<name>.*?).git').search(url).group('name')
 
     # Connect to the Git server
-    token = input("Enter your github token: ")
+    token = os.environ.get('GITHUB_TOKEN')
+
+    if token is None:
+        print("Enter your github token. If you do no have one you can generate it here:");
+        print("    https://github.com/settings/tokens");
+        print("You may set it in your environment as GITHUB_TOKEN")
+        token = input("\nGithub token: ");
+
+    else:
+        print("Using github token from user's environment.")
+
     github = Github(token)
 
     # Get the repo information
