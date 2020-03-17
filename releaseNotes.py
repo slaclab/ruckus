@@ -17,17 +17,17 @@
 #       > git merge origin/master
 #       > git merge origin/pre-release
 #       > git push
-#    - Tag the release in master: 
+#    - Tag the release in master:
 #       > git tag -a vMAJOR.MINOR.0
 #       > git push --tags
 #    - Create release using tag on github.com, use this script to generate notes
 # ----------------------------------------------------------------------------
-# This file is part of the 'SLAC Firmware Standard Library'. It is subject to 
-# the license terms in the LICENSE.txt file found in the top-level directory 
-# of this distribution and at: 
-#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-# No part of the 'SLAC Firmware Standard Library', including this file, may be 
-# copied, modified, propagated, or distributed except according to the terms 
+# This file is part of the 'SLAC Firmware Standard Library'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'SLAC Firmware Standard Library', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
@@ -71,19 +71,19 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
             else:
                 entry['Jira'] = None
 
-            entry['labels'] = None
+            entry['Labels'] = None
             for lbl in req.get_labels():
-                if entry['labels'] is None:
-                    entry['labels'] = lbl.name
+                if entry['Labels'] is None:
+                    entry['Labels'] = lbl.name
                 else:
-                    entry['labels'] += ', ' + lbl.name
+                    entry['Labels'] += ', ' + lbl.name
 
             if 'release candidate' not in req.title.lower():
                 records.append(entry)
 
-            entry = {}         
-            
-    # Check if sorting the pull request entries        
+            entry = {}
+
+    # Check if sorting the pull request entries
     if noSort is False:
         records = sorted(records, key=lambda v : v['changes'], reverse=True)
 
@@ -101,21 +101,21 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
 
         md += '\n|||\n|---:|:---|\n'
 
-        for i in ['Author','Date','Pull','Branch','Jira','labels']:
+        for i in ['Author','Date','Pull','Branch','Jira','Labels']:
             if i in entry and entry[i] is not None:
                 md += f'|**{i}:**|{entry[i]}|\n'
 
         md += '\n**Notes:**\n'
         for line in entry['body'].splitlines():
             md += '> ' + line + '\n'
-        md += '\n-------\n'         
+        md += '\n-------\n'
         md += '\n\n'
 
     # Deal with potential UNICODE in the md
     # Note: Markup language uses the XML # character for unicode
-    md = md.encode('ascii', 'xmlcharrefreplace')  
-    md = str(md)[2:-1]      
-    md = md.replace('\\n', '\n') 
+    md = md.encode('ascii', 'xmlcharrefreplace')
+    md = str(md)[2:-1]
+    md = md.replace('\\n', '\n')
 
     return md
 
@@ -138,10 +138,10 @@ if __name__ == "__main__":
 
     # Add arguments
     parser.add_argument(
-        "tag", 
+        "tag",
         type     = str,
         help     = 'reference tag or range. (i.e. v2.5.0 or v2.5.0..v2.6.0)',
-    ) 
+    )
 
     parser.add_argument(
         "--noSort",
@@ -149,15 +149,15 @@ if __name__ == "__main__":
         required = False,
         default  = False,
         help     = "Disable sort by change counts",
-    )  
+    )
 
     parser.add_argument(
-        "--copy", 
+        "--copy",
         type     = argBool,
         required = False,
         default  = False,
         help     = "Copy to clipboard",
-    )  
+    )
 
     # Get the arguments
     args = parser.parse_args()
@@ -197,9 +197,9 @@ if __name__ == "__main__":
     print(md)
 
     if args.copy:
-        try:	
-            pyperclip.copy(md)	
-            print('Release notes copied to clipboard')	
-        except:	
+        try:
+            pyperclip.copy(md)
+            print('Release notes copied to clipboard')
+        except:
             print("Copy to clipboard failed!")
 
