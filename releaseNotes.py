@@ -71,6 +71,13 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
             else:
                 entry['Jira'] = None
 
+            entry['Labels'] = None
+            for lbl in req.get_labels():
+                if entry['Labels'] is None:
+                    entry['Labels'] = lbl.name
+                else:
+                    entry['Labels'] += ', ' + lbl.name
+
             if 'release candidate' not in req.title.lower():
                 records.append(entry)
 
@@ -94,7 +101,7 @@ def getReleaseNotes(locRepo, remRepo, tagRange, noSort=False):
 
         md += '\n|||\n|---:|:---|\n'
 
-        for i in ['Author','Date','Pull','Branch','Jira']:
+        for i in ['Author','Date','Pull','Branch','Jira','Labels']:
             if i in entry and entry[i] is not None:
                 md += f'|**{i}:**|{entry[i]}|\n'
 
