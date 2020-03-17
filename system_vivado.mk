@@ -45,7 +45,7 @@ export GIT_BYPASS = 1
 endif
 
 ifndef GZIP_BUILD_IMAGE
-export GZIP_BUILD_IMAGE = 0
+export GZIP_BUILD_IMAGE = 1
 endif
 
 ifndef GEN_BIN_IMAGE
@@ -136,10 +136,10 @@ else
    export GIT_HASH_MSG   = dirty
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
-      export GIT_HASH_LONG  = 
-      export GIT_HASH_SHORT = 
+      export GIT_HASH_LONG  =
+      export GIT_HASH_SHORT =
    else
-      export GIT_STATUS     = 
+      export GIT_STATUS     =
       export GIT_HASH_LONG  = 0
       export GIT_HASH_SHORT = 0
    endif
@@ -186,7 +186,7 @@ endif
 ###############################################################
 
 ifndef LD_PRELOAD
-export LD_PRELOAD = 
+export LD_PRELOAD =
 endif
 
 ifndef EMBED_PROC
@@ -201,12 +201,12 @@ else
    export EMBED_TYPE = SDK
    export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
    export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/bit.tcl
-   
+
    # Ubuntu SDK support
    ifndef SWT_GTK3
    export SWT_GTK3 = 0
-   endif   
-   
+   endif
+
 endif
 
 ###############################################################
@@ -291,35 +291,11 @@ dir:
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
 
 ###############################################################
-#### Vivado Project ###########################################
-###############################################################
-$(VIVADO_DEPEND) : dir
-	$(call ACTION_HEADER,"Vivado Project Creation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/project.tcl -notrace 
-
-###############################################################
 #### Vivado Sources ###########################################
 ###############################################################
-$(SOURCE_DEPEND) : $(VIVADO_DEPEND)
+$(SOURCE_DEPEND) : dir
 	$(call ACTION_HEADER,"Vivado Source Setup")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/sources.tcl
-
-###############################################################
-#### Vivado Batch #############################################
-###############################################################
-.PHONY : bit mcs prom
-bit mcs prom: $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
-	@echo "Don't forget to 'git commit and git push' the images file when the image is stable!"
-
-###############################################################
-#### Vivado Interactive #######################################
-###############################################################
-.PHONY : interactive
-interactive : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Vivado Interactive")
-	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
 
 ###############################################################
 #### Vivado Project GUI mode ##################################
@@ -328,6 +304,14 @@ interactive : $(SOURCE_DEPEND)
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
 	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
+
+###############################################################
+#### Vivado Batch #############################################
+###############################################################
+.PHONY : bit mcs prom
+bit mcs prom : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
 ###############################################################
 #### Vivado Synthesis Only ####################################
@@ -346,6 +330,14 @@ dcp : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); export SYNTH_DCP=1; vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
 ###############################################################
+#### Vivado Interactive #######################################
+###############################################################
+.PHONY : interactive
+interactive : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Vivado Interactive")
+	@cd $(OUT_DIR); vivado -mode tcl -source $(RUCKUS_DIR)/vivado/env_var.tcl
+
+###############################################################
 #### Vivado SDK ###############################################
 ###############################################################
 .PHONY : sdk vitis
@@ -362,7 +354,6 @@ elf :
 	@cd $(OUT_DIR); $(EMBED_ELF)
 	@echo ""
 	@echo "Bit file w/ Elf file copied to $(IMAGES_DIR)/$(IMAGENAME).bit"
-	@echo "Don't forget to 'git commit and git push' the .bit.gz file when the image is stable!"
 
 ###############################################################
 #### Release ##################################################
@@ -419,7 +410,7 @@ xsim : $(SOURCE_DEPEND)
 vcs : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Generating the VCS Simulation scripts")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
-   
+
 ###############################################################
 #### Vivado Batch Mode within the Project Environment  ########
 ###############################################################
@@ -431,9 +422,6 @@ batch : $(SOURCE_DEPEND)
 ###############################################################
 #### Makefile Targets #########################################
 ###############################################################
-.PHONY      : depend
-depend      : $(VIVADO_DEPEND)
-
 .PHONY      : sources
 sources     : $(SOURCE_DEPEND)
 
