@@ -133,7 +133,7 @@ Variables</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.project</b> = re.compile(r'slaclab/(?P&lt;name&gt;.*?).git').search(url).group('name')</td></tr>
 <tr class="separator:a4d94ec73bac60e750110c541c66cfa1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f5f4c148e254651e2a85dabb74b12cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4f5f4c148e254651e2a85dabb74b12cd"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.token</b> = input(&quot;Enter your github token: &quot;)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.token</b> = os.environ.get('GITHUB_TOKEN')</td></tr>
 <tr class="separator:a4f5f4c148e254651e2a85dabb74b12cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a951685fb0329d3782f78661642d63e6f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a951685fb0329d3782f78661642d63e6f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>releaseNotes.github</b> = Github(token)</td></tr>
@@ -159,7 +159,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;= getReleaseNotes(</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;        locRepo  = g,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;        remRepo  = repo,</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;        tagRange = tags,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;        noSort   = args.noSort,</div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;    )</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="releaseNotes_8py_source.html#l00183">183</a> of file <a class="el" href="releaseNotes_8py_source.html">releaseNotes.py</a>.</p>
+<p>Definition at line <a class="el" href="releaseNotes_8py_source.html#l00201">201</a> of file <a class="el" href="releaseNotes_8py_source.html">releaseNotes.py</a>.</p>
 
 </div>
 </div>

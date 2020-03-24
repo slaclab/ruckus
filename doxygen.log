@@ -3,21 +3,21 @@ warning: ignoring unsupported tag `HTML_DYNAMIC_MENUS     =' at line 1236, file 
 warning: ignoring unsupported tag `PLANTUML_CFG_FILE      =' at line 2416, file /home/travis/build/slaclab/ruckus/Doxyfile
 /home/travis/build/slaclab/ruckus/vivado_proc.tcl:11: warning: the name `vivado/proc.tcl' supplied as the second argument in the \file statement is not an input file
 /home/travis/build/slaclab/ruckus/releaseNotes.py:38: warning: Member getReleaseNotes(locRepo, remRepo, tagRange, noSort=False) (function) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:127: warning: Member parser (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:130: warning: Member argBool (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:135: warning: Member type (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:136: warning: Member help (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:142: warning: Member required (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:143: warning: Member default (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:156: warning: Member args (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:161: warning: Member tags (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:168: warning: Member g (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:171: warning: Member url (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:174: warning: Member project (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:177: warning: Member token (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:178: warning: Member github (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:181: warning: Member repo (variable) of namespace releaseNotes is not documented.
-/home/travis/build/slaclab/ruckus/releaseNotes.py:183: warning: Member md (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:135: warning: Member parser (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:138: warning: Member argBool (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:143: warning: Member type (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:144: warning: Member help (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:150: warning: Member required (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:151: warning: Member default (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:164: warning: Member args (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:169: warning: Member tags (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:176: warning: Member g (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:179: warning: Member url (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:182: warning: Member project (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:185: warning: Member token (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:196: warning: Member github (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:199: warning: Member repo (variable) of namespace releaseNotes is not documented.
+/home/travis/build/slaclab/ruckus/releaseNotes.py:201: warning: Member md (variable) of namespace releaseNotes is not documented.
 Searching for include files...
 Searching for example files...
 Searching for images...
@@ -122,5 +122,5 @@ Generating file member index...
 Generating example index...
 finalizing index lists...
 writing tag file...
-lookup cache used 27/65536 hits=52 misses=27
+lookup cache used 26/65536 hits=51 misses=26
 finished...
