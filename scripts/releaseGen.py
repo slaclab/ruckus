@@ -13,7 +13,7 @@ import os
 import git                 # GitPython
 from github import Github  # PyGithub
 import re
-import ReleaseNotes
+import releaseNotes
 
 ghRepo = os.environ.get('TRAVIS_REPO_SLUG')
 token  = os.environ.get('GH_REPO_TOKEN')
@@ -42,7 +42,7 @@ remRepo = gh.get_repo(ghRepo)
 oldTag = git.Git('.').describe('--abbrev=0','--tags',newTag + '^')
 
 # Get release notes
-md = ReleaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = ghRepo, oldTag = oldTag, newTag = newTag)
+md = releaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = ghRepo, oldTag = oldTag, newTag = newTag)
 
 # Create release using tag
 remRel = remRepo.create_git_release(tag=newTag, name=newTag, message=md, draft=False)
