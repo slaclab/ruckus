@@ -42,7 +42,7 @@ remRepo = gh.get_repo(ghRepo)
 oldTag = git.Git('.').describe('--abbrev=0','--tags',newTag + '^')
 
 # Get release notes
-md = releaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = ghRepo, oldTag = oldTag, newTag = newTag)
+md = releaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = remRepo, oldTag = oldTag, newTag = newTag)
 
 # Create release using tag
 remRel = remRepo.create_git_release(tag=newTag, name=newTag, message=md, draft=False)
