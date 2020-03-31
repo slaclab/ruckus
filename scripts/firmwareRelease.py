@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# Title      : Release Generation
+# Title      : Firmware Release Generation
 # ----------------------------------------------------------------------------
 # Description:
 # Script to generate rogue.zip and cpsw.tar.gz files as well as creating

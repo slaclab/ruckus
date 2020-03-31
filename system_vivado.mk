@@ -361,7 +361,7 @@ elf :
 .PHONY : release
 release : dir
 	$(call ACTION_HEADER,"Generaring Release")
-	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE) --push
+	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/scripts/firmwareRelease.py --project=$(TOP_DIR) --release=$(RELEASE) --push
 
 ###############################################################
 #### Release Files ############################################
@@ -369,7 +369,7 @@ release : dir
 .PHONY : release_files
 release_files : dir
 	$(call ACTION_HEADER,"Generaring Release Files")
-	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/releaseGen.py --project=$(TOP_DIR) --release=$(RELEASE)
+	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/scripts/firmwareRelease.py --project=$(TOP_DIR) --release=$(RELEASE)
 
 ###############################################################
 #### Vivado PyRogue ###########################################
