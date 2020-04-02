@@ -120,3 +120,4 @@ release: dir
 
 	# Update the metadata file's source code paths
 	sed -i 's+$(TOP_DIR)+/$(PROJECT)+g' $(RELEASE)/*file_list.*
+	sed -i 's+____ ./$(ROOTDIR)+____ ./$(PROJECT)+g' $(RELEASE)/GENIP_README
