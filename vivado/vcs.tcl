@@ -33,7 +33,7 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
 ## Checks for VCS versions that ruckus supports
 proc VcsVersionCheck { } {
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 P-2019.06"
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03"
 
    # Get the VCS version
    set err_ret [catch {
@@ -52,7 +52,6 @@ proc VcsVersionCheck { } {
    set err_ret [catch {
       exec vcs -ID | grep "vcs script version"
    } grepVersion]
-   set err_ret 0 ; # Work around for Ubuntu 19.04 not having /usr/lib/i386-linux-gnu/libelf.so.
    if { ${err_ret} != 0} {
       puts "\n\n*********************************************************"
       puts "\"vcs -ID\" command failed:"
