@@ -50,7 +50,7 @@ endif
 
 # VCS elaborate options
 ifndef VCS_ELAB_OPTS
-export VCS_ELAB_OPTS = -full64 +warn=none -kdb -lca -t ps -licqueue -l $(SIM_OUT_DIR)/elaborate.log
+export VCS_ELAB_OPTS = -full64 +warn=none -kdb -lca -debug_pp -t ps -licqueue -l $(SIM_OUT_DIR)/elaborate.log
 endif
 
 # Path to VCS analyze script 
@@ -109,8 +109,12 @@ analyzes: dir
 elaborate: analyzes
 	vcs $(VCS_ELAB_OPTS) $(ELAB_TESTBED) -o simv
 
-# VCS release
-release: dir
+# VCS GUI
+gui: elaborate
+	./simv -gui -l gui.log&
+
+# VCS gen_vcs_ip
+gen_vcs_ip: dir
 	# Generate the IP release
 	gen_vcs_ip -top_name $(IP_NAME) -ipdir $(RELEASE) -noencrypt -parse -e "$(ANALYZE) 0"
 
@@ -121,3 +125,8 @@ release: dir
 	# Update the metadata file's source code paths
 	sed -i 's+$(TOP_DIR)+/$(PROJECT)+g' $(RELEASE)/*file_list.*
 	sed -i 's+____ ./$(ROOTDIR)+____ ./$(PROJECT)+g' $(RELEASE)/GENIP_README
+
+# VCS pre-compiled IP
+pre_compiled_ip: dir
+	$(ANALYZE) 0
+	vcs -lca -genip $(IP_NAME) -dir=$(RELEASE)
