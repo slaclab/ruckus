@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #-----------------------------------------------------------------------------
-# Title      : Release Generation
+# Title      : Firmware Release Generation
 # ----------------------------------------------------------------------------
 # Description:
 # Script to generate rogue.zip and cpsw.tar.gz files as well as creating
@@ -547,11 +547,15 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     locRepo.remotes.origin.push(newTag)
 
     if prev != "":
-        if relData['Primary']: tagRange = f'{prev}..{ver}'
-        else: tagRange = f'{relName}_{prev}..{relName}_{ver}'
+        if relData['Primary']:
+            relOld = prev
+            relNew = ver
+        else:
+            relOld = '{relName}_{prev}'
+            relNew = '{relName}_{ver}'
 
         print("\nGenerating release notes ...")
-        md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, tagRange)
+        md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, oldTag=relOld, newTag=relNew)
     else:
         md = "No release notes"
 
