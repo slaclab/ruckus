@@ -20,7 +20,8 @@ import github # PyGithub
 #############################################################################################
 
 # Convert str to bool
-argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
+def argBool(s):
+    return s.lower() in ['true', 't', 'yes', '1']
 
 # Set the argument parser
 parser = argparse.ArgumentParser('Create New Project')
