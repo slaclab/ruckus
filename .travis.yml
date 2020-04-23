@@ -31,6 +31,7 @@ addons:
       - doxygen-latex
       - doxygen-gui
       - graphviz
+      - flake8
 
 stages:
     - name: gen_release
@@ -55,6 +56,8 @@ jobs:
       before_script:
         - cd $TRAVIS_BUILD_DIR
         - chmod +x generateDocumentationAndDeploy.sh
+        - python3 -m compileall -f scripts/
+        - flake8 --count python/
       script: ./generateDocumentationAndDeploy.sh 0
 
     # Stage to generate and deploy the documentation
