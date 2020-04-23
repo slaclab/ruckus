@@ -13,8 +13,6 @@
 
 import os
 import argparse
-import re
-from getpass import getpass
 import time
 
 import github # PyGithub
@@ -160,12 +158,12 @@ def githubLogin():
         if token is None:
 
             # Ask for the token from the command line prompt
-            print('Enter your github token. If you do no have one you can generate it here:');
-            print('    https://github.com/settings/tokens');
+            print('Enter your github token. If you do no have one you can generate it here:')
+            print('    https://github.com/settings/tokens')
             print('You may set it in your environment as GITHUB_TOKEN\n')
 
             # Set the token value
-            token = input('\nGithub token: ');
+            token = input('\nGithub token: ')
 
         # Else the token was defined
         else:
@@ -260,26 +258,26 @@ def setPermissions(gh,repo):
 
     # Check for list of teams with admin permissions
     if args.adminTeam is not None:
-        for idx in args.adminTeam:
-            print( f'Team Admin Permission: {idx[0]}/{idx[1]}' )
-            org = gh.get_organization(idx[0])
-            team = org.get_team_by_slug(idx[1])
+        for [orgName, teamName] in args.adminTeam:
+            print( f'Team Admin Permission: {orgName}/{teamName}' )
+            org = gh.get_organization(orgName)
+            team = org.get_team_by_slug(teamName)
             team.set_repo_permission(repo, 'admin')
 
     # Check for list of teams with write permissions
     if args.writeTeam is not None:
-        for idx in args.writeTeam:
-            print( f'Team Write Permission: {idx[0]}/{idx[1]}' )
-            org = gh.get_organization(idx[0])
-            team = org.get_team_by_slug(idx[1])
+        for [orgName, teamName] in args.writeTeam:
+            print( f'Team Write Permission: {orgName}/{teamName}' )
+            org = gh.get_organization(orgName)
+            team = org.get_team_by_slug(teamName)
             team.set_repo_permission(repo, 'push')
 
     # Check for list of teams with read permissions
     if args.readTeam is not None:
-        for idx in args.readTeam:
-            print( f'Team Read Permission: {idx[0]}/{idx[1]}' )
-            org = gh.get_organization(idx[0])
-            team = org.get_team_by_slug(idx[1])
+        for [orgName, teamName] in args.readTeam:
+            print( f'Team Read Permission: {orgName}/{teamName}' )
+            org = gh.get_organization(orgName)
+            team = org.get_team_by_slug(teamName)
             team.set_repo_permission(repo, 'pull')
 
     print('\n')
