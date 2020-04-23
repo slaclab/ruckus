@@ -55,9 +55,9 @@ jobs:
       name: "Generate Documentation"
       before_script:
         - cd $TRAVIS_BUILD_DIR
-        - chmod +x generateDocumentationAndDeploy.sh
         - python3 -m compileall -f scripts/
         - flake8 --count scripts/
+        - chmod +x generateDocumentationAndDeploy.sh
       script: ./generateDocumentationAndDeploy.sh 0
 
     # Stage to generate and deploy the documentation
