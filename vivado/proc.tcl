@@ -127,6 +127,16 @@ proc ListComp { List1 List2 } {
    return $DiffList
 }
 
+proc ::findFiles { baseDir pattern } {
+   set dirs [ glob -nocomplain -type d [ file join $baseDir * ] ]
+   set files {}
+   foreach dir $dirs { 
+      lappend files {*}[ findFiles $dir $pattern ] 
+   }
+   lappend files {*}[ glob -nocomplain -type f [ file join $baseDir $pattern ] ] 
+   return $files
+}
+
 ## Function to build all the IP cores
 proc BuildIpCores { } {
    # Get variables
