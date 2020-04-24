@@ -1,8 +1,8 @@
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
 
-# Setup for Ubuntu Xenial (Ubuntu 16.04)
-dist: xenial
+# Setup for Ubuntu Bionic (18.04)
+dist: bionic
 
 # Blacklist
 branches:
