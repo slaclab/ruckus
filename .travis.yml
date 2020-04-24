@@ -1,8 +1,8 @@
 # This will run on Travis' 'new' container-based infrastructure
 sudo: false
 
-# Setup for Ubuntu Xenial (Ubuntu 16.04)
-dist: xenial
+# Setup for Ubuntu Bionic (18.04)
+dist: bionic
 
 # Blacklist
 branches:
@@ -31,6 +31,7 @@ addons:
       - doxygen-latex
       - doxygen-gui
       - graphviz
+      - flake8
 
 stages:
     - name: gen_release
@@ -54,6 +55,8 @@ jobs:
       name: "Generate Documentation"
       before_script:
         - cd $TRAVIS_BUILD_DIR
+        - python3 -m compileall -f scripts/
+        - flake8 --count scripts/
         - chmod +x generateDocumentationAndDeploy.sh
       script: ./generateDocumentationAndDeploy.sh 0
 
