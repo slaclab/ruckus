@@ -1723,7 +1723,7 @@ proc loadZipIpCore args {
                # Check if directory doesn't exist yet
                if { [file exists [file rootname "$params(repo_path)/$params(path)"]] == 0 } {
                   # Add achieved .zip to repo path
-                  # update_ip_catalog -add_ip $params(path) -repo_path $params(repo_path)
+                  update_ip_catalog -add_ip $params(path) -repo_path $params(repo_path)
                }
             } else {
                puts "\n\n\n\n\n********************************************************"
@@ -1753,7 +1753,7 @@ proc loadZipIpCore args {
                   # Check if directory doesn't exist yet
                   if { [file exists [file rootname "$params(repo_path)/${pntr}"]] == 0 } {
                      # Add achieved .zip to repo path
-                     # update_ip_catalog -add_ip ${pntr} -repo_path $params(repo_path)
+                     update_ip_catalog -add_ip ${pntr} -repo_path $params(repo_path)
                   }
                }
             } else {
