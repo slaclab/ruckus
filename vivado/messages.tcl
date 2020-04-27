@@ -107,6 +107,7 @@ set_msg_config -id {Synth 8-3512}     -new_severity ERROR;# SYNTH: Assigned valu
 set_msg_config -id {Synth 8-327}      -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}      -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found in the same library
+set_msg_config -id {IP_Flow 19-1663}  -new_severity ERROR;# IP_FLOW: Duplicate IP found
 
 ## Check for version 2015.3 (or older)
 if { [VersionCompare 2015.3] <= 0 } {
