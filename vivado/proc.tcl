@@ -1721,7 +1721,9 @@ proc loadZipIpCore args {
             if { ${fileExt} eq {.zip} ||
                  ${fileExt} eq {.ZIP} } {
                # Check if directory doesn't exist yet
-               if { [file exists [file rootname "$params(repo_path)/$params(path)"]] == 0 } {
+               set strip [file rootname [file tail $params(path)]]
+               set dirPath "$params(repo_path)/${strip}"
+               if { [file isdirectory [file rootname ${dirPath}]] == 0 } {
                   # Add achieved .zip to repo path
                   update_ip_catalog -add_ip $params(path) -repo_path $params(repo_path)
                }
@@ -1751,7 +1753,9 @@ proc loadZipIpCore args {
                # Load all the constraint files
                foreach pntr ${list} {
                   # Check if directory doesn't exist yet
-                  if { [file exists [file rootname "$params(repo_path)/${pntr}"]] == 0 } {
+                  set strip [file rootname [file tail ${pntr}]]
+                  set dirPath "$params(repo_path)/${strip}"
+                  if { [file isdirectory [file rootname ${dirPath}]] == 0 } {
                      # Add achieved .zip to repo path
                      update_ip_catalog -add_ip ${pntr} -repo_path $params(repo_path)
                   }
