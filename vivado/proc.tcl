@@ -1720,8 +1720,11 @@ proc loadZipIpCore args {
             set fileExt [file extension $params(path)]
             if { ${fileExt} eq {.zip} ||
                  ${fileExt} eq {.ZIP} } {
-               # Add achieved .zip to repo path
-               update_ip_catalog -add_ip $params(path) -repo_path $params(repo_path)
+               # Check if directory doesn't exist yet
+               if { [file exists [file rootname "$params(repo_path)/$params(path)"]] == 0 } {
+                  # Add achieved .zip to repo path
+                  # update_ip_catalog -add_ip $params(path) -repo_path $params(repo_path)
+               }
             } else {
                puts "\n\n\n\n\n********************************************************"
                puts "loadZipIpCore: $params(path) does not have a \[.zip,.ZIP\] file extension"
@@ -1747,8 +1750,11 @@ proc loadZipIpCore args {
             if { ${list} != "" } {
                # Load all the constraint files
                foreach pntr ${list} {
-                  # Add achieved .zip to repo path
-                  update_ip_catalog -add_ip ${pntr} -repo_path $params(repo_path)
+                  # Check if directory doesn't exist yet
+                  if { [file exists [file rootname "$params(repo_path)/${pntr}"]] == 0 } {
+                     # Add achieved .zip to repo path
+                     # update_ip_catalog -add_ip ${pntr} -repo_path $params(repo_path)
+                  }
                }
             } else {
                puts "\n\n\n\n\n********************************************************"
