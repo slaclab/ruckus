@@ -369,7 +369,7 @@ if __name__ == '__main__':
 
     # Create first initial release
     repo.create_git_release(
-        tag     = 'v0.0.1',
+        tag     = 'v0.0.0',
         name    = 'Initial Release',
         message = 'First Tagged Release',
         draft   =False,
