@@ -145,7 +145,6 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
     return md
 
 if __name__ == "__main__":
-    import re
     import os
 
     import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
