@@ -1,10 +1,42 @@
-html/
-latex/
+# SVN files
+.svn*
 
-*.bit
+# EMACS temp files
+*~
+
+# Compiled source files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pyc
 *.bin
+*.ld
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumps.db
+build.info
+
+# Build directories 
+build*
+bin*
+.Xil*
+
+firmware/common/python/
+
+# Only .bit.gz and .mcs.gz should be committed to git
+*.bit
 *.mcs
-*.ltx
 *.gz
-*.dcp
-__pycache__
+*.ltx
+*.hdf
+*.vho
+*.zip

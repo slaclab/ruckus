@@ -111,6 +111,11 @@ export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
 export SYN_DIR  = $(OUT_DIR)/$(VIVADO_PROJECT).runs/synth_1
 export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 
+# Define the user IP repo
+ifndef IP_REPO
+export IP_REPO = $(OUT_DIR)/ip_repo
+endif
+
 # Generate build string
 export BUILD_SYS_NAME    = $(shell uname -n)
 export BUILD_SVR_TYPE    = $(shell uname -m)
@@ -287,6 +292,7 @@ dir:
 			 echo ""; false; }
 	@test -d $(OUT_DIR)     || mkdir $(OUT_DIR)
 	@test -d $(RELEASE_DIR) || mkdir $(RELEASE_DIR)
+	@test -d $(IP_REPO)     || mkdir $(IP_REPO)
 	@cd $(OUT_DIR); rm -f firmware
 	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
 

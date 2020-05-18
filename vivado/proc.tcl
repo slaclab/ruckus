@@ -127,6 +127,16 @@ proc ListComp { List1 List2 } {
    return $DiffList
 }
 
+proc ::findFiles { baseDir pattern } {
+   set dirs [ glob -nocomplain -type d [ file join $baseDir * ] ]
+   set files {}
+   foreach dir $dirs {
+      lappend files {*}[ findFiles $dir $pattern ]
+   }
+   lappend files {*}[ glob -nocomplain -type f [ file join $baseDir $pattern ] ]
+   return $files
+}
+
 ## Function to build all the IP cores
 proc BuildIpCores { } {
    # Get variables
@@ -1677,3 +1687,91 @@ proc loadConstraints args {
    }
 }
 
+## Function to load ZIP IP cores
+proc loadZipIpCore args {
+   set options {
+      {path.arg       "" "path to a single file"}
+      {dir.arg        "" "path to a directory of files"}
+      {repo_path.arg  "" "path to a repo directory"}
+   }
+   set usage ": loadZipIpCore \[options] ...\noptions:"
+   array set params [::cmdline::getoptions args $options $usage]
+   set has_path [expr {[string length $params(path)] > 0}]
+   set has_dir  [expr {[string length $params(dir)] > 0}]
+   set has_repo [expr {[string length $params(repo_path)] > 0}]
+
+   # Check for error state
+   if {${has_path} && ${has_dir}} {
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadZipIpCore: Cannot specify both -path and -dir"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   } elseif {$has_repo} {
+      # Load a single file
+      if {$has_path} {
+         # Check if file doesn't exist
+         if { [file exists $params(path)] != 1 } {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadZipIpCore: $params(path) doesn't exist"
+            puts "********************************************************\n\n\n\n\n"
+            exit -1
+         } else {
+            # Check the file extension
+            set fileExt [file extension $params(path)]
+            if { ${fileExt} eq {.zip} ||
+                 ${fileExt} eq {.ZIP} } {
+               # Check if directory doesn't exist yet
+               set strip [file rootname [file tail $params(path)]]
+               set dirPath "$params(repo_path)/${strip}"
+               if { [file isdirectory [file rootname ${dirPath}]] == 0 } {
+                  # Add achieved .zip to repo path
+                  update_ip_catalog -add_ip $params(path) -repo_path $params(repo_path)
+               }
+            } else {
+               puts "\n\n\n\n\n********************************************************"
+               puts "loadZipIpCore: $params(path) does not have a \[.zip,.ZIP\] file extension"
+               puts "********************************************************\n\n\n\n\n"
+               exit -1
+            }
+         }
+      # Load all files from a directory
+      } elseif {$has_dir} {
+         # Check if directory doesn't exist
+         if { [file exists $params(dir)] != 1 } {
+            puts "\n\n\n\n\n********************************************************"
+            puts "loadZipIpCore: $params(dir) doesn't exist"
+            puts "********************************************************\n\n\n\n\n"
+            exit -1
+         } else {
+            # Get a list of all constraint files
+            set list ""
+            set list_rc [catch {
+               set list [glob -directory $params(dir) *.zip *.ZIP]
+            } _RESULT]
+            # Load all the block design files
+            if { ${list} != "" } {
+               # Load all the constraint files
+               foreach pntr ${list} {
+                  # Check if directory doesn't exist yet
+                  set strip [file rootname [file tail ${pntr}]]
+                  set dirPath "$params(repo_path)/${strip}"
+                  if { [file isdirectory [file rootname ${dirPath}]] == 0 } {
+                     # Add achieved .zip to repo path
+                     update_ip_catalog -add_ip ${pntr} -repo_path $params(repo_path)
+                  }
+               }
+            } else {
+               puts "\n\n\n\n\n********************************************************"
+               puts "loadZipIpCore: $params(dir) directory does not have any \[.zip,.ZIP\] files"
+               puts "********************************************************\n\n\n\n\n"
+               exit -1
+            }
+         }
+      }
+   } else {
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadZipIpCore: -repo_path not defined"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+}

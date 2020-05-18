@@ -25,7 +25,7 @@ import git    # GitPython
 import github # PyGithub
 
 import re
-from getpass import getpass
+# from getpass import getpass
 import releaseNotes
 
 # Set the argument parser
@@ -103,7 +103,7 @@ def loadReleaseConfig():
             txt = f.read()
             cfg = yaml.load(txt)
     except Exception as e:
-        raise Exception(f"Failed to load project release file {relFile}")
+        raise Exception(f"Failed to load project release file {relFile}: {e}")
 
     if not 'GitBase' in cfg or cfg['GitBase'] is None:
         raise Exception("Invalid release config. GitBase key is missing or empty!")
@@ -253,7 +253,7 @@ def selectBuildImages(cfg, relName, relData):
         for f in dirList:
             for exp in tarExp:
                 if exp.match(f):
-                    print(f"    Found: {f}");
+                    print(f"    Found: {f}")
                     retList.append(os.path.join(imageDir,f))
 
     return retList
@@ -379,7 +379,8 @@ def buildSetupPy(zipFile,ver,relName,packList,sList):
 
     setupPy += ")\n"
 
-    with zipFile.open('setup.py','w') as sf: sf.write(setupPy.encode('utf-8'))
+    with zipFile.open('setup.py','w') as sf:
+        sf.write(setupPy.encode('utf-8'))
 
 
 def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
@@ -456,7 +457,8 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
                 if (not 'import os'   in line) and \
                    (not '__version__' in line) and \
                    (not 'ConfigDir'   in line) and \
-                   (not 'ImageDir'    in line): newInit += line
+                   (not 'ImageDir'    in line):
+                    newInit += line
 
         # Append new lines
         newInit += "\n\n"
@@ -506,7 +508,8 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     locRepo = git.Repo(gitDir)
 
     url = locRepo.remote().url
-    if not url.endswith('.git'): url += '.git'
+    if not url.endswith('.git'):
+        url += '.git'
 
     # Get the git repo's name (assumption that exists in the github.com/slaclab organization)
     project = re.compile(r'slaclab/(?P<name>.*?)(?P<ext>\.git?)').search(url).group('name')
@@ -532,10 +535,10 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         token = os.environ.get('GITHUB_TOKEN')
 
         if token is None:
-            print("Enter your github token. If you do no have one you can generate it here:");
-            print("    https://github.com/settings/tokens");
+            print("Enter your github token. If you do no have one you can generate it here:")
+            print("    https://github.com/settings/tokens")
             print("You may set it in your environment as GITHUB_TOKEN")
-            token = input("\nGithub token: ");
+            token = input("\nGithub token: ")
         else:
             print("Using github token from user's environment.")
 
@@ -585,8 +588,10 @@ if __name__ == "__main__":
     # Determine if we generate a Rogue zipfile
     if 'Rogue' in relData['Types']:
 
-        if relData['Primary']: zipName = os.path.join(os.getcwd(),f'rogue_{ver}.zip')
-        else: zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
+        if relData['Primary']:
+            zipName = os.path.join(os.getcwd(),f'rogue_{ver}.zip')
+        else:
+            zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
 
         buildRogueFile(zipName,cfg,ver,relName,relData,imgList)
         tagAttach.append(zipName)
@@ -599,4 +604,3 @@ if __name__ == "__main__":
 
     if args.push is not None:
         pushRelease(cfg,relName,relData,ver,tagAttach,prev)
-

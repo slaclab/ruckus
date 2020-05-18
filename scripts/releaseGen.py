@@ -44,7 +44,17 @@ oldTag = git.Git('.').describe('--abbrev=0','--tags',newTag + '^')
 # Get release notes
 md = releaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = remRepo, oldTag = oldTag, newTag = newTag)
 
+def releaseType(ver):
+    parts = str.split(ver.replace('v', ''), '.')
+    if parts[-1] != '0':
+        return 'Patch'
+    if parts[-2] != '0':
+        return 'Minor'
+    return 'Major'
+
+newName = f'{releaseType(newTag)} Release {newTag}'
+
 # Create release using tag
-remRel = remRepo.create_git_release(tag=newTag, name=newTag, message=md, draft=False)
+remRel = remRepo.create_git_release(tag=newTag, name=newName, message=md, draft=False)
 
 print("Success!")

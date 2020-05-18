@@ -16,7 +16,7 @@
 # Generate release notes for pull requests relative to a tag.
 
 from collections import OrderedDict as odict
-import re
+# import re
 
 
 def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
@@ -161,7 +161,8 @@ if __name__ == "__main__":
     locRepo = git.Git('.')
 
     url = locRepo.remote('get-url','origin')
-    if not url.endswith('.git'): url += '.git'
+    if not url.endswith('.git'):
+        url += '.git'
 
     project = re.compile(r'slaclab/(?P<name>.*?).git').search(url).group('name')
 
@@ -169,10 +170,10 @@ if __name__ == "__main__":
     token = os.environ.get('GITHUB_TOKEN')
 
     if token is None:
-        print("Enter your github token. If you do no have one you can generate it here:");
-        print("    https://github.com/settings/tokens");
+        print("Enter your github token. If you do no have one you can generate it here:")
+        print("    https://github.com/settings/tokens")
         print("You may set it in your environment as GITHUB_TOKEN")
-        token = input("\nGithub token: ");
+        token = input("\nGithub token: ")
 
     else:
         print("Using github token from user's environment.")

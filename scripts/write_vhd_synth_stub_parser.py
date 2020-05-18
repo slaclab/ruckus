@@ -47,7 +47,6 @@
 # This script is designed to parse the Vivado "write_vhdl -mode synth_stub"
 # output file back into the user friendly record types.
 
-import os
 import sys
 import re
 
