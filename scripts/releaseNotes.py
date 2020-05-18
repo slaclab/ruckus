@@ -16,7 +16,7 @@
 # Generate release notes for pull requests relative to a tag.
 
 from collections import OrderedDict as odict
-# import re
+import re
 
 
 def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
