@@ -22,7 +22,7 @@ import re
 def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
     # Get logs
-    loginfo = locRepo.log(f"{oldTag}...{newTag}", '--grep', "\"Merge pull request\"")
+    loginfo = locRepo.log(f"{oldTag}...{newTag}", '--grep', "Merge pull request")
 
     # Grouping of recors
     records = odict({'Bug': [],
