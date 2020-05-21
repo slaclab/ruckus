@@ -554,8 +554,8 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
             relOld = prev
             relNew = ver
         else:
-            relOld = '{relName}_{prev}'
-            relNew = '{relName}_{ver}'
+            relOld = f'{relName}_{prev}'
+            relNew = f'{relName}_{ver}'
 
         print("\nGenerating release notes ...")
         md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, oldTag=relOld, newTag=relNew)
