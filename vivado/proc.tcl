@@ -399,7 +399,7 @@ proc CreateFpgaBit { } {
    # Check for Vivado 2019.2 (or newer)
    if { [VersionCompare 2019.2] > 0 } {
       # Try to generate the .XSA file
-      write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+      set src_rc [catch { write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa } _RESULT]
 
    # Else Vivado 2019.1 (or older)
    } else {
