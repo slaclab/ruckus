@@ -28,7 +28,7 @@ app create \
    -name app_0 \
    -hw ${OUT_DIR}/${PROJECT}.xsa  \
    -proc $::env(EMBED_PROC) \
-   -template {Empty Application} \
+   -template {Empty Application (C++)} \
    -os standalone \
    -lang {c++}
 

@@ -399,7 +399,7 @@ proc CreateFpgaBit { } {
    # Check for Vivado 2019.2 (or newer)
    if { [VersionCompare 2019.2] > 0 } {
       # Try to generate the .XSA file
-      write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+      set src_rc [catch { write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa } _RESULT]
 
    # Else Vivado 2019.1 (or older)
    } else {
@@ -472,7 +472,7 @@ proc CheckVivadoVersion { } {
    }
    # Check for unsupported versions of ruckus + Vitis
    if { [VersionCompare 2019.1] > 0 &&
-        [VersionCompare 2020.1] < 0 &&
+        [VersionCompare 2019.3] < 0 &&
         [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 } {
       # Here's why Vitis 2019.2 not supported in ruckus
       # https://forums.xilinx.com/t5/Embedded-Development-Tools/SDK-banned-from-Vivado-2019-2/td-p/1042059
@@ -483,7 +483,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [VersionCompare 2019.2.0] > 0 } {
+   if { [VersionCompare 2020.1.0] > 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
