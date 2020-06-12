@@ -29,7 +29,7 @@ if newTag is None:
     exit("TRAVIS_TAG not in environment.")
 
 # Check tag to make sure it is a proper release: va.b.c
-vpat = re.compile('v\d+\.\d+\.\d+')
+vpat = re.compile('v?\d+\.\d+\.\d+')
 
 if vpat.match(newTag) is None:
     exit("Not a release version")
