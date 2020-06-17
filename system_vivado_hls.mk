@@ -26,11 +26,6 @@ export VIVADO_DEPEND    = $(OUT_DIR)/$(PROJECT)_project/$(VIVADO_PROJECT).app
 export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
-# Images Directory
-ifndef RTL_DIR
-export RTL_DIR = $(abspath $(PROJ_DIR)/rtl)
-endif
-
 # Source Files
 ifndef SRC_FILE
 export SRC_FILE = $(PROJ_DIR)/sources.tcl
@@ -80,7 +75,6 @@ test:
 	@echo PROJ_DIR: $(PROJ_DIR)
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo OUT_DIR: $(OUT_DIR)
-	@echo RTL_DIR: $(RTL_DIR)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
