@@ -8,6 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+ifndef PRJ_VERSION
+export PRJ_VERSION = 0xFFFFFFFF
+endif
+
 # Check for /u1 drive
 BUILD_EXIST=$(shell [ -e  $(TOP_DIR)/build/ ] && echo 1 || echo 0 )
 U1_EXIST=$(shell [ -e /u1/ ] && echo 1 || echo 0 )

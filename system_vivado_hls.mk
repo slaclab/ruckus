@@ -78,6 +78,7 @@ all: target
 test:
 	@echo PROJECT: $(PROJECT)
 	@echo PROJ_DIR: $(PROJ_DIR)
+	@echo PRJ_VERSION: $(PRJ_VERSION)
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo OUT_DIR: $(OUT_DIR)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
