@@ -38,30 +38,39 @@ CheckProcRetVal ${retVal} "csynth_design" "vivado/hls/build"
 
 # Run co-simulation (compares the C/C++ code to the RTL)
 if { [info exists ::env(FAST_DCP_GEN)] == 0 } {
-   set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) }]
+   set retVal [catch { \
+      cosim_design -O \
+      -trace_level $::env(HLS_SIM_TRACE_LEVEL) \
+      -rtl verilog \
+      -ldflags ${LDFLAGS} \
+      -mflags ${MFLAGS} \
+      -argv ${ARGV} \
+      -tool $::env(HLS_SIM_TOOL) \
+      -compiled_library_dir $::env(COMPILED_LIB_DIR)\
+   }]
    CheckProcRetVal ${retVal} "cosim_design" "vivado/hls/build"
 }
 
-# Copy the IP directory to module source tree
-if { [file isdirectory ${PROJ_DIR}/ip/] != 1 } {
-   exec mkdir ${PROJ_DIR}/ip/
-}
+# Make the output directories
+exec rm -rf ${PROJ_DIR}/ip
+exec mkdir ${PROJ_DIR}/ip
+exec rm -rf ${PROJ_DIR}/reports
+exec mkdir ${PROJ_DIR}/reports
 
 # Copy the HLS csynth reports
-set csyn_reports [glob "${OUT_DIR}/${PROJECT}_project/solution1/syn/report/*.rpt"]
-file copy -force {*}$csyn_reports ${PROJ_DIR}/ip/.
+exec cp -rf ${OUT_DIR}/${PROJECT}_project/solution1/syn/report ${PROJ_DIR}/reports/syn
 
 # Export the Design
 if { [info exists ::env(SKIP_EXPORT)] == 0 } {
 
-   set retVal [catch { export_design -flow syn -rtl verilog -format ip_catalog }]
+   set retVal [catch { export_design -format syn_dcp }]
    CheckProcRetVal ${retVal} "export_design" "vivado/hls/build"
 
    # Copy over the .DCP file
-   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1/*.dcp"]] ${PROJ_DIR}/ip/${TOP}.dcp
+   exec cp -rf  ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip ${PROJ_DIR}/.
 
    # Copy the driver to module source tree
-   set DRIVER ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/drivers
+   set DRIVER ${OUT_DIR}/${PROJECT}_project/solution1/impl/misc/drivers
    if { [file exist  ${DRIVER}] } {
       set DRIVER ${DRIVER}/[exec ls ${DRIVER}]/src
       set DRIVER [glob ${DRIVER}/*_hw.h]
@@ -69,7 +78,8 @@ if { [info exists ::env(SKIP_EXPORT)] == 0 } {
    }
 
    # Copy the HLS implementation report
-   exec cp -f  [exec ls [glob "${OUT_DIR}/${PROJECT}_project/solution1/impl/report/verilog/*.rpt"]] ${PROJ_DIR}/ip/.
+   exec cp -rf ${OUT_DIR}/${PROJECT}_project/solution1/impl/report/verilog ${PROJ_DIR}/reports/impl
+
 }
 
 # Close current solution
