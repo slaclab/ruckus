@@ -41,6 +41,11 @@ ifndef COMPILED_LIB_DIR
 export COMPILED_LIB_DIR =
 endif
 
+# Specifies any co-simulation compiled library paths
+ifndef HLS_SIM_TRACE_LEVEL
+export HLS_SIM_TRACE_LEVEL = none
+endif
+
 # Specifies the options passed to the linker for C simulation
 ifndef LDFLAGS
 export LDFLAGS =
