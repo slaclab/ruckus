@@ -26,11 +26,6 @@ export VIVADO_DEPEND    = $(OUT_DIR)/$(PROJECT)_project/$(VIVADO_PROJECT).app
 export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
-# Images Directory
-ifndef RTL_DIR
-export RTL_DIR = $(abspath $(PROJ_DIR)/rtl)
-endif
-
 # Source Files
 ifndef SRC_FILE
 export SRC_FILE = $(PROJ_DIR)/sources.tcl
@@ -39,6 +34,21 @@ endif
 # HLS Simulation Tool [vcs, xsim, modelsim, ncsim, riviera]
 ifndef HLS_SIM_TOOL
 export HLS_SIM_TOOL = xsim
+endif
+
+# Specifies any co-simulation compiled library paths
+ifndef COMPILED_LIB_DIR
+export COMPILED_LIB_DIR =
+endif
+
+# Specifies any co-simulation compiled library paths
+ifndef HLS_SIM_TRACE_LEVEL
+export HLS_SIM_TRACE_LEVEL = none
+endif
+
+# Specifies the options passed to the flags for C simulation
+ifndef CFLAGS
+export CFLAGS =
 endif
 
 # Specifies the options passed to the linker for C simulation
@@ -56,17 +66,7 @@ ifndef ARGV
 export ARGV =
 endif
 
-# Build System Header
-define ACTION_HEADER
-@echo
-@echo    ================================================================
-@echo    $(1)
-@echo    "   Project = $(PROJECT)"
-@echo    "   Out Dir = $(OUT_DIR)"
-@echo -e "   Changed = $(foreach ARG,$?,$(ARG)\n            )"
-@echo    ================================================================
-@echo
-endef
+include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 .PHONY : all
 all: target
@@ -78,9 +78,9 @@ all: target
 test:
 	@echo PROJECT: $(PROJECT)
 	@echo PROJ_DIR: $(PROJ_DIR)
+	@echo PRJ_VERSION: $(PRJ_VERSION)
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo OUT_DIR: $(OUT_DIR)
-	@echo RTL_DIR: $(RTL_DIR)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
@@ -88,6 +88,8 @@ test:
 	@echo ARGV: $(ARGV)
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
+	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
+	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 
 ###############################################################
 #### Build Location ###########################################
@@ -99,7 +101,6 @@ dir:
 #### Vivado Project ###########################################
 ###############################################################
 $(VIVADO_DEPEND) :
-	vivado -mode batch -source $(RUCKUS_DIR)/vivado/hls/version.tcl
 	$(call ACTION_HEADER,"Making output directory")
 	@test -d $(TOP_DIR)/build/ || { \
 			 echo ""; \
