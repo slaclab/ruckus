@@ -63,7 +63,7 @@ exec cp -rf ${OUT_DIR}/${PROJECT}_project/solution1/syn/report ${PROJ_DIR}/repor
 # Export the Design
 if { [info exists ::env(SKIP_EXPORT)] == 0 } {
 
-   set retVal [catch { export_design -flow syn -format syn_dcp }]
+   set retVal [catch { export_design -format syn_dcp }]
    CheckProcRetVal ${retVal} "export_design" "vivado/hls/build"
 
    # Copy over the .DCP file
