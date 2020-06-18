@@ -16,6 +16,11 @@ set RUCKUS_DIR $::env(RUCKUS_DIR)
 source ${RUCKUS_DIR}/vivado/hls/env_var.tcl
 source ${RUCKUS_DIR}/vivado/hls/proc.tcl
 
+## Check for unsupported Vivado_HLS versions
+if { [HlsVersionCheck] < 0 } {
+   exit -1
+}
+
 ## Create a Project
 open_project ${PROJECT}_project
 

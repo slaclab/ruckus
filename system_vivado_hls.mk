@@ -98,7 +98,6 @@ dir:
 #### Vivado Project ###########################################
 ###############################################################
 $(VIVADO_DEPEND) :
-	vivado -mode batch -source $(RUCKUS_DIR)/vivado/hls/version.tcl
 	$(call ACTION_HEADER,"Making output directory")
 	@test -d $(TOP_DIR)/build/ || { \
 			 echo ""; \
