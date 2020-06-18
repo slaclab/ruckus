@@ -46,6 +46,11 @@ ifndef HLS_SIM_TRACE_LEVEL
 export HLS_SIM_TRACE_LEVEL = none
 endif
 
+# Specifies the options passed to the flags for C simulation
+ifndef CFLAGS
+export CFLAGS =
+endif
+
 # Specifies the options passed to the linker for C simulation
 ifndef LDFLAGS
 export LDFLAGS =
