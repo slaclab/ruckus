@@ -36,6 +36,11 @@ ifndef HLS_SIM_TOOL
 export HLS_SIM_TOOL = xsim
 endif
 
+# Specifies any co-simulation compiled library paths
+ifndef COMPILED_LIB_DIR
+export COMPILED_LIB_DIR =
+endif
+
 # Specifies the options passed to the linker for C simulation
 ifndef LDFLAGS
 export LDFLAGS =

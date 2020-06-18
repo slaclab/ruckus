@@ -38,7 +38,7 @@ CheckProcRetVal ${retVal} "csynth_design" "vivado/hls/build"
 
 # Run co-simulation (compares the C/C++ code to the RTL)
 if { [info exists ::env(FAST_DCP_GEN)] == 0 } {
-   set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) }]
+   set retVal [catch { cosim_design -O -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} -trace_level all -rtl verilog -tool $::env(HLS_SIM_TOOL) -compiled_library_dir $::env(COMPILED_LIB_DIR)}]
    CheckProcRetVal ${retVal} "cosim_design" "vivado/hls/build"
 }
 
