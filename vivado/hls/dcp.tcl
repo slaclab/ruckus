@@ -26,10 +26,6 @@ open_checkpoint ${filename}
 # Delete all timing constraint for importing into a target vivado project
 reset_timing
 
-# Create synth_stub
-write_verilog -force -mode synth_stub ${PROJ_DIR}/ip/${fbasename}_stub.v
-write_vhdl    -force -mode synth_stub ${PROJ_DIR}/ip/${fbasename}_stub.vhd
-
 # Overwrite the checkpoint
 write_checkpoint -force ${filename}
 

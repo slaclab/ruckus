@@ -87,6 +87,8 @@ test:
 	@echo ARGV: $(ARGV)
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
+	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
+	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 
 ###############################################################
 #### Build Location ###########################################
