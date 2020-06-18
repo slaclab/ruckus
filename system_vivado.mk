@@ -68,23 +68,6 @@ ifndef RECONFIG_PBLOCK
 export RECONFIG_PBLOCK = 0
 endif
 
-# Check for /u1 drive
-BUILD_EXIST=$(shell [ -e  $(TOP_DIR)/build/ ] && echo 1 || echo 0 )
-U1_EXIST=$(shell [ -e /u1/ ] && echo 1 || echo 0 )
-ifeq ($(U1_EXIST), 1)
-   $(shell mkdir -p /u1/$(USER) )
-   $(shell mkdir -p /u1/$(USER)/build )
-   ifeq ($(BUILD_EXIST), 0)
-      $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )
-   endif
-endif
-U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
-ifeq ($(U1_EXIST), 1)
-   export TMP_DIR=/u1/$(USER)/build
-else
-   export TMP_DIR=/tmp/build
-endif
-
 # Vivado Simulation Variables
 ifndef VIVADO_PROJECT_SIM
 export VIVADO_PROJECT_SIM = $(PROJECT)
@@ -114,45 +97,6 @@ export IMPL_DIR = $(OUT_DIR)/$(VIVADO_PROJECT).runs/impl_1
 # Define the user IP repo
 ifndef IP_REPO
 export IP_REPO = $(OUT_DIR)/ip_repo
-endif
-
-# Generate build string
-export BUILD_SYS_NAME    = $(shell uname -n)
-export BUILD_SVR_TYPE    = $(shell uname -m)
-export BUILD_USER   = $(shell whoami)
-BUILD_DATE := $(shell date)
-BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
-export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
-
-# Check the GIT status
-export GIT_STATUS = $(shell git diff-index --name-only HEAD)
-
-# Check for non-dirty git clone
-ifeq ($(GIT_STATUS),)
-   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
-   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
-   export GIT_HASH_MSG   = $(GIT_HASH_LONG)
-   ifeq ($(RECONFIG_STATIC_HASH), 0)
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
-   else
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)_$(RECONFIG_STATIC_HASH)
-   endif
-else
-   export GIT_HASH_MSG   = dirty
-   # Check if we are using GIT tagging
-   ifeq ($(GIT_BYPASS), 0)
-      export GIT_HASH_LONG  =
-      export GIT_HASH_SHORT =
-   else
-      export GIT_STATUS     =
-      export GIT_HASH_LONG  = 0
-      export GIT_HASH_SHORT = 0
-   endif
-   ifeq ($(RECONFIG_STATIC_HASH), 0)
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
-   else
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty_$(RECONFIG_STATIC_HASH)
-   endif
 endif
 
 ###############################################################
@@ -214,20 +158,6 @@ else
 
 endif
 
-###############################################################
-define ACTION_HEADER
-@echo
-@echo    "============================================================================="
-@echo    $(1)
-@echo    "   Project      = $(PROJECT)"
-@echo    "   Out Dir      = $(OUT_DIR)"
-@echo    "   Version      = $(PRJ_VERSION)"
-@echo    "   Build String = $(BUILD_STRING)"
-@echo    "   GIT Hash     = $(GIT_HASH_MSG)"
-@echo    "============================================================================="
-@echo
-endef
-
 define COPY_PROBES_FILE
 @if [ -f '$(OUT_DIR)/debugProbes.ltx' ] ; then \
 	$(RM) '$(IMAGES_DIR)/$(IMAGENAME).ltx' ; \
@@ -241,6 +171,8 @@ else \
 	echo "No Debug Probes found"; \
 fi
 endef
+
+include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 .PHONY : all
 all: target

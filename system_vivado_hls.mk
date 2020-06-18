@@ -66,34 +66,7 @@ ifndef ARGV
 export ARGV =
 endif
 
-# Check for /u1 drive
-BUILD_EXIST=$(shell [ -e  $(TOP_DIR)/build/ ] && echo 1 || echo 0 )
-U1_EXIST=$(shell [ -e /u1/ ] && echo 1 || echo 0 )
-ifeq ($(U1_EXIST), 1)
-   $(shell mkdir -p /u1/$(USER) )
-   $(shell mkdir -p /u1/$(USER)/build )
-   ifeq ($(BUILD_EXIST), 0)
-      $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )
-   endif
-endif
-U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
-ifeq ($(U1_EXIST), 1)
-   export TMP_DIR=/u1/$(USER)/build
-else
-   export TMP_DIR=/tmp/build
-endif
-
-# Build System Header
-define ACTION_HEADER
-@echo
-@echo    ================================================================
-@echo    $(1)
-@echo    "   Project = $(PROJECT)"
-@echo    "   Out Dir = $(OUT_DIR)"
-@echo -e "   Changed = $(foreach ARG,$?,$(ARG)\n            )"
-@echo    ================================================================
-@echo
-endef
+include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 .PHONY : all
 all: target
