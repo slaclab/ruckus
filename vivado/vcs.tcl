@@ -21,6 +21,10 @@
 source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
+#####################################################################################################
+## Procedures and Checks
+#####################################################################################################
+
 if { [info exists ::env(VCS_VERSION)] != 1 } {
    puts "\n\n*********************************************************"
    puts "VCS_VERSION environmental variable does not exist. Please add"
@@ -94,6 +98,10 @@ proc VcsVersionCheck { } {
    return ${retVar}
 }
 
+#####################################################################################################
+## Open project and some VCS checking
+#####################################################################################################
+
 # Check for version 2016.4 (or later)
 if { [VersionCheck 2016.4] < 0 } {
    close_project
@@ -116,8 +124,13 @@ if { [CheckPrjConfig sim_1] != true } {
 # Target specific VCS script
 SourceTclFile ${VIVADO_DIR}/pre_vcs.tcl
 
+#####################################################################################################
+## Set the local variables
+#####################################################################################################
+
 # Setup variables
-set simLibOutDir ${OUT_DIR}/vcs_library
+set VersionNumber [GetVcsName]
+set simLibOutDir ${VIVADO_INSTALL}/vcs-${VersionNumber}
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
 
@@ -144,25 +157,7 @@ if { [file exists ${simLibOutDir}] != 1 } {
    -cfgopt {vcs_mx.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb }
 
    # Compile the simulation libraries
-   if { [info exists ::env(VCS_IP_COMPILE)] != 1 || $::env(VCS_IP_COMPILE) == 0 } {
-      # Compile the simulation libraries without very long IP compile
-      compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx -no_ip_compile
-   } else {
-      # Compile the simulation libraries with very long IP compile
-      compile_simlib -directory ${simLibOutDir} -family [getFpgaFamily] -simulator vcs_mx
-   }
-
-   # Set VCS as target_simulator
-   set_property target_simulator "VCS" [current_project]
-   set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]
-
-   # Configure VCS settings
-   set_property -name {vcs.compile.vhdlan.more_options} -value ${vhdlanOpt} -objects [get_filesets sim_1]
-   set_property -name {vcs.compile.vlogan.more_options} -value ${vloganOpt} -objects [get_filesets sim_1]
-   set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt}   -objects [get_filesets sim_1]
-   set_property -name {vcs.elaborate.debug_pp}          -value {false}      -objects [get_filesets sim_1]
-   set_property nl.process_corner fast [get_filesets sim_1]
-   set_property unifast true [get_filesets sim_1]
+   catch { compile_simlib -force -simulator vcs_mx -family all -language all -library all -directory ${simLibOutDir} }
 
    ##################################################################
    ##                synopsys_sim.setup bug fix
@@ -173,8 +168,8 @@ if { [file exists ${simLibOutDir}] != 1 } {
    set LIBRARY_SCAN_NEW "LIBRARY_SCAN                    = TRUE"
 
    # open the files
-   set in  [open ${OUT_DIR}/vcs_library/synopsys_sim.setup r]
-   set out [open ${OUT_DIR}/vcs_library/synopsys_sim.temp  w]
+   set in  [open ${simLibOutDir}/synopsys_sim.setup r]
+   set out [open ${simLibOutDir}/synopsys_sim.temp  w]
 
    # Find and replace the LIBRARY_SCAN parameter
    while { [eof ${in}] != 1 } {
@@ -191,16 +186,32 @@ if { [file exists ${simLibOutDir}] != 1 } {
    close ${out}
 
    # over-write the existing file
-   exec mv -f ${OUT_DIR}/vcs_library/synopsys_sim.temp ${OUT_DIR}/vcs_library/synopsys_sim.setup
+   exec mv -f ${simLibOutDir}/synopsys_sim.temp ${simLibOutDir}/synopsys_sim.setup
 
 }
 
 #####################################################################################################
-## Export the Simulation
+## Setup Vivado's VCS environment
 #####################################################################################################
+
+# Set VCS as target_simulator
+set_property target_simulator "VCS" [current_project]
+set_property compxlib.vcs_compiled_library_dir ${simLibOutDir} [current_project]
+
+# Configure VCS settings
+set_property -name {vcs.compile.vhdlan.more_options} -value ${vhdlanOpt} -objects [get_filesets sim_1]
+set_property -name {vcs.compile.vlogan.more_options} -value ${vloganOpt} -objects [get_filesets sim_1]
+set_property -name {vcs.elaborate.vcs.more_options}  -value ${elabOpt}   -objects [get_filesets sim_1]
+set_property -name {vcs.elaborate.debug_pp}          -value {false}      -objects [get_filesets sim_1]
+set_property nl.process_corner fast [get_filesets sim_1]
+set_property unifast true [get_filesets sim_1]
 
 # Update the compile order
 update_compile_order -quiet -fileset sim_1
+
+#####################################################################################################
+## Export the Simulation
+#####################################################################################################
 
 # Export Xilinx & User IP Cores
 generate_target -force {simulation} [get_ips]
@@ -209,13 +220,13 @@ export_ip_user_files -force -no_script
 # Launch the scripts generator
 set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
 set define  [get_property verilog_define [get_filesets sim_1]]; # Verilog only
-export_simulation -absolute_path -force -simulator vcs -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
+export_simulation -force -absolute_path -simulator vcs -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
 
 #####################################################################################################
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################
+
 set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueTcpStream.vhd RogueTcpMemory.vhd RogueSideBand.vhd}]
-set rogueSimEn false
 if { ${rogueSimPath} != "" } {
 
    # Set the flag true
@@ -272,7 +283,10 @@ if { ${rogueSimPath} != "" } {
    # Move back to simulation target directory
    cd $::env(PROJ_DIR)
 
+} else {
+   set rogueSimEn false
 }
+
 
 #####################################################################################################
 ## Customization of the executable bash (.sh) script
