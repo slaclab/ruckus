@@ -30,10 +30,8 @@ if { [info exists ::env(VCS_VERSION)] != 1 } {
    exit -1
 }
 
-## Checks for VCS versions that ruckus supports
-proc VcsVersionCheck { } {
-   # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03"
+## Get VCS install name
+proc GetVcsName { } {
 
    # Get the VCS version
    set err_ret [catch {
@@ -60,7 +58,19 @@ proc VcsVersionCheck { } {
       return -1
    }
    scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
+
+   return ${VersionNumber}
+}
+
+## Checks for VCS versions that ruckus supports
+proc VcsVersionCheck { } {
    set retVar -1
+
+   # List of supported VCS versions
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03"
+
+   # Get Version Name
+   set VersionNumber [GetVcsName]
 
    # Generate error message
    set errMsg "\n\n*********************************************************\n"
@@ -102,7 +112,6 @@ open_project -quiet ${VIVADO_PROJECT}
 if { [CheckPrjConfig sim_1] != true } {
    exit -1
 }
-
 
 # Target specific VCS script
 SourceTclFile ${VIVADO_DIR}/pre_vcs.tcl
