@@ -74,6 +74,7 @@ endif
 
 # Synthesis Variables
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "(\d+\.)+\d+")
+export VIVADO_INSTALL   = $(abspath  $(shell which vivado)/../..)
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
 export VIVADO_PROJECT   = $(PROJECT)_project
 export VIVADO_DEPEND    = $(OUT_DIR)/$(VIVADO_PROJECT).xpr
@@ -191,6 +192,7 @@ test:
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
+	@echo VIVADO_INSTALL: $(VIVADO_INSTALL)
 	@echo XILINX_LOCAL_USER_DATA: $(XILINX_LOCAL_USER_DATA)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
