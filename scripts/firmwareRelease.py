@@ -101,7 +101,7 @@ def loadReleaseConfig():
     try:
         with open(relFile) as f:
             txt = f.read()
-            cfg = yaml.load(txt)
+            cfg = yaml.load(txt,Loader=yaml.Loader)
     except Exception as e:
         raise Exception(f"Failed to load project release file {relFile}: {e}")
 
