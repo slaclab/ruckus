@@ -209,6 +209,15 @@ set_property unifast true [get_filesets sim_1]
 # Update the compile order
 update_compile_order -quiet -fileset sim_1
 
+# Check for mixed-simulation
+set fileList [get_files -compile_order sources -used_in simulation]
+set mixedSim false
+foreach filePntr ${fileList} {
+   if { [file extension ${filePntr}] ne {.vhd} } {
+      set mixedSim true
+   }
+}
+
 #####################################################################################################
 ## Export the Simulation
 #####################################################################################################
@@ -299,10 +308,12 @@ set err_ret [catch {get_files -compile_order sources -used_in simulation {*.sv}}
 set vlogan_opts_old   "vlogan_opts=\"-full64"
 set vhdlan_opts_old   "vhdlan_opts=\"-full64"
 set vcs_elab_opts_old "vcs_elab_opts=\"-full64"
+set surf_glbl_old     "surf.glbl -o simv"
 
 set vlogan_opts_new   "${vlogan_opts_old} ${vloganOpt}"
 set vhdlan_opts_new   "${vhdlan_opts_old} ${vhdlanOpt}"
 set vcs_elab_opts_new "${vcs_elab_opts_old} ${elabOpt}"
+set surf_glbl_new      "-o simv"
 
 # Copy of all the Xilinx IP core datafile
 set list ""
@@ -349,6 +360,10 @@ while { [eof ${in}] != 1 } {
            ${svList}  == "" } {
          # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
          set line [string map { "xil_defaultlib.glbl" "" } ${line}]
+      }
+
+      if { ${mixedSim} != true } {
+         set line [string map [list ${surf_glbl_old} ${surf_glbl_new}] ${line}]
       }
 
       # Write to file
