@@ -40,3 +40,4 @@ firmware/common/python/
 *.hdf
 *.vho
 *.zip
+*.xsa
