@@ -305,14 +305,15 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
     # Create conda-recipe/build.sh
     tmpTxt =  '#!/usr/bin/bash\n\n'
-    tmpTxt += 'python setup.py install\n\n'
 
     # Library build is included
     if 'LibDir' in relData:
-        tmpTxt += 'mkdir build\n'
-        tmpTxt += 'cd build\n'
+        tmpTxt += 'mkdir lib_build\n'
+        tmpTxt += 'cd lib_build\n'
         tmpTxt += 'cmake ../lib\n'
         tmpTxt += 'make -j ${CPU_COUNT} install\n'
+
+    tmpTxt += 'python setup.py install\n\n'
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
