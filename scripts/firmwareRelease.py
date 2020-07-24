@@ -311,7 +311,8 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += 'mkdir lib_build\n'
         tmpTxt += 'cd lib_build\n'
         tmpTxt += 'cmake ../lib\n'
-        tmpTxt += 'make -j ${CPU_COUNT} install\n'
+        tmpTxt += 'make -j ${CPU_COUNT}\n'
+        tmpTxt += 'cd ..\n'
 
     tmpTxt += 'python setup.py install\n\n'
 
@@ -359,7 +360,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
     # Conda build script
     tmpTxt  = '#!/usr/bin/bash\n\n'
-    tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge\n'
+    tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c tidair-packages -c conda-forge\n'
     tmpTxt += '\n'
 
     # Create conda.sh
@@ -474,7 +475,6 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
 
         # Walk through collected library directories
         for e in lList:
-            print(f"Adding {e['fullPath']} at {e['subPath']}")
             zf.write(e['fullPath'],'lib/' + e['subPath'])
 
         if topPath is None:
