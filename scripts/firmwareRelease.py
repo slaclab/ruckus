@@ -261,10 +261,10 @@ def selectBuildImages(cfg, relName, relData):
 def genFileList(base,root,entries,typ):
     retList = []
 
-    if '__pycache__' not in root:
+    if '__pycache__' not in root and 'build' not in root:
         for e in entries:
             if '__pycache__' not in e:
-                fullPath = os.path.join(root,e)
+                fullPath = os.path.abspath(os.path.join(root,e))
                 subPath  = fullPath.replace(base+'/','')
 
                 retList.append({'type':typ,
@@ -277,8 +277,14 @@ def selectDirectories(cfg, key):
     retList = []
 
     if key in cfg and cfg[key] is not None:
-        for d in cfg[key]:
-            base = os.path.join(FirmwareDir,d)
+
+        if isinstance(cfg[key],list):
+            lst = cfg[key]
+        else:
+            lst = [cfg[key]]
+
+        for d in lst:
+            base = os.path.abspath(os.path.join(FirmwareDir,d))
 
             for root, folders, files in os.walk(base):
                 retList.extend(genFileList(base,root,folders,'folder'))
@@ -295,11 +301,20 @@ def selectFiles(cfg, key):
 
     return retList
 
-def buildCondaFiles(cfg,zipFile,ver,relName):
+def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
     # Create conda-recipe/build.sh
     tmpTxt =  '#!/usr/bin/bash\n\n'
-    tmpTxt += 'python setup.py install\n\n'
+
+    # Library build is included
+    if 'LibDir' in relData:
+        tmpTxt += 'mkdir lib_build\n'
+        tmpTxt += 'cd lib_build\n'
+        tmpTxt += 'cmake ../lib\n'
+        tmpTxt += 'make -j ${CPU_COUNT}\n'
+        tmpTxt += 'cd ..\n'
+
+    tmpTxt += '${PYTHON} setup.py install\n\n'
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -311,19 +326,32 @@ def buildCondaFiles(cfg,zipFile,ver,relName):
     tmpTxt =  'package:\n'
     tmpTxt += f'  name: {relNameLower}\n'
     tmpTxt += f'  version: {ver}\n'
-    tmpTxt += f'\n'
+    tmpTxt += '\n'
     tmpTxt += 'source:\n'
-    tmpTxt += f'  path: ..\n'
-    tmpTxt += f'\n'
+    tmpTxt += '  path: ..\n'
+    tmpTxt += '\n'
+    tmpTxt += 'build:\n'
+    tmpTxt += '  number: 1\n'
+    tmpTxt += '\n'
     tmpTxt += 'requirements:\n'
-    tmpTxt += f'  build:\n'
-    tmpTxt += f'    - rogue\n'
-    tmpTxt += f'    - python\n'
-    tmpTxt += f'    - setuptools\n'
-    tmpTxt += f'\n'
-    tmpTxt += f'  run:\n'
-    tmpTxt += f'    - rogue\n'
-    tmpTxt += f'    - python\n'
+    tmpTxt += '  build:\n'
+    tmpTxt += '    - rogue\n'
+
+    if 'LibDir' in relData:
+        tmpTxt += "    - {{ compiler('c') }}\n"
+        tmpTxt += "    - {{ compiler('cxx') }}\n"
+
+    tmpTxt += '    - python\n'
+    tmpTxt += '    - setuptools\n'
+    tmpTxt += '\n'
+    tmpTxt += '  host:\n'
+    tmpTxt += '    - rogue\n'
+    tmpTxt += '    - python\n'
+    tmpTxt += '    - setuptools\n'
+    tmpTxt += '\n'
+    tmpTxt += '  run:\n'
+    tmpTxt += '    - rogue\n'
+    tmpTxt += '    - python\n'
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
         for f in cfg['CondaDependencies']:
@@ -340,14 +368,14 @@ def buildCondaFiles(cfg,zipFile,ver,relName):
 
     # Conda build script
     tmpTxt  = '#!/usr/bin/bash\n\n'
-    tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge\n'
+    tmpTxt += 'conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c tidair-packages -c conda-forge\n'
     tmpTxt += '\n'
 
     # Create conda.sh
     with zipFile.open('conda.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
 
-def buildSetupPy(zipFile,ver,relName,packList,sList):
+def buildSetupPy(zipFile,ver,relName,packList,sList,relData):
 
     # setuptools version creates and installs a .egg file which will not work with
     # our image and config data! Use distutils version for now.
@@ -366,7 +394,12 @@ def buildSetupPy(zipFile,ver,relName,packList,sList):
 
     # Close up setup.py file
     setupPy +=  "   package_dir={'':'python'},\n"
-    setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*']},\n"
+    setupPy +=  "   package_data={'" + cfg['TopRoguePackage'] + "':['config/*','images/*'],\n"
+
+    if 'LibDir' in relData:
+        setupPy +=  "                 '' : ['../*.so'],\n"
+
+    setupPy +=  "                },\n"
 
     if len(sList) != 0:
         setupPy +=  "   scripts=[\n"
@@ -388,6 +421,7 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     pList = selectDirectories(cfg, 'RoguePackages')
     cList = selectDirectories(cfg, 'RogueConfig')
     sList = selectFiles(cfg,       'RogueScripts')
+    lList = selectDirectories(relData, 'LibDir')
 
     if len(pList) == 0:
         raise Exception(f"Invalid release config. Rogue packages list is empty!")
@@ -447,6 +481,10 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
             dst = 'scripts/' + os.path.basename(e)
             zf.write(e,dst)
 
+        # Walk through collected library directories
+        for e in lList:
+            zf.write(e['fullPath'],'lib/' + e['subPath'])
+
         if topPath is None:
             raise Exception(f"Failed to find file: firmware/python/{topInit}")
 
@@ -473,10 +511,10 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
             f.write(newInit.encode('utf-8'))
 
         # Add setup.py file
-        buildSetupPy(zf,ver,relName,packList,sList)
+        buildSetupPy(zf,ver,relName,packList,sList,relData)
 
         # Add conda files
-        buildCondaFiles(cfg,zf,ver,relName)
+        buildCondaFiles(cfg,zf,ver,relName,relData)
 
 
 def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
