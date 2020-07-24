@@ -314,7 +314,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += 'make -j ${CPU_COUNT}\n'
         tmpTxt += 'cd ..\n'
 
-    tmpTxt += 'python setup.py install\n\n'
+    tmpTxt += '${PYTHON} setup.py install\n\n'
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -330,6 +330,9 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += 'source:\n'
     tmpTxt += '  path: ..\n'
     tmpTxt += '\n'
+    tmpTxt += 'build:\n'
+    tmpTxt += '  number: 1\n'
+    tmpTxt += '\n'
     tmpTxt += 'requirements:\n'
     tmpTxt += '  build:\n'
     tmpTxt += '    - rogue\n'
@@ -338,6 +341,11 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += "    - {{ compiler('c') }}\n"
         tmpTxt += "    - {{ compiler('cxx') }}\n"
 
+    tmpTxt += '    - python\n'
+    tmpTxt += '    - setuptools\n'
+    tmpTxt += '\n'
+    tmpTxt += '  host:\n'
+    tmpTxt += '    - rogue\n'
     tmpTxt += '    - python\n'
     tmpTxt += '    - setuptools\n'
     tmpTxt += '\n'
