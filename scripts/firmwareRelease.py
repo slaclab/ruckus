@@ -340,7 +340,6 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += '    - setuptools\n'
 
     if 'LibDir' in relData:
-        tmpTxt += '  build:\n'
         tmpTxt += "    - {{ compiler('c') }}\n"
         tmpTxt += "    - {{ compiler('cxx') }}\n"
 
