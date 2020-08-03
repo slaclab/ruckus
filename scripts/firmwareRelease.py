@@ -336,22 +336,21 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += 'requirements:\n'
     tmpTxt += '  build:\n'
     tmpTxt += '    - rogue\n'
+    tmpTxt += '    - python<3.8\n'
+    tmpTxt += '    - setuptools\n'
 
     if 'LibDir' in relData:
         tmpTxt += "    - {{ compiler('c') }}\n"
         tmpTxt += "    - {{ compiler('cxx') }}\n"
 
-    tmpTxt += '    - python\n'
-    tmpTxt += '    - setuptools\n'
     tmpTxt += '\n'
     tmpTxt += '  host:\n'
     tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python\n'
+    tmpTxt += '    - python<3.8\n'
     tmpTxt += '    - setuptools\n'
     tmpTxt += '\n'
     tmpTxt += '  run:\n'
     tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python\n'
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
         for f in cfg['CondaDependencies']:
