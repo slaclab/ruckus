@@ -62,4 +62,4 @@ except:
     remRel = remRepo.create_git_release(tag=newTag, name=newName, message=md, draft=False)
     print("Success!")
 else:
-    exit(f'{newTag} release already exists')
+    print( f'{newTag} release already exists' )
