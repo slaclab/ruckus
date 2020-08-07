@@ -32,10 +32,11 @@ exclude = __init__.py
 # E501 line too long
 # W605 invalid escape sequence
 # E713 test for membership should be 'not in'
+# E722 do not use bare 'except'
 #############################################################
 ignore = E116,E128,E131,\
          E201,E202,E203,E211,E221,E222,E225,E226,E227,E228,E231,E241,E251,E261,E262,E265,E266,E272,\
          E302,E303,E305,E306,\
          E501,\
          W605,\
-         E713
+         E722,E713
