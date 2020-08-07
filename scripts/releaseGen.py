@@ -54,7 +54,12 @@ def releaseType(ver):
 
 newName = f'{releaseType(newTag)} Release {newTag}'
 
-# Create release using tag
-remRel = remRepo.create_git_release(tag=newTag, name=newName, message=md, draft=False)
-
-print("Success!")
+# Check if tag already exists
+try:
+    remRepo.get_release(newTag)
+except:
+    # Create release using tag
+    remRel = remRepo.create_git_release(tag=newTag, name=newName, message=md, draft=False)
+    print("Success!")
+else:
+    exit(f'{newTag} release already exists')
