@@ -624,12 +624,7 @@ if __name__ == "__main__":
 
     # Determine if we generate a Rogue zipfile
     if 'Rogue' in relData['Types']:
-
-        if relData['Primary']:
-            zipName = os.path.join(os.getcwd(),f'rogue_{ver}.zip')
-        else:
-            zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
-
+        zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
         buildRogueFile(zipName,cfg,ver,relName,relData,imgList)
         tagAttach.append(zipName)
 
