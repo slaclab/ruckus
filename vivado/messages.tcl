@@ -18,6 +18,21 @@
 source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
+# Get the value of all the timing ignore flags
+set tigAll   [expr {[info exists ::env(TIG)]       && [string is true -strict $::env(TIG)]}]
+set tigSetup [expr {[info exists ::env(TIG_SETUP)] && [string is true -strict $::env(TIG_SETUP)]}]
+set tigHold  [expr {[info exists ::env(TIG_HOLD)]  && [string is true -strict $::env(TIG_HOLD)]}]
+set tigPulse [expr {[info exists ::env(TIG_PULSE)] && [string is true -strict $::env(TIG_PULSE)]}]
+
+if { ${tigSetup} == 1 ||
+     ${tigHold}  == 1 ||
+     ${tigPulse} == 1 ||
+     ${tigAll}   == 1 } {
+   set notTig false
+} else {
+   set notTig true
+}
+
 ########################################################
 ## Message Suppression
 ########################################################
@@ -108,7 +123,9 @@ set_msg_config -id {Synth 8-327}      -new_severity ERROR;# SYNTH: Inferred latc
 set_msg_config -id {VRFC 10-664}      -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found in the same library
 set_msg_config -id {IP_Flow 19-1663}  -new_severity ERROR;# IP_FLOW: Duplicate IP found
-set_msg_config -id {Route 35-328}     -new_severity ERROR;# IMPL: Router estimated timing not met
+if { ${notTig} } {
+   set_msg_config -id {Route 35-328}     -new_severity ERROR;# IMPL: Router estimated timing not met
+}
 
 ## Check for version 2015.3 (or older)
 if { [VersionCompare 2015.3] <= 0 } {
@@ -144,8 +161,10 @@ set_msg_config -id {HDL 9-806}      -new_severity ERROR;# SYNTH: Syntax error ne
 set_msg_config -id {Opt 31-80}      -new_severity ERROR;# IMPL: Multi-driver net found in the design
 set_msg_config -id {Route 35-14}    -new_severity ERROR;# IMPL: Multi-driver net found in the design
 set_msg_config -id {AVAL-46}        -new_severity ERROR;# DRC: MMCM's (or PLL's) VCO frequency out of range
-set_msg_config -id {Route 35-39}    -new_severity ERROR;# IMPL: The design did not meet timing requirements
-set_msg_config -id {Timing 38-282}  -new_severity ERROR;# IMPL: The design failed to meet the timing requirements
+if { ${notTig} } {
+   set_msg_config -id {Route 35-39}    -new_severity ERROR;# IMPL: The design did not meet timing requirements
+   set_msg_config -id {Timing 38-282}  -new_severity ERROR;# IMPL: The design failed to meet the timing requirements
+}
 
 ########################################################
 ## Modifying ERROR messaging
