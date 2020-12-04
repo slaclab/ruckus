@@ -67,7 +67,7 @@ if { [info exists ::env(SKIP_EXPORT)] == 0 } {
    CheckProcRetVal ${retVal} "export_design" "vivado/hls/build"
 
    # Copy over the .DCP file
-   exec cp -rf  ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip ${PROJ_DIR}/.
+   exec cp -rf [glob -directory ${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog/project.runs/synth_1 *.dcp] ${PROJ_DIR}/ip/.
 
    # Copy the driver to module source tree
    set DRIVER ${OUT_DIR}/${PROJECT}_project/solution1/impl/misc/drivers
