@@ -39,8 +39,8 @@ jobs:
 
       - name: Python Syntax Check
         run: |
-          python -m compileall -f python/
-          flake8 --count python/
+          python -m compileall -f scripts/
+          flake8 --count scripts/
 
       - name: Generate Documentation
         run: |
