@@ -170,7 +170,7 @@ def selectRelease(cfg):
             relName = keyList[idx]
 
     if '-' in relName:
-        raise Exception(f"Invalid release name. Release names with '-' are not support in python!")
+        raise Exception("Invalid release name. Release names with '-' are not support in python!")
 
     relData = cfg['Releases'][relName]
 
@@ -356,11 +356,11 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         for f in cfg['CondaDependencies']:
             tmpTxt += f'    - {f}\n'
 
-    tmpTxt += f'\n'
+    tmpTxt += '\n'
     tmpTxt += 'about:\n'
-    tmpTxt += f'  license: SLAC Open License\n'
-    tmpTxt += f'  license_file: LICENSE.txt\n'
-    tmpTxt += f'\n'
+    tmpTxt += '  license: SLAC Open License\n'
+    tmpTxt += '  license_file: LICENSE.txt\n'
+    tmpTxt += '\n'
 
     with zipFile.open('conda-recipe/meta.yaml','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -423,7 +423,7 @@ def buildRogueFile(zipName, cfg, ver, relName, relData, imgList):
     lList = selectDirectories(relData, 'LibDir')
 
     if len(pList) == 0:
-        raise Exception(f"Invalid release config. Rogue packages list is empty!")
+        raise Exception("Invalid release config. Rogue packages list is empty!")
 
     if not 'TopRoguePackage' in cfg or cfg['TopRoguePackage'] is None:
         raise Exception("Invalid release config. TopRoguePackage is not defined!")
@@ -524,7 +524,7 @@ def buildCpswFile(tarName, cfg, ver, relName, relData, imgList):
     baseDir = relName + '_project.yaml'
 
     if len(sList) == 0:
-        raise Exception(f"Invalid release config. Cpsw packages list is empty!")
+        raise Exception("Invalid release config. Cpsw packages list is empty!")
 
     with tarfile.open(tarName,'w:gz') as tf:
         print(f"\nCreating CPSW tarfile {tarName}")
