@@ -123,9 +123,6 @@ set_msg_config -id {Synth 8-327}      -new_severity ERROR;# SYNTH: Inferred latc
 set_msg_config -id {VRFC 10-664}      -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found in the same library
 set_msg_config -id {IP_Flow 19-1663}  -new_severity ERROR;# IP_FLOW: Duplicate IP found
-if { ${notTig} } {
-   set_msg_config -id {Route 35-328}     -new_severity ERROR;# IMPL: Router estimated timing not met
-}
 
 ## Check for version 2015.3 (or older)
 if { [VersionCompare 2015.3] <= 0 } {
@@ -142,6 +139,7 @@ set_msg_config -id {Synth 8-3919}      -new_severity "CRITICAL WARNING";# SYNTH:
 set_msg_config -id {Synth 8-153}       -new_severity "CRITICAL WARNING";# SYNTH: Case statement has an input that will never be executed
 set_msg_config -id {Synth 8-3295}      -new_severity "CRITICAL WARNING";# SYNTH: Tying undriven pin to a constant
 set_msg_config -id {Synth 8-5835}      -new_severity "CRITICAL WARNING";# SYNTH: Resources of type BRAM have been overutilized. Will try to implement using LUT-RAM.
+set_msg_config -id {Route 35-328}      -new_severity "CRITICAL WARNING";# IMPL: Router estimated timing not met
 
 ########################################################
 ## Modifying CRITICAL_WARNING messaging
