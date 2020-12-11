@@ -98,6 +98,20 @@ proc getFpgaFamily { } {
    return [get_property FAMILY [get_property {PART} [current_project]]]
 }
 
+## Returns the FPGA family string
+proc getFpgaArch { } {
+   return [get_property ARCHITECTURE [get_property {PART} [current_project]]]
+}
+
+## Returns true is Versal
+proc isVersal { } {
+   if { [getFpgaArch] != "versal" } {
+      return false;
+   } else {
+      return true;
+   }
+}
+
 ## Get the number of CPUs available on the Linux box
 proc GetCpuNumber { } {
    return [exec cat /proc/cpuinfo | grep processor | wc -l]
