@@ -230,7 +230,11 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
                # Check if copying .DCP output
                if { ${copyDcp} } {
                   # Overwrite the existing .dcp file in the source tree
-                  set SRC [string map {.xci .dcp} ${SRC}]
+                  if { $::env(VIVADO_VERSION) >= 2020.2 } {
+                     set SRC "${OUT_DIR}/${VIVADO_PROJECT}.runs/${corePntr}_synth_1/${corePntr}.dcp"
+                  } else {
+                     set SRC [string map {.xci .dcp} ${SRC}]
+                  }
                   set DST [string map {.xci .dcp} ${DST}]
                   exec cp ${SRC} ${DST}
                   puts "exec cp ${SRC} ${DST}"
