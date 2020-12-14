@@ -27,7 +27,11 @@ set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE ${RUCKUS_DIR}/vivado/mess
 set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE             ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
 set_property STEPS.ROUTE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
-set_property STEPS.WRITE_BITSTREAM.TCL.PRE             ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+if { [isVersal] } {
+   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE       ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+} else {
+   set_property STEPS.WRITE_BITSTREAM.TCL.PRE          ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+}
 
 # Refer to http://www.xilinx.com/support/answers/65415.html
 if { [VersionCompare 2016.1] >= 0 } {
