@@ -98,6 +98,20 @@ proc getFpgaFamily { } {
    return [get_property FAMILY [get_property {PART} [current_project]]]
 }
 
+## Returns the FPGA family string
+proc getFpgaArch { } {
+   return [get_property ARCHITECTURE [get_property {PART} [current_project]]]
+}
+
+## Returns true is Versal
+proc isVersal { } {
+   if { [getFpgaArch] != "versal" } {
+      return false;
+   } else {
+      return true;
+   }
+}
+
 ## Get the number of CPUs available on the Linux box
 proc GetCpuNumber { } {
    return [exec cat /proc/cpuinfo | grep processor | wc -l]
@@ -216,7 +230,11 @@ proc CopyIpCores { {copyDcp true} {copySourceCode false} } {
                # Check if copying .DCP output
                if { ${copyDcp} } {
                   # Overwrite the existing .dcp file in the source tree
-                  set SRC [string map {.xci .dcp} ${SRC}]
+                  if { $::env(VIVADO_VERSION) >= 2020.2 } {
+                     set SRC "${OUT_DIR}/${VIVADO_PROJECT}.runs/${corePntr}_synth_1/${corePntr}.dcp"
+                  } else {
+                     set SRC [string map {.xci .dcp} ${SRC}]
+                  }
                   set DST [string map {.xci .dcp} ${DST}]
                   exec cp ${SRC} ${DST}
                   puts "exec cp ${SRC} ${DST}"
