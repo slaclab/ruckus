@@ -31,7 +31,7 @@ endif
 
 # Generate build string
 export BUILD_SYS_NAME    = $(shell uname -n)
-export BUILD_SVR_TYPE    = $(shell uname -m)
+export BUILD_SVR_TYPE    = $(strip $(shell cat /etc/issue | cut -d '\' -f 1) )
 export BUILD_USER   = $(shell whoami)
 BUILD_DATE := $(shell date)
 BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
