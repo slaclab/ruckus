@@ -19,8 +19,8 @@ source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
 if { [VersionCompare 2020.1] >= 0 } {
-   report_qor_assessment  -file ${SYN_DIR}/${PROJECT}_qor_assessment_routed.rpt
-   report_qor_suggestions -file ${SYN_DIR}/${PROJECT}_qor_suggestions_routed.rpt
+   report_qor_assessment  -file ${IMPL_DIR}/${PROJECT}_qor_assessment_routed.rpt
+   report_qor_suggestions -file ${IMPL_DIR}/${PROJECT}_qor_suggestions_routed.rpt
 }
 
 # Target specific script
