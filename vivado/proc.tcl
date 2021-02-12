@@ -879,28 +879,40 @@ proc DcpCompleteMessage { filename } {
 proc VersionCheck { lockVersion {mustBeExact ""} } {
    # Get the Vivado version
    set VersionNumber [version -short]
-   # Generate error message
-   set errMsg "\n\n*********************************************************\n"
-   set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
-   set errMsg "${errMsg}However, Vivado Version Lock = ${lockVersion}\n"
-   set errMsg "${errMsg}You need to change your Vivado software to Version ${lockVersion}\n"
-   set errMsg "${errMsg}*********************************************************\n\n"
-   # Check for less than
-   if { ${VersionNumber} < ${lockVersion} } {
-      puts ${errMsg}
-      return -1
-   # Check for equal to
-   } elseif { ${VersionNumber} == ${lockVersion} } {
-      return 0
-   # Check for greater than but must be exact
-   } elseif { ${mustBeExact} == "mustBeExact" } {
-      puts ${errMsg}
-      return -1
-   # Else for greater than and not exact
+   if { [info exists ::env(BYPASS_VERSION_CHECK)] != 1 || $::env(BYPASS_VERSION_CHECK) == 0 } {
+      # Generate error message
+      set errMsg "\n\n*********************************************************\n"
+      set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+      set errMsg "${errMsg}However, Vivado Version Lock = ${lockVersion}\n"
+      set errMsg "${errMsg}You need to change your Vivado software to Version ${lockVersion}\n"
+      set errMsg "${errMsg}*********************************************************\n\n"
+      # Check for less than
+      if { ${VersionNumber} < ${lockVersion} } {
+         puts ${errMsg}
+         return -1
+      # Check for equal to
+      } elseif { ${VersionNumber} == ${lockVersion} } {
+         return 0
+      # Check for greater than but must be exact
+      } elseif { ${mustBeExact} == "mustBeExact" } {
+         puts ${errMsg}
+         return -1
+      # Else for greater than and not exact
+      } else {
+         return 1
+      }
    } else {
-      return 1
+      # Generate warning message
+      set warnMsg "\n\n*********************************************************\n"
+      set warnMsg "${warnMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+      set warnMsg "${warnMsg}The Vivado Version Lock = ${lockVersion}\n"
+      set warnMsg "${warnMsg}However, BYPASS_VERSION_CHECK = 1\n"
+      set warnMsg "${warnMsg}*********************************************************\n\n"
+      puts ${warnMsg}
+      return 0
    }
 }
+
 
 ## Compares the tag release to a user defined value
 proc CompareTags { tag lockTag } {
