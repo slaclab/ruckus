@@ -8,20 +8,13 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/run/post/route.tcl
-# \brief This script runs at the end of the place and route (inside of impl_1)
+## \file vivado/run/post/gui_write.tcl
 
-########################################################
-## Get variables and Custom Procedures
-########################################################
+# Get variables and Custom Procedures
 source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
-if { [VersionCompare 2020.1] >= 0 } {
-   report_qor_assessment  -file ${SYN_DIR}/${PROJECT}_qor_assessment_routed.rpt
-   report_qor_suggestions -file ${SYN_DIR}/${PROJECT}_qor_suggestions_routed.rpt
-}
-
-# Target specific script
-SourceTclFile ${VIVADO_DIR}/post_route_run.tcl
+########################################################
+## Copy the .bit/.mcs image files
+########################################################
+CreateFpgaBit
