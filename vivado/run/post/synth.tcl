@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/post_synth_run.tcl
+## \file vivado/run/post/synth.tcl
 # \brief This script runs at the end of the synthesis run (inside of synth_1)
 
 ########################################################

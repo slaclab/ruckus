@@ -20,9 +20,9 @@ source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
 # Update the bitstream post script
 if { [isVersal] } {
-   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST ${RUCKUS_DIR}/vivado/post_route_run.tcl [get_runs impl_1]
+   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST ${RUCKUS_DIR}/vivado/run/post/route.tcl [get_runs impl_1]
 } else {
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado/post_route_run.tcl [get_runs impl_1]
+   set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado/run/post/route.tcl [get_runs impl_1]
 }
 
 # Call the user script
