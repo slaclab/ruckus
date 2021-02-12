@@ -901,17 +901,18 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
       } else {
          return 1
       }
-   } else
+   } else {
       # Generate warning message
       set warnMsg "\n\n*********************************************************\n"
       set warnMsg "${warnMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
       set warnMsg "${warnMsg}The Vivado Version Lock = ${lockVersion}\n"
       set warnMsg "${warnMsg}However, BYPASS_VERSION_CHECK = 1\n"
-      set warnMsg "${warnMsg}*********************************************************\n\n"   
+      set warnMsg "${warnMsg}*********************************************************\n\n"
       puts ${warnMsg}
-      return 0      
+      return 0
    }
 }
+
 
 ## Compares the tag release to a user defined value
 proc CompareTags { tag lockTag } {
