@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/post_synth_run.tcl
+## \file vivado/run/post/synth.tcl
 # \brief This script runs at the end of the synthesis run (inside of synth_1)
 
 ########################################################
@@ -28,6 +28,11 @@ if { ${AllowMultiDriven} != 1 } {
       puts "\n\n\nMulti-driven nets detected during synthesis!!!\n\n"
       exit -1
    }
+}
+
+if { [VersionCompare 2020.1] >= 0 } {
+   report_qor_assessment  -file ${SYN_DIR}/${PROJECT}_qor_assessment_synth.rpt
+   report_qor_suggestions -file ${SYN_DIR}/${PROJECT}_qor_suggestions_synth.rpt
 }
 
 # GUI Related:

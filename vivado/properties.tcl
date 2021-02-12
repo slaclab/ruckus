@@ -15,18 +15,38 @@
 source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
-# Setup pre and post scripts for synthesis
-set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/pre_synth_run.tcl  [get_runs synth_1]
-set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/post_synth_run.tcl [get_runs synth_1]
+# Setup scripts for SYNTH
+set_property STEPS.SYNTH_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/synth.tcl  [get_runs synth_1]
+set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/synth.tcl [get_runs synth_1]
 
-# Setup pre and post scripts for implementation
-set_property STEPS.OPT_DESIGN.TCL.PRE                  ${RUCKUS_DIR}/vivado/pre_opt_run.tcl [get_runs impl_1]
-set_property STEPS.POWER_OPT_DESIGN.TCL.PRE            ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
-set_property STEPS.PLACE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
-set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
-set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE             ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
-set_property STEPS.ROUTE_DESIGN.TCL.PRE                ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
-set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+# Setup scripts for OPT
+set_property STEPS.OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/opt.tcl  [get_runs impl_1]
+set_property STEPS.OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/opt.tcl [get_runs impl_1]
+
+# Setup scripts for POWER_OPT
+set_property STEPS.POWER_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/power_opt.tcl  [get_runs impl_1]
+set_property STEPS.POWER_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/power_opt.tcl [get_runs impl_1]
+
+# Setup scripts for PLACE
+set_property STEPS.PLACE_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/place.tcl  [get_runs impl_1]
+set_property STEPS.PLACE_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/place.tcl [get_runs impl_1]
+
+# Setup scripts for POST_PLACE_POWER_OPT
+set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/post_place_power_opt.tcl  [get_runs impl_1]
+set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/post_place_power_opt.tcl [get_runs impl_1]
+
+# Setup scripts for PHYS_OPT
+set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/phys_opt.tcl  [get_runs impl_1]
+set_property STEPS.PHYS_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/phys_opt.tcl [get_runs impl_1]
+
+# Setup scripts for ROUTE
+set_property STEPS.ROUTE_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/route.tcl  [get_runs impl_1]
+set_property STEPS.ROUTE_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/route.tcl [get_runs impl_1]
+
+# Setup scripts for POST_ROUTE_PHYS_OPT
+set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/post_route_phys_opt.tcl  [get_runs impl_1]
+set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/post_route_phys_opt.tcl [get_runs impl_1]
+
 if { [isVersal] } {
    set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE       ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
 } else {

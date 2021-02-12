@@ -8,18 +8,13 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/pre_synth_run.tcl
-# \brief This script runs at the beginning of the synthesis run (inside of synth_1)
+## \file vivado/run/post/gui_write.tcl
 
-########################################################
-## Get variables and Custom Procedures
-########################################################
+# Get variables and Custom Procedures
 source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
-# Refer to http://www.xilinx.com/support/answers/65415.html
-set_param synth.elaboration.rodinMoreOptions {rt::set_parameter ignoreVhdlAssertStmts false}
-
-# Target specific pre_synth_run script
-SourceTclFile ${VIVADO_DIR}/pre_synth_run.tcl
+########################################################
+## Copy the .bit/.mcs image files
+########################################################
+CreateFpgaBit
