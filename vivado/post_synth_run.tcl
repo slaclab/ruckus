@@ -30,6 +30,11 @@ if { ${AllowMultiDriven} != 1 } {
    }
 }
 
+if { [VersionCompare 2020.2] >= 0 } {
+   report_qor_assessment  -name qor_assessment_synth  -file ${SYN_DIR}/qor_assessment_synth.rpt
+   report_qor_suggestions -name qor_suggestions_synth -file ${SYN_DIR}/qor_suggestions_synth.rpt
+}
+
 # GUI Related:
 # Disable a refresh due to the changes
 # in the Version.vhd file during synthesis
