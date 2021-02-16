@@ -13,7 +13,7 @@ A Makefile/TCL `hybrid` Firmware build system
 
 `MicroblazeBasicCore` is a simple Microblaze implementation (BRAM cache).
 
-Example: https://github.com/slaclab/surf/tree/master/xilinx/general/microblaze/bd
+Example: https://github.com/slaclab/surf/tree/main/xilinx/general/microblaze/bd
 
 # List of user defined TCL scripts
 
