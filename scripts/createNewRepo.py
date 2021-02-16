@@ -336,16 +336,16 @@ def setupNewRepoStructure(repo):
 
 def setBranchProtection(repo):
 
-    # Create pre-release branch from master branch
-    print('Create pre-release branch from master branch...\n')
+    # Create pre-release branch from main branch
+    print('Create pre-release branch from main branch...\n')
     repo.create_git_ref(
         ref = 'refs/heads/pre-release',
-        sha = repo.get_branch('master').commit.sha,
+        sha = repo.get_branch('main').commit.sha,
     )
 
-    # Creating Setting Branch Protection for master and pre-release
-    print('Creating Setting Branch Protection for master and pre-release...\n')
-    for idx in ['master','pre-release']:
+    # Creating Setting Branch Protection for main and pre-release
+    print('Creating Setting Branch Protection for main and pre-release...\n')
+    for idx in ['main','pre-release']:
         repo.get_branch(idx).edit_protection()
 
 #############################################################################################
