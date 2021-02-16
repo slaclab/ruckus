@@ -8,27 +8,20 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/gui.tcl
-# \brief This script launches the Vivado interface GUI mode with all the
-# ruckus procedures and environmental variables included
+## \file vivado/run/post/route.tcl
+# \brief This script runs at the end of the place and route (inside of impl_1)
 
-# Get variables and Custom Procedures and common properties
+########################################################
+## Get variables and Custom Procedures
+########################################################
 source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado/properties.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
-# Update the bitstream post script
-if { [isVersal] } {
-   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST ${RUCKUS_DIR}/vivado/run/post/gui_write.tcl [get_runs impl_1]
-} else {
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST ${RUCKUS_DIR}/vivado/run/post/gui_write.tcl [get_runs impl_1]
+if { [VersionCompare 2020.1] >= 0 } {
+   report_qor_assessment  -file ${IMPL_DIR}/${PROJECT}_qor_assessment_routed.rpt
+   report_qor_suggestions -file ${IMPL_DIR}/${PROJECT}_qor_suggestions_routed.rpt
 }
 
-# Call the user script
-SourceTclFile ${VIVADO_DIR}/gui.tcl
-
-# Bug fix work around for Vivado due to post script changes
-if { [CheckSynth] == true } {
-   set_property NEEDS_REFRESH 0 [get_runs impl_1]
-}
+# Target specific script
+SourceTclFile ${VIVADO_DIR}/post_route_run.tcl

@@ -8,14 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/post_route_run.tcl
-# \brief This script runs at the end of the place and route (inside of impl_1)
+## \file vivado/run/post/post_place_power_opt.tcl
 
-# Get variables and Custom Procedures
-source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
-source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
-
-########################################################
-## Copy the .bit/.mcs image files
-########################################################
-CreateFpgaBit
+# Target specific script
+SourceTclFile ${VIVADO_DIR}/post_post_place_power_opt_run.tcl

@@ -8,7 +8,7 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/pre_opt_run.tcl
+## \file vivado/run/pre/opt.tcl
 # \brief This script runs at the beginning of the place and route's optimization run (inside of impl_1)
 
 ########################################################
