@@ -48,7 +48,13 @@ if { [file exists ${VIVADO_DIR}/vitis.tcl] == 1 } {
       wait_on_run impl_1
    } _RESULT]
 
-   # Copy the .bit file (and create .mcs)
-   CreateFpgaBit
+   if { [isVersal] } {
+   } else {
+      # Copy the .bit file (and create .mcs)
+      CreateFpgaBit
+   } else {
+      # Create Versal Output files
+      CreateVersalOutputs
+   }
 
 }

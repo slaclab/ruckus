@@ -40,8 +40,13 @@ proc ArchiveProject { } {
    set PHYS_OPT_POST [get_property {STEPS.PHYS_OPT_DESIGN.TCL.POST}             [get_runs impl_1]]
    set ROUTE_PRE     [get_property {STEPS.ROUTE_DESIGN.TCL.PRE}                 [get_runs impl_1]]
    set ROUTE_POST    [get_property {STEPS.ROUTE_DESIGN.TCL.POST}                [get_runs impl_1]]
-   set WRITE_PRE     [get_property {STEPS.WRITE_BITSTREAM.TCL.PRE}              [get_runs impl_1]]
-   set WRITE_POST    [get_property {STEPS.WRITE_BITSTREAM.TCL.POST}             [get_runs impl_1]]
+   if { [isVersal] } {
+      set WRITE_PRE     [get_property {STEPS.WRITE_DEVICE_IMAGE.TCL.PRE}  [get_runs impl_1]]
+      set WRITE_POST    [get_property {STEPS.WRITE_DEVICE_IMAGE.TCL.POST} [get_runs impl_1]]
+   } else {
+      set WRITE_PRE     [get_property {STEPS.WRITE_BITSTREAM.TCL.PRE}     [get_runs impl_1]]
+      set WRITE_POST    [get_property {STEPS.WRITE_BITSTREAM.TCL.POST}    [get_runs impl_1]]
+   }
 
    ## Remove the TCL configurations
    set_property STEPS.SYNTH_DESIGN.TCL.PRE                 "" [get_runs synth_1]
@@ -58,8 +63,13 @@ proc ArchiveProject { } {
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             "" [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 "" [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.POST                "" [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              "" [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST             "" [get_runs impl_1]
+   if { [isVersal] } {
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE  "" [get_runs impl_1]
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST "" [get_runs impl_1]
+   } else {
+      set_property STEPS.WRITE_BITSTREAM.TCL.PRE     "" [get_runs impl_1]
+      set_property STEPS.WRITE_BITSTREAM.TCL.POST    "" [get_runs impl_1]
+   }
 
    ## Archive the project
    archive_project $::env(IMAGES_DIR)/$::env(PROJECT)_project.xpr.zip -force -include_config_settings
@@ -79,8 +89,14 @@ proc ArchiveProject { } {
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             ${PHYS_OPT_POST} [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 ${ROUTE_PRE}     [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.POST                ${ROUTE_POST}    [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              ${WRITE_PRE}     [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}    [get_runs impl_1]
+   if { [isVersal] } {
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE  ${WRITE_PRE}  [get_runs impl_1]
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST ${WRITE_POST} [get_runs impl_1]
+
+   } else {
+      set_property STEPS.WRITE_BITSTREAM.TCL.PRE     ${WRITE_PRE}  [get_runs impl_1]
+      set_property STEPS.WRITE_BITSTREAM.TCL.POST    ${WRITE_POST} [get_runs impl_1]
+   }
 }
 
 ## Custom TLC source function
@@ -424,6 +440,47 @@ proc CreateFpgaBit { } {
 
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs
+}
+
+## Create Versal Output files
+proc CreateVersalOutputs { } {
+   puts "CreateVersalOutputs()"
+   # # Get variables
+   # source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   # source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+   # set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   # set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
+
+   # # Copy the .BIT file to image directory
+   # exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
+   # puts "Bit file copied to ${imagePath}.bit"
+
+   # # Check if gzip-ing the image files
+   # if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+      # exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+   # }
+
+   # # Copy the .BIN file to image directory
+   # if { $::env(GEN_BIN_IMAGE) != 0 } {
+      # exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
+      # if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+         # exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
+      # }
+   # }
+
+   # # Copy the .ltx file (if it exists)
+   # if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
+      # exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
+      # puts "Debug Probes file copied to ${imagePath}.ltx"
+   # } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
+      # exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
+      # puts "Debug Probes file copied to ${imagePath}.ltx"
+   # } else {
+      # puts "No Debug Probes found"
+   # }
+
+   # # Create the .XSA file
+   # write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
 }
 
 ## Create tar.gz of all cpsw files in firmware
