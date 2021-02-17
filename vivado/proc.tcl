@@ -454,6 +454,14 @@ proc CreateVersalOutputs { } {
    # Copy the .ltx file (if it exists)
    CopyLtxFile
 
+   ################################################################################################################################################################################################################################
+   # Work Around for the following errors:
+   ################################################################################################################################################################################################################################
+   #     ERROR: [Vivado 12-5942] Found non local file in project: <filepath> It is required that all files in the project be imported into the project locally before running write_hw_platform.
+   #     ERROR: [Common 17-53] User Exception: All sources need to be local to the project for creating a Shell. Please import all sources locally or remove unnecessary external sources from project. Aborting write_hw_platform.
+   ################################################################################################################################################################################################################################
+   import_files
+
    # Create the .XSA file
    write_hw_platform -force -include_bit -include_sim_content -verbose -file ${imagePath}.xsa
 }
