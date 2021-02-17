@@ -307,12 +307,9 @@ proc GenerateBdWrappers { } {
       # Loop through the has block designs
       foreach bdpath ${bdList} {
          # Create the wrapper
-         make_wrapper -force -files [get_files $bdpath] -top
-         # Get the base dir and file name
-         set bd_wrapper_path [file dirname [lindex ${bdpath} 0]]
-         set wrapperFileName [lsearch -inline [exec ls ${bd_wrapper_path}/hdl/] *_wrapper.vhd]
+         set wrapper_path [make_wrapper -force -files [get_files $bdpath] -top]
          # Add the VHDL (or Verilog) to the project
-         add_files -force -fileset sources_1 ${bd_wrapper_path}/hdl/${wrapperFileName}
+         add_files -force -fileset sources_1 ${wrapper_path}
       }
    }
 
