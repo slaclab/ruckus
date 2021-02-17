@@ -417,15 +417,7 @@ proc CreateFpgaBit { } {
    }
 
    # Copy the .ltx file (if it exists)
-   if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
-      exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"
-   } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
-      exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"
-   } else {
-      puts "No Debug Probes found"
-   }
+   CopyLtxFile
 
    # Check for Vivado 2019.2 (or newer)
    if { [VersionCompare 2019.2] >= 0 } {
@@ -444,43 +436,44 @@ proc CreateFpgaBit { } {
 
 ## Create Versal Output files
 proc CreateVersalOutputs { } {
-   puts "CreateVersalOutputs()"
-   # # Get variables
-   # source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
-   # source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   # set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
-   # set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.pdi]]]
 
-   # # Copy the .BIT file to image directory
-   # exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
-   # puts "Bit file copied to ${imagePath}.bit"
+   # Copy the .pdi file to image directory
+   exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
+   puts "Bit file copied to ${imagePath}.pdi"
 
-   # # Check if gzip-ing the image files
-   # if { $::env(GZIP_BUILD_IMAGE) != 0 } {
-      # exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
-   # }
+   # Check if gzip-ing the image files
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+      exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.pdi > ${imagePath}.pdi.gz
+   }
 
-   # # Copy the .BIN file to image directory
-   # if { $::env(GEN_BIN_IMAGE) != 0 } {
-      # exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
-      # if { $::env(GZIP_BUILD_IMAGE) != 0 } {
-         # exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
-      # }
-   # }
+   # Copy the .ltx file (if it exists)
+   CopyLtxFile
 
-   # # Copy the .ltx file (if it exists)
-   # if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
-      # exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
-      # puts "Debug Probes file copied to ${imagePath}.ltx"
-   # } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
-      # exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
-      # puts "Debug Probes file copied to ${imagePath}.ltx"
-   # } else {
-      # puts "No Debug Probes found"
-   # }
+   # Create the .XSA file
+   write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+}
 
-   # # Create the .XSA file
-   # write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+## Copy .LTX file to output image directory
+proc CopyLtxFile { } {
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   # Copy the .ltx file (if it exists)
+   if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
+      exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
+      puts "Debug Probes file copied to ${imagePath}.ltx"
+   } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
+      exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
+      puts "Debug Probes file copied to ${imagePath}.ltx"
+   } else {
+      puts "No Debug Probes found"
+   }
 }
 
 ## Create tar.gz of all cpsw files in firmware
