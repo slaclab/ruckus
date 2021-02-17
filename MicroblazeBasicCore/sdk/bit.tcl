@@ -43,11 +43,10 @@ if { [file exists ${VIVADO_DIR}/sdk.tcl] == 1 } {
    } _RESULT]
 
    if { [isVersal] } {
+      # Create Versal Output files
+      CreateVersalOutputs
    } else {
       # Copy the .bit file (and create .mcs)
       CreateFpgaBit
-   } else {
-      # Create Versal Output files
-      CreateVersalOutputs
    }
 }
