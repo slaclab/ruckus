@@ -455,7 +455,7 @@ proc CreateVersalOutputs { } {
    CopyLtxFile
 
    # Create the .XSA file
-   write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa
+   write_hw_platform -force -include_bit -include_sim_content -verbose -file ${imagePath}.xsa
 }
 
 ## Copy .LTX file to output image directory
@@ -882,10 +882,17 @@ proc CheckImpl { {flags ""} } {
          return false
       }
    }
+
+   if { [isVersal] } {
+      set completeMsg "write_device_image Complete!"
+   } else {
+      set completeMsg "write_bitstream Complete!"
+   }
+
    if { [get_property PROGRESS [get_runs impl_1]] != "100\%" } {
       set errmsg "\t\[get_property PROGRESS \[get_runs impl_1\]\] != 100\%\n"
-   } elseif { [get_property STATUS [get_runs impl_1]] != "write_bitstream Complete!" } {
-      set errmsg "\t\[get_property STATUS \[get_runs impl_1\]\] != \"write_bitstream Complete!\"\n"
+   } elseif { [get_property STATUS [get_runs impl_1]] != ${completeMsg} } {
+      set errmsg "\t\[get_property STATUS \[get_runs impl_1\]\] != \"${completeMsg}\"\n"
    } else {
       return true
    }
