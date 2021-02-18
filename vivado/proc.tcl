@@ -439,7 +439,7 @@ proc CreateVersalOutputs { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   set imagePath "[file normalize ${IMAGES_DIR}]/$::env(IMAGENAME)"
    set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.pdi]]]
 
    # Copy the .pdi file to image directory
@@ -463,7 +463,12 @@ proc CreateVersalOutputs { } {
    import_files
 
    # Create the .XSA file
-   write_hw_platform -force -include_bit -include_sim_content -verbose -file ${imagePath}.xsa
+   write_hw_platform -force ${imagePath}.xsa
+
+   # Check if gzip-ing the image files
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+      exec gzip -c -f -9 ${imagePath}.xsa > ${imagePath}.xsa.gz
+   }
 }
 
 ## Copy .LTX file to output image directory
