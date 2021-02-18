@@ -439,12 +439,12 @@ proc CreateVersalOutputs { } {
    # Get variables
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   set imagePath "[file normalize ${IMAGES_DIR}]/$::env(IMAGENAME)"
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
    set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.pdi]]]
 
    # Copy the .pdi file to image directory
    exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
-   puts "Bit file copied to ${imagePath}.pdi"
+   puts "PDI file copied to ${imagePath}.pdi"
 
    # Check if gzip-ing the image files
    if { $::env(GZIP_BUILD_IMAGE) != 0 } {
@@ -453,22 +453,6 @@ proc CreateVersalOutputs { } {
 
    # Copy the .ltx file (if it exists)
    CopyLtxFile
-
-   ################################################################################################################################################################################################################################
-   # Work Around for the following errors:
-   ################################################################################################################################################################################################################################
-   #     ERROR: [Vivado 12-5942] Found non local file in project: <filepath> It is required that all files in the project be imported into the project locally before running write_hw_platform.
-   #     ERROR: [Common 17-53] User Exception: All sources need to be local to the project for creating a Shell. Please import all sources locally or remove unnecessary external sources from project. Aborting write_hw_platform.
-   ################################################################################################################################################################################################################################
-   import_files
-
-   # Create the .XSA file
-   write_hw_platform -force ${imagePath}.xsa
-
-   # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
-      exec gzip -c -f -9 ${imagePath}.xsa > ${imagePath}.xsa.gz
-   }
 }
 
 ## Copy .LTX file to output image directory
@@ -731,7 +715,8 @@ proc CheckPrjConfig { fileset } {
       }
    }
 
-   if { ${PRJ_TOP} != $::env(PROJECT) } {
+   if { ${PRJ_TOP} != $::env(PROJECT) &&
+      [string match "*_wrapper" ${PRJ_TOP}] != 1 } {
       # Check if not a dynamic build of partial reconfiguration,
       # which usually ${PRJ_TOP} != $::env(PROJECT)
       if { ${RECONFIG_CHECKPOINT} == 0 } {
