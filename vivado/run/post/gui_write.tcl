@@ -15,6 +15,12 @@ source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 
 ########################################################
-## Copy the .bit/.mcs image files
+## Copy the FW image files
 ########################################################
-CreateFpgaBit
+if { [isVersal] } {
+   # Create Versal Output files
+   CreateVersalOutputs
+} else {
+   # Copy the .bit file (and create .mcs)
+   CreateFpgaBit
+}
