@@ -26,7 +26,6 @@ open_project -quiet ${VIVADO_PROJECT}
 
 # Setup project properties
 source -quiet ${RUCKUS_DIR}/vivado/properties.tcl
-set_property STEPS.WRITE_BITSTREAM.TCL.POST "" [get_runs impl_1]
 
 # Setup project messaging
 source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
@@ -184,9 +183,15 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
 }
 
 ########################################################
-## Copy the .bit/.mcs image files
+## Copy the FW image files
 ########################################################
-CreateFpgaBit
+if { [isVersal] } {
+   # Create Versal Output files
+   CreateVersalOutputs
+} else {
+   # Copy the .bit file (and create .mcs)
+   CreateFpgaBit
+}
 
 ########################################################
 # Target Post Build script

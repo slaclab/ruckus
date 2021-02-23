@@ -40,8 +40,13 @@ proc ArchiveProject { } {
    set PHYS_OPT_POST [get_property {STEPS.PHYS_OPT_DESIGN.TCL.POST}             [get_runs impl_1]]
    set ROUTE_PRE     [get_property {STEPS.ROUTE_DESIGN.TCL.PRE}                 [get_runs impl_1]]
    set ROUTE_POST    [get_property {STEPS.ROUTE_DESIGN.TCL.POST}                [get_runs impl_1]]
-   set WRITE_PRE     [get_property {STEPS.WRITE_BITSTREAM.TCL.PRE}              [get_runs impl_1]]
-   set WRITE_POST    [get_property {STEPS.WRITE_BITSTREAM.TCL.POST}             [get_runs impl_1]]
+   if { [isVersal] } {
+      set WRITE_PRE     [get_property {STEPS.WRITE_DEVICE_IMAGE.TCL.PRE}  [get_runs impl_1]]
+      set WRITE_POST    [get_property {STEPS.WRITE_DEVICE_IMAGE.TCL.POST} [get_runs impl_1]]
+   } else {
+      set WRITE_PRE     [get_property {STEPS.WRITE_BITSTREAM.TCL.PRE}     [get_runs impl_1]]
+      set WRITE_POST    [get_property {STEPS.WRITE_BITSTREAM.TCL.POST}    [get_runs impl_1]]
+   }
 
    ## Remove the TCL configurations
    set_property STEPS.SYNTH_DESIGN.TCL.PRE                 "" [get_runs synth_1]
@@ -58,8 +63,13 @@ proc ArchiveProject { } {
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             "" [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 "" [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.POST                "" [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              "" [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST             "" [get_runs impl_1]
+   if { [isVersal] } {
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE  "" [get_runs impl_1]
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST "" [get_runs impl_1]
+   } else {
+      set_property STEPS.WRITE_BITSTREAM.TCL.PRE     "" [get_runs impl_1]
+      set_property STEPS.WRITE_BITSTREAM.TCL.POST    "" [get_runs impl_1]
+   }
 
    ## Archive the project
    archive_project $::env(IMAGES_DIR)/$::env(PROJECT)_project.xpr.zip -force -include_config_settings
@@ -79,8 +89,14 @@ proc ArchiveProject { } {
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             ${PHYS_OPT_POST} [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 ${ROUTE_PRE}     [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.POST                ${ROUTE_POST}    [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE              ${WRITE_PRE}     [get_runs impl_1]
-   set_property STEPS.WRITE_BITSTREAM.TCL.POST             ${WRITE_POST}    [get_runs impl_1]
+   if { [isVersal] } {
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE  ${WRITE_PRE}  [get_runs impl_1]
+      set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST ${WRITE_POST} [get_runs impl_1]
+
+   } else {
+      set_property STEPS.WRITE_BITSTREAM.TCL.PRE     ${WRITE_PRE}  [get_runs impl_1]
+      set_property STEPS.WRITE_BITSTREAM.TCL.POST    ${WRITE_POST} [get_runs impl_1]
+   }
 }
 
 ## Custom TLC source function
@@ -307,12 +323,9 @@ proc GenerateBdWrappers { } {
       # Loop through the has block designs
       foreach bdpath ${bdList} {
          # Create the wrapper
-         make_wrapper -force -files [get_files $bdpath] -top
-         # Get the base dir and file name
-         set bd_wrapper_path [file dirname [lindex ${bdpath} 0]]
-         set wrapperFileName [lsearch -inline [exec ls ${bd_wrapper_path}/hdl/] *_wrapper.vhd]
+         set wrapper_path [make_wrapper -force -files [get_files $bdpath] -top]
          # Add the VHDL (or Verilog) to the project
-         add_files -force -fileset sources_1 ${bd_wrapper_path}/hdl/${wrapperFileName}
+         add_files -force -fileset sources_1 ${wrapper_path}
       }
    }
 
@@ -404,15 +417,7 @@ proc CreateFpgaBit { } {
    }
 
    # Copy the .ltx file (if it exists)
-   if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
-      exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"
-   } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
-      exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"
-   } else {
-      puts "No Debug Probes found"
-   }
+   CopyLtxFile
 
    # Check for Vivado 2019.2 (or newer)
    if { [VersionCompare 2019.2] >= 0 } {
@@ -427,6 +432,45 @@ proc CreateFpgaBit { } {
 
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs
+}
+
+## Create Versal Output files
+proc CreateVersalOutputs { } {
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.pdi]]]
+
+   # Copy the .pdi file to image directory
+   exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
+   puts "PDI file copied to ${imagePath}.pdi"
+
+   # Check if gzip-ing the image files
+   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+      exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.pdi > ${imagePath}.pdi.gz
+   }
+
+   # Copy the .ltx file (if it exists)
+   CopyLtxFile
+}
+
+## Copy .LTX file to output image directory
+proc CopyLtxFile { } {
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   # Copy the .ltx file (if it exists)
+   if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
+      exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
+      puts "Debug Probes file copied to ${imagePath}.ltx"
+   } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
+      exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
+      puts "Debug Probes file copied to ${imagePath}.ltx"
+   } else {
+      puts "No Debug Probes found"
+   }
 }
 
 ## Create tar.gz of all cpsw files in firmware
@@ -671,7 +715,8 @@ proc CheckPrjConfig { fileset } {
       }
    }
 
-   if { ${PRJ_TOP} != $::env(PROJECT) } {
+   if { ${PRJ_TOP} != $::env(PROJECT) &&
+      [string match "*_wrapper" ${PRJ_TOP}] != 1 } {
       # Check if not a dynamic build of partial reconfiguration,
       # which usually ${PRJ_TOP} != $::env(PROJECT)
       if { ${RECONFIG_CHECKPOINT} == 0 } {
@@ -835,10 +880,17 @@ proc CheckImpl { {flags ""} } {
          return false
       }
    }
+
+   if { [isVersal] } {
+      set completeMsg "write_device_image Complete!"
+   } else {
+      set completeMsg "write_bitstream Complete!"
+   }
+
    if { [get_property PROGRESS [get_runs impl_1]] != "100\%" } {
       set errmsg "\t\[get_property PROGRESS \[get_runs impl_1\]\] != 100\%\n"
-   } elseif { [get_property STATUS [get_runs impl_1]] != "write_bitstream Complete!" } {
-      set errmsg "\t\[get_property STATUS \[get_runs impl_1\]\] != \"write_bitstream Complete!\"\n"
+   } elseif { [get_property STATUS [get_runs impl_1]] != ${completeMsg} } {
+      set errmsg "\t\[get_property STATUS \[get_runs impl_1\]\] != \"${completeMsg}\"\n"
    } else {
       return true
    }

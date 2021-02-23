@@ -48,9 +48,17 @@ set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/post_route_phys_opt.tcl [get_runs impl_1]
 
 if { [isVersal] } {
-   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE       ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+   set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST "" [get_runs impl_1]
 } else {
-   set_property STEPS.WRITE_BITSTREAM.TCL.PRE          ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+   set_property STEPS.WRITE_BITSTREAM.TCL.PRE    ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
+   set_property STEPS.WRITE_BITSTREAM.TCL.POST "" [get_runs impl_1]
+
+   if { $::env(GEN_BIN_IMAGE) != 0 } {
+      # Enable .bin generation for partial reconfiguration
+      set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
+   }
+
 }
 
 # Refer to http://www.xilinx.com/support/answers/65415.html
@@ -60,11 +68,6 @@ if { [VersionCompare 2016.1] >= 0 } {
 
 # Enable physical optimization for register replication
 set_property STEPS.PHYS_OPT_DESIGN.IS_ENABLED true [get_runs impl_1]
-
-if { $::env(GEN_BIN_IMAGE) != 0 } {
-   # Enable .bin generation for partial reconfiguration
-   set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]
-}
 
 # Automatically use the checkpoint from the previous run
 if { [VersionCompare 2019.1] >= 0 } {
