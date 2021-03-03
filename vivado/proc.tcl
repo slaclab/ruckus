@@ -915,7 +915,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
          puts "\t\$ source setup_env.sh"
       }
    }
-   puts "\t\$ ./simv -gui &"
+   puts "\t\$ ./simv -gui=dve (or $ ./simv -gui=verdi -verdi_opts -sx)"
    puts "********************************************************\n\n"
 }
 
