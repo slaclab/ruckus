@@ -71,7 +71,7 @@ proc VcsVersionCheck { } {
    set retVar -1
 
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03"
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12"
 
    # Get Version Name
    set VersionNumber [GetVcsName]
