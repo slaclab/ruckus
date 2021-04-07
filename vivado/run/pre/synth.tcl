@@ -18,8 +18,10 @@ source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
-# Refer to http://www.xilinx.com/support/answers/65415.html
-set_param synth.elaboration.rodinMoreOptions {rt::set_parameter ignoreVhdlAssertStmts false}
+if { $::env(VIVADO_VERSION) < 2016.1 } {
+   # Refer to http://www.xilinx.com/support/answers/65415.html
+   set_param synth.elaboration.rodinMoreOptions {rt::set_parameter ignoreVhdlAssertStmts false}
+}
 
 # Target specific script
 SourceTclFile ${VIVADO_DIR}/pre_synth_run.tcl
