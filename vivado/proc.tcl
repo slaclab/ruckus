@@ -167,6 +167,11 @@ proc ::findFiles { baseDir pattern } {
    return $files
 }
 
+## Set the synthesis to "out of context"
+proc SetSynthOutOfContext { } {
+   set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
+}
+
 ## Function to build all the IP cores
 proc BuildIpCores { } {
    # Get variables

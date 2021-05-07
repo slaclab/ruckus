@@ -74,7 +74,7 @@ set syn_rc [catch {
    if { [CheckSynth] != true } {
       ## Check for DCP only synthesis run
       if { [info exists ::env(SYNTH_DCP)] } {
-         set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
+         SetSynthOutOfContext
       }
       ## Launch the run
       launch_runs synth_1 -jobs $::env(PARALLEL_SYNTH)
