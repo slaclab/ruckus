@@ -160,7 +160,7 @@ set_msg_config -id {Opt 31-80}      -new_severity ERROR;# IMPL: Multi-driver net
 set_msg_config -id {Route 35-14}    -new_severity ERROR;# IMPL: Multi-driver net found in the design
 set_msg_config -id {AVAL-46}        -new_severity ERROR;# DRC: MMCM's (or PLL's) VCO frequency out of range
 if { ${notTig} } {
-   set_msg_config -id {Route 35-39}    -new_severity ERROR;# IMPL: The design did not meet timing requirements
+   # set_msg_config -id {Route 35-39}    -new_severity ERROR;# IMPL: The design did not meet timing requirements
    set_msg_config -id {Timing 38-282}  -new_severity ERROR;# IMPL: The design failed to meet the timing requirements
 }
 
