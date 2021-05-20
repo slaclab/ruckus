@@ -11,4 +11,5 @@
 *.mem filter=lfs diff=lfs merge=lfs -text
 *.pdi filter=lfs diff=lfs merge=lfs -text
 *.bif filter=lfs diff=lfs merge=lfs -text
+*.elf filter=lfs diff=lfs merge=lfs -text
 *.slabtimeproj filter=lfs diff=lfs merge=lfs -text
