@@ -912,7 +912,6 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "The VCS simulation script has been generated."
    puts "To compile and run the simulation:"
    puts "\t\$ cd ${dirPath}/"
-   puts "\t\$ ./sim_vcs_mx.sh"
    if { ${rogueSim} == true } {
       if { $::env(SHELL) != "/bin/bash" } {
          puts "\t\$ source setup_env.csh"
@@ -920,6 +919,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
          puts "\t\$ source setup_env.sh"
       }
    }
+   puts "\t\$ ./sim_vcs_mx.sh"
    puts "\t\$ ./simv -gui=dve (or $ ./simv -gui=verdi -verdi_opts -sx)"
    puts "********************************************************\n\n"
 }
