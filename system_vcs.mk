@@ -53,12 +53,12 @@ ifndef VCS_ELAB_OPTS
 export VCS_ELAB_OPTS = -full64 +warn=none -kdb -lca -debug_pp -t ps -licqueue -l $(SIM_OUT_DIR)/elaborate.log
 endif
 
-# Path to VCS analyze script 
+# Path to VCS analyze script
 ifndef ANALYZE
 export ANALYZE = $(realpath $(PWD)/analyze.sh )
 endif
 
-# Files/Directories to remove during "clean" 
+# Files/Directories to remove during "clean"
 ifndef CLEAN
 export CLEAN = $(RELEASE) $(SIM_LIB_DIR) $(SIM_OUT_DIR) *.conf *.rc *.log synopsys_sim.setup csrc simv vcs_output simv.daidir DVEfiles verdiLog inter.vpd ucli.key
 endif
@@ -97,7 +97,7 @@ $(DESIGN_LIBS): $(SIM_LIB_DIR)
 $(SIM_LIB_DIR):
 	mkdir -p $@
 	rm -f synopsys_sim.setup
-	touch synopsys_sim.setup 
+	touch synopsys_sim.setup
 	echo "WORK > DEFAULT" >> synopsys_sim.setup
 	echo DEFAULT:$(SIM_LIB_DIR)/work >> synopsys_sim.setup
 

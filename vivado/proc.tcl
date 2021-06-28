@@ -550,7 +550,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [VersionCompare 2020.3.0] > 0 } {
+   if { [VersionCompare 2021.1.0] > 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -912,7 +912,6 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "The VCS simulation script has been generated."
    puts "To compile and run the simulation:"
    puts "\t\$ cd ${dirPath}/"
-   puts "\t\$ ./sim_vcs_mx.sh"
    if { ${rogueSim} == true } {
       if { $::env(SHELL) != "/bin/bash" } {
          puts "\t\$ source setup_env.csh"
@@ -920,6 +919,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
          puts "\t\$ source setup_env.sh"
       }
    }
+   puts "\t\$ ./sim_vcs_mx.sh"
    puts "\t\$ ./simv -gui=dve (or $ ./simv -gui=verdi -verdi_opts -sx)"
    puts "********************************************************\n\n"
 }

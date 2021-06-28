@@ -29,8 +29,7 @@ build.info
 build*
 bin*
 .Xil*
-
-firmware/common/python/
+.obj*
 
 # Only .bit.gz and .mcs.gz should be committed to git
 *.bit
@@ -43,3 +42,4 @@ firmware/common/python/
 *.xsa
 *.pdi
 *.bif
+*.elf
