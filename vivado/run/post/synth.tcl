@@ -30,7 +30,7 @@ if { ${AllowMultiDriven} != 1 } {
    }
 }
 
-if { [VersionCompare 2020.1] >= 0 } {
+if { [VersionCompare 2020.1] >= 0  && $::env(REPORT_QOR) == 1 } {
    report_qor_assessment  -file ${SYN_DIR}/${PROJECT}_qor_assessment_synth.rpt
    report_qor_suggestions -file ${SYN_DIR}/${PROJECT}_qor_suggestions_synth.rpt
 }

@@ -17,7 +17,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
-if { [VersionCompare 2020.1] >= 0 } {
+if { [VersionCompare 2020.1] >= 0  && $::env(REPORT_QOR) == 1 } {
    report_qor_assessment  -file ${IMPL_DIR}/${PROJECT}_qor_assessment_opted.rpt
    report_qor_suggestions -file ${IMPL_DIR}/${PROJECT}_qor_suggestions_opted.rpt
 }
