@@ -40,6 +40,10 @@ ifndef GIT_BYPASS
 export GIT_BYPASS = 1
 endif
 
+ifndef REPORT_QOR
+export REPORT_QOR = 0
+endif
+
 ifndef GZIP_BUILD_IMAGE
 export GZIP_BUILD_IMAGE = 1
 endif
