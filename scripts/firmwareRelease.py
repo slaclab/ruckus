@@ -624,13 +624,19 @@ if __name__ == "__main__":
 
     # Determine if we generate a Rogue zipfile
     if 'Rogue' in relData['Types']:
-        zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
+        if relData['Primary']:
+            zipName = os.path.join(os.getcwd(),f'rogue_{ver}.zip')
+        else:
+            zipName = os.path.join(os.getcwd(),f'rogue_{relName}_{ver}.zip')
         buildRogueFile(zipName,cfg,ver,relName,relData,imgList)
         tagAttach.append(zipName)
 
     # Determine if we generate a CPSW tarball
     if 'CPSW' in relData['Types']:
-        tarName = f'cpsw_{relName}_{ver}.tar.gz'
+        if relData['Primary']:
+            tarName = f'cpsw_{ver}.tar.gz'
+        else:
+            tarName = f'cpsw_{relName}_{ver}.tar.gz'
         buildCpswFile(tarName,cfg,ver,relName,relData,imgList)
         tagAttach.append(tarName)
 
