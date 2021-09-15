@@ -8,18 +8,12 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/hls/proc.tcl
-# \brief This script contains all the custom TLC procedures for Vivado HLS
+## \file vitis/hls/proc.tcl
+# \brief This script contains all the custom TLC procedures for Vitis HLS
 
 ###############################################################
 #### General Functions ########################################
 ###############################################################
-
-## Refreshes the Vivado HLS project
-proc VivadoRefresh { vivadoHlsProject } {
-   close_project
-   open_project ${vivadoHlsProject}
-}
 
 ## Custom TLC source function
 proc SourceTclFile { filePath } {
@@ -36,12 +30,12 @@ proc GetCpuNumber { } {
    return [exec cat /proc/cpuinfo | grep processor | wc -l]
 }
 
-## Check for Vivado HLS versions that are supportted by ruckus
+## Check for Vitis HLS versions that are supportted by ruckus
 proc HlsVersionCheck { } {
    set VersionNumber [version -short]
-   if { ${VersionNumber} == 2014.2 } {
+   if { ${VersionNumber} < 2021.1 } {
       puts "\n\n****************************************************************"
-      puts "Vivado_HLS Version = ${VersionNumber} is not support in this build system."
+      puts "Vitis_HLS Version = ${VersionNumber} is not support in this build system."
       puts "****************************************************************\n\n"
       return -1
    } else {

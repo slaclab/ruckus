@@ -8,15 +8,15 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/hls/sources.tcl
-# \brief This script loads the source code into the Vivado HLS project
+## \file vitis/hls/sources.tcl
+# \brief This script loads the source code into the Vitis HLS project
 
 ## Get variables and Custom Procedures
 set RUCKUS_DIR $::env(RUCKUS_DIR)
-source ${RUCKUS_DIR}/vivado/hls/env_var.tcl
-source ${RUCKUS_DIR}/vivado/hls/proc.tcl
+source ${RUCKUS_DIR}/vitis/hls/env_var.tcl
+source ${RUCKUS_DIR}/vitis/hls/proc.tcl
 
-## Check for unsupported Vivado_HLS versions
+## Check for unsupported Vitis_HLS versions
 if { [HlsVersionCheck] < 0 } {
    exit -1
 }
@@ -35,7 +35,7 @@ open_solution "solution1"
 
 ## Setup the csim ldflags
 set retVal [catch { csim_design -O -setup -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} }]
-CheckProcRetVal ${retVal} "csim setup" "vivado/hls/sources"
+CheckProcRetVal ${retVal} "csim setup" "vitis/hls/sources"
 
 ## Target specific solution setup script
 source ${PROJ_DIR}/solution.tcl
