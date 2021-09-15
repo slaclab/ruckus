@@ -63,6 +63,11 @@ ifndef ARGV
 export ARGV =
 endif
 
+# Specifies the synthesis type [verilog, VHDL]
+ifndef HDL_TYPE
+export HDL_TYPE = verilog
+endif
+
 # Specifies if we are skipping the csim step
 ifndef SKIP_CSIM
 export SKIP_CSIM = 0
@@ -73,9 +78,17 @@ ifndef SKIP_COSIM
 export SKIP_COSIM = 0
 endif
 
-# Specifies if we are skipping the export step
-ifndef SKIP_EXPORT
-export SKIP_EXPORT = 0
+# Specifies the export configurations
+ifndef EXPORT_VENDOR
+export EXPORT_VENDOR = SLAC
+endif
+ifndef EXPORT_VERSION
+export EXPORT_VERSION = 1.0
+endif
+
+# Specifies if we need to modify the ip/component.xml to support "all" FPGA family types
+ifndef ALL_XIL_FAMILY
+export ALL_XIL_FAMILY = 0
 endif
 
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
@@ -99,6 +112,7 @@ test:
 	@echo ARGV: $(ARGV)
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
+	@echo HDL_TYPE: $(HDL_TYPE)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 

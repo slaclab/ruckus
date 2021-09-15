@@ -35,17 +35,17 @@ source ${PROJ_DIR}/directives.tcl
 ##############################################################################
 #                  Run C/C++ simulation testbed
 ##############################################################################
-if { ${SKIP_CSIM} == 0 } {
-   
+if { $::env(SKIP_CSIM) == 0 } {
+
    set retVal [catch { \
       csim_design -clean -O \
       -ldflags ${LDFLAGS} \
       -mflags ${MFLAGS} \
-      -argv ${ARGV}\
+      -argv ${ARGV} \
    }]
-   
+
    CheckProcRetVal ${retVal} "csim_design" "vitis/hls/build"
-   
+
 }
 ##############################################################################
 #                  Synthesis C/C++ code into RTL
@@ -56,37 +56,49 @@ CheckProcRetVal ${retVal} "csynth_design" "vitis/hls/build"
 ##############################################################################
 #      Run co-simulation (compares the C/C++ code to the RTL)
 ##############################################################################
-if { ${SKIP_COSIM} == 0 } {
+if { $::env(SKIP_COSIM) == 0 } {
 
    set retVal [catch { \
       cosim_design -O \
       -trace_level $::env(HLS_SIM_TRACE_LEVEL) \
-      -rtl verilog \
+      -rtl ${HDL_TYPE} \
       -ldflags ${LDFLAGS} \
       -mflags ${MFLAGS} \
       -argv ${ARGV} \
       -tool $::env(HLS_SIM_TOOL) \
-      -compiled_library_dir $::env(COMPILED_LIB_DIR)\
+      -compiled_library_dir $::env(COMPILED_LIB_DIR) \
    }]
-   
+
    CheckProcRetVal ${retVal} "cosim_design" "vitis/hls/build"
 }
 
 ##############################################################################
 #                             Export the Design
 ##############################################################################
-if { ${SKIP_EXPORT} == 0 } {
+set retVal [catch { \
+   export_design \
+   -description $::env(GIT_HASH_LONG) \
+   -display_name ${TOP} \
+   -format ip_catalog \
+   -ipname ${TOP} \
+   -library hls \
+   -taxonomy "/VITIS_HLS_IP" \
+   -vendor $::env(EXPORT_VENDOR) \
+   -version $::env(EXPORT_VERSION) \
+}]
 
-   set retVal [catch { \
-      export_design \
-      -flow syn \
-      -format syn_dcp \
-      -output ${PROJ_DIR}/ip/${PROJECT}.dcp \
-   }]
-   
-   CheckProcRetVal ${retVal} "export_design" "vitis/hls/build"
+CheckProcRetVal ${retVal} "export_design(zip)" "vitis/hls/build"
 
+# Check if we need to modify the component.xml
+if { $::env(ALL_XIL_FAMILY) == 1 } {
+   # Modify the component.xml for all fammily support
+   ComponentXmlAllFamilySupport
+} else {
+   # No modification to .ZIP.  Only copy the .ZIP to the output image directory
+   set zipFile [glob -directory ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/ *.zip *.ZIP]
+   exec cp -f ${zipFile} ${PROJ_DIR}/ip/${TOP}.zip
 }
+puts "${PROJ_DIR}/ip/${TOP}.zip"
 
 ##############################################################################
 #                            Exit Procedure

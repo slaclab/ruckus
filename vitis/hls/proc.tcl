@@ -65,3 +65,54 @@ proc CheckProcRetVal { retVal procType tclScript} {
       exit -1
    }
 }
+
+## Modifies the export's IP .ZIP file to add support for all FPGA device families
+proc ComponentXmlAllFamilySupport { } {
+   # Over the .ZIP file and decompress it
+   exec rm -rf $::env(OUT_DIR)/ip
+   exec mkdir $::env(OUT_DIR)/ip
+   exec unzip $::env(OUT_DIR)/$::env(PROJECT)_project/solution1/impl/ip/*.zip -d $::env(OUT_DIR)/ip
+
+   # open the files
+   set in  [open $::env(OUT_DIR)/ip/component.xml r]
+   set out [open $::env(OUT_DIR)/ip/component.temp  w]
+
+   # Get the top level name
+   set TOP [get_top]
+
+   # Define the old and new string
+   set XIL_FAMILY "\
+   <xilinx:family xilinx:lifeCycle=\"Production\">artix7</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">kintex7</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">virtex7</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">zynq</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">kintexu</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">virtexu</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">kintexuplus</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">virtexuplus</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">virtexuplusHBM</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">zynquplus</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">zynquplusRFSOC</xilinx:family>\n\
+   <xilinx:family xilinx:lifeCycle=\"Production\">versal</xilinx:family>\
+   "
+
+   # Find and replace the "xilinx:family" parameter
+   while { [eof ${in}] != 1 } {
+      gets ${in} line
+      if { [string match "*xilinx:family*" ${line}] == 1 } {
+         puts ${out} ${XIL_FAMILY}
+      } else {
+         puts ${out} ${line}
+      }
+   }
+
+   # Close the files
+   close ${in}
+   close ${out}
+
+   # over-write the existing file
+   exec mv -f $::env(OUT_DIR)/ip/component.temp $::env(OUT_DIR)/ip/component.xml
+
+   # Compress the modify IP directory to the target's image directory
+   exec bash -c "cd $::env(OUT_DIR)/ip; zip -r $::env(PROJ_DIR)/ip/${TOP}.zip *"
+}
