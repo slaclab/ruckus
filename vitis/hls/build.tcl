@@ -77,7 +77,7 @@ if { $::env(SKIP_COSIM) == 0 } {
 ##############################################################################
 set retVal [catch { \
    export_design \
-   -description $::env(GIT_HASH_LONG) \
+   -description $::env(IMAGENAME) \
    -display_name ${TOP} \
    -format ip_catalog \
    -ipname ${TOP} \
