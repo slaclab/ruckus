@@ -8,18 +8,17 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-## \file vivado/hls/env_var.tcl
-# \brief This script set all the common ruckus environmental variables for Vivado HLS
+## \file vitis/hls/env_var.tcl
+# \brief This script set all the common ruckus environmental variables for Vitis HLS
 
 set PROJ_DIR         $::env(PROJ_DIR)
 set TOP_DIR          $::env(TOP_DIR)
 set PROJECT          $::env(PROJECT)
 set OUT_DIR          $::env(OUT_DIR)
-set VIVADO_PROJECT   $::env(VIVADO_PROJECT)
 set VIVADO_VERSION   $::env(VIVADO_VERSION)
-set VIVADO_DEPEND    $::env(VIVADO_DEPEND)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)
 set ARGV             $::env(ARGV)
 set CFLAGS           $::env(CFLAGS)
 set LDFLAGS          $::env(LDFLAGS)
 set MFLAGS           $::env(MFLAGS)
+set HDL_TYPE         $::env(HDL_TYPE)

@@ -33,6 +33,10 @@ if { [file exists ${IMAGES_DIR}] != 1 } {
 source ${RUCKUS_DIR}/vivado/project.tcl
 VivadoRefresh ${VIVADO_PROJECT}
 
+# Setup the user IP repo
+set_property ip_repo_paths $::env(IP_REPO) [current_project]
+update_ip_catalog
+
 ########################################################
 ## Setup the top-level generics
 ########################################################
