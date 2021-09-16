@@ -10,7 +10,12 @@
 
 # Detect project name
 ifndef PROJECT
-export PROJECT = $(notdir $(BASE_DIR))
+export PROJECT = $(notdir $(PWD))
+endif
+
+# Detect project path
+ifndef PROJ_DIR
+export PROJ_DIR = $(abspath $(PWD))
 endif
 
 # Project Build Directory
@@ -86,6 +91,9 @@ ifndef EXPORT_VERSION
 export EXPORT_VERSION = 1.0
 endif
 
+# Update legacy "PRJ_VERSION" variable
+export PRJ_VERSION = v$(EXPORT_VERSION)
+
 # Specifies if we need to modify the ip/component.xml to support "all" FPGA family types
 ifndef ALL_XIL_FAMILY
 export ALL_XIL_FAMILY = 0
@@ -101,18 +109,24 @@ all: target
 ###############################################################
 .PHONY : test
 test:
+	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo PROJECT: $(PROJECT)
 	@echo PROJ_DIR: $(PROJ_DIR)
-	@echo PRJ_VERSION: $(PRJ_VERSION)
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo OUT_DIR: $(OUT_DIR)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
-	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo SRC_FILE: $(SRC_FILE)
 	@echo ARGV: $(ARGV)
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
 	@echo HDL_TYPE: $(HDL_TYPE)
+	@echo SKIP_CSIM: $(SKIP_CSIM)
+	@echo SKIP_COSIM: $(SKIP_COSIM)
+	@echo EXPORT_VENDOR: $(EXPORT_VENDOR)
+	@echo EXPORT_VERSION: $(PRJ_VERSION)
+	@echo HDL_TYPE: $(HDL_TYPE)
+	@echo IMAGENAME: $(IMAGENAME)
+	@echo BUILD_STRING: "$(BUILD_STRING)"
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
 

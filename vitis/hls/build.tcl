@@ -77,7 +77,7 @@ if { $::env(SKIP_COSIM) == 0 } {
 ##############################################################################
 set retVal [catch { \
    export_design \
-   -description $::env(IMAGENAME) \
+   -description $::env(BUILD_STRING) \
    -display_name ${TOP} \
    -format ip_catalog \
    -ipname ${TOP} \
@@ -96,9 +96,9 @@ if { $::env(ALL_XIL_FAMILY) == 1 } {
 } else {
    # No modification to .ZIP.  Only copy the .ZIP to the output image directory
    set zipFile [glob -directory ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/ *.zip *.ZIP]
-   exec cp -f ${zipFile} ${PROJ_DIR}/ip/${TOP}.zip
+   exec cp -f ${zipFile} ${PROJ_DIR}/ip/$::env(IMAGENAME).zip
 }
-puts "${PROJ_DIR}/ip/${TOP}.zip"
+puts "${PROJ_DIR}/ip/$::env(IMAGENAME).zip"
 
 ##############################################################################
 #                            Exit Procedure
