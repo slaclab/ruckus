@@ -116,3 +116,29 @@ proc ComponentXmlAllFamilySupport { } {
    # Compress the modify IP directory to the target's image directory
    exec bash -c "cd $::env(OUT_DIR)/ip; zip -r $::env(PROJ_DIR)/ip/$::env(IMAGENAME).zip *"
 }
+
+## Open sources.tcl file
+proc loadSourcesTcl { filePath {flags ""} } {
+   puts "loadSourcesTcl: ${filePath} ${flags}"
+   # Make a local copy of global variable
+   set LOC_PATH $::DIR_PATH
+   # Make a local copy of global variable
+   set ::DIR_PATH ${filePath}
+   # Open the TCL file
+   if { [file exists ${filePath}/sources.tcl] == 1 } {
+      if { ${flags} == "debug" } {
+         source ${filePath}/sources.tcl
+      } else {
+         source ${filePath}/sources.tcl -notrace
+      }
+   } else {
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadSourcesTcl: ${filePath}/sources.tcl doesn't exist"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   # Revert the global variable back to orginal value
+   set ::DIR_PATH ${LOC_PATH}
+   # Keep a history of all the load paths
+   set ::DIR_LIST "$::DIR_LIST ${filePath}"
+}
