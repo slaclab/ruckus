@@ -32,6 +32,13 @@ set TOP [get_top]
 # Get the directives
 source ${PROJ_DIR}/directives.tcl
 
+# Generate the description string for the ip catalog export
+if { $::env(GIT_HASH_SHORT) == 0 } {
+   set description "$::env(BUILD_STRING), Githash=dirty"
+} else {
+   set description "$::env(BUILD_STRING), Githash=$::env(GIT_HASH_SHORT)"
+}
+
 ##############################################################################
 #                  Run C/C++ simulation testbed
 ##############################################################################
@@ -77,7 +84,7 @@ if { $::env(SKIP_COSIM) == 0 } {
 ##############################################################################
 set retVal [catch { \
    export_design \
-   -description "$::env(BUILD_STRING), Githash=$::env(GIT_HASH_SHORT)" \
+   -description ${description} \
    -display_name ${TOP} \
    -format ip_catalog \
    -ipname ${TOP} \
