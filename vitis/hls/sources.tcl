@@ -34,8 +34,18 @@ source ${PROJ_DIR}/sources.tcl
 open_solution "solution1"
 
 ## Setup the csim ldflags
-set retVal [catch { csim_design -O -setup -ldflags ${LDFLAGS} -mflags ${MFLAGS} -argv ${ARGV} }]
-CheckProcRetVal ${retVal} "csim setup" "vitis/hls/sources"
+if { $::env(SKIP_CSIM) == 0 } {
+
+   set retVal [catch { \
+      csim_design -O -setup \
+      -ldflags ${LDFLAGS} \
+      -mflags ${MFLAGS} \
+      -argv ${ARGV} \
+   }]
+
+   CheckProcRetVal ${retVal} "csim setup" "vitis/hls/sources"
+
+}
 
 ## Target specific solution setup script
 source ${PROJ_DIR}/solution.tcl
