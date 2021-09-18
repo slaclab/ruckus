@@ -26,9 +26,6 @@ open_project ${PROJECT}_project
 # Create a solution
 open_solution "solution1"
 
-# Get the top level name
-set TOP [get_top]
-
 # Get the directives
 source ${PROJ_DIR}/directives.tcl
 
@@ -85,9 +82,9 @@ if { $::env(SKIP_COSIM) == 0 } {
 set retVal [catch { \
    export_design \
    -description ${description} \
-   -display_name ${TOP} \
+   -display_name ${PROJECT} \
    -format ip_catalog \
-   -ipname ${TOP} \
+   -ipname ${PROJECT} \
    -library hls \
    -taxonomy "/VITIS_HLS_IP" \
    -vendor $::env(EXPORT_VENDOR) \
