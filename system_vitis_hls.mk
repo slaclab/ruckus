@@ -68,7 +68,7 @@ ifndef ARGV
 export ARGV =
 endif
 
-# Specifies the synthesis type [verilog, VHDL]
+# Specifies the synthesis type [verilog, vhdl]
 ifndef HDL_TYPE
 export HDL_TYPE = verilog
 endif
