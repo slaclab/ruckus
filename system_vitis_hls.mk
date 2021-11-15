@@ -68,19 +68,24 @@ ifndef ARGV
 export ARGV =
 endif
 
-# Specifies the synthesis type [verilog, VHDL]
+# Specifies the synthesis type [verilog, vhdl]
 ifndef HDL_TYPE
 export HDL_TYPE = verilog
 endif
 
-# Specifies if we are skipping the csim step
+# Specifies if we are skipping the csim
 ifndef SKIP_CSIM
 export SKIP_CSIM = 0
 endif
 
-# Specifies if we are skipping the cosim step
+# Specifies if we are skipping the cosim
 ifndef SKIP_COSIM
 export SKIP_COSIM = 0
+endif
+
+# Specifies if we are skipping the dcp generation
+ifndef SKIP_DCP
+export SKIP_DCP = 1
 endif
 
 # Specifies the export configurations
