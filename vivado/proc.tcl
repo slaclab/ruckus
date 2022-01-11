@@ -208,17 +208,17 @@ proc BuildIpCores { } {
             } _RESULT]
          }
       }
-      foreach corePntr ${ipList} {
-         # Disable the IP Core's XDC (so it doesn't get implemented at the project level)
-         set xdcPntr [get_files -quiet -of_objects [get_files ${corePntr}.xci] -filter {FILE_TYPE == XDC}]
-         if { ${xdcPntr} != "" } {
-            set_property is_enabled false [get_files ${xdcPntr}]
-         }
-         # Set the IP core synthesis run name
-         set ipSynthRun ${corePntr}_synth_1
-         # Reset the "needs_refresh" flag
-         set_property needs_refresh false [get_runs ${ipSynthRun}]
-      }
+#      foreach corePntr ${ipList} {
+#         # Disable the IP Core's XDC (so it doesn't get implemented at the project level)
+#         set xdcPntr [get_files -quiet -of_objects [get_files ${corePntr}.xci] -filter {FILE_TYPE == XDC}]
+#         if { ${xdcPntr} != "" } {
+#            set_property is_enabled false [get_files ${xdcPntr}]
+#         }
+#         # Set the IP core synthesis run name
+#         set ipSynthRun ${corePntr}_synth_1
+#         # Reset the "needs_refresh" flag
+#         set_property needs_refresh false [get_runs ${ipSynthRun}]
+#      }
    }
    # Refresh the project
    update_compile_order -quiet -fileset sources_1
