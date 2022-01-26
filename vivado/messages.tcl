@@ -119,7 +119,6 @@ set_msg_config -id {Power 33-332}       -new_severity INFO;# Route: Found switch
 # Messages: Change from WARNING to ERROR
 set_msg_config -id {Synth 8-614}      -new_severity ERROR;# SYNTH: Signal not in the sensitivity list
 set_msg_config -id {Synth 8-3512}     -new_severity ERROR;# SYNTH: Assigned value in logic is out of range
-set_msg_config -id {Synth 8-327}      -new_severity ERROR;# SYNTH: Inferred latch
 set_msg_config -id {VRFC 10-664}      -new_severity ERROR;# SIM:   expression has XXX elements ; expected XXX
 set_msg_config -id {filemgmt 20-1318} -new_severity ERROR;# FILEMGMT: Duplicate entities/files found in the same library
 set_msg_config -id {IP_Flow 19-1663}  -new_severity ERROR;# IP_FLOW: Duplicate IP found
@@ -200,6 +199,15 @@ if { [info exists ::env(ALLOW_UN_DRIVEN)] != 1 || $::env(ALLOW_UN_DRIVEN) == 1 }
     set_msg_config -id {Synth 8-3848} -new_severity "CRITICAL WARNING"; # SYNTH: un-driven net
 } else {
     set_msg_config -id {Synth 8-3848} -new_severity ERROR; # SYNTH: un-driven net
+}
+
+########################################################
+# Check if inferred latch are **NOT** allowed
+########################################################
+if { [info exists ::env(ALLOW_LATCH)] != 1 || $::env(ALLOW_LATCH) == 1 } {
+    set_msg_config -id {Synth 8-327} -new_severity "CRITICAL WARNING"; # SYNTH: Inferred latch
+} else {
+    set_msg_config -id {Synth 8-327} -new_severity ERROR; # SYNTH: Inferred latch
 }
 
 ########################################################
