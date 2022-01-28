@@ -8,9 +8,9 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 # VCS + Verdi GUI + Ubuntu 19.04 Notes:
-# Download https://www.dropbox.com/s/79x3imq73tcqyw4/libpng12-0_1.2.54-1ubuntu1b_amd64.deb?dl=1
-# $ sudo dpkg -i libpng12-0_1.2.54-1ubuntu1b_amd64.deb
-# $ sudo apt install -f
+# $ sudo add-apt-repository ppa:linuxuprising/libpng12
+# $ sudo apt update
+# $ sudo apt install libpng12-0
 ##############################################################################
 
 ## \file vivado/vcs.tcl
@@ -54,13 +54,13 @@ proc GetVcsName { } {
    set err_ret [catch {
       exec vcs -ID | grep "vcs script version"
    } grepVersion]
-   if { ${err_ret} != 0} {
-      puts "\n\n*********************************************************"
-      puts "\"vcs -ID\" command failed:"
-      puts "${grepVersion}"
-      puts "*********************************************************\n\n"
-      return -1
-   }
+   # if { ${err_ret} != 0} {
+      # puts "\n\n*********************************************************"
+      # puts "\"vcs -ID\" command failed:"
+      # puts "${grepVersion}"
+      # puts "*********************************************************\n\n"
+      # return -1
+   # }
    scan $grepVersion "vcs script version : %s\n%s" VersionNumber blowoff
 
    return ${VersionNumber}
@@ -71,7 +71,7 @@ proc VcsVersionCheck { } {
    set retVar -1
 
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12"
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09"
 
    # Get Version Name
    set VersionNumber [GetVcsName]
