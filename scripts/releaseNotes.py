@@ -48,6 +48,11 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
             # Get PR info from github
             req = remRepo.get_pull(int(entry['PR'][1:]))
+
+            # Detect Release Candidate PRs
+            if ('main' in req.base.label or 'master' in req.base.label) and 'pre-release' in req.head.label:
+                entry['IsRC'] = True
+
             entry['Title'] = req.title
             entry['body'] = req.body
 
@@ -55,7 +60,7 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             entry['Pull'] = entry['PR'] + f" ({req.additions} additions, {req.deletions} deletions, {req.changed_files} files changed)"
 
             # Detect JIRA entry
-            if entry['Branch'].startswith('slaclab/ES'):
+            if entry['Branch'].lower().startswith('slaclab/es'):
                 url = 'https://jira.slac.stanford.edu/issues/{}'.format(entry['Branch'].split('/')[1])
                 entry['Jira'] = url
             else:
@@ -113,7 +118,8 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
         entries = sorted(records[label], key=lambda v: v['changes'], reverse=True)
 
         for entry in entries:
-            subLab += f" 1. {entry['PR']} - {entry['Title']}\n"
+            if 'IsRC' not in entry:
+                subLab += f" 1. {entry['PR']} - {entry['Title']}\n"
 
         if len(subLab) > 0:
             md += f"### {label}\n" + subLab
@@ -126,18 +132,20 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
     # Generate detailed PR notes
     for entry in details:
-        det += f"### {entry['Title']}"
-        det += '\n|||\n|---:|:---|\n'
+        if 'IsRC' not in entry: # Don't generate output for Release Candidate PRs
+            det += f"### {entry['Title']}"
+            det += '\n|||\n|---:|:---|\n'
 
-        for i in ['Author', 'Date', 'Pull', 'Branch', 'Issues', 'Jira', 'Labels']:
-            if entry[i] is not None:
-                det += f'|**{i}:**|{entry[i]}|\n'
+            for i in ['Author', 'Date', 'Pull', 'Branch', 'Issues', 'Jira', 'Labels']:
+                if entry[i] is not None:
+                    det += f'|**{i}:**|{entry[i]}|\n'
 
-        det += '\n**Notes:**\n'
-        for line in entry['body'].splitlines():
-            det += '> ' + line + '\n'
-        det += '\n-------\n'
-        det += '\n\n'
+            det += '\n**Notes:**\n'
+            for line in entry['body'].splitlines():
+                det += '> ' + line + '\n'
+            det += '\n-------\n'
+            det += '\n\n'
+
 
     # Include details
     md += det
