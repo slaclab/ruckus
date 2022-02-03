@@ -52,7 +52,7 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             # Detect Release Candidate PRs
             if ('main' in req.base.label or 'master' in req.base.label) and 'pre-release' in req.head.label:
                 entry['IsRC'] = True
-                
+
             entry['Title'] = req.title
             entry['body'] = req.body
 
