@@ -15,3 +15,4 @@
 *.slx filter=lfs diff=lfs merge=lfs -text
 *.slabtimeproj filter=lfs diff=lfs merge=lfs -text
 *.pptx filter=lfs diff=lfs merge=lfs -text
+*.xlsx filter=lfs diff=lfs merge=lfs -text

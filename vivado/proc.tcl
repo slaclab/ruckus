@@ -1066,11 +1066,23 @@ proc CheckGitVersion { } {
 ## Checks the submodule tag release to a user defined value
 proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
 
-   # Get the full git submodule string for a particular module
-   set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]
+   # Get the submodule status string
+   set retVar [catch {set submodule [exec git -C $::env(MODULES) submodule status -- ${name}]} _RESULT]
+   if {$retVar} {
+      puts "\n\n\n\n\n********************************************************"
+      puts "SubmoduleCheck(name=$name): ${_RESULT}"
+      puts "********************************************************\n\n\n\n\n"
+      return -1
+   }
 
-   # Scan for the hash, name, and tag portions of the string
-   scan $submodule "%s %s (v%s)" hash temp tag
+   # Scan for the hash, name, and tag portions of the string (assumes a 'v' prefix to start with)
+   if { [scan $submodule "%s %s (v%s)" hash temp tag] != 3 } {
+      # Check again with 'v' prefix
+      set prefix ""
+      scan $submodule "%s %s (%s)" hash temp tag
+   } else {
+      set prefix "v"
+   }
    scan $tag "%d.%d.%d%s" major minor patch d
    set tag [string map [list $d ""] $tag]
    set tag "${major}.${minor}.${patch}"
@@ -1082,18 +1094,18 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
    # Check the validTag flag
    if { ${validTag} != 1 } {
       puts "\n\n*********************************************************"
-      puts "Your git clone ${name} = v${tag}"
-      puts "However, ${name} Lock  = v${lockTag}"
-      puts "Please update this submodule tag to v${lockTag} (or later)"
+      puts "Your git clone ${name} = ${prefix}${tag}"
+      puts "However, ${name} Lock  = ${prefix}${lockTag}"
+      puts "Please update this submodule tag to ${prefix}${lockTag} (or later)"
       puts "*********************************************************\n\n"
       return -1
    } elseif { ${major} == ${majorLock} && ${minor} == ${minorLock} && ${patch} == ${patchLock} } {
       return 0
    } elseif { ${mustBeExact} == "mustBeExact" } {
       puts "\n\n*********************************************************"
-      puts "Your git clone ${name} = v${tag}"
-      puts "However, ${name} Lock  = v${lockTag}"
-      puts "Please update this submodule tag to v${lockTag}"
+      puts "Your git clone ${name} = ${prefix}${tag}"
+      puts "However, ${name} Lock  = ${prefix}${lockTag}"
+      puts "Please update this submodule tag to ${prefix}${lockTag}"
       puts "*********************************************************\n\n"
       return -1
    } else {
