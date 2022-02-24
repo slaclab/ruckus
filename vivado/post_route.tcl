@@ -53,8 +53,7 @@ if { [CheckTiming false] == true } {
    if { [VersionCompare 2019.2] >= 0 } {
 
       # Check if VITIS_SRC_PATH is a valid path
-      if { [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 && ${mbPath} != "" &&
-           [file exists ${OUT_DIR}/${VIVADO_PROJECT}.runs/impl_1/${PROJECT}_bd.bmm] == 1 } {
+      if { [expr [info exists ::env(VITIS_SRC_PATH)]] == 1 && ${mbPath} != "" } {
          # Add .ELF to the .bit file
          source ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/bit.tcl
       }
