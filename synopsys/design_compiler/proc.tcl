@@ -267,19 +267,83 @@ proc loadRuckusTcl { filePath {flags ""} } {
    set ::DIR_PATH ${LOC_PATH}
 }
 
-## Function for putting the TCL script into a wait (in units of seconds)
-proc formatType {filepath} {
+## Reset source file lists
+proc ResetSrcFileLists {} {
+   set ::SRC_VHDL     ""
+   set ::SRC_VERILOG  ""
+   set ::SRC_SVERILOG ""
+}
+
+## Update source file lists
+proc UpdateSrcFileLists {filepath} {
    set fileExt [file extension ${filepath}]
    if { ${fileExt} eq {.vhd} ||
         ${fileExt} eq {.vhdl} } {
-      return "vhdl"
+      set ::SRC_VHDL "$::SRC_VHDL ${filepath}"
    } elseif {
         ${fileExt} eq {.v} ||
         ${fileExt} eq {.vh} } {
-      return "verilog"
+      set ::SRC_VERILOG "$::SRC_VERILOG ${filepath}"
    } else {
-      return "sverilog"
+      set ::SRC_SVERILOG "$::SRC_SVERILOG ${filepath}"
    }
+}
+
+## Analyze source file lists
+proc AnalyzeSrcFileLists args {
+   # Parse the list of args
+   array set params $args
+
+   # Initialize local variables
+   set vhdlTop ""
+   set verilogTop ""
+   set systemVerilogTop ""
+   set vhdlLib ""
+   set verilogLib ""
+   set systemVerilogLib ""
+
+   if {[info exists params(-vhdlTop)]} {
+     set vhdlTop "$params(-vhdlTop)"
+   }
+
+   if {[info exists params(-verilogTop)]} {
+      set verilogTop "$params(-verilogTop)"
+   }
+
+   if {[info exists params(-systemVerilogTop)]} {
+      set systemVerilogTop "$params(-systemVerilogTop)"
+   }
+
+   if {[info exists params(-vhdlLib)]} {
+      set vhdlLib "$params(-vhdlLib)"
+   }
+
+   if {[info exists params(-verilogLib)]} {
+      set verilogLib "$params(-verilogLib)"
+   }
+
+   if {[info exists params(-systemVerilogLib)]} {
+      set systemVerilogLib "$params(-systemVerilogLib)"
+   }
+
+   # Load VHDL code to memory
+   if { $::SRC_VHDL  != "" } {
+      # analyze -format vhdl ${vhdlLib} ${vhdlTop} -autoread $::SRC_VHDL
+      analyze -format vhdl -library ${vhdlLib} -top ${vhdlTop} -autoread $::SRC_VHDL
+   }
+
+   # Load Verilog code to memory
+   if { $::SRC_VERILOG  != "" } {
+      analyze -format verilog -library ${verilogLib} -top ${verilogTop} -autoread $::SRC_VERILOG
+   }
+
+   # Load System Verilog code to memory
+   if { $::SRC_SVERILOG  != "" } {
+      analyze -format verilog -library ${systemVerilogLib} -top ${systemVerilogTop} -autoread $::SRC_SVERILOG
+   }
+
+   # Reset source file lists
+   ResetSrcFileLists
 }
 
 ## Function to load RTL files
@@ -288,6 +352,8 @@ proc loadSource args {
    # Strip out the -sim_only flag
    if {[string match {*-sim_only*} $args]} {
       set args [string map {"-sim_only" ""} $args]
+      # Not support simulation source code in design compiler yet
+      return
    }
 
    # Parse the list of args
@@ -311,9 +377,6 @@ proc loadSource args {
       set lib $params(-lib)
    }
 
-   # Define design library
-   define_design_lib ${lib} -path $::env(SYN_DIR)/${lib}
-
    # Check for error state
    if {${has_path} && ${has_dir}} {
       puts "\n\n\n\n\n********************************************************"
@@ -336,24 +399,8 @@ proc loadSource args {
               ${fileExt} eq {.v}   ||
               ${fileExt} eq {.vh}  ||
               ${fileExt} eq {.sv} } {
-            # Add the RTL Files
-            set format [formatType $params(-path)]
-            set src_rc [catch {analyze -format ${format} -library ${lib} $params(-path)} _RESULT]
-            if {$src_rc} {
-               puts "\n\n\n\n\n********************************************************"
-               puts ${_RESULT}
-               set gitLfsCheck "Runs 36-335"
-               if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
-                  puts "Here's what the .DCP file looks like right now:"
-                  puts [exec cat $params(-path)]
-                  puts "\nPlease do the following commands:"
-                  puts "$ git-lfs install"
-                  puts "$ git-lfs pull"
-                  puts "$ git submodule foreach git-lfs pull"
-               }
-               puts "********************************************************\n\n\n\n\n"
-               exit -1
-            }
+            # Update source file list
+            UpdateSrcFileLists $params(-path)
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(-path) does not have a \[.vhd,.vhdl,.v,.vh,.sv\] file extension"
@@ -378,25 +425,8 @@ proc loadSource args {
          # Load all the RTL files
          if { ${list} != "" } {
             foreach pntr ${list} {
-               puts  ${pntr}
-               # Add the RTL Files
-               set format [formatType ${pntr}]
-               set src_rc [catch {analyze -autoread -top $::env(PROJECT) -format ${format} -library ${lib} ${pntr}} _RESULT]
-               if {$src_rc} {
-                  puts "\n\n\n\n\n********************************************************"
-                  puts ${_RESULT}
-                  set gitLfsCheck "Runs 36-335"
-                  if { [ string match *${gitLfsCheck}* ${_RESULT} ] } {
-                     puts "Here's what the .DCP file looks like right now:"
-                     puts [exec cat ${pntr}]
-                     puts "\nPlease do the following commands:"
-                     puts "$ git-lfs install"
-                     puts "$ git-lfs pull"
-                     puts "$ git submodule foreach git-lfs pull"
-                  }
-                  puts "********************************************************\n\n\n\n\n"
-                  exit -1
-               }
+               # Update source file list
+               UpdateSrcFileLists ${pntr}
             }
          } else {
             puts "\n\n\n\n\n********************************************************"

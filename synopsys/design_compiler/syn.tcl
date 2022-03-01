@@ -14,7 +14,7 @@ source $::env(RUCKUS_DC_DIR)/env_var.tcl
 
 # Init the global variable
 set ::DIR_PATH ""
-set ::SRC_LIST ""
+ResetSrcFileLists
 
 # Setup local variables
 set design  ${DESIGN}
@@ -50,6 +50,7 @@ set_svf ${SYN_DIR}/svf/${design}.svf
 # Load the top-level ruckus.tcl
 source $::env(PROJ_DIR)/ruckus.tcl
 
+# elaborate the design
 elaborate $design
 current_design $design
 
