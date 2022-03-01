@@ -8,8 +8,36 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+ifndef MAX_CORES
+export MAX_CORES = 4
+endif
+
 ifndef DIG_TECH
 export DIG_TECH =
+endif
+
+ifndef STD_CELL_LIB
+export STD_CELL_LIB =
+endif
+
+ifndef SIM_CARGS_VERILOG
+export SIM_CARGS_VERILOG = -full64 -nc -y $(SYN_HOME)/dw/sim_ver +libext+.v+.sv+
+endif
+
+ifndef SIM_CARGS_VHDL
+export SIM_CARGS_VHDL = -full64 -nc
+endif
+
+ifndef SIM_TIMESCALE
+export SIM_TIMESCALE = 1ns/1ps
+endif
+
+ifndef SIM_VCS_FLAGS
+export SIM_VCS_FLAGS = -full64 -debug_acc+all +vcs+initreg+random
+endif
+
+ifndef SIM_CARGS_VHDL
+export SIM_CARGS_VHDL = -full64 -nc
 endif
 
 ifndef PROJECT
@@ -52,9 +80,10 @@ export GIT_BYPASS = 1
 endif
 
 # Project Build Directory
-export OUT_DIR = $(abspath $(TOP_DIR)/build/$(PROJECT))
-export SYN_DIR = $(OUT_DIR)/syn
-export SIM_DIR = $(OUT_DIR)/sim
+export OUT_DIR     = $(abspath $(TOP_DIR)/build/$(PROJECT))
+export SYN_DIR     = $(OUT_DIR)/syn
+export SYN_OUT_DIR = $(OUT_DIR)/syn/out
+export SIM_DIR     = $(OUT_DIR)/sim
 
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
@@ -90,6 +119,8 @@ test:
 	@echo PARALLEL_SYNTH: $(PARALLEL_SYNTH)
 	@echo GIT_BYPASS: $(GIT_BYPASS)
 	@echo OUT_DIR: $(OUT_DIR)
+	@echo SYN_DIR: $(SYN_DIR)
+	@echo SYN_OUT_DIR: $(SYN_OUT_DIR)
 	@echo IMAGENAME: $(IMAGENAME)
 	@echo IMAGES_DIR: $(IMAGES_DIR)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
@@ -117,28 +148,23 @@ dir:
 	@test -d $(IMAGES_DIR) || mkdir $(IMAGES_DIR)
 
 ###############################################################
-#### Synopsys Interactive TCL Mode ############################
-###############################################################
-.PHONY : interactive
-interactive : dir
-	$(call ACTION_HEADER,"Synopsys Design Compiler Interactive")
-	@cd $(OUT_DIR); $(DC_CMD) | $(DC_MSG)
-
-###############################################################
 #### Synopsys Synthesis Mode ##################################
 ###############################################################
 .PHONY : syn
 syn : dir
 	$(call ACTION_HEADER,"Synopsys Design Compiler Synthesis")
-	@cd $(OUT_DIR); $(DC_CMD) -f $(RUCKUS_DC_DIR)/syn.tcl | $(DC_MSG)
+	@rm -rf $(SYN_DIR); mkdir $(SYN_DIR);
+	@mkdir $(SYN_OUT_DIR); mkdir $(SYN_OUT_DIR)/reports; mkdir $(SYN_OUT_DIR)/svf
+	@cd $(SYN_DIR); $(DC_CMD) -f $(RUCKUS_DC_DIR)/syn.tcl | $(DC_MSG)
 
 ###############################################################
 #### VCS Simulation ###########################################
 ###############################################################
-.PHONY : vcs
-vcs : dir
+.PHONY : sim
+sim : dir
 	$(call ACTION_HEADER,"VCS Simulation")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DC_DIR)/vcs.tcl
+	@rm -rf $(SIM_DIR); mkdir $(SIM_DIR);
+	@cd $(SIM_DIR); source $(RUCKUS_DC_DIR)/sim.sh
 
 ###############################################################
 #### Clean ####################################################

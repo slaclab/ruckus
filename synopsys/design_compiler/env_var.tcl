@@ -13,8 +13,12 @@
 ########################################################
 
 # Project Variables
-set DESIGN           $::env(PROJECT)
+set MAX_CORES        $::env(MAX_CORES)
 set DIG_TECH         $::env(DIG_TECH)
+set STD_CELL_LIB     $::env(STD_CELL_LIB)
+set TLU_PLUS_FILES   $::env(TLU_PLUS_FILES)
+set DESIGN           $::env(PROJECT)
+set PROJECT          $::env(PROJECT)
 set PRJ_VERSION      $::env(PRJ_VERSION)
 set PROJ_DIR         $::env(PROJ_DIR)
 set TOP_DIR          $::env(TOP_DIR)
@@ -22,4 +26,5 @@ set IMAGES_DIR       $::env(IMAGES_DIR)
 set IMAGENAME        $::env(IMAGENAME)
 set OUT_DIR          $::env(OUT_DIR)
 set SYN_DIR          $::env(SYN_DIR)
+set SYN_OUT_DIR      $::env(SYN_OUT_DIR)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)

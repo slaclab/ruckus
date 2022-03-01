@@ -20,16 +20,8 @@ ResetSrcFileLists
 set design  ${DESIGN}
 set pdk_dir ${DIG_TECH}
 
-# Remove old build
-exec rm -rf ${SYN_DIR}
-
-# Create new build directories
-exec mkdir ${SYN_DIR}
-exec mkdir ${SYN_DIR}/reports
-exec mkdir ${SYN_DIR}/svf
-
-# Hard coded to 4
-set_host_option -max_cores 4
+# Set the number of maximum cores
+set_host_option -max_cores ${MAX_CORES}
 
 # Include DesignWare synthetic library
 set synthetic_library "dw_foundation.sldb"
@@ -40,12 +32,15 @@ create_mw_lib -technology $milkyway_tech -mw_reference_library $milkyway_ref_lib
 open_mw_lib "$design"
 
 # Setup TLU Plus files
-lappend search_path $pdk_dir/Back_End/milkyway/tcb013ghp_211a/techfiles/
+lappend search_path ${TLU_PLUS_FILES}
 set_tlu_plus_files -tech2itf_map $tluplus_tech2itf_map_file -max_tluplus $max_tluplus_file
 check_tlu_plus_files
 
 # Set the set_svf path
-set_svf ${SYN_DIR}/svf/${design}.svf
+set_svf ${SYN_OUT_DIR}/svf/${design}.svf
+
+# Set the work path directory
+define_design_lib WORK -path ${SYN_DIR}/work
 
 # Load the top-level ruckus.tcl
 source $::env(PROJ_DIR)/ruckus.tcl
@@ -96,18 +91,20 @@ remove_attribute [get_lib_cells *:*/TIEH] dont_use
 
 # Write outputs
 change_names -rules verilog -hierarchy
-write -format verilog -hierarchy -output ${SYN_DIR}/${design}_g.v
-write -format ddc -hierarchy -output ${SYN_DIR}/${design}_g.ddc
-write_sdf ${SYN_DIR}/${design}_g.sdf
-write_sdc ${SYN_DIR}/${design}_g.sdc
+write -format verilog -hierarchy -output ${SYN_OUT_DIR}/${design}_g.v
+write -format ddc -hierarchy -output ${SYN_OUT_DIR}/${design}_g.ddc
+write_sdf ${SYN_OUT_DIR}/${design}_g.sdf
+write_sdc ${SYN_OUT_DIR}/${design}_g.sdc
 
 # Copy the .sdf and .v to project image directory
-exec cp -f ${SYN_DIR}/${design}_g.sdf ${IMAGES_DIR}/${IMAGENAME}.sdf
-exec cp -f ${SYN_DIR}/${design}_g.v   ${IMAGES_DIR}/${IMAGENAME}.v
+exec cp -f ${SYN_OUT_DIR}/${design}_g.sdf ${IMAGES_DIR}/${IMAGENAME}.sdf
+exec cp -f ${SYN_OUT_DIR}/${design}_g.v   ${IMAGES_DIR}/${IMAGENAME}.v
 
 # Generate reports
-report_area -nosplit -hierarchy > ${SYN_DIR}/reports/area.rpt
-report_timing -nosplit -transition_time -nets -attributes -delay_type max > ${SYN_DIR}/reports/timing.rpt
-report_timing -nosplit -transition_time -nets -attributes -delay_type min >> ${SYN_DIR}/reports/timing.rpt
-report_power -nosplit -hierarchy > ${SYN_DIR}/reports/power.rpt
-report_resources -nosplit -hierarchy > ${SYN_DIR}/reports/resources.rpt
+report_area -nosplit -hierarchy > ${SYN_OUT_DIR}/reports/area.rpt
+report_timing -nosplit -transition_time -nets -attributes -delay_type max > ${SYN_OUT_DIR}/reports/timing.rpt
+report_timing -nosplit -transition_time -nets -attributes -delay_type min >> ${SYN_OUT_DIR}/reports/timing.rpt
+report_power -nosplit -hierarchy > ${SYN_OUT_DIR}/reports/power.rpt
+report_resources -nosplit -hierarchy > ${SYN_OUT_DIR}/reports/resources.rpt
+
+exit
