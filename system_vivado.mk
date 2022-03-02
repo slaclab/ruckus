@@ -85,6 +85,7 @@ export VIVADO_DEPEND    = $(OUT_DIR)/$(VIVADO_PROJECT).xpr
 ifndef RUCKUS_DIR
 export RUCKUS_DIR = $(MODULES)/ruckus
 endif
+export SOURCE_DEPEND = $(OUT_DIR)/$(PROJECT)_sources.txt
 export RUCKUS_PROC_TCL       = $(RUCKUS_DIR)/vivado/proc.tcl
 export RUCKUS_PROC_TCL_QUIET = -quiet $(RUCKUS_DIR)/vivado/proc.tcl
 
