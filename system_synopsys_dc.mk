@@ -69,7 +69,7 @@ export RUCKUS_DIR = $(MODULES)/ruckus
 endif
 export RUCKUS_DC_DIR     = $(RUCKUS_DIR)/synopsys/design_compiler
 export RUCKUS_PROC_TCL   = $(RUCKUS_DC_DIR)/proc.tcl
-export RUCKUS_QUIET_FLAG = 
+export RUCKUS_QUIET_FLAG = -verbose
 
 ifndef PARALLEL_SYNTH
 export PARALLEL_SYNTH = $(shell cat /proc/cpuinfo | grep processor | wc -l)
