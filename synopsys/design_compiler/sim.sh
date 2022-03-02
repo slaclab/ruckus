@@ -18,13 +18,15 @@ if [ -f "$PROJ_DIR/sim/sim.sh" ]; then
 
 # Else use the default simulation code structure
 else
-   # --- Compile PnR sources
+
+   # --- Compile post-synthesis sources
    vlogan $SIM_CARGS_VERILOG $SYN_OUT_DIR/${PROJECT}_g.v
 
    # --- Compile the system verilog simulation testbed
-   vlogan -sverilog $SIM_CARGS_VERILOG $SIM_SV_TESTBBED
-fi
+   vlogan -sverilog $SIM_CARGS_VERILOG $SIM_SV_TESTBED
 
-# Run the testbench
-vcs tb_${PROJECT} $SIM_VCS_FLAGS -fgp -timescale=$SIM_TIMESCALE
-./simv -gui=dve -fgp=num_threads:$MAX_CORES +vcs+initreg+0
+   # Run the testbench
+   vcs tb_${PROJECT} $SIM_VCS_FLAGS -fgp -timescale=$SIM_TIMESCALE
+   ./simv -gui=dve -fgp=num_threads:$MAX_CORES +vcs+initreg+0
+
+fi
