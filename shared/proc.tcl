@@ -225,3 +225,51 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
       return 1
    }
 }
+
+## Generate the build string
+proc GenBuildString { pkgDir } {
+
+   # Make directory if it does not exist
+   exec mkdir -p ${pkgDir}
+
+   # Generate the build string
+   binary scan [encoding convertto ascii $::env(BUILD_STRING)] c* bstrAsic
+   set buildString ""
+   foreach decChar ${bstrAsic} {
+      set hexChar [format %02X ${decChar}]
+      set buildString ${buildString}${hexChar}
+   }
+   for {set n [string bytelength ${buildString}]} {$n < 512} {incr n} {
+      set padding "0"
+      set buildString ${buildString}${padding}
+   }
+
+   # Generate the Firmware Version string
+   scan $::env(PRJ_VERSION) %x decVer
+   set fwVersion [format %08X ${decVer}]
+
+   # Generate the GIT SHA-1 string
+   set gitHash $::env(GIT_HASH_LONG)
+   while { [string bytelength $gitHash] != 40 } {
+      set gitHash "0${gitHash}"
+   }
+
+   # Check for non-zero Vivado version (in-case non-Vivado project)
+   if {  $::env(VIVADO_VERSION) > 0.0} {
+      # Set the top-level generic values
+      set buildInfo "BUILD_INFO_G=2240'h${gitHash}${fwVersion}${buildString}"
+      set_property generic ${buildInfo} -objects [current_fileset]
+   }
+
+   # Auto-generate a "BUILD_INFO_C" VHDL package for applications that do NOT support top-level generic
+   set out [open ${pkgDir}/BuildInfoPkg.vhd w]
+   puts ${out} "library ieee;"
+   puts ${out} "use ieee.std_logic_1164.all;"
+   puts ${out} "library surf;"
+   puts ${out} "use surf.StdRtlPkg.all;"
+   puts ${out} "package BuildInfoPkg is"
+   puts ${out} "constant BUILD_INFO_C : BuildInfoType :=x\"${gitHash}${fwVersion}${buildString}\";"
+   puts ${out} "end BuildInfoPkg;"
+   close ${out}
+   loadSource -lib ruckus -path ${pkgDir}/BuildInfoPkg.vhd
+}
