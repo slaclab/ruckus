@@ -36,10 +36,6 @@ ifndef SIM_VCS_FLAGS
 export SIM_VCS_FLAGS = -full64 -debug_acc+all +vcs+initreg+random
 endif
 
-ifndef SIM_CARGS_VHDL
-export SIM_CARGS_VHDL = -full64 -nc
-endif
-
 ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
 endif
