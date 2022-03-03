@@ -48,6 +48,12 @@ GenBuildString "${OUT_DIR}/${VIVADO_PROJECT}.srcs"
 ########################################################
 set pathToLog "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfo.log"
 
+# Generate the GIT SHA-1 string
+set gitHash [GetGitHash]
+
+# Generate the Firmware Version string
+set fwVersion [GetFwVersion]
+
 # Check if file doesn't exist
 if { [expr [file exists ${pathToLog}]] == 0 } {
    reset_run synth_1

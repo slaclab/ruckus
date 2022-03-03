@@ -226,6 +226,22 @@ proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
    }
 }
 
+## Generate the GIT SHA-1 string
+proc GetGitHash { } {
+   set gitHash $::env(GIT_HASH_LONG)
+   while { [string bytelength $gitHash] != 40 } {
+      set gitHash "0${gitHash}"
+   }
+   return ${gitHash}
+}
+
+## Generate the Firmware Version string
+proc GetFwVersion { } {
+   scan $::env(PRJ_VERSION) %x decVer
+   set fwVersion [format %08X ${decVer}]
+   return ${fwVersion}
+}
+
 ## Generate the build string
 proc GenBuildString { pkgDir } {
 
@@ -245,14 +261,10 @@ proc GenBuildString { pkgDir } {
    }
 
    # Generate the Firmware Version string
-   scan $::env(PRJ_VERSION) %x decVer
-   set fwVersion [format %08X ${decVer}]
+   set fwVersion [GetFwVersion]
 
    # Generate the GIT SHA-1 string
-   set gitHash $::env(GIT_HASH_LONG)
-   while { [string bytelength $gitHash] != 40 } {
-      set gitHash "0${gitHash}"
-   }
+   set gitHash [GetGitHash]
 
    # Check for non-zero Vivado version (in-case non-Vivado project)
    if {  $::env(VIVADO_VERSION) > 0.0} {
