@@ -8,6 +8,10 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+###############################################################
+#### Hardware Debugging Functions #############################
+###############################################################
+
 ## Create a Debug Core Function
 proc CreateDebugCore {ilaName} {
 
@@ -78,23 +82,5 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
          puts "Instead the debug_probe file will automatically get copied in the ruckus/system_vivado.mk COPY_PROBES_FILE() function"
          puts "********************************************************\n\n\n\n\n"
       }
-   }
-}
-
-## Copy .LTX file to output image directory
-proc CopyLtxFile { } {
-   # Get variables
-   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
-   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
-   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
-   # Copy the .ltx file (if it exists)
-   if { [file exists ${OUT_DIR}/debugProbes.ltx] == 1 } {
-      exec cp -f ${OUT_DIR}/debugProbes.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"
-   } elseif { [file exists ${IMPL_DIR}/debug_nets.ltx] == 1 } {
-      exec cp -f ${IMPL_DIR}/debug_nets.ltx ${imagePath}.ltx
-      puts "Debug Probes file copied to ${imagePath}.ltx"
-   } else {
-      puts "No Debug Probes found"
    }
 }
