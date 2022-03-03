@@ -10,6 +10,25 @@
 
 package require cmdline
 
+## Returns the FPGA family string
+proc getFpgaFamily { } {
+   return [get_property FAMILY [get_property {PART} [current_project]]]
+}
+
+## Returns the FPGA family string
+proc getFpgaArch { } {
+   return [get_property ARCHITECTURE [get_property {PART} [current_project]]]
+}
+
+## Returns true is Versal
+proc isVersal { } {
+   if { [getFpgaArch] != "versal" } {
+      return false;
+   } else {
+      return true;
+   }
+}
+
 ## Open ruckus.tcl file
 proc loadRuckusTcl { filePath {flags ""} } {
    puts "loadRuckusTcl: ${filePath} ${flags}"
