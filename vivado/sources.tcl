@@ -38,53 +38,21 @@ set_property ip_repo_paths $::env(IP_REPO) [current_project]
 update_ip_catalog
 
 ########################################################
-## Setup the top-level generics
+## Generate the build string
 ########################################################
 
-# Generate the build string
-binary scan [encoding convertto ascii $::env(BUILD_STRING)] c* bstrAsic
-set buildString ""
-foreach decChar ${bstrAsic} {
-   set hexChar [format %02X ${decChar}]
-   set buildString ${buildString}${hexChar}
-}
-for {set n [string bytelength ${buildString}]} {$n < 512} {incr n} {
-   set padding "0"
-   set buildString ${buildString}${padding}
-}
-
-# Generate the Firmware Version string
-scan ${PRJ_VERSION} %x decVer
-set fwVersion [format %08X ${decVer}]
-
-# Generate the GIT SHA-1 string
-set gitHash $::env(GIT_HASH_LONG)
-while { [string bytelength $gitHash] != 40 } {
-   set gitHash "0${gitHash}"
-}
-
-# Set the top-level generic values
-set buildInfo "BUILD_INFO_G=2240'h${gitHash}${fwVersion}${buildString}"
-set_property generic ${buildInfo} -objects [current_fileset]
-
-# Auto-generate a "BUILD_INFO_C" VHDL package for Dynamic Partial Reconfiguration builds
-set pathToPkg "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfoPkg.vhd"
-exec mkdir -p ${OUT_DIR}/${VIVADO_PROJECT}.srcs
-set out [open ${pathToPkg} w]
-puts ${out} "library ieee;"
-puts ${out} "use ieee.std_logic_1164.all;"
-puts ${out} "library surf;"
-puts ${out} "use surf.StdRtlPkg.all;"
-puts ${out} "package BuildInfoPkg is"
-puts ${out} "constant BUILD_INFO_C : BuildInfoType :=x\"${gitHash}${fwVersion}${buildString}\";"
-puts ${out} "end BuildInfoPkg;"
-close ${out}
-loadSource -lib ruckus -path ${pathToPkg}
+GenBuildString "${OUT_DIR}/${VIVADO_PROJECT}.srcs"
 
 ########################################################
 ## Check for change in hash or fwVersion between builds
 ########################################################
 set pathToLog "${OUT_DIR}/${VIVADO_PROJECT}.srcs/BuildInfo.log"
+
+# Generate the GIT SHA-1 string
+set gitHash [GetGitHash]
+
+# Generate the Firmware Version string
+set fwVersion [GetFwVersion]
 
 # Check if file doesn't exist
 if { [expr [file exists ${pathToLog}]] == 0 } {
