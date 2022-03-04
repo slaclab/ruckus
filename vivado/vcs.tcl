@@ -135,9 +135,9 @@ set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
 
 # Set the compile/elaborate options
-set vloganOpt "-nc -l +v2k -xlrm -kdb -v2005 +define+SIM_SPEED_UP"
-set vhdlanOpt "-nc -l +v2k -xlrm -kdb"
-set elabOpt "+warn=none -kdb -lca"
+set vloganOpt $::env(SIM_CARGS_VERILOG)
+set vhdlanOpt $::env(SIM_CARGS_VHDL)
+set elabOpt $::env(SIM_VCS_FLAGS)
 
 #####################################################################################################
 ## Compile the VCS Simulation Library
@@ -337,8 +337,10 @@ while { [eof ${in}] != 1 } {
 
    set simString "  simulate"
    if { ${line} == ${simString} } {
-      set simString "  source ${simTbOutDir}/setup_env.sh"
-      puts ${out} ${simString}
+      if { ${rogueSimEn} == true } {
+         set simString "  source ${simTbOutDir}/setup_env.sh"
+         puts ${out} ${simString}
+      }
    } else {
 
       # Replace ${simTbFileName}_simv with the simv

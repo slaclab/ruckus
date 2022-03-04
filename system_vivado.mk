@@ -103,6 +103,20 @@ export IP_REPO = $(OUT_DIR)/ip_repo
 endif
 
 ###############################################################
+
+ifndef SIM_CARGS_VERILOG
+export SIM_CARGS_VERILOG = -nc -l +v2k -xlrm -kdb -v2005 +define+SIM_SPEED_UP
+endif
+
+ifndef SIM_CARGS_VHDL
+export SIM_CARGS_VHDL = -nc -l +v2k -xlrm -kdb
+endif
+
+ifndef SIM_VCS_FLAGS
+export SIM_VCS_FLAGS = +warn=none -kdb -lca
+endif
+
+###############################################################
 #           Vitis Variables (Vivado 2019.2 or newer)
 ###############################################################
 
