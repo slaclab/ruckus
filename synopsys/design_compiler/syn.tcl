@@ -71,8 +71,8 @@ if { [file exists ${PROJ_DIR}/syn/import.tcl] == 1 } {
    exec cp -f ${SYN_OUT_DIR}/${design}_g.v   ${IMAGES_DIR}/${IMAGENAME}.v
 
    # Create compressed versions of the files due to Github's 100MB limit on git-lfs
-   exec gzip -c -f -9 ${SYN_OUT_DIR}/${design}_g.sdf > ${imagePath}.sdf.gz
-   exec gzip -c -f -9 ${SYN_OUT_DIR}/${design}_g.v   > ${imagePath}.v.gz
+   exec gzip -c -f -9 ${SYN_OUT_DIR}/${design}_g.sdf > ${IMAGES_DIR}/${IMAGENAME}.sdf.gz
+   exec gzip -c -f -9 ${SYN_OUT_DIR}/${design}_g.v   > ${IMAGES_DIR}/${IMAGENAME}.v.gz
 
    # Generate reports
    report_area -nosplit -hierarchy > ${SYN_OUT_DIR}/reports/area.rpt
