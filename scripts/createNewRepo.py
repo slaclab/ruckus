@@ -110,7 +110,7 @@ parser.add_argument(
     '--adminTeam',
     nargs    = '+',
     required = False,
-    default  = [ ['slaclab','tid-air-es-admin'] ],
+    default  = [ ['slaclab','tid-id-es-admin'] ],
     help     = 'List of admin teams [org,team_name]'
 )
 
@@ -118,7 +118,7 @@ parser.add_argument(
     '--writeTeam',
     nargs    = '+',
     required = False,
-    default  = [ ['slaclab','tidaires'] ],
+    default  = [ ['slaclab','tid-id-es'] ],
     help     = 'List of write teams [org,team_name]'
 )
 
