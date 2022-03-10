@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ----------------------------------------------------------------------------
-# Description: 
-#   Script to convert the .bin file from opalkelly 
+# Description:
+#   Script to convert the .bin file from opalkelly
 #   into a .txt file for DM160237 I2C Evaluation Kit GUI
 # ----------------------------------------------------------------------------
 # https://opalkelly.com/tools/fmceepromgenerator/
@@ -16,8 +16,6 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-import sys
-import re
 import argparse
 
 from array import array
@@ -52,12 +50,12 @@ if __name__ == '__main__':
     data = array('B')
     with open(args.bin, 'rb') as f:
         data.fromfile(f, 256)
-    
+
     # Write the loaded data into a text file
     ofd = open(args.txt, 'w')
     for i in range(len(data)):
         byte = hex(data[i]).upper()[2:].zfill(2)
         ofd.write(byte)
         if (i%8==7):
-             ofd.write('\n')
+            ofd.write('\n')
     ofd.close()
