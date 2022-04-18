@@ -97,7 +97,7 @@ proc loadSource args {
               ${fileExt} eq {.v}   ||
               ${fileExt} eq {.vh}  ||
               ${fileExt} eq {.sv}  ||
-              ${fileExt} eq {.svh}  ||
+              ${fileExt} eq {.svh} ||
               ${fileExt} eq {.dat} ||
               ${fileExt} eq {.coe} ||
               ${fileExt} eq {.mem} ||
