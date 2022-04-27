@@ -97,6 +97,7 @@ proc loadSource args {
               ${fileExt} eq {.v}   ||
               ${fileExt} eq {.vh}  ||
               ${fileExt} eq {.sv}  ||
+              ${fileExt} eq {.svh} ||
               ${fileExt} eq {.dat} ||
               ${fileExt} eq {.coe} ||
               ${fileExt} eq {.mem} ||
@@ -134,7 +135,7 @@ proc loadSource args {
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.mem,.edif,.dcp\] file extension"
+            puts "loadSource: $params(path) does not have a \[.vhd,.vhdl,.v,.vh,.sv,.svh,.dat,.coe,.mem,.edif,.dcp\] file extension"
             puts "********************************************************\n\n\n\n\n"
             exit -1
          }
@@ -151,7 +152,7 @@ proc loadSource args {
          # Get a list of all RTL files
          set list ""
          set list_rc [catch {
-            set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.dat *.coe *.mem *.edif *.dcp]
+            set list [glob -directory $params(dir) *.vhd *.vhdl *.v *.vh *.sv *.svh *.dat *.coe *.mem *.edif *.dcp]
          } _RESULT]
          # Load all the RTL files
          if { ${list} != "" } {
@@ -190,7 +191,7 @@ proc loadSource args {
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
-            puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.dat,.coe,.mem,.edif,.dcp\] files"
+            puts "loadSource: $params(dir) directory does not have any \[.vhd,.vhdl,.v,.vh,.sv,.svh,.dat,.coe,.mem,.edif,.dcp\] files"
             puts "********************************************************\n\n\n\n\n"
             exit -1
          }

@@ -16,6 +16,10 @@
 *.ld
 *.dat
 
+# Matlab
+*.autosave
+*.slxc
+
 # OS files
 .DS_Store
 .DS_Store?
