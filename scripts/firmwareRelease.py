@@ -582,6 +582,32 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     gh = github.Github(token)
     remRepo = gh.get_repo(f'slaclab/{project}')
 
+    # Check if old and new tag exist in local repo
+    oldTagExist = False
+    newTagExist = False
+    for tagIdx in locRepo.tags:
+        if str(tagIdx) == prev:
+            oldTagExist = True
+        if str(tagIdx) == ver:
+            newTagExist = True
+    if not oldTagExist:
+        raise(Exception(f'local repo: oldTag={prev} does NOT exist'))
+    if newTagExist:
+        raise(Exception(f'local repo: newTag={ver} already does exist'))
+
+    # Check if old and new tag exist in remote repo
+    oldTagExist = False
+    newTagExist = False
+    for tagIdx in remRepo.get_tags():
+        if tagIdx.name == prev:
+            oldTagExist = True
+        if tagIdx.name == ver:
+            newTagExist = True
+    if not oldTagExist:
+        raise(Exception(f'remote repo: oldTag={prev} does NOT exist'))
+    if newTagExist:
+        raise(Exception(f'remote repo: newTag={ver} already does exist'))
+
     print(f"\nCreating and pushing tag {tag} .... ")
     newTag = locRepo.create_tag(path=tag, message=msg)
     locRepo.remotes.origin.push(newTag)
