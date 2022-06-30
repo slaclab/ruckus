@@ -586,7 +586,7 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     oldTagExist = False
     newTagExist = False
     for tagIdx in locRepo.tags:
-        if str(tagIdx) == prev:
+        if (str(tagIdx) == prev) and (oldTagExist != ''):
             oldTagExist = True
         if str(tagIdx) == ver:
             newTagExist = True
@@ -599,7 +599,7 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     oldTagExist = False
     newTagExist = False
     for tagIdx in remRepo.get_tags():
-        if tagIdx.name == prev:
+        if (tagIdx.name == prev) and (oldTagExist != ''):
             oldTagExist = True
         if tagIdx.name == ver:
             newTagExist = True
