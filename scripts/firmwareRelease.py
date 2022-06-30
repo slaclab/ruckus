@@ -590,7 +590,7 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
             oldTagExist = True
         if str(tagIdx) == ver:
             newTagExist = True
-    if not oldTagExist and (oldTagExist != ''):
+    if not oldTagExist and (prev != ''):
         raise(Exception(f'local repo: oldTag={prev} does NOT exist'))
     if newTagExist:
         raise(Exception(f'local repo: newTag={ver} already does exist'))
@@ -603,7 +603,7 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
             oldTagExist = True
         if tagIdx.name == ver:
             newTagExist = True
-    if not oldTagExist and (oldTagExist != ''):
+    if not oldTagExist and (prev != ''):
         raise(Exception(f'remote repo: oldTag={prev} does NOT exist'))
     if newTagExist:
         raise(Exception(f'remote repo: newTag={ver} already does exist'))
