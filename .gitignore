@@ -15,6 +15,7 @@
 *.bin
 *.ld
 *.dat
+*.htm
 
 # Matlab
 *.autosave
