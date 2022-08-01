@@ -553,7 +553,7 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
 
     # Prevent "dirty" git clone (uncommitted code) from pushing tags
     if locRepo.is_dirty():
-        raise(Exception("Cannot create tag! Git repo is dirty!"))
+        raise (Exception("Cannot create tag! Git repo is dirty!"))
 
     # Check if this is a primary release
     if relData['Primary']:
@@ -591,9 +591,9 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         if str(tagIdx) == ver:
             newTagExist = True
     if not oldTagExist and (prev != ''):
-        raise(Exception(f'local repo: oldTag={prev} does NOT exist'))
+        raise (Exception(f'local repo: oldTag={prev} does NOT exist'))
     if newTagExist:
-        raise(Exception(f'local repo: newTag={ver} already does exist'))
+        raise (Exception(f'local repo: newTag={ver} already does exist'))
 
     # Check if old and new tag exist in remote repo
     oldTagExist = False
@@ -604,9 +604,9 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         if tagIdx.name == ver:
             newTagExist = True
     if not oldTagExist and (prev != ''):
-        raise(Exception(f'remote repo: oldTag={prev} does NOT exist'))
+        raise (Exception(f'remote repo: oldTag={prev} does NOT exist'))
     if newTagExist:
-        raise(Exception(f'remote repo: newTag={ver} already does exist'))
+        raise (Exception(f'remote repo: newTag={ver} already does exist'))
 
     print(f"\nCreating and pushing tag {tag} .... ")
     newTag = locRepo.create_tag(path=tag, message=msg)
