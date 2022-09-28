@@ -43,13 +43,18 @@ proc GetCurrentProbe {ilaName} {
 }
 
 ## Probe Configuring function
-proc ConfigProbe {ilaName netName} {
+proc ConfigProbe {ilaName netName {lsb 0} {msb -1} } {
 
    # determine the probe index
    set probeIndex ${ilaName}/probe[expr [llength [get_debug_ports ${ilaName}/probe*]] - 1]
 
    # get the list of netnames
    set probeNet [lsort -increasing -dictionary [get_nets ${netName}]]
+
+   # Check if using range of values
+   if { ${msb} > -1 } {
+      set probeNet [lrange ${probeNet} ${lsb} ${msb}]
+   }
 
    # calculate the probe width
    set probeWidth [llength ${probeNet}]
