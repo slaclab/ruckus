@@ -316,7 +316,7 @@ elf :
 ###############################################################
 .PHONY : release
 release : dir
-	$(call ACTION_HEADER,"Generaring Release")
+	$(call ACTION_HEADER,"Generating Release")
 	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/scripts/firmwareRelease.py --project=$(TOP_DIR) --release=$(RELEASE) --push
 
 ###############################################################
@@ -324,7 +324,7 @@ release : dir
 ###############################################################
 .PHONY : release_files
 release_files : dir
-	$(call ACTION_HEADER,"Generaring Release Files")
+	$(call ACTION_HEADER,"Generating Release Files")
 	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/scripts/firmwareRelease.py --project=$(TOP_DIR) --release=$(RELEASE)
 
 ###############################################################
@@ -332,7 +332,7 @@ release_files : dir
 ###############################################################
 .PHONY : pyrogue
 pyrogue : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Generaring pyrogue.tar.gz file")
+	$(call ACTION_HEADER,"Generating pyrogue.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/pyrogue.tcl
 
 ###############################################################
@@ -340,7 +340,7 @@ pyrogue : $(SOURCE_DEPEND)
 ###############################################################
 .PHONY : yaml
 yaml : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Generaring cpsw.tar.gz file")
+	$(call ACTION_HEADER,"Generating cpsw.tar.gz file")
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/cpsw.tcl
 
 ###############################################################
