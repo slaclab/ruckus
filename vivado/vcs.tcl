@@ -348,9 +348,11 @@ while { [eof ${in}] != 1 } {
       set line [string map ${replaceString}  ${line}]
 
       # Update the compile options (fix bug in export_simulation not including more_options properties)
-      set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
-      set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
-      set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]
+      if { [VersionCompare 2022.1] <= 0 } {
+         set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
+         set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
+         set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]
+      }
 
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
