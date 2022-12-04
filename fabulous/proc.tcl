@@ -45,15 +45,27 @@ proc CopyFabricHdlFiles { } {
       set fileExt ".vhdl"
    }
 
-   foreach filePath [glob $::env(OUT_DIR)/Tile/*/*${fileExt}] {
+   foreach filePath [exec find $::env(OUT_DIR)/Tile -name *${fileExt}] {
       exec cp -f ${filePath} $::env(HDL_DIR)/.
    }
 
-   foreach filePath [glob -directory $::env(OUT_DIR)/Fabric *${fileExt}] {
+   foreach filePath [exec find $::env(OUT_DIR)/Fabric -name *${fileExt}] {
       exec cp -f ${filePath} $::env(HDL_DIR)/.
    }
 
    puts "\n\neFPGA HDL files copied to $::env(HDL_DIR)\n\n"
+}
+
+# Copy over the user design files
+proc CopyUserDesign { } {
+   exec rm -rf $::env(OUT_DIR)/user_design
+   if { [file exists $::env(PROJ_DIR)/user_design] != 1 } {
+      puts "\n\n$::env(PROJ_DIR)/user_design does NOT exist!!\n\n"
+      return -1
+   } else {
+      exec cp -rf $::env(PROJ_DIR)/user_design $::env(OUT_DIR)/user_design
+      return 1
+   }
 }
 
 ###############################################################

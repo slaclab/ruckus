@@ -24,11 +24,16 @@ run_FABulous_fabric
 # Check DUMP_HDL env var
 if { ${DUMP_HDL} != 1 } {
 
-   # Generate the bitstream
-   run_FABulous_bitstream {npnr user_design/sequential_16bit_en.v}
+   # Copy over the user design files
+   if { [CopyUserDesign] == 1 } {
 
-   # Copy the bitstream file to image directory
-   CopyBitstream
+      # Generate the bitstream
+      run_FABulous_bitstream {npnr user_design/top.v}
+
+      # Copy the bitstream file to image directory
+      CopyBitstream
+   }
+
 
 } else {
 

@@ -149,7 +149,7 @@ bin: proj
 ###############################################################
 .PHONY : fabric
 fabric: proj
-	$(call ACTION_HEADER,"Fabulous: Generate the bitstream")
+	$(call ACTION_HEADER,"Fabulous: Generate the eFPGA fabric")
 	@cd $(TOP_DIR)/build; export DUMP_HDL=1; python3 $(PYFAB) -s $(RUCKUS_DC_DIR)/build.tcl $(PROJECT)
 
 ###############################################################
