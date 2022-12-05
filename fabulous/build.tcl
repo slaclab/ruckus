@@ -15,6 +15,9 @@ source $::env(RUCKUS_DC_DIR)/env_var.tcl
 # Run the user configuration script
 SourceTclFile ${PROJ_DIR}/fabulous.tcl
 
+# Copy User Tiles (if they exist)
+CopyUserTiles
+
 # Load fabric
 load_fabric
 

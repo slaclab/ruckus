@@ -68,6 +68,15 @@ proc CopyUserDesign { } {
    }
 }
 
+# Copy User Tiles (if they exist)
+proc CopyUserTiles { } {
+   if { [file exists $::env(PROJ_DIR)/Tile] == 1 } {
+      foreach dirPath [glob -directory $::env(PROJ_DIR)/Tile -type d *] {
+         exec cp -rf ${dirPath} $::env(OUT_DIR)/Tile/.
+      }
+   }
+}
+
 ###############################################################
 #### Loading Source Code Functions ############################
 ###############################################################
