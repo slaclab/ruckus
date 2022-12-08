@@ -113,17 +113,17 @@ proc AnalyzeSrcFileLists args {
 
    # Load VHDL code to memory
    if { $::SRC_VHDL  != "" } {
-      read_hdl -vhdl -library ${vhdlLib} $::SRC_VHDL
+      read_hdl -language vhdl -library ${vhdlLib} "$::SRC_VHDL"
    }
 
    # Load Verilog code to memory
    if { $::SRC_VERILOG  != "" } {
-      read_hdl -v2001 -library ${verilogLib} $::SRC_VERILOG
+      read_hdl "$::SRC_VERILOG"
    }
 
    # Load System Verilog code to memory
    if { $::SRC_SVERILOG  != "" } {
-      read_hdl -sv $::SRC_SVERILOG
+      read_hdl -sv "$::SRC_SVERILOG"
    }
 
    # Reset source file lists

@@ -13,7 +13,7 @@ export GIT_BYPASS = 1
 endif
 
 ifndef MAX_CORES
-export MAX_CORES = 16
+export MAX_CORES = 8
 endif
 
 ifndef PROJECT
