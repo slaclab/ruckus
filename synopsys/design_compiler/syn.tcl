@@ -55,7 +55,7 @@ source $::env(PROJ_DIR)/ruckus.tcl
 source ${PROJ_DIR}/syn/compile.tcl
 
 # Check for user export.tcl script
-if { [file exists ${PROJ_DIR}/syn/import.tcl] == 1 } {
+if { [file exists ${PROJ_DIR}/syn/export.tcl] == 1 } {
    source ${PROJ_DIR}/syn/export.tcl
 } else {
 
