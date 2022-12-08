@@ -25,6 +25,10 @@ if { [file exists ${PROJ_DIR}/syn/import.tcl] == 1 } {
    source ${PROJ_DIR}/syn/import.tcl
 } else {
 
+   # Setup super-threading
+   set_db max_cpus_per_server $::env(MAX_CORES)
+   set_db super_thread_servers "localhost"
+
    # define tech, operating conditions and cell lef
    set_db library $::env(STD_CELL_LIB)
    set_db operating_condition $::env(OPERATING_CONDITION)
@@ -78,4 +82,4 @@ if { [file exists ${PROJ_DIR}/syn/export.tcl] == 1 } {
    exec gzip -c -f -9 ${SYN_OUT_DIR}/${design}_g.v   > ${IMAGES_DIR}/${IMAGENAME}.v.gz
 }
 
-exit
+quit

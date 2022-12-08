@@ -12,6 +12,10 @@ ifndef GIT_BYPASS
 export GIT_BYPASS = 1
 endif
 
+ifndef MAX_CORES
+export MAX_CORES = 16
+endif
+
 ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
 endif
@@ -85,6 +89,7 @@ test:
 	@echo PROJ_DIR: $(PROJ_DIR)
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo MODULES: $(MODULES)
+	@echo MAX_CORES: $(MAX_CORES)
 	@echo PDK_PATH: $(PDK_PATH)
 	@echo OPERATING_CONDITION: $(OPERATING_CONDITION)
 	@echo STD_CELL_LIB: $(STD_CELL_LIB)
