@@ -151,10 +151,17 @@ if { [file exists ${simLibOutDir}] != 1 } {
 
    # Configure the simlib compiler
    config_compile_simlib -simulator vcs_mx \
-   -cfgopt {vcs_mx.vhdl.unisim: -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs_mx.vhdl.unisim:   -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs_mx.vhdl.unimacro: -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs_mx.vhdl.unifast:  -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs_mx.vhdl.secureip: -nc -l      -xlrm -kdb } \
+   -cfgopt {vcs_mx.vhdl.xpm:      -nc -l +v2k -xlrm -kdb } \
    -cfgopt {vcs_mx.verilog.unisim:   -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.unimacro: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.unifast:  -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs_mx.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
    -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc      +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb }
+   -cfgopt {vcs_mx.verilog.xpm:      -sverilog -nc +v2k +define+XIL_TIMING -kdb }
 
    # Compile the simulation libraries
    catch { compile_simlib -force -simulator vcs_mx -family all -language all -library all -directory ${simLibOutDir} }
@@ -348,9 +355,11 @@ while { [eof ${in}] != 1 } {
       set line [string map ${replaceString}  ${line}]
 
       # Update the compile options (fix bug in export_simulation not including more_options properties)
-      set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
-      set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
-      set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]
+      if { [VersionCompare 2022.1] <= 0 } {
+         set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
+         set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
+         set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]
+      }
 
       # Change the glbl.v path (Vivado 2017.2 fix)
       set replaceString "behav/vcs/glbl.v glbl.v"
