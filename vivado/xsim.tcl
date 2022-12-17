@@ -53,10 +53,6 @@ export_ip_user_files -no_script
 ########################################################
 set sim_rc [catch {
 
-   # Set sim properties
-   set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
-   set_property top_lib xil_defaultlib [get_filesets sim_1]
-
    # Launch the xsim
    launch_simulation
 
