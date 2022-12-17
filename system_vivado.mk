@@ -368,6 +368,14 @@ vcs : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
 
 ###############################################################
+#### Vivado VCS Simulation ####################################
+###############################################################
+.PHONY : qsim
+qsim : $(SOURCE_DEPEND)
+	$(call ACTION_HEADER,"Questa Simulation")
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/qsim.tcl
+
+###############################################################
 #### Vivado Batch Mode within the Project Environment  ########
 ###############################################################
 .PHONY : batch
