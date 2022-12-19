@@ -49,7 +49,7 @@ proc GetQuestaName { } {
 proc QuestaVersionCheck { } {
     set retVar -1
 
-    # List of supported VCS versions
+    # List of supported QuestaSim versions
     set supported "2021.1_2"
 
     # Get Version Name
@@ -87,7 +87,7 @@ if { [VersionCheck 2016.4] < 0 } {
     exit -1
 }
 
-# Check for supported VCS version
+# Check for supported Questa version
 if { [QuestaVersionCheck] < 0 } {
     exit -1
 }
@@ -100,7 +100,7 @@ if { [CheckPrjConfig sim_1] != true } {
     exit -1
 }
 
-# Target specific VCS script
+# Target specific Questa script
 SourceTclFile ${VIVADO_DIR}/pre_qsim.tcl
 
 #####################################################################################################
