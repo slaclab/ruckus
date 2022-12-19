@@ -115,15 +115,17 @@ set simLibOutDir ${VIVADO_INSTALL}/qsim-${VersionNumber}
 ## Compile the Questa Simulation Library
 #####################################################################################################
 
-# Compile the libraries for VCS
+# Compile the libraries for Questa Sim
 if { [file exists ${simLibOutDir}] != 1 } {
 
-   # Make the directory
-   exec mkdir ${simLibOutDir}
+    # Make the directory
+    exec mkdir -p ${simLibOutDir}
 
-   # Compile the simulation libraries
-   catch { compile_simlib -force -simulator questa -family all -language all -library all -directory ${simLibOutDir} }
+    # Compile the simulation libraries
+    set CompSimLibComm "compile_simlib -simulator questa -simulator_exec_path {$::env(QSIM_PATH)} -family all -language all -library all -dir ${simLibOutDir}"
+    eval ${CompSimLibComm}
 }
+
 
 #####################################################################################################
 ## Setup Vivado's VCS environment
@@ -154,6 +156,10 @@ foreach filePntr ${fileList} {
 #####################################################################################################
 ## Run Questa simulation
 #####################################################################################################
+set errMsg "\n\n*********************************************************\n"
+   set errMsg "${errMsg}Error in Questa Simulation. Check the errors in the console\n"
+   set errMsg "${errMsg}*********************************************************\n\n"
+
 set sim_rc [catch {
 
     # Set sim properties
@@ -169,8 +175,6 @@ set sim_rc [catch {
 # Check for error return code during the process
 ########################################################
 if { ${sim_rc} } {
-    puts "\n\n*********************************************************"
-    puts "Error in Questa Simulation. Check the errors in the console"
-    puts "*********************************************************\n\n"
+    puts ${errMsg}
     exit -1
 }
