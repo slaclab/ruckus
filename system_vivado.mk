@@ -368,7 +368,7 @@ vcs : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
 
 ###############################################################
-#### Vivado Questa Simulation #################################
+#### Vivado ModelSim/Questa Simulation #################################
 ###############################################################
 .PHONY : msim
 msim : $(SOURCE_DEPEND)
