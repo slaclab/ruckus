@@ -128,7 +128,7 @@ if { [file exists ${simLibOutDir}] != 1 } {
 
 
 #####################################################################################################
-## Setup Vivado's VCS environment
+## Setup Vivado's Questa environment
 #####################################################################################################
 
 # Set Questa as target_simulator
