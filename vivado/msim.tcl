@@ -22,22 +22,34 @@ source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 ## Get ModelSim/Questa install name
 proc GetModelsim-QuestaName { } {
 
-    # Get the ModelSim/Questa version
-    set err_ret [catch {
-        exec bash -c "command -v $::env(MSIM_PATH)/vsim"
+    # Is ModelSim/Questa in PATH?
+    set err_ret_l1 [catch {
+        exec bash -c "command -v vsim"
     } grepCmd]
 
-    if { ${err_ret} != 0} {
-        puts "\n\n*********************************************************"
-        puts "vsim: Command not found."
-        puts "Please setup MSIM_PATH in your Modelsim/Questa setup script"
-        puts "Example: export MSIM_PATH=/tools/questasim/bin"
-        puts "*********************************************************\n\n"
-        exit -1
+    # Or set as env variable?
+    if { ${err_ret_l1} != 0} {
+        set err_ret [catch {
+            exec bash -c "command -v $::env(MSIM_PATH)/vsim"
+        } grepCmd]
+
+        if { ${err_ret} != 0} {
+            puts "\n\n*********************************************************"
+            puts "vsim: Command not found."
+            puts "Please setup MSIM_PATH in your Modelsim/Questa setup script"
+            puts "Example: export MSIM_PATH=/tools/questasim/bin"
+            puts "*********************************************************\n\n"
+            exit -1
+        } else {
+            set MSIM_PATH $::env(MSIM_PATH)
+        }
+    } else {
+        set MSIM_PATH [file dirname $grepCmd]
     }
 
+    # Is it ModelSim or Questa?
     set err_ret [catch {
-        exec $::env(MSIM_PATH)/vsim -version
+        exec ${MSIM_PATH}/vsim -version
     } grepVersion]
 
     if {[string first "Questa" ${grepVersion}] != -1} {
@@ -54,7 +66,7 @@ proc GetModelsim-QuestaName { } {
     while {[scan $grepVersion %s%n word length] == 2 && $word != {vsim}} {set grepVersion [string range $grepVersion $length end]}
     scan $grepVersion "%s %s Simulator%s" blowoff1 VersionNumber blowoff2
 
-    return [list ${Simulator} ${VersionNumber}]
+    return [list ${Simulator} ${VersionNumber} ${MSIM_PATH}]
 }
 
 ## Checks for ModelSim/Questa Sim versions that ruckus supports
@@ -126,26 +138,22 @@ SourceTclFile ${VIVADO_DIR}/pre_msim.tcl
 #####################################################################################################
 ## Set the local variables
 #####################################################################################################
-
-# Setup variables
-
 set SimInfo [GetModelsim-QuestaName]
 set Simulator [lindex $SimInfo 0]
 set VersionNumber [lindex $SimInfo 1]
+set MSIM_PATH [lindex $SimInfo 2]
 set simLibOutDir ${VIVADO_INSTALL}/msim-${VersionNumber}
 
 #####################################################################################################
-## Compile the ModelSim/Questa Simulation Library
+## Compile the Questa Simulation Library
 #####################################################################################################
-
-# Compile the libraries for ModelSim/Questa Sim
 if { [file exists ${simLibOutDir}] != 1 } {
 
     # Make the directory
     exec mkdir -p ${simLibOutDir}
 
     # Compile the simulation libraries
-    set CompSimLibComm "compile_simlib -simulator [string tolower ${Simulator}] -simulator_exec_path {$::env(MSIM_PATH)} -family all -language all -library all -dir ${simLibOutDir}"
+    set CompSimLibComm "compile_simlib -simulator [string tolower ${Simulator}] -simulator_exec_path { ${MSIM_PATH} } -family all -language all -library all -dir ${simLibOutDir}"
     eval ${CompSimLibComm}
 }
 
@@ -190,7 +198,7 @@ set sim_rc [catch {
     set_property top_lib xil_defaultlib [get_filesets sim_1]
 
     # Launch the msim
-    launch_simulation -install_path $::env(MSIM_PATH)
+    launch_simulation -install_path ${MSIM_PATH}
 
 } _SIM_RESULT]
 
