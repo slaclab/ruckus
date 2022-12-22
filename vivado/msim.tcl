@@ -36,7 +36,8 @@ proc GetModelsim-QuestaName { } {
         if { ${err_ret} != 0} {
             puts "\n\n*********************************************************"
             puts "vsim: Command not found."
-            puts "Please setup MSIM_PATH in your Modelsim/Questa setup script"
+            puts "Please add ModelSim/Questa installation directory to your PATH"
+            puts "or setup MSIM_PATH variable in your Modelsim/Questa setup script"
             puts "Example: export MSIM_PATH=/tools/questasim/bin"
             puts "*********************************************************\n\n"
             exit -1
@@ -138,6 +139,9 @@ SourceTclFile ${VIVADO_DIR}/pre_msim.tcl
 #####################################################################################################
 ## Set the local variables
 #####################################################################################################
+
+# Setup variables
+
 set SimInfo [GetModelsim-QuestaName]
 set Simulator [lindex $SimInfo 0]
 set VersionNumber [lindex $SimInfo 1]
@@ -147,13 +151,15 @@ set simLibOutDir ${VIVADO_INSTALL}/msim-${VersionNumber}
 #####################################################################################################
 ## Compile the Questa Simulation Library
 #####################################################################################################
+
+# Compile the libraries for ModelSim/Questa Sim
 if { [file exists ${simLibOutDir}] != 1 } {
 
     # Make the directory
     exec mkdir -p ${simLibOutDir}
 
     # Compile the simulation libraries
-    set CompSimLibComm "compile_simlib -simulator [string tolower ${Simulator}] -simulator_exec_path { ${MSIM_PATH} } -family all -language all -library all -dir ${simLibOutDir}"
+    set CompSimLibComm "compile_simlib -simulator [string tolower ${Simulator}] -simulator_exec_path ${MSIM_PATH} -family all -language all -library all -dir ${simLibOutDir}"
     eval ${CompSimLibComm}
 }
 
