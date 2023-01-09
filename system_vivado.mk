@@ -151,10 +151,6 @@ endif
 
 ###############################################################
 
-ifndef LD_PRELOAD
-export LD_PRELOAD =
-endif
-
 ifndef EMBED_PROC
 export EMBED_PROC = microblaze_0
 endif
@@ -167,6 +163,10 @@ else
    export EMBED_TYPE = SDK
    export EMBED_GUI  = xsdk -workspace $(OUT_DIR)/$(VIVADO_PROJECT).sdk -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
    export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/sdk/bit.tcl
+
+   ifndef LD_PRELOAD
+   export LD_PRELOAD =
+   endif
 
    # Ubuntu SDK support
    ifndef SWT_GTK3
