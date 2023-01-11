@@ -45,13 +45,18 @@ if { [CheckPrjConfig sim_1] != true } {
 ########################################################
 ## Prepare simulation and check IP cores
 ########################################################
-generate_target {simulation} [get_ips]
+generate_target -quiet {simulation} [get_ips]
 export_ip_user_files -no_script
 
 ########################################################
 ## Simulate Process
 ########################################################
 set sim_rc [catch {
+
+   # Set sim properties
+   set_property target_simulator XSim [current_project]
+   set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
+   set_property top_lib xil_defaultlib [get_filesets sim_1]
 
    # Launch the xsim
    launch_simulation
