@@ -29,6 +29,7 @@
 .Trashes
 ehthumbs.db
 Thumps.db
+*.swp
 build.info
 
 # Build directories 
