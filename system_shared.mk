@@ -56,7 +56,7 @@ ifeq ($(GIT_STATUS),)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)_$(RECONFIG_STATIC_HASH)
    endif
 else
-   export GIT_HASH_MSG   = dirty
+   export GIT_HASH_MSG   = dirty (uncommitted code)
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_LONG  =
