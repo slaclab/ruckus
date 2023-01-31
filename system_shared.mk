@@ -62,7 +62,6 @@ else
       export GIT_HASH_LONG  =
       export GIT_HASH_SHORT =
    else
-      export GIT_STATUS     =
       export GIT_HASH_LONG  = 0
       export GIT_HASH_SHORT = 0
    endif
