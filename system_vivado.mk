@@ -222,7 +222,7 @@ test:
 	@echo EMBED_GUI: $(EMBED_GUI)
 	@echo EMBED_ELF: $(EMBED_ELF)
 	@echo Untracked Files:
-	@echo "\t$(foreach ARG,$(GIT_STATUS),  $(ARG)\n)"
+	@echo "${GIT_STATUS}" | sed -e 's/ /\n/g'
 
 ###############################################################
 #### Build Location ###########################################

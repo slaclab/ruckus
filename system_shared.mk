@@ -43,6 +43,7 @@ BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
 export BUILD_STRING = $(PROJECT): Vivado v$(VIVADO_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Check the GIT status
+$(shell git update-index --refresh)
 export GIT_STATUS = $(shell git diff-index --name-only HEAD)
 
 # Check for non-dirty git clone
@@ -56,13 +57,12 @@ ifeq ($(GIT_STATUS),)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)_$(RECONFIG_STATIC_HASH)
    endif
 else
-   export GIT_HASH_MSG   = dirty
+   export GIT_HASH_MSG   = dirty (uncommitted code)
    # Check if we are using GIT tagging
    ifeq ($(GIT_BYPASS), 0)
       export GIT_HASH_LONG  =
       export GIT_HASH_SHORT =
    else
-      export GIT_STATUS     =
       export GIT_HASH_LONG  = 0
       export GIT_HASH_SHORT = 0
    endif
