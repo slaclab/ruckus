@@ -27,6 +27,7 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
     # Grouping of recors
     records = odict({'Bug': [],
                      'Enhancement': [],
+                     'Documentation': [],
                      'Interface-change': [],
                      'Unlabeled': []})
 
@@ -95,7 +96,7 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             # Add both to details list and sectioned summary list
             found = False
             if entry['Labels'] is not None:
-                for label in ['Bug', 'Enhancement', 'Interface-change']:
+                for label in records.keys():
 
                     if label.lower() in entry['Labels']:
                         records[label].append(entry)
@@ -111,7 +112,7 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
     md = f'# Pull Requests Since {oldTag}\n'
 
     # Summary list is sectioned
-    for label in ['Interface-change', 'Bug', 'Enhancement', 'Unlabeled']:
+    for label in ['Interface-change', 'Bug', 'Enhancement', 'Documentation', 'Unlabeled']:
         subLab = ""
 
         # Sort by changes
