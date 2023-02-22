@@ -37,6 +37,7 @@ build*
 bin*
 .Xil*
 .obj*
+.ipynb_checkpoints*
 
 # Only .bit.gz and .mcs.gz should be committed to git
 *.bit
