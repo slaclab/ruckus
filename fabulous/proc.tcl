@@ -53,6 +53,9 @@ proc CopyFabricHdlFiles { } {
       exec cp -f ${filePath} $::env(HDL_DIR)/.
    }
 
+   if { [file exists $::env(PROJ_DIR)/post_fabric.tcl] == 1 } {
+      source $::env(PROJ_DIR)/post_fabric.tcl
+   }
    puts "\n\neFPGA HDL files copied to $::env(HDL_DIR)\n\n"
 }
 
