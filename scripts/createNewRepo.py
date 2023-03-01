@@ -263,7 +263,7 @@ def setPermissions(gh,repo):
             print( f'Team Admin Permission: {orgName}/{teamName}' )
             org = gh.get_organization(orgName)
             team = org.get_team_by_slug(teamName)
-            team.set_repo_permission(repo, 'admin')
+            updateTeamRepository(team, repo, 'admin')
 
     # Check for list of teams with write permissions
     if args.writeTeam is not None:
@@ -271,7 +271,7 @@ def setPermissions(gh,repo):
             print( f'Team Write Permission: {orgName}/{teamName}' )
             org = gh.get_organization(orgName)
             team = org.get_team_by_slug(teamName)
-            team.set_repo_permission(repo, 'push')
+            updateTeamRepository(team, repo, 'push')
 
     # Check for list of teams with read permissions
     if args.readTeam is not None:
@@ -279,9 +279,18 @@ def setPermissions(gh,repo):
             print( f'Team Read Permission: {orgName}/{teamName}' )
             org = gh.get_organization(orgName)
             team = org.get_team_by_slug(teamName)
-            team.set_repo_permission(repo, 'pull')
+            updateTeamRepository(team, repo, 'pull')
 
     print('\n')
+
+#############################################################################################
+
+# Team.set_repo_permission() is deprecated, use Team.update_team_repository() instead
+def updateTeamRepository(team, repo, permission):
+    try:
+      team.update_team_repository(repo, permission)
+    except:
+      team.set_repo_permission(repo, permission)
 
 #############################################################################################
 
