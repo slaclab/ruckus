@@ -559,9 +559,13 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     if relData['Primary']:
         tag = f'{ver}'
         msg = f'{releaseType(ver)} Release {ver}'
+        relOld = prev
+        relNew = ver
     else:
         tag = f'{relName}_{ver}'
         msg = f'{relName} {releaseType(ver)} Release {ver}'
+        relOld = f'{relName}_{prev}'
+        relNew = f'{relName}_{ver}'
 
     print("\nLogging into github....\n")
 
@@ -586,40 +590,33 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     oldTagExist = False
     newTagExist = False
     for tagIdx in locRepo.tags:
-        if str(tagIdx) == prev:
+        if str(tagIdx) == relOld:
             oldTagExist = True
-        if str(tagIdx) == ver:
+        if str(tagIdx) == relNew:
             newTagExist = True
-    if not oldTagExist and (prev != ''):
-        raise (Exception(f'local repo: oldTag={prev} does NOT exist'))
+    if not oldTagExist and (relOld != ''):
+        raise (Exception(f'local repo: oldTag={relOld} does NOT exist'))
     if newTagExist:
-        raise (Exception(f'local repo: newTag={ver} already does exist'))
+        raise (Exception(f'local repo: newTag={relNew} already does exist'))
 
     # Check if old and new tag exist in remote repo
     oldTagExist = False
     newTagExist = False
     for tagIdx in remRepo.get_tags():
-        if tagIdx.name == prev:
+        if tagIdx.name == relOld:
             oldTagExist = True
-        if tagIdx.name == ver:
+        if tagIdx.name == relNew:
             newTagExist = True
-    if not oldTagExist and (prev != ''):
-        raise (Exception(f'remote repo: oldTag={prev} does NOT exist'))
+    if not oldTagExist and (relOld != ''):
+        raise (Exception(f'remote repo: oldTag={relOld} does NOT exist'))
     if newTagExist:
-        raise (Exception(f'remote repo: newTag={ver} already does exist'))
+        raise (Exception(f'remote repo: newTag={relNew} already does exist'))
 
     print(f"\nCreating and pushing tag {tag} .... ")
     newTag = locRepo.create_tag(path=tag, message=msg)
     locRepo.remotes.origin.push(newTag)
 
     if prev != "":
-        if relData['Primary']:
-            relOld = prev
-            relNew = ver
-        else:
-            relOld = f'{relName}_{prev}'
-            relNew = f'{relName}_{ver}'
-
         print("\nGenerating release notes ...")
         md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, oldTag=relOld, newTag=relNew)
     else:
