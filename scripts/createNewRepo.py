@@ -288,9 +288,9 @@ def setPermissions(gh,repo):
 # Team.set_repo_permission() is deprecated, use Team.update_team_repository() instead
 def updateTeamRepository(team, repo, permission):
     try:
-      team.update_team_repository(repo, permission)
+        team.update_team_repository(repo, permission)
     except:
-      team.set_repo_permission(repo, permission)
+        team.set_repo_permission(repo, permission)
 
 #############################################################################################
 
