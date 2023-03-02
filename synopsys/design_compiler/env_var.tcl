@@ -28,3 +28,6 @@ set OUT_DIR          $::env(OUT_DIR)
 set SYN_DIR          $::env(SYN_DIR)
 set SYN_OUT_DIR      $::env(SYN_OUT_DIR)
 set RUCKUS_DIR       $::env(RUCKUS_DIR)
+
+set design  ${DESIGN}
+set pdk_dir ${DIG_TECH}
