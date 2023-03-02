@@ -73,6 +73,7 @@ if { [file exists ${PROJ_DIR}/syn/export.tcl] == 1 } {
    # Copy the .sdf, sdc, .v, and reports to project image directory
    exec cp -f ${SYN_OUT_DIR}/${design}_g.sdf ${IMAGES_DIR}/${IMAGENAME}.sdf
    exec cp -f ${SYN_OUT_DIR}/${design}_g.sdc ${IMAGES_DIR}/${IMAGENAME}.sdc
+   exec cp -r ${SYN_OUT_DIR}/${design}_g.v   ${IMAGES_DIR}/${IMAGENAME}.v
    exec rm -rf ${IMAGES_DIR}/reports
    exec cp -rf ${SYN_OUT_DIR}/reports ${IMAGES_DIR}/.
 
