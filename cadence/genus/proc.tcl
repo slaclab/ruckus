@@ -82,7 +82,7 @@ proc AnalyzeSrcFileLists { } {
          set vhdlLib [file tail ${dir}]
          set vhdlDir "${vhdlDir} -x ${vhdlLib}:${dir}"
       }
-      exec cd $::env(OUT_DIR)/SRC_VHDL; $::env(VHDEPS_BIN) dump "${vhdlDir}" -o $::env(OUT_DIR)/SRC_VHDL/order
+      exec cd $::env(OUT_DIR)/SRC_VHDL; vhdeps dump "${vhdlDir}" -o $::env(OUT_DIR)/SRC_VHDL/order
 
       set vhdlList ""
       set in [open $::env(OUT_DIR)/SRC_VHDL/order r]

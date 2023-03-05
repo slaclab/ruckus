@@ -48,10 +48,6 @@ ifndef STD_LEF_LIB
 export STD_LEF_LIB =
 endif
 
-ifndef VHDEPS_BIN
-export VHDEPS_BIN = /cad/anaconda3/bin/vhdeps
-endif
-
 ifndef RUCKUS_DIR
 export RUCKUS_DIR = $(MODULES)/ruckus
 endif
