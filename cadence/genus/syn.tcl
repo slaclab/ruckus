@@ -14,7 +14,6 @@ source $::env(RUCKUS_GENUS_DIR)/env_var.tcl
 
 # Init the global variable
 set ::DIR_PATH ""
-ResetSrcFileLists
 
 # Setup local variables
 set design  ${DESIGN}

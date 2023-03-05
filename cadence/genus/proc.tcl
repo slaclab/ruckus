@@ -52,82 +52,73 @@ proc loadRuckusTcl { filePath {flags ""} } {
    set ::DIR_PATH ${LOC_PATH}
 }
 
-## Reset source file lists
-proc ResetSrcFileLists {} {
-   set ::SRC_VHDL     ""
-   set ::SRC_VERILOG  ""
-   set ::SRC_SVERILOG ""
-}
-
 ## Update source file lists
-proc UpdateSrcFileLists {filepath} {
-   set fileExt [file extension ${filepath}]
+proc UpdateSrcFileLists {filepath lib} {
+   set path ${filepath}
+   set fileExt [file extension ${path}]
+   set fbasename [file tail ${path}]
    if { ${fileExt} eq {.vhd} ||
         ${fileExt} eq {.vhdl} } {
-      set ::SRC_VHDL "$::SRC_VHDL ${filepath}"
+      set SRC_TYPE "SRC_VHDL"
    } elseif {
         ${fileExt} eq {.v} ||
         ${fileExt} eq {.vh} } {
-      set ::SRC_VERILOG "$::SRC_VERILOG ${filepath}"
+      set SRC_TYPE "SRC_VERILOG"
    } else {
-      set ::SRC_SVERILOG "$::SRC_SVERILOG ${filepath}"
+      set SRC_TYPE "SRC_SVERILOG"
    }
+   exec mkdir -p $::env(OUT_DIR)/${SRC_TYPE}
+   exec mkdir -p $::env(OUT_DIR)/${SRC_TYPE}/${lib}
+   exec ln -s ${path} $::env(OUT_DIR)/${SRC_TYPE}/${lib}/${fbasename}
 }
 
 ## Analyze source file lists
-proc AnalyzeSrcFileLists args {
-   # Parse the list of args
-   array set params $args
+proc AnalyzeSrcFileLists { } {
 
-   # Initialize local variables
-   set vhdlTop ""
-   set verilogTop ""
-   set systemVerilogTop ""
-   set vhdlLib ""
-   set verilogLib ""
-   set systemVerilogLib ""
+   if {[file exist $::env(OUT_DIR)/SRC_VHDL]} {
 
-   if {[info exists params(-vhdlTop)]} {
-     set vhdlTop "$params(-vhdlTop)"
+      set vhdlDir ""
+      foreach dir [glob -type d $::env(OUT_DIR)/SRC_VHDL/*] {
+         set vhdlLib [file tail ${dir}]
+         set vhdlDir "${vhdlDir} -x ${vhdlLib}:${dir}"
+      }
+      exec cd $::env(OUT_DIR)/SRC_VHDL; $::env(VHDEPS_BIN) dump "${vhdlDir}" -o $::env(OUT_DIR)/SRC_VHDL/order
+
+      set vhdlList ""
+      set in [open $::env(OUT_DIR)/SRC_VHDL/order r]
+      while { [eof ${in}] != 1 } {
+         gets ${in} line
+         set vhdlLib  [lindex [split ${line}] 1]
+         set filePath [lindex [split ${line}] 3]
+         read_hdl -language vhdl -library ${vhdlLib} ${filePath}
+      }
+
    }
 
-   if {[info exists params(-verilogTop)]} {
-      set verilogTop "$params(-verilogTop)"
+   if {[file exist $::env(OUT_DIR)/SRC_VERILOG]} {
+
+      set srcList ""
+      foreach dir [glob -type d $::env(OUT_DIR)/SRC_VERILOG/*] {
+         foreach filePath [glob -type f ${dir}/*] {
+            set srcList "${srcList} ${filePath}"
+         }
+      }
+      read_hdl ${srcList}
+
    }
 
-   if {[info exists params(-systemVerilogTop)]} {
-      set systemVerilogTop "$params(-systemVerilogTop)"
+   if {[file exist $::env(OUT_DIR)/SRC_SVERILOG]} {
+
+      set srcList ""
+      foreach dir [glob -type d $::env(OUT_DIR)/SRC_SVERILOG/*] {
+         foreach filePath [glob -type f ${dir}/*] {
+            set srcList "${srcList} ${filePath}"
+         }
+      }
+      read_hdl -sv ${srcList}
+
    }
 
-   if {[info exists params(-vhdlLib)]} {
-      set vhdlLib "$params(-vhdlLib)"
-   }
-
-   if {[info exists params(-verilogLib)]} {
-      set verilogLib "$params(-verilogLib)"
-   }
-
-   if {[info exists params(-systemVerilogLib)]} {
-      set systemVerilogLib "$params(-systemVerilogLib)"
-   }
-
-   # Load VHDL code to memory
-   if { $::SRC_VHDL  != "" } {
-      read_hdl -language vhdl -library ${vhdlLib} "$::SRC_VHDL"
-   }
-
-   # Load Verilog code to memory
-   if { $::SRC_VERILOG  != "" } {
-      read_hdl "$::SRC_VERILOG"
-   }
-
-   # Load System Verilog code to memory
-   if { $::SRC_SVERILOG  != "" } {
-      read_hdl -sv "$::SRC_SVERILOG"
-   }
-
-   # Reset source file lists
-   ResetSrcFileLists
 }
 
 ## Function to load RTL files
@@ -184,7 +175,7 @@ proc loadSource args {
               ${fileExt} eq {.vh}  ||
               ${fileExt} eq {.sv} } {
             # Update source file list
-            UpdateSrcFileLists $params(-path)
+            UpdateSrcFileLists $params(-path) ${lib}
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadSource: $params(-path) does not have a \[.vhd,.vhdl,.v,.vh,.sv\] file extension"
@@ -210,7 +201,7 @@ proc loadSource args {
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Update source file list
-               UpdateSrcFileLists ${pntr}
+               UpdateSrcFileLists ${pntr} ${lib}
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
@@ -221,4 +212,3 @@ proc loadSource args {
       }
    }
 }
-
