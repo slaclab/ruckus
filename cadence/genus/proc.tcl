@@ -76,23 +76,23 @@ proc UpdateSrcFileLists {filepath lib} {
 proc AnalyzeSrcFileLists { } {
 
    if {[file exist $::env(OUT_DIR)/SRC_VHDL]} {
-
       set vhdlDir ""
       foreach dir [glob -type d $::env(OUT_DIR)/SRC_VHDL/*] {
          set vhdlLib [file tail ${dir}]
          set vhdlDir "${vhdlDir} -x ${vhdlLib}:${dir}"
       }
       exec cd $::env(OUT_DIR)/SRC_VHDL; vhdeps dump "${vhdlDir}" -o $::env(OUT_DIR)/SRC_VHDL/order
-
-      set vhdlList ""
-      set in [open $::env(OUT_DIR)/SRC_VHDL/order r]
-      while { [eof ${in}] != 1 } {
-         gets ${in} line
-         set vhdlLib  [lindex [split ${line}] 1]
-         set filePath [lindex [split ${line}] 3]
-         read_hdl -language vhdl -library ${vhdlLib} ${filePath}
+      set fp [open $::env(OUT_DIR)/SRC_VHDL/order r]
+      set file_data  [read $fp]
+      close $fp
+      set vhdlOrderList [split $file_data "\n"]
+      foreach line ${vhdlOrderList} {
+         if { ${line} != ""} {
+            set vhdlLib  [lindex [split ${line}] 1]
+            set filePath [lindex [split ${line}] 3]
+            read_hdl -language vhdl -library ${vhdlLib} ${filePath}
+         }
       }
-
    }
 
    if {[file exist $::env(OUT_DIR)/SRC_VERILOG]} {
