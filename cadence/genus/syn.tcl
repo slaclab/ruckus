@@ -12,9 +12,13 @@
 source $::env(RUCKUS_GENUS_DIR)/proc.tcl
 source $::env(RUCKUS_GENUS_DIR)/env_var.tcl
 
+# Check if we are suppressing messages
+if { [expr {[info exists ::env(SUPRESS_MSG)]       && [string is true -strict $::env(SUPRESS_MSG)]}] } {
+   source ${RUCKUS_DIR}/cadence/genus/messages.tcl
+}
+
 # Init the global variable
 set ::DIR_PATH ""
-ResetSrcFileLists
 
 # Setup local variables
 set design  ${DESIGN}
@@ -73,6 +77,7 @@ if { [file exists ${PROJ_DIR}/syn/export.tcl] == 1 } {
    # Copy the .sdf, sdc, .v, and reports to project image directory
    exec cp -f ${SYN_OUT_DIR}/${design}_g.sdf ${IMAGES_DIR}/${IMAGENAME}.sdf
    exec cp -f ${SYN_OUT_DIR}/${design}_g.sdc ${IMAGES_DIR}/${IMAGENAME}.sdc
+   exec cp -r ${SYN_OUT_DIR}/${design}_g.v   ${IMAGES_DIR}/${IMAGENAME}.v
    exec rm -rf ${IMAGES_DIR}/reports
    exec cp -rf ${SYN_OUT_DIR}/reports ${IMAGES_DIR}/.
 

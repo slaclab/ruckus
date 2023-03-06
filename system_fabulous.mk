@@ -119,19 +119,10 @@ dir:
 	@rm -rf $(OUT_DIR)
 
 ###############################################################
-#### Build nextpnr ############################################
-###############################################################
-.PHONY : nextpnr
-nextpnr: dir
-	$(call ACTION_HEADER,"Fabulous: Build nextpnr")
-	@cd $(FAB_ROOT)/nextpnr; cmake . -DARCH=generic;  make -j$(nproc)
-	@cd $(FAB_ROOT)/nextpnr; cmake . -DARCH=fabulous; make -j$(nproc)
-
-###############################################################
 #### Create Project ###########################################
 ###############################################################
 .PHONY : proj
-proj: nextpnr
+proj: dir
 	$(call ACTION_HEADER,"Fabulous: Create Project")
 	@cd $(TOP_DIR)/build; python3 $(PYFAB) -c $(PROJECT)
 	@cp -f $(PROJ_DIR)/fabric.csv $(OUT_DIR)/.
@@ -151,6 +142,14 @@ bin: proj
 fabric: proj
 	$(call ACTION_HEADER,"Fabulous: Generate the eFPGA fabric")
 	@cd $(TOP_DIR)/build; export DUMP_HDL=1; python3 $(PYFAB) -s $(RUCKUS_DC_DIR)/build.tcl $(PROJECT)
+
+###############################################################
+#### Interactive Mode   #######################################
+###############################################################
+.PHONY : interactive
+interactive : proj
+	$(call ACTION_HEADER,"Fabulous Interactive")
+	@cd $(TOP_DIR)/build; python3 $(PYFAB) $(PROJECT)
 
 ###############################################################
 #### Clean ####################################################

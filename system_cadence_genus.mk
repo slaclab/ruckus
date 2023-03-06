@@ -110,7 +110,7 @@ test:
 #### Build Location ###########################################
 ###############################################################
 .PHONY : dir
-dir:
+dir: clean
 	@test -d $(TOP_DIR)/build/ || { \
 			 echo ""; \
 			 echo "Build directory missing!"; \

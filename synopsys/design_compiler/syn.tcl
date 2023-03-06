@@ -16,10 +16,6 @@ source $::env(RUCKUS_DC_DIR)/env_var.tcl
 set ::DIR_PATH ""
 ResetSrcFileLists
 
-# Setup local variables
-set design  ${DESIGN}
-set pdk_dir ${DIG_TECH}
-
 # Set the number of maximum cores
 set_host_option -max_cores ${MAX_CORES}
 
