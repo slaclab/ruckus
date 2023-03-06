@@ -12,9 +12,13 @@
 source $::env(RUCKUS_GENUS_DIR)/proc.tcl
 source $::env(RUCKUS_GENUS_DIR)/env_var.tcl
 
+# Check if we are suppressing messages
+if { [expr {[info exists ::env(SUPRESS_MSG)]       && [string is true -strict $::env(SUPRESS_MSG)]}] } {
+   source ${RUCKUS_DIR}/cadence/genus/messages.tcl
+}
+
 # Init the global variable
 set ::DIR_PATH ""
-ResetSrcFileLists
 
 # Setup local variables
 set design  ${DESIGN}
