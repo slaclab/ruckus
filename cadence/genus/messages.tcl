@@ -32,6 +32,10 @@ suppress_messages { VHDL-643 }
 # in file 'surf/i2cSlave.sv' on line 401, column 20.
 suppress_messages { VLOGPT-35 }
 
+# Warning : Real value rounded to nearest integral value. [CDFG-371]
+# : Real value XXX.000000 rounded to nearest integer value XXX
+suppress_messages { CDFG-371 }
+
 # Check for user messages.tcl script
 if { [file exists $::env(PROJ_DIR)/syn/messages.tcl] == 1 } {
    source $::env(PROJ_DIR)/syn/messages.tcl
