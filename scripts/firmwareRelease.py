@@ -336,7 +336,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += 'requirements:\n'
     tmpTxt += '  build:\n'
     tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python<3.8\n'
+    tmpTxt += '    - python\n'
     tmpTxt += '    - setuptools\n'
 
     if 'LibDir' in relData:
@@ -346,7 +346,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += '\n'
     tmpTxt += '  host:\n'
     tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python<3.8\n'
+    tmpTxt += '    - python\n'
     tmpTxt += '    - setuptools\n'
     tmpTxt += '\n'
     tmpTxt += '  run:\n'
