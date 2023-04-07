@@ -344,12 +344,13 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += "    - {{ compiler('c') }}\n"
         tmpTxt += "    - {{ compiler('cxx') }}\n"
         tmpTxt += '    - rogue\n'
+        tmpTxt += '\n'
 
     tmpTxt += '  host:\n'
-    tmpTxt += '    - python\n'
+    tmpTxt += '    - python>=3.7\n'
     tmpTxt += '\n'
     tmpTxt += '  run:\n'
-    tmpTxt += '    - python\n'
+    tmpTxt += '    - python>=3.7\n'
     tmpTxt += '    - rogue\n'
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
