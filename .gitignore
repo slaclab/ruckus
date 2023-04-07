@@ -16,6 +16,7 @@
 *.ld
 *.dat
 *.htm
+*.log
 
 # Matlab
 *.autosave
