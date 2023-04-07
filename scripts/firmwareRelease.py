@@ -314,7 +314,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += 'make -j ${CPU_COUNT}\n'
         tmpTxt += 'cd ..\n'
 
-    tmpTxt += '${PYTHON} setup.py install\n\n'
+    tmpTxt += '${PYTHON} -m pip install .\n\n'
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -332,24 +332,24 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += '\n'
     tmpTxt += 'build:\n'
     tmpTxt += '  number: 1\n'
+
+    if 'LibDir' not in relData:
+        tmpTxt += '  noarch: python\n'
+
     tmpTxt += '\n'
     tmpTxt += 'requirements:\n'
-    tmpTxt += '  build:\n'
-    tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python\n'
-    tmpTxt += '    - setuptools\n'
 
     if 'LibDir' in relData:
+        tmpTxt += '  build:\n'
         tmpTxt += "    - {{ compiler('c') }}\n"
         tmpTxt += "    - {{ compiler('cxx') }}\n"
+        tmpTxt += '    - rogue\n'
 
-    tmpTxt += '\n'
     tmpTxt += '  host:\n'
-    tmpTxt += '    - rogue\n'
     tmpTxt += '    - python\n'
-    tmpTxt += '    - setuptools\n'
     tmpTxt += '\n'
     tmpTxt += '  run:\n'
+    tmpTxt += '    - python\n'
     tmpTxt += '    - rogue\n'
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
@@ -378,7 +378,7 @@ def buildSetupPy(zipFile,ver,relName,packList,sList,relData):
 
     # setuptools version creates and installs a .egg file which will not work with
     # our image and config data! Use distutils version for now.
-    setupPy  =  "\n\nfrom distutils.core import setup\n\n"
+    setupPy  =  "\n\nfrom setuptools import setup\n\n"
     #setupPy  =  "\n\nfrom setuptools import setup\n\n"
     setupPy +=  "setup (\n"
     setupPy += f"   name='{relName}',\n"
