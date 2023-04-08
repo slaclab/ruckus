@@ -383,6 +383,19 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     with zipFile.open('conda.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
 
+    if 'LibDir' in relData:
+
+        # Update conda_build_config.yaml
+        tmpTxt  = "pin_run_as_build:\n"
+        tmpTxt += "  rogue:\n"
+        tmpTxt += "    max_pin: x.x.x\n"
+        tmpTxt += "  python:\n"
+        tmpTxt += "    max_pin: x.x\n"
+
+        # Create conda_build_config.yaml
+        with zipFile.open('conda_build_config.yaml','w') as f:
+            f.write(tmpTxt.encode('utf-8'))
+
 def buildSetupPy(zipFile,ver,relName,packList,sList,relData):
 
     # setuptools version creates and installs a .egg file which will not work with
