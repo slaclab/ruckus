@@ -303,6 +303,8 @@ def selectFiles(cfg, key):
 
 def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
+    rogueVer = cfg['RogueVersion']:
+
     # Create conda-recipe/build.sh
     tmpTxt =  '#!/usr/bin/bash\n\n'
 
@@ -340,28 +342,31 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += 'requirements:\n'
 
     if 'LibDir' in relData:
-        tmpTxt += '  build:\n'
-        tmpTxt += "    - {{ compiler('c') }}\n"
-        tmpTxt += "    - {{ compiler('cxx') }}\n"
-        tmpTxt += '    - rogue\n'
-        tmpTxt += '\n'
+        tmpTxt +=  "  build:\n"
+        tmpTxt +=  "    - {{ compiler('c') }}\n"
+        tmpTxt +=  "    - {{ compiler('cxx') }}\n"
+        tmpTxt +=  "    - cmake\n"
+        tmpTxt +=  "    - make\n"
+        tmpTxt += f"    - rogue{rogueVer}\n"
+        tmpTxt += "\n"
 
-    tmpTxt += '  host:\n'
-    tmpTxt += '    - python>=3.7\n'
-    tmpTxt += '\n'
-    tmpTxt += '  run:\n'
-    tmpTxt += '    - python>=3.7\n'
-    tmpTxt += '    - rogue\n'
+    tmpTxt +=  "  host:\n"
+    tmpTxt += f"    - rogue{rogueVer}\n"
+    tmpTxt +=  "    - python>=3.7\n"
+    tmpTxt +=  "\n"
+    tmpTxt +=  "  run:\n"
+    tmpTxt +=  "    - python>=3.7\n"
+    tmpTxt += f"    - rogue{rogueVer}\n"
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
         for f in cfg['CondaDependencies']:
-            tmpTxt += f'    - {f}\n'
+            tmpTxt += f"    - {f}\n"
 
-    tmpTxt += '\n'
-    tmpTxt += 'about:\n'
-    tmpTxt += '  license: SLAC Open License\n'
-    tmpTxt += '  license_file: LICENSE.txt\n'
-    tmpTxt += '\n'
+    tmpTxt += "\n"
+    tmpTxt += "about:\n"
+    tmpTxt += "  license: SLAC Open License\n"
+    tmpTxt += "  license_file: LICENSE.txt\n"
+    tmpTxt += "\n'
 
     with zipFile.open('conda-recipe/meta.yaml','w') as f:
         f.write(tmpTxt.encode('utf-8'))
