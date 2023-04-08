@@ -360,10 +360,10 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
     tmpTxt +=  "  host:\n"
     tmpTxt += f"    - rogue{rogueVer}\n"
-    tmpTxt +=  "    - python(pyVer}\n"
+    tmpTxt += f"    - python(pyVer}\n"
     tmpTxt +=  "\n"
     tmpTxt +=  "  run:\n"
-    tmpTxt +=  "    - python{pyVer}\n"
+    tmpTxt += f"    - python{pyVer}\n"
     tmpTxt += f"    - rogue{rogueVer}\n"
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
