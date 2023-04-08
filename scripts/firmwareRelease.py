@@ -303,7 +303,10 @@ def selectFiles(cfg, key):
 
 def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
-    rogueVer = cfg['RogueVersion']:
+    if 'RogueVersion' in cfg:
+        rogueVer = cfg['RogueVersion']:
+    else:
+        rogueVer = ''
 
     # Create conda-recipe/build.sh
     tmpTxt =  '#!/usr/bin/bash\n\n'
