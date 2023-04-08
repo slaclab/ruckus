@@ -322,9 +322,9 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
         for f in cfg['CondaDependencies']:
-            if f.startswith('rogue')
+            if f.startswith('rogue'):
                 rogueDep = f
-            if f.startswith('python')
+            if f.startswith('python'):
                 pythonDep = f
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
