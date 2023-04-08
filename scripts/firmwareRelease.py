@@ -314,7 +314,18 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += 'make -j ${CPU_COUNT}\n'
         tmpTxt += 'cd ..\n'
 
-    tmpTxt += '${PYTHON} setup.py install\n\n'
+    tmpTxt += '${PYTHON} -m pip install .\n\n'
+
+    # Walk through conda dependencies and see if rogue or python versions are overriden
+    rogueDep  = 'rogue'
+    pythonDep = 'python>=3.7'
+
+    if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
+        for f in cfg['CondaDependencies']:
+            if f.startswith('rogue'):
+                rogueDep = f
+            if f.startswith('python'):
+                pythonDep = f
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -332,35 +343,40 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += '\n'
     tmpTxt += 'build:\n'
     tmpTxt += '  number: 1\n'
+
+    if 'LibDir' not in relData:
+        tmpTxt += '  noarch: python\n'
+
     tmpTxt += '\n'
     tmpTxt += 'requirements:\n'
-    tmpTxt += '  build:\n'
-    tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python\n'
-    tmpTxt += '    - setuptools\n'
 
     if 'LibDir' in relData:
-        tmpTxt += "    - {{ compiler('c') }}\n"
-        tmpTxt += "    - {{ compiler('cxx') }}\n"
+        tmpTxt +=  "  build:\n"
+        tmpTxt +=  "    - {{ compiler('c') }}\n"
+        tmpTxt +=  "    - {{ compiler('cxx') }}\n"
+        tmpTxt +=  "    - cmake\n"
+        tmpTxt +=  "    - make\n"
+        tmpTxt += f"    - {rogueDep}\n"
+        tmpTxt += "\n"
 
-    tmpTxt += '\n'
-    tmpTxt += '  host:\n'
-    tmpTxt += '    - rogue\n'
-    tmpTxt += '    - python\n'
-    tmpTxt += '    - setuptools\n'
-    tmpTxt += '\n'
-    tmpTxt += '  run:\n'
-    tmpTxt += '    - rogue\n'
+    tmpTxt +=  "  host:\n"
+    tmpTxt += f"    - {rogueDep}\n"
+    tmpTxt += f"    - {pythonDep}\n"
+    tmpTxt +=  "\n"
+    tmpTxt +=  "  run:\n"
+    tmpTxt += f"    - {pythonDep}\n"
+    tmpTxt += f"    - {rogueDep}\n"
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
         for f in cfg['CondaDependencies']:
-            tmpTxt += f'    - {f}\n'
+            if not f.startswith('rogue') and not f.startswith('python'):
+                tmpTxt += f"    - {f}\n"
 
-    tmpTxt += '\n'
-    tmpTxt += 'about:\n'
-    tmpTxt += '  license: SLAC Open License\n'
-    tmpTxt += '  license_file: LICENSE.txt\n'
-    tmpTxt += '\n'
+    tmpTxt += "\n"
+    tmpTxt += "about:\n"
+    tmpTxt += "  license: SLAC Open License\n"
+    tmpTxt += "  license_file: LICENSE.txt\n"
+    tmpTxt += "\n"
 
     with zipFile.open('conda-recipe/meta.yaml','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -374,11 +390,25 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     with zipFile.open('conda.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
 
+    # Unclear how well this works
+    if 'LibDir' in relData:
+
+        # Update conda_build_config.yaml
+        tmpTxt  = "pin_run_as_build:\n"
+        tmpTxt += "  rogue:\n"
+        tmpTxt += "    max_pin: x.x.x\n"
+        tmpTxt += "  python:\n"
+        tmpTxt += "    max_pin: x.x\n"
+
+        # Create conda_build_config.yaml
+        with zipFile.open('conda-recipe/conda_build_config.yaml','w') as f:
+            f.write(tmpTxt.encode('utf-8'))
+
 def buildSetupPy(zipFile,ver,relName,packList,sList,relData):
 
     # setuptools version creates and installs a .egg file which will not work with
     # our image and config data! Use distutils version for now.
-    setupPy  =  "\n\nfrom distutils.core import setup\n\n"
+    setupPy  =  "\n\nfrom setuptools import setup\n\n"
     #setupPy  =  "\n\nfrom setuptools import setup\n\n"
     setupPy +=  "setup (\n"
     setupPy += f"   name='{relName}',\n"
