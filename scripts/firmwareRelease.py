@@ -303,16 +303,6 @@ def selectFiles(cfg, key):
 
 def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
-    if 'RogueVersion' in cfg:
-        rogueVer = cfg['RogueVersion']
-    else:
-        rogueVer = ''
-
-    if 'PythonVersion' in cfg:
-        pyVer = cfg['PythonVersion']
-    else:
-        pyVer = ''
-
     # Create conda-recipe/build.sh
     tmpTxt =  '#!/usr/bin/bash\n\n'
 
@@ -325,6 +315,17 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += 'cd ..\n'
 
     tmpTxt += '${PYTHON} -m pip install .\n\n'
+
+    # Walk through conda dependencies and see if rogue or python versions are overriden
+    rogueDep  = 'rogue'
+    pythonDep = 'python>=3.7'
+
+    if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
+        for f in cfg['CondaDependencies']:
+            if f.startswith('rogue')
+                rogueDep = f
+            if f.startswith('python')
+                pythonDep = f
 
     with zipFile.open('conda-recipe/build.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
@@ -355,20 +356,21 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt +=  "    - {{ compiler('cxx') }}\n"
         tmpTxt +=  "    - cmake\n"
         tmpTxt +=  "    - make\n"
-        tmpTxt += f"    - rogue{rogueVer}\n"
+        tmpTxt += f"    - {rogueDep}\n"
         tmpTxt += "\n"
 
     tmpTxt +=  "  host:\n"
-    tmpTxt += f"    - rogue{rogueVer}\n"
-    tmpTxt += f"    - python{pyVer}\n"
+    tmpTxt += f"    - {rogueDep}\n"
+    tmpTxt += f"    - {pythonDep}\n"
     tmpTxt +=  "\n"
     tmpTxt +=  "  run:\n"
-    tmpTxt += f"    - python{pyVer}\n"
-    tmpTxt += f"    - rogue{rogueVer}\n"
+    tmpTxt += f"    - {pythonDep}\n"
+    tmpTxt += f"    - {rogueDep}\n"
 
     if 'CondaDependencies' in cfg and cfg['CondaDependencies'] is not None:
         for f in cfg['CondaDependencies']:
-            tmpTxt += f"    - {f}\n"
+            if not f.startswith('rogue') and not f.startswith('python'):
+                tmpTxt += f"    - {f}\n"
 
     tmpTxt += "\n"
     tmpTxt += "about:\n"
@@ -388,6 +390,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     with zipFile.open('conda.sh','w') as f:
         f.write(tmpTxt.encode('utf-8'))
 
+    # Unclear how well this works
     if 'LibDir' in relData:
 
         # Update conda_build_config.yaml
@@ -398,7 +401,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
         tmpTxt += "    max_pin: x.x\n"
 
         # Create conda_build_config.yaml
-        with zipFile.open('conda_build_config.yaml','w') as f:
+        with zipFile.open('conda-recipe/conda_build_config.yaml','w') as f:
             f.write(tmpTxt.encode('utf-8'))
 
 def buildSetupPy(zipFile,ver,relName,packList,sList,relData):
