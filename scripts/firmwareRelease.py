@@ -369,7 +369,7 @@ def buildCondaFiles(cfg,zipFile,ver,relName, relData):
     tmpTxt += "about:\n"
     tmpTxt += "  license: SLAC Open License\n"
     tmpTxt += "  license_file: LICENSE.txt\n"
-    tmpTxt += "\n'
+    tmpTxt += "\n"
 
     with zipFile.open('conda-recipe/meta.yaml','w') as f:
         f.write(tmpTxt.encode('utf-8'))
