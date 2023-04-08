@@ -304,7 +304,7 @@ def selectFiles(cfg, key):
 def buildCondaFiles(cfg,zipFile,ver,relName, relData):
 
     if 'RogueVersion' in cfg:
-        rogueVer = cfg['RogueVersion']:
+        rogueVer = cfg['RogueVersion']
     else:
         rogueVer = ''
 
