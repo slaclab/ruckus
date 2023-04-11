@@ -88,6 +88,7 @@ endif
 export SOURCE_DEPEND     = $(OUT_DIR)/$(PROJECT)_sources.txt
 export RUCKUS_PROC_TCL   = $(RUCKUS_DIR)/vivado/proc.tcl
 export RUCKUS_QUIET_FLAG = -quiet
+export RUCKUS_PROC_TCL_COMBO = $(RUCKUS_QUIET_FLAG) $(RUCKUS_PROC_TCL)
 
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
