@@ -9,8 +9,8 @@
 ##############################################################################
 
 # Load RUCKUS environment and library
-source $::env(RUCKUS_DC_DIR)/proc.tcl
-source $::env(RUCKUS_DC_DIR)/env_var.tcl
+source $::env(RUCKUS_FAB_DIR)/proc.tcl
+source $::env(RUCKUS_FAB_DIR)/env_var.tcl
 
 # Run the user configuration script
 SourceTclFile ${PROJ_DIR}/fabulous.tcl

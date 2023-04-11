@@ -44,9 +44,10 @@ endif
 ifndef RUCKUS_DIR
 export RUCKUS_DIR = $(MODULES)/ruckus
 endif
-export RUCKUS_DC_DIR     = $(RUCKUS_DIR)/fabulous
-export RUCKUS_PROC_TCL   = $(RUCKUS_DC_DIR)/proc.tcl
+export RUCKUS_FAB_DIR    = $(RUCKUS_DIR)/fabulous
+export RUCKUS_PROC_TCL   = $(RUCKUS_FAB_DIR)/proc.tcl
 export RUCKUS_QUIET_FLAG = -verbose
+export RUCKUS_PROC_TCL_COMBO = $(RUCKUS_QUIET_FLAG) $(RUCKUS_PROC_TCL)
 
 # Project Build Directory
 export OUT_DIR = $(abspath $(TOP_DIR)/build/$(PROJECT))
@@ -133,7 +134,7 @@ proj: dir
 .PHONY : bin
 bin: proj
 	$(call ACTION_HEADER,"Fabulous: Generate the bitstream")
-	@cd $(TOP_DIR)/build; export DUMP_HDL=0; python3 $(PYFAB) -s $(RUCKUS_DC_DIR)/build.tcl $(PROJECT)
+	@cd $(TOP_DIR)/build; export DUMP_HDL=0; python3 $(PYFAB) -s $(RUCKUS_FAB_DIR)/build.tcl $(PROJECT)
 
 ###############################################################
 #### Generate the eFPGA fabric ################################
@@ -141,7 +142,7 @@ bin: proj
 .PHONY : fabric
 fabric: proj
 	$(call ACTION_HEADER,"Fabulous: Generate the eFPGA fabric")
-	@cd $(TOP_DIR)/build; export DUMP_HDL=1; python3 $(PYFAB) -s $(RUCKUS_DC_DIR)/build.tcl $(PROJECT)
+	@cd $(TOP_DIR)/build; export DUMP_HDL=1; python3 $(PYFAB) -s $(RUCKUS_FAB_DIR)/build.tcl $(PROJECT)
 
 ###############################################################
 #### Interactive Mode   #######################################
