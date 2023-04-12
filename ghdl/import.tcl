@@ -15,10 +15,14 @@ source $::env(RUCKUS_PROC_TCL_COMBO)
 # Init the global variable
 set ::DIR_PATH ""
 
-# Remove the existing source directories 
-exec rm -rf $::env(OUT_DIR)/SRC_VHDL
-exec rm -rf $::env(OUT_DIR)/SRC_VERILOG
-exec rm -rf $::env(OUT_DIR)/SRC_SVERILOG
+# Remove the existing source directories
+exec rm -rf $::env(OUT_DIR)
+
+# Create a new directory
+exec mkdir $::env(OUT_DIR)
+
+# Load ruckus library (ruckus.BuildInfoPkg.vhd only)
+GenBuildString $::env(OUT_DIR)
 
 # Load the top-level ruckus.tcl
 loadRuckusTcl $::env(PROJ_DIR)
