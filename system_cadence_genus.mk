@@ -54,7 +54,6 @@ endif
 export RUCKUS_GENUS_DIR  = $(RUCKUS_DIR)/cadence/genus
 export RUCKUS_PROC_TCL   = $(RUCKUS_GENUS_DIR)/proc.tcl
 export RUCKUS_QUIET_FLAG = -quiet
-export RUCKUS_PROC_TCL_COMBO = $(RUCKUS_QUIET_FLAG) $(RUCKUS_PROC_TCL)
 
 # Project Build Directory
 export OUT_DIR     = $(abspath $(TOP_DIR)/build/$(PROJECT))

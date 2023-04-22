@@ -47,7 +47,6 @@ endif
 export RUCKUS_FAB_DIR    = $(RUCKUS_DIR)/fabulous
 export RUCKUS_PROC_TCL   = $(RUCKUS_FAB_DIR)/proc.tcl
 export RUCKUS_QUIET_FLAG = -verbose
-export RUCKUS_PROC_TCL_COMBO = $(RUCKUS_QUIET_FLAG) $(RUCKUS_PROC_TCL)
 
 # Project Build Directory
 export OUT_DIR = $(abspath $(TOP_DIR)/build/$(PROJECT))

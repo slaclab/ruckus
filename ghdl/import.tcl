@@ -10,7 +10,7 @@
 ##############################################################################
 
 # Load RUCKUS environment and library
-source $::env(RUCKUS_PROC_TCL_COMBO)
+source $::env(RUCKUS_PROC_TCL)
 
 # Init the global variable
 set ::DIR_PATH ""
