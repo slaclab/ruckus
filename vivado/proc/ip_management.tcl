@@ -37,7 +37,7 @@ proc BuildIpCores { } {
       # Check for IP cores to build
       if { ${ipCoreList} != "" } {
          # Build the IP Core
-         launch_runs -quiet ${ipCoreList} -jobs [GetCpuNumber]
+         launch_runs -quiet ${ipCoreList} -jobs $::env(PARALLEL_SYNTH)
          foreach waitPntr ${ipCoreList} {
             set src_rc [catch {
                wait_on_run ${waitPntr}
