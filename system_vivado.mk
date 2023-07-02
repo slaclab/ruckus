@@ -45,7 +45,7 @@ export REPORT_QOR = 0
 endif
 
 ifndef GZIP_BUILD_IMAGE
-export GZIP_BUILD_IMAGE = 1
+export GZIP_BUILD_IMAGE = 0
 endif
 
 ifndef GEN_BIN_IMAGE
