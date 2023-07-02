@@ -78,8 +78,6 @@ proc loadSource args {
    # Strip out the -sim_only flag
    if {[string match {*-sim_only*} $args]} {
       set args [string map {"-sim_only" ""} $args]
-      # Not support simulation source code in design compiler yet
-      return
    }
 
    # Parse the list of args
