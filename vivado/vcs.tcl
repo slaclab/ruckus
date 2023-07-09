@@ -342,44 +342,50 @@ while { [eof ${in}] != 1 } {
 
    gets ${in} line
 
-   set simString "  simulate"
-   if { ${line} == ${simString} } {
-      if { ${rogueSimEn} == true } {
-         set simString "  source ${simTbOutDir}/setup_env.sh"
-         puts ${out} ${simString}
-      }
-   } else {
+   # Do not execute the simulation in sim_vcs_mx.sh build script
+   if { [string match "*simulate.do" ${line}] } {
+      set line "  echo \"Ready to simulate\""
 
-      # Replace ${simTbFileName}_simv with the simv
-      set replaceString "${simTbFileName}_simv simv"
-      set line [string map ${replaceString}  ${line}]
-
-      # Update the compile options (fix bug in export_simulation not including more_options properties)
-      if { [VersionCompare 2022.1] <= 0 } {
-         set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
-         set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
-         set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]
-      }
-
-      # Change the glbl.v path (Vivado 2017.2 fix)
-      set replaceString "behav/vcs/glbl.v glbl.v"
-      set line [string map ${replaceString}  ${line}]
-
-      # Check if only a VHDL simulation
-      if { ${vList}   == "" &&
-           ${vhList}  == "" &&
-           ${svList}  == "" } {
-         # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
-         set line [string map { "xil_defaultlib.glbl" "" } ${line}]
-      }
-
-      if { ${mixedSim} != true } {
-         set line [string map [list ${surf_glbl_old} ${surf_glbl_new}] ${line}]
-      }
-
-      # Write to file
-      puts ${out} ${line}
    }
+
+   # Replace ${simTbFileName}_simv with the simv
+   set replaceString "${simTbFileName}_simv simv"
+   set line [string map ${replaceString}  ${line}]
+
+   # Update the compile options (fix bug in export_simulation not including more_options properties)
+   if { [VersionCompare 2022.1] <= 0 } {
+      set line [string map [list ${vlogan_opts_old}   ${vlogan_opts_new}]   ${line}]
+      set line [string map [list ${vhdlan_opts_old}   ${vhdlan_opts_new}]   ${line}]
+      set line [string map [list ${vcs_elab_opts_old} ${vcs_elab_opts_new}] ${line}]
+   }
+
+   # Change the glbl.v path (Vivado 2017.2 fix)
+   set replaceString "behav/vcs/glbl.v glbl.v"
+   set line [string map ${replaceString}  ${line}]
+
+   # Remove additional/redundant command line switch '-l[og]'
+   set line [string map {" -l .tmp_log" ""} ${line}]
+   if { [string match "*vhdlan.log 2>/dev/null" ${line}] } {
+      set line "  2>&1 | tee -a vhdlan.log"
+   }
+   if { [string match "*vlogan.log 2>/dev/null" ${line}] } {
+      set line "  2>&1 | tee -a vlogan.log"
+   }
+
+   # Check if only a VHDL simulation
+   if { ${vList}   == "" &&
+        ${vhList}  == "" &&
+        ${svList}  == "" } {
+      # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
+      set line [string map { "xil_defaultlib.glbl" "" } ${line}]
+   }
+
+   if { ${mixedSim} != true } {
+      set line [string map [list ${surf_glbl_old} ${surf_glbl_new}] ${line}]
+   }
+
+   # Write to file
+   puts ${out} ${line}
 }
 
 # Close the files
