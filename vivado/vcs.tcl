@@ -130,9 +130,17 @@ SourceTclFile ${VIVADO_DIR}/pre_vcs.tcl
 
 # Setup variables
 set VersionNumber [GetVcsName]
-set simLibOutDir ${VIVADO_INSTALL}/vcs-${VersionNumber}
+if { [info exists ::env(VCS_LIB_PATH)] } {
+    set simLibOutDir $::env(VCS_LIB_PATH)
+} else {
+    set simLibOutDir ${VIVADO_INSTALL}/vcs-${VersionNumber}
+}
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
-set simTbFileName [get_property top [get_filesets sim_1]]
+if { [info exists ::env(VIVADO_PROJECT_SIM)] } {
+    set simTbFileName $::env(VIVADO_PROJECT_SIM)
+} else {
+    set simTbFileName [get_property top [get_filesets sim_1]]
+}
 
 # Set the compile/elaborate options
 set vloganOpt $::env(SIM_CARGS_VERILOG)
