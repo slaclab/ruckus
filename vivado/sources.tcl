@@ -86,6 +86,11 @@ close ${out}
 set_property top ${PROJECT} [current_fileset]
 # set_property top "glbl"     [get_filesets sim_1]
 
+# If VIVADO_PROJECT_SIM variable exist, set as sim top
+if { [info exists ::env(VIVADO_PROJECT_SIM)] } {
+    set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
+}
+
 # Init the global variable
 set ::DIR_PATH ""
 set ::DIR_LIST ""
