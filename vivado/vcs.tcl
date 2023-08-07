@@ -136,11 +136,7 @@ if { [info exists ::env(VCS_LIB_PATH)] } {
     set simLibOutDir ${VIVADO_INSTALL}/vcs-${VersionNumber}
 }
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
-if { [info exists ::env(VIVADO_PROJECT_SIM)] } {
-    set simTbFileName $::env(VIVADO_PROJECT_SIM)
-} else {
-    set simTbFileName [get_property top [get_filesets sim_1]]
-}
+set simTbFileName [get_property top [get_filesets sim_1]]
 
 # Set the compile/elaborate options
 set vloganOpt $::env(SIM_CARGS_VERILOG)
