@@ -50,7 +50,7 @@ endif
 
 # VCS elaborate options
 ifndef VCS_ELAB_OPTS
-export VCS_ELAB_OPTS = -full64 +warn=none -kdb -lca -debug_pp -t ps -licqueue -l $(SIM_OUT_DIR)/elaborate.log
+export VCS_ELAB_OPTS = -full64 -debug_acc+pp+dmptf +warn=none -kdb -lca -debug_pp -t ps -licqueue -l $(SIM_OUT_DIR)/elaborate.log
 endif
 
 # Path to VCS analyze script

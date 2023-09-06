@@ -113,7 +113,7 @@ export SIM_CARGS_VHDL = -nc -l +v2k -xlrm -kdb
 endif
 
 ifndef SIM_VCS_FLAGS
-export SIM_VCS_FLAGS = +warn=none -kdb -lca
+export SIM_VCS_FLAGS = -debug_acc+pp+dmptf +warn=none -kdb -lca
 endif
 
 ###############################################################
@@ -368,7 +368,7 @@ vcs : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/vcs.tcl
 
 ###############################################################
-#### Vivado ModelSim/Questa Simulation #################################
+#### Vivado ModelSim/Questa Simulation ########################
 ###############################################################
 .PHONY : msim
 msim : $(SOURCE_DEPEND)
