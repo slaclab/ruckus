@@ -231,7 +231,7 @@ proc loadIpCore args {
             # Check if file doesn't exist in project
             if { [get_files -quiet $params(path)] == "" } {
                # Add the IP core file
-               import_ip -quiet -srcset sources_1 $params(path)
+               import_ip -srcset sources_1 $params(path)
             }
             # Update the global list
             set strip [file rootname [file tail $params(path)]]
@@ -264,7 +264,7 @@ proc loadIpCore args {
                # Check if file doesn't exist in project
                if { [get_files -quiet ${pntr}] == "" } {
                   # Add the IP core file
-                  import_ip -quiet -srcset sources_1 ${pntr}
+                  import_ip -srcset sources_1 ${pntr}
                }
                # Update the global list
                set strip [file rootname [file tail ${pntr}]]
