@@ -35,7 +35,9 @@ source -quiet ${RUCKUS_DIR}/vivado/messages.tcl
 set_property target_language VHDL [current_project]
 
 # Disable Xilinx's WebTalk
-config_webtalk -user off
+if { [VersionCompare 2023.1] <= 0 } {
+   config_webtalk -user off
+}
 
 # Default to no flattening of the hierarchy
 set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
