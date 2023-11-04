@@ -52,6 +52,14 @@ ifndef GEN_BIN_IMAGE
 export GEN_BIN_IMAGE = 0
 endif
 
+ifndef GEN_BIT_IMAGE
+export GEN_BIT_IMAGE = 1
+endif
+
+ifndef GEN_XSA_IMAGE
+export GEN_XSA_IMAGE = 1
+endif
+
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 0
 export RECONFIG_STATIC_HASH = 0
