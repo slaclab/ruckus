@@ -229,7 +229,8 @@ proc loadIpCore args {
          if { ${fileExt} eq {.xci} ||
               ${fileExt} eq {.xcix} } {
             # Check if file doesn't exist in project
-            if { [get_files -quiet $params(path)] == "" } {
+            set fbasename [file rootname [file tail $params(path)]]
+            if { [get_ips ${fbasename}] == "" } {
                # Add the IP core file
                import_ip -srcset sources_1 $params(path)
             }
@@ -262,7 +263,8 @@ proc loadIpCore args {
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Check if file doesn't exist in project
-               if { [get_files -quiet ${pntr}] == "" } {
+               set fbasename [file rootname [file tail ${pntr}]]
+               if { [get_ips ${fbasename}] == "" } {
                   # Add the IP core file
                   import_ip -srcset sources_1 ${pntr}
                }
