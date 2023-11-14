@@ -64,10 +64,6 @@ set sim_rc [catch {
    # Run simulation for time specified
    set VIVADO_PROJECT_SIM_TIME "run ${VIVADO_PROJECT_SIM_TIME}"; # set cmd
    eval ${VIVADO_PROJECT_SIM_TIME}; # run cmd
-   set src_rc [catch {
-      wait_on_run sim_1
-   } _RESULT]
-
 } _SIM_RESULT]
 
 ########################################################
