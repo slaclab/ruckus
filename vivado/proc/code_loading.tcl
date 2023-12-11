@@ -228,16 +228,15 @@ proc loadIpCore args {
          set fileExt [file extension $params(path)]
          if { ${fileExt} eq {.xci} ||
               ${fileExt} eq {.xcix} } {
-            # Check if file doesn't exist in project
-            set fbasename [file rootname [file tail $params(path)]]
-            if { [get_ips ${fbasename}] == "" } {
-               # Add the IP core file
-               import_ip -srcset sources_1 $params(path)
-            }
             # Update the global list
             set strip [file rootname [file tail $params(path)]]
             set ::IP_LIST "$::IP_LIST ${strip}"
             set ::IP_FILES "$::IP_FILES $params(path)"
+            # Check if file doesn't exist in project
+            if { [get_ips ${strip}] eq ""  } {
+               # Add the IP core file
+               import_ip -srcset sources_1 $params(path)
+            }
          } else {
             puts "\n\n\n\n\n********************************************************"
             puts "loadIpCore: $params(path) does not have a \[.xci,.xcix\] file extension"
@@ -262,16 +261,15 @@ proc loadIpCore args {
          # Load all the IP core files
          if { ${list} != "" } {
             foreach pntr ${list} {
-               # Check if file doesn't exist in project
-               set fbasename [file rootname [file tail ${pntr}]]
-               if { [get_ips ${fbasename}] == "" } {
-                  # Add the IP core file
-                  import_ip -srcset sources_1 ${pntr}
-               }
                # Update the global list
                set strip [file rootname [file tail ${pntr}]]
                set ::IP_LIST "$::IP_LIST ${strip}"
                set ::IP_FILES "$::IP_FILES ${pntr}"
+               # Check if file doesn't exist in project
+               if { [get_ips ${strip}] eq ""  } {
+                  # Add the IP core file
+                  import_ip -srcset sources_1 ${pntr}
+               }
             }
          } else {
             puts "\n\n\n\n\n********************************************************"
