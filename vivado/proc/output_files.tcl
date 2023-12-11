@@ -24,34 +24,39 @@ proc CreateFpgaBit { } {
    set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.bit]]]
 
    # Copy the .BIT file to image directory
-   exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
-   puts "Bit file copied to ${imagePath}.bit"
-
-   # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+   if { $::env(GEN_BIT_IMAGE) != 0 } {
+      exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
+      puts "Bit file copied to ${imagePath}.bit"
+   }
+   if { $::env(GEN_BIT_IMAGE_GZIP) != 0 } {
       exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+      puts "Bit file copied to ${imagePath}.bit.gz"
    }
 
    # Copy the .BIN file to image directory
    if { $::env(GEN_BIN_IMAGE) != 0 } {
       exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
-      if { $::env(GZIP_BUILD_IMAGE) != 0 } {
-         exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
-      }
+      puts "Bin file copied to ${imagePath}.bin"
+   }
+   if { $::env(GEN_BIN_IMAGE_GZIP) != 0 } {
+      exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
+      puts "Bin file copied to ${imagePath}.bin.gz"
    }
 
    # Copy the .ltx file (if it exists)
    CopyLtxFile
 
-   # Check for Vivado 2019.2 (or newer)
-   if { [VersionCompare 2019.2] >= 0 } {
-      # Try to generate the .XSA file
-      set src_rc [catch { write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa } _RESULT]
+   if { $::env(GEN_XSA_IMAGE) != 0 } {
+      # Check for Vivado 2019.2 (or newer)
+      if { [VersionCompare 2019.2] >= 0 } {
+         # Try to generate the .XSA file
+         set src_rc [catch { write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa } _RESULT]
 
-   # Else Vivado 2019.1 (or older)
-   } else {
-      # Try to generate the .HDF file
-      write_hwdef -force -file ${imagePath}.hdf
+      # Else Vivado 2019.1 (or older)
+      } else {
+         # Try to generate the .HDF file
+         write_hwdef -force -file ${imagePath}.hdf
+      }
    }
 
    # Create the MCS file (if target/vivado/promgen.tcl exists)
@@ -67,12 +72,14 @@ proc CreateVersalOutputs { } {
    set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.pdi]]]
 
    # Copy the .pdi file to image directory
-   exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
-   puts "PDI file copied to ${imagePath}.pdi"
-
+   if { $::env(GEN_PDI_IMAGE) != 0 } {
+      exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
+      puts "PDI file copied to ${imagePath}.pdi"
+   }
    # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+   if { $::env(GEN_PDI_IMAGE_GZIP) != 0 } {
       exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.pdi > ${imagePath}.pdi.gz
+      puts "PDI file copied to ${imagePath}.pdi.gz"
    }
 
    # Copy the .ltx file (if it exists)
