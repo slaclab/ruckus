@@ -26,19 +26,21 @@ proc CreateFpgaBit { } {
    # Copy the .BIT file to image directory
    if { $::env(GEN_BIT_IMAGE) != 0 } {
       exec cp -f ${IMPL_DIR}/${topModule}.bit ${imagePath}.bit
-      if { $::env(GZIP_BUILD_IMAGE) != 0 } {
-         exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
-      }
       puts "Bit file copied to ${imagePath}.bit"
+   }
+   if { $::env(GEN_BIT_IMAGE_GZIP) != 0 } {
+      exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bit > ${imagePath}.bit.gz
+      puts "Bit file copied to ${imagePath}.bit.gz"
    }
 
    # Copy the .BIN file to image directory
    if { $::env(GEN_BIN_IMAGE) != 0 } {
       exec cp -f ${IMPL_DIR}/${topModule}.bin ${imagePath}.bin
-      if { $::env(GZIP_BUILD_IMAGE) != 0 } {
-         exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
-      }
       puts "Bin file copied to ${imagePath}.bin"
+   }
+   if { $::env(GEN_BIN_IMAGE_GZIP) != 0 } {
+      exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.bin > ${imagePath}.bin.gz
+      puts "Bin file copied to ${imagePath}.bin.gz"
    }
 
    # Copy the .ltx file (if it exists)
@@ -70,12 +72,14 @@ proc CreateVersalOutputs { } {
    set topModule [file rootname [file tail [glob -dir ${IMPL_DIR} *.pdi]]]
 
    # Copy the .pdi file to image directory
-   exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
-   puts "PDI file copied to ${imagePath}.pdi"
-
+   if { $::env(GEN_PDI_IMAGE) != 0 } {
+      exec cp -f ${IMPL_DIR}/${topModule}.pdi ${imagePath}.pdi
+      puts "PDI file copied to ${imagePath}.pdi"
+   }
    # Check if gzip-ing the image files
-   if { $::env(GZIP_BUILD_IMAGE) != 0 } {
+   if { $::env(GEN_PDI_IMAGE_GZIP) != 0 } {
       exec gzip -c -f -9 ${IMPL_DIR}/${topModule}.pdi > ${imagePath}.pdi.gz
+      puts "PDI file copied to ${imagePath}.pdi.gz"
    }
 
    # Copy the .ltx file (if it exists)
