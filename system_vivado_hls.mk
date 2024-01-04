@@ -74,6 +74,14 @@ ifndef ARGV
 export ARGV =
 endif
 
+# Specifies the export configurations
+ifndef EXPORT_VENDOR
+export EXPORT_VENDOR = SLAC
+endif
+ifndef EXPORT_VERSION
+export EXPORT_VERSION = 1.0
+endif
+
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 .PHONY : all

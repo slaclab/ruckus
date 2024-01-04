@@ -82,6 +82,33 @@ if { [info exists ::env(SKIP_EXPORT)] == 0 } {
 
 }
 
+# Generate the description string for the ip catalog export
+if { $::env(GIT_HASH_SHORT) == 0 } {
+   set description "$::env(BUILD_STRING), Githash=dirty"
+} else {
+   set description "$::env(BUILD_STRING), Githash=$::env(GIT_HASH_SHORT)"
+}
+
+# Export the IP catalog
+set retVal [catch { \
+   export_design \
+   -description ${description} \
+   -display_name ${PROJECT} \
+   -format ip_catalog \
+   -ipname ${PROJECT} \
+   -library hls \
+   -taxonomy "/VIVADO_HLS_IP" \
+   -vendor $::env(EXPORT_VENDOR) \
+   -version $::env(EXPORT_VERSION) \
+}]
+
+CheckProcRetVal ${retVal} "export_design(zip)" "vivado/hls/build"
+
+# Copy the IP .zip file
+set zipFile [glob -directory ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/ *.zip *.ZIP]
+exec cp -f ${zipFile} ${PROJ_DIR}/ip/${PROJECT}.zip
+puts "${PROJ_DIR}/ip/${PROJECT}.zip"
+
 # Close current solution
 close_solution
 
