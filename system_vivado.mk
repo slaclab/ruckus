@@ -296,8 +296,8 @@ gui : $(SOURCE_DEPEND)
 ###############################################################
 #### Vivado Batch #############################################
 ###############################################################
-.PHONY : bit mcs prom
-bit mcs prom : $(SOURCE_DEPEND)
+.PHONY : bit mcs prom pdi
+bit mcs prom pdi : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Batch Build for .bit/.mcs")
 	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/build.tcl
 
