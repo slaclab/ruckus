@@ -89,9 +89,8 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 # Override system_shared.mk build string
-export BUILD_SVR_TYPE = $(shell python -m platform)
 export DC_VERSION     = $(shell dc_shell-xg-t -V | grep version | sed 's/ //g' | sed 's/version-/ /g')
-export BUILD_STRING   = $(PROJECT): $(DC_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
+export BUILD_STRING   ="$(PROJECT): $(DC_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)"
 
 # Legacy Vivado Version
 export VIVADO_VERSION = -1.0
