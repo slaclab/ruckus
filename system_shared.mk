@@ -26,12 +26,14 @@ ifeq ($(U1_EXIST), 1)
    ifeq ($(BUILD_EXIST), 0)
       $(shell ln -s /u1/$(USER)/build $(TOP_DIR)/build )
    endif
+else
+   $(shell mkdir -p $(TOP_DIR)/build )
 endif
 U1_EXIST=$(shell [ -e /u1/$(USER)/build ] && echo 1 || echo 0 )
 ifeq ($(U1_EXIST), 1)
    export TMP_DIR=/u1/$(USER)/build
 else
-   export TMP_DIR=/tmp/build
+   export TMP_DIR=$(TOP_DIR)/build
 endif
 
 # Generate build string
