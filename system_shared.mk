@@ -79,11 +79,11 @@ define ACTION_HEADER
 @echo
 @echo    "============================================================================="
 @echo    $(1)
-@echo    "   Project      = $(PROJECT)"
-@echo    "   Out Dir      = $(OUT_DIR)"
-@echo    "   Version      = $(PRJ_VERSION)"
-@echo    "   Build String = $(BUILD_STRING)"
-@echo    "   GIT Hash     = $(GIT_HASH_MSG)"
+@echo -e "   Project      = " $(PROJECT)
+@echo -e "   Out Dir      = " $(OUT_DIR)
+@echo -e "   Version      = " $(PRJ_VERSION)
+@echo -e "   Build String = " $(BUILD_STRING)
+@echo -e "   GIT Hash     = " $(GIT_HASH_MSG)
 @echo    "============================================================================="
 @echo
 endef
