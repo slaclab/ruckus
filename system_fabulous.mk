@@ -86,6 +86,7 @@ test:
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo GIT_BYPASS: $(GIT_BYPASS)
 	@echo OUT_DIR: $(OUT_DIR)
+	@echo BUILD_STRING: $(BUILD_STRING)
 	@echo FAB_ROOT: $(FAB_ROOT)
 	@echo HDL_TYPE: $(HDL_TYPE)
 	@echo PYFAB: $(PYFAB)
