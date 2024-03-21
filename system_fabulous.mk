@@ -67,8 +67,7 @@ export YOSYS_VERSION   = $(shell yosys -V | sed 's/.*Yosys //; s/ .*//')
 export VIVADO_VERSION  = -1.0
 
 # Override system_shared.mk build string
-export BUILD_SVR_TYPE = $(shell python -m platform)
-export BUILD_STRING   = $(PROJECT): $(FAB_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
+export BUILD_STRING   ="$(PROJECT): $(FAB_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)"
 
 .PHONY : all
 all: target
@@ -86,6 +85,7 @@ test:
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo GIT_BYPASS: $(GIT_BYPASS)
 	@echo OUT_DIR: $(OUT_DIR)
+	@echo BUILD_STRING: $(BUILD_STRING)
 	@echo FAB_ROOT: $(FAB_ROOT)
 	@echo HDL_TYPE: $(HDL_TYPE)
 	@echo PYFAB: $(PYFAB)

@@ -69,9 +69,8 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 # Override system_shared.mk build string
-export BUILD_SVR_TYPE = $(shell python -m platform)
 export GENUS_VERSION  = $(shell genus -version | grep Version: | sed 's/.*Version: //')
-export BUILD_STRING   = $(PROJECT): $(GENUS_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
+export BUILD_STRING   ="$(PROJECT): $(GENUS_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)"
 
 # Legacy Vivado Version
 export VIVADO_VERSION = -1.0
@@ -99,6 +98,7 @@ test:
 	@echo OUT_DIR: $(OUT_DIR)
 	@echo SYN_DIR: $(SYN_DIR)
 	@echo SYN_OUT_DIR: $(SYN_OUT_DIR)
+	@echo BUILD_STRING: $(BUILD_STRING)
 	@echo IMAGENAME: $(IMAGENAME)
 	@echo IMAGES_DIR: $(IMAGES_DIR)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
