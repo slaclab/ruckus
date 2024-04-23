@@ -1,0 +1,56 @@
+# ----------------------------------------------------------------------------
+# Title      : Ruckus GitHub Actions CI Script
+# ----------------------------------------------------------------------------
+# This file is part of the 'Ruckus Package'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'Ruckus Package', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
+
+name: Generate Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      GH_TOKEN:
+        required: true
+
+jobs:
+  gen_release:
+    runs-on: ubuntu-20.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Get Image Information
+        id: get_image_info
+        run: |
+          echo ::set-output name=tag::`git describe --tags`
+
+      - name: Get Ruckus
+        run: |
+          git clone https://github.com/slaclab/ruckus.git
+          python -m pip install --upgrade pip
+          pip install -r ruckus/scripts/pip_requirements.txt
+
+      - name: Gen Release
+        env:
+          TRAVIS_REPO_SLUG: ${{ github.repository }}
+          TRAVIS_TAG: ${{ steps.get_image_info.outputs.tag }}
+          GH_REPO_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          python ruckus/scripts/releaseGen.py
