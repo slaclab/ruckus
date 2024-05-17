@@ -70,8 +70,8 @@ parser.add_argument(
     '--submodules',
     nargs    = '+',
     required = False,
-    default  =  ['git@github.com:slaclab/ruckus',
-                 'git@github.com:slaclab/surf',],
+    default  =  ['https://github.com/slaclab/ruckus.git',
+                 'https://github.com/slaclab/surf.git',],
     help     = 'List of submodules'
 )
 
@@ -332,7 +332,7 @@ def setupNewRepoStructure(repo):
         # A.K.A. "brute force method"
         #####################################################
         time.sleep(10)
-        os.system(f'git clone --recursive git@github.com:{repo.full_name}')
+        os.system(f'git clone --recursive https://github.com/{repo.full_name}')
         os.system(f'cd {args.name}; mkdir firmware; cd firmware; mkdir submodules; git pull')
         for submodule in args.submodules:
             os.system(f'cd {args.name}/firmware/submodules; git submodule add {submodule}')
