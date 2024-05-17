@@ -104,6 +104,12 @@ if { $::env(ALL_XIL_FAMILY) == 1 } {
 }
 puts "${PROJ_DIR}/ip/${PROJECT}.zip"
 
+# Copy the build RTL dir into user's ip dir
+exec rm -rf ${PROJ_DIR}/ip/verilog
+exec cp -rf ${OUT_DIR}/${PROJECT}_project/solution1/impl/verilog ${PROJ_DIR}/ip/.
+exec rm -rf ${PROJ_DIR}/ip/vhdl
+exec cp -rf ${OUT_DIR}/${PROJECT}_project/solution1/impl/vhdl ${PROJ_DIR}/ip/.
+
 ##############################################################################
 #                            Exit Procedure
 ##############################################################################
