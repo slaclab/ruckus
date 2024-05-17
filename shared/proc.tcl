@@ -250,7 +250,6 @@ proc GenBuildString { pkgDir } {
 
    # Generate the build string
    binary scan [encoding convertto ascii $::env(BUILD_STRING)] c* bstrAsic
-   set bstrAsic [lrange $bstrAsic 1 end-1]
    set buildString ""
    foreach decChar ${bstrAsic} {
       set hexChar [format %02X ${decChar}]

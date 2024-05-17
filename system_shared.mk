@@ -37,12 +37,12 @@ else
 endif
 
 # Generate build string
-export BUILD_SYS_NAME    = $(shell uname -n)
-export BUILD_USER   := $(shell id -u -n)
+export BUILD_SYS_NAME = $(shell uname -n)
+export BUILD_USER = $(shell id -u -n)
 BUILD_SVR_TYPE := $(shell grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d \")
 BUILD_DATE := $(shell date)
 BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
-export BUILD_STRING="$(PROJECT): Vivado v${VIVADO_VERSION}, ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}"
+export BUILD_STRING = $(PROJECT): Vivado v${VIVADO_VERSION}, ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}
 
 # Check the GIT status
 export GIT_STATUS = $(shell git update-index --refresh | sed -e 's/: needs update//g')
@@ -82,7 +82,7 @@ define ACTION_HEADER
 @echo    "   Project      = $(PROJECT)"
 @echo    "   Out Dir      = $(OUT_DIR)"
 @echo    "   Version      = $(PRJ_VERSION)"
-@echo -e "   Build String = "$(BUILD_STRING)
+@echo    "   Build String = $(BUILD_STRING)"
 @echo    "   GIT Hash     = $(GIT_HASH_MSG)"
 @echo    "============================================================================="
 @echo
