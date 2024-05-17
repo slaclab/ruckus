@@ -50,6 +50,11 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             # Get PR info from github
             req = remRepo.get_pull(int(entry['PR'][1:]))
 
+            # Check for empty PR description
+            if not req.body or req.body.strip() == "":
+                pr_url = f"https://github.com/{remRepo.full_name}/pull/{entry['PR'][1:]}"
+                raise ValueError(f"Pull request {entry['PR']} has an empty description. Please open your web browser, go to this PR, and fill in the description: {pr_url}")
+
             # Detect Release Candidate PRs
             if ('main' in req.base.label or 'master' in req.base.label) and 'pre-release' in req.head.label:
                 entry['IsRC'] = True
