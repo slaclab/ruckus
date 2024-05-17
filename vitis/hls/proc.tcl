@@ -114,5 +114,5 @@ proc ComponentXmlAllFamilySupport { } {
    exec mv -f $::env(OUT_DIR)/ip/component.temp $::env(OUT_DIR)/ip/component.xml
 
    # Compress the modify IP directory to the target's image directory
-   exec bash -c "cd $::env(OUT_DIR)/ip; zip -r $::env(PROJ_DIR)/ip/$::env(IMAGENAME).zip *"
+   exec bash -c "cd $::env(OUT_DIR)/ip; zip -r $::env(PROJ_DIR)/ip/$::env(PROJECT).zip *"
 }
