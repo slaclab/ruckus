@@ -642,10 +642,6 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
     if newTagExist:
         raise (Exception(f'remote repo: newTag={relNew} already does exist'))
 
-    print(f"\nCreating and pushing tag {tag} .... ")
-    newTag = locRepo.create_tag(path=tag, message=msg)
-    locRepo.remotes.origin.push(newTag)
-
     if prev != "":
         print("\nGenerating release notes ...")
         md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, oldTag=relOld, newTag=relNew)
@@ -653,6 +649,10 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         md = "No release notes"
 
     md += "\n\nRelease generated with SLAC ruckus releaseGen script\n"
+
+    print(f"\nCreating and pushing tag {tag} .... ")
+    newTag = locRepo.create_tag(path=tag, message=msg)
+    locRepo.remotes.origin.push(newTag)
 
     remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 
