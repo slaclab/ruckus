@@ -89,8 +89,8 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 # Override system_shared.mk build string
-export DC_VERSION    = $(shell dc_shell-xg-t -V | grep version | sed 's/ //g' | sed 's/version-/ /g')
-export BUILD_STRING := $(PROJECT): $(DC_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
+export DC_VERSION   = $(shell dc_shell-xg-t -V | grep version | sed 's/ //g' | sed 's/version-/ /g')
+export BUILD_STRING = $(PROJECT): $(DC_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Legacy Vivado Version
 export VIVADO_VERSION = -1.0
@@ -114,7 +114,7 @@ test:
 	@echo PARALLEL_SYNTH: $(PARALLEL_SYNTH)
 	@echo GIT_BYPASS: $(GIT_BYPASS)
 	@echo OUT_DIR: $(OUT_DIR)
-	@echo BUILD_STRING: $(BUILD_STRING)
+	@echo BUILD_STRING: $${BUILD_STRING}
 	@echo SYN_DIR: $(SYN_DIR)
 	@echo SYN_OUT_DIR: $(SYN_OUT_DIR)
 	@echo IMAGENAME: $(IMAGENAME)
