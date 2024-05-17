@@ -100,9 +100,9 @@ if { $::env(ALL_XIL_FAMILY) == 1 } {
 } else {
    # No modification to .ZIP.  Only copy the .ZIP to the output image directory
    set zipFile [glob -directory ${OUT_DIR}/${PROJECT}_project/solution1/impl/ip/ *.zip *.ZIP]
-   exec cp -f ${zipFile} ${PROJ_DIR}/ip/$::env(IMAGENAME).zip
+   exec cp -f ${zipFile} ${PROJ_DIR}/ip/${PROJECT}.zip
 }
-puts "${PROJ_DIR}/ip/$::env(IMAGENAME).zip"
+puts "${PROJ_DIR}/ip/${PROJECT}.zip"
 
 ##############################################################################
 #                            Exit Procedure
