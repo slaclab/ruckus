@@ -190,28 +190,20 @@ foreach filePntr ${fileList} {
    }
 }
 
+# Export command export_simulation  -lib_map_path "/home/fmarini/git/BlueSurf/build/BlueSurf/BlueSurf_project.cache/compile_simlib/questa" -absolute_path -directory "/home/fmarini/git/BlueSurf/build/BlueSurf" -simulator questa  -use_ip_compiled_libs
+
+# with vcs: export_simulation  -lib_map_path "/home/fmarini/git/BlueSurf/build/BlueSurf/BlueSurf_project.cache/compile_simlib/vcs" -absolute_path -directory "/home/fmarini/git/BlueSurf/build/BlueSurf" -simulator vcs  -use_ip_compiled_libs
+
 #####################################################################################################
-## Run Questa simulation
+## Export the Simulation
 #####################################################################################################
-set errMsg "\n\n*********************************************************\n"
-set errMsg "${errMsg}Error in ${Simulator}. Check the errors in the console\n"
-   set errMsg "${errMsg}*********************************************************\n\n"
 
-set sim_rc [catch {
+# Export Xilinx & User IP Cores
+generate_target -force {simulation} [get_ips]
+export_ip_user_files -force -no_script
 
-    # Set sim properties
-    set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
-    set_property top_lib xil_defaultlib [get_filesets sim_1]
+# Launch the scripts generator
+set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
+set define  [get_property verilog_define [get_filesets sim_1]]; # Verilog only
+export_simulation -force -absolute_path -simulator questa -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
 
-    # Launch the msim
-    launch_simulation -install_path ${MSIM_PATH}
-
-} _SIM_RESULT]
-
-########################################################
-# Check for error return code during the process
-########################################################
-if { ${sim_rc} } {
-    puts ${errMsg}
-    exit -1
-}
