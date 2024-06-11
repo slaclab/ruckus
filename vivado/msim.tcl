@@ -151,6 +151,8 @@ if { [info exists ::env(MSIM_LIB_PATH)] } {
 }
 set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
 set simTbFileName [get_property top [get_filesets sim_1]]
+set hopeTopFile [lindex [find_top -fileset [get_filesets sim_1] -return_file_paths] 1]
+set simTbLibName [get_property -quiet LIBRARY [get_files -quiet $hopeTopFile]]
 
 # Set the compile/elaborate options
 if { [info exists ::env(MSIM_CARGS_VERILOG)] } {
@@ -168,8 +170,17 @@ if { [info exists ::env(MSIM_ELAB_FLAGS)] } {
 } else {
     set elabOpt ""
 }
-puts ${vlogOpt}
-puts ${vcomOpt}
+if { [info exists ::env(MSIM_RUN_FLAGS)] } {
+    set runOpt $::env(MSIM_RUN_FLAGS)
+} else {
+    set runOpt ""
+}
+# Run vsim with GUI
+if { [info exists ::env(MSIM_RUN_GUI)] } {
+    set msimGui $::env(MSIM_RUN_GUI)
+} else {
+    set msimGui false
+}
 
 #####################################################################################################
 ## Compile the Questa Simulation Library
@@ -249,17 +260,24 @@ if { ${list} != "" } {
 
 # open the main file
 set in  [open ${simTbOutDir}/[string tolower ${Simulator}]/${simTbFileName}.sh r]
-set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
+set out [open ${simTbOutDir}/sim_msim.sh  w]
 
 # Find and replace the AFS path
 while { [eof ${in}] != 1 } {
 
     gets ${in} line
 
-    # Do not execute the simulation in sim_vcs_mx.sh build script
+    # Do not execute the simulation in sim_msim.sh build script
     if { [string match "*simulate.do*" ${line}] } {
-        set line "  echo \"Ready to simulate\""
-
+        if { ${msimGui} } {
+            set line "echo \"\vsim -64 ${runOpt} -do \\\"do \{simulate.do\}\\\" -lib xil_defaultlib ${simTbFileName}_opt\" >> vsim\n"
+            append line "chmod 0755 ${simTbOutDir}/simv\n"
+            append line   echo \"Ready to simulate\""
+        } else {
+            set line "echo \"vsim -64 -c ${runOpt} -do \\\"do \{simulate.do\}\\\" -lib ${simTbLibName} ${simTbFileName}_opt\" >> simv\n"
+            append line "chmod 0755 ${simTbOutDir}/simv\n"
+            append line "echo \"Ready to simulate\""
+        }
     }
 
     # Replace ${simTbFileName}_simv with the simv
@@ -279,7 +297,7 @@ close ${in}
 close ${out}
 
 # Update the permissions
-exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
+exec chmod 0755 ${simTbOutDir}/sim_msim.sh
 
 # Update the compile options (fix bug in export_simulation not including more_options properties)
 if { [VersionCompare 2022.1] <= 0 } {
@@ -328,7 +346,7 @@ if { [VersionCompare 2022.1] <= 0 } {
         ${vhList}  == "" &&
         ${svList}  == "" } {
       # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
-      set line [string map { "xil_defaultlib.glbl" "" } ${line}]
+       set line [string map { "xil_defaultlib.glbl" "" } ${line}]
    }
 
         puts ${out} ${line}
@@ -347,6 +365,57 @@ if { [VersionCompare 2022.1] <= 0 } {
     # Copy the elaborate.do file
     if { [file exists ${simTbOutDir}/[string tolower ${Simulator}]/elaborate.do] == 1 } {
         exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/elaborate.do ${simTbOutDir}/elaborate.do
+    }
+}
+
+# Copy the simulation file
+set in  [open ${simTbOutDir}/[string tolower ${Simulator}]/simulate.do r]
+set out [open ${simTbOutDir}/simulate.do  w]
+
+# Find and replace the AFS path
+while { [eof ${in}] != 1 } {
+    gets ${in} line
+    # Delete vsim command
+    if { [string match "*vsim*" ${line}] } {
+        set line ""
+    }
+    # Delete need for .udo files
+    if { [string match "*.udo\}" ${line}] } {
+        set line "# Insert custom action here"
+    }
+    puts ${out} ${line}
+}
+
+# Close the files
+close ${in}
+close ${out}
+
+# Copy the wave.do file
+if { [info exists ::env(MSIM_DUMP_VCD)] } {
+    set msimVcdDump $::env(MSIM_DUMP_VCD)
+} else {
+    set msimVcdDump false
+}
+
+if { ${msimVcdDump} } {
+    set in  [open ${simTbOutDir}/[string tolower ${Simulator}]/wave.do r]
+    set out [open ${simTbOutDir}/wave.do  w]
+
+    # Find and replace the AFS path
+    while { [eof ${in}] != 1 } {
+        # copy files
+        gets ${in} line
+        puts ${out} ${line}
+    }
+    puts ${out} "vcd file sim.vcd"
+    puts ${out} "vcd add -r *"
+
+    # Close the files
+    close ${in}
+    close ${out}
+} else {
+    if { [file exists ${simTbOutDir}/[string tolower ${Simulator}]/wave.do] == 1 } {
+        exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/wave.do ${simTbOutDir}/wave.do
     }
 }
 
