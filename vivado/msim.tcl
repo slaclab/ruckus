@@ -75,7 +75,7 @@ proc Modelsim-QuestaVersionCheck { } {
     set retVar -1
 
     # List of supported ModelSim/QuestaSim versions
-    set supported "2019.2 2021.1_2"
+    set supported "2019.2 2019.3_2 2021.1_2"
 
     # Get Version Name
     set SimInfo [GetModelsim-QuestaName]
@@ -116,7 +116,6 @@ if { [VersionCheck 2016.4] < 0 } {
 
 # Check for supported ModelSim/Questa version
 if { [Modelsim-QuestaVersionCheck] < 0 } {
-    #exit -1
     puts -nonewline "Sim version not supported, do you want to continue? (y/n): "
     flush stdout
     set Cont [gets stdin]
@@ -141,12 +140,36 @@ SourceTclFile ${VIVADO_DIR}/pre_msim.tcl
 #####################################################################################################
 
 # Setup variables
-
 set SimInfo [GetModelsim-QuestaName]
 set Simulator [lindex $SimInfo 0]
 set VersionNumber [lindex $SimInfo 1]
 set MSIM_PATH [lindex $SimInfo 2]
-set simLibOutDir ${VIVADO_INSTALL}/msim-${VersionNumber}
+if { [info exists ::env(MSIM_LIB_PATH)] } {
+    set simLibOutDir $::env(MSIM_LIB_PATH)
+} else {
+    set simLibOutDir ${VIVADO_INSTALL}/msim-${VersionNumber}
+}
+set simTbOutDir ${OUT_DIR}/${PROJECT}_project.sim/sim_1/behav
+set simTbFileName [get_property top [get_filesets sim_1]]
+
+# Set the compile/elaborate options
+if { [info exists ::env(MSIM_CARGS_VERILOG)] } {
+    set vlogOpt $::env(MSIM_CARGS_VERILOG)
+} else {
+    set vlogOpt ""
+}
+if { [info exists ::env(MSIM_CARGS_VHDL)] } {
+    set vcomOpt $::env(MSIM_CARGS_VHDL)
+} else {
+    set vcomOpt ""
+}
+if { [info exists ::env(MSIM_ELAB_FLAGS)] } {
+    set elabOpt $::env(MSIM_ELAB_FLAGS)
+} else {
+    set elabOpt ""
+}
+puts ${vlogOpt}
+puts ${vcomOpt}
 
 #####################################################################################################
 ## Compile the Questa Simulation Library
@@ -175,6 +198,9 @@ set_property compxlib.[string tolower ${Simulator}]_compiled_library_dir ${simLi
 # Configure ModelSim/Questa settings
 set VIVADO_PROJECT_SIM_TIME "set_property -name {[string tolower ${Simulator}].simulate.runtime} -value {$::env(VIVADO_PROJECT_SIM_TIME)} -objects \[\get_filesets \sim_1\]"
 eval ${VIVADO_PROJECT_SIM_TIME}
+set_property -name {[string tolower ${Simulator}].compile.vcom.more_options}    -value ${vcomOpt}   -objects [get_filesets sim_1]
+set_property -name {[string tolower ${Simulator}].compile.vlog.more_options}    -value ${vlogOpt}   -objects [get_filesets sim_1]
+set_property -name {[string tolower ${Simulator}].elaborate.vopt.more_options}  -value ${elabOpt}   -objects [get_filesets sim_1]
 set_property nl.process_corner fast [get_filesets sim_1]
 set_property unifast true [get_filesets sim_1]
 
@@ -190,14 +216,9 @@ foreach filePntr ${fileList} {
    }
 }
 
-# Export command export_simulation  -lib_map_path "/home/fmarini/git/BlueSurf/build/BlueSurf/BlueSurf_project.cache/compile_simlib/questa" -absolute_path -directory "/home/fmarini/git/BlueSurf/build/BlueSurf" -simulator questa  -use_ip_compiled_libs
-
-# with vcs: export_simulation  -lib_map_path "/home/fmarini/git/BlueSurf/build/BlueSurf/BlueSurf_project.cache/compile_simlib/vcs" -absolute_path -directory "/home/fmarini/git/BlueSurf/build/BlueSurf" -simulator vcs  -use_ip_compiled_libs
-
 #####################################################################################################
 ## Export the Simulation
 #####################################################################################################
-
 # Export Xilinx & User IP Cores
 generate_target -force {simulation} [get_ips]
 export_ip_user_files -force -no_script
@@ -205,5 +226,149 @@ export_ip_user_files -force -no_script
 # Launch the scripts generator
 set include [get_property include_dirs   [get_filesets sim_1]]; # Verilog only
 set define  [get_property verilog_define [get_filesets sim_1]]; # Verilog only
-export_simulation -force -absolute_path -simulator questa -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
+export_simulation -force -absolute_path -simulator [string tolower ${Simulator}] -include ${include} -define ${define} -lib_map_path ${simLibOutDir} -directory ${simTbOutDir}/
 
+#####################################################################################################
+## Customization of the executable bash (.sh) script
+#####################################################################################################
+
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.v}}  vList]
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.vh}} vhList]
+set err_ret [catch {get_files -compile_order sources -used_in simulation {*.sv}} svList]
+
+# Copy of all the Xilinx IP core datafile
+set list ""
+set list_rc [catch {
+    set list [glob -directory ${simTbOutDir}/[string tolower ${Simulator}]/ *.dat *.coe *.mem *.edif *.mif]
+} _RESULT]
+if { ${list} != "" } {
+   foreach pntr ${list} {
+      exec cp -f ${pntr} ${simTbOutDir}/.
+   }
+}
+
+# open the main file
+set in  [open ${simTbOutDir}/[string tolower ${Simulator}]/${simTbFileName}.sh r]
+set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
+
+# Find and replace the AFS path
+while { [eof ${in}] != 1 } {
+
+    gets ${in} line
+
+    # Do not execute the simulation in sim_vcs_mx.sh build script
+    if { [string match "*simulate.do*" ${line}] } {
+        set line "  echo \"Ready to simulate\""
+
+    }
+
+    # Replace ${simTbFileName}_simv with the simv
+    set replaceString "${simTbFileName}_simv simv"
+    set line [string map ${replaceString}  ${line}]
+
+    # Change the glbl.v path (Vivado 2017.2 fix)
+    set replaceString "behav/vcs/glbl.v glbl.v"
+    set line [string map ${replaceString}  ${line}]
+
+    # Write to file
+    puts ${out} ${line}
+}
+
+# Close the files
+close ${in}
+close ${out}
+
+# Update the permissions
+exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
+
+# Update the compile options (fix bug in export_simulation not including more_options properties)
+if { [VersionCompare 2022.1] <= 0 } {
+    # open the compile file
+    set in  [open ${simTbOutDir}/[string tolower ${Simulator}]/compile.do r]
+    set out [open ${simTbOutDir}/compile.do  w]
+
+    # Set substitutions
+    set vcom_new_sub "-64 -93 ${vcomOpt} "
+    set vcom_old_sub "-64 -93 "
+
+    set vlog_new_sub "-incr -mfcu ${vlogOpt} "
+    set vlog_old_sub "-incr -mfcu "
+
+    # Find and replace the AFS path
+    while { [eof ${in}] != 1 } {
+        gets ${in} line
+
+        set line [regsub -- ${vcom_old_sub} $line ${vcom_new_sub}]
+        set line [regsub -- ${vlog_old_sub} $line ${vlog_new_sub}]
+
+        puts ${out} ${line}
+    }
+
+    # Close the files
+    close ${in}
+    close ${out}
+
+    # open the elaborate file
+    set in  [open ${simTbOutDir}/[string tolower ${Simulator}]/elaborate.do r]
+    set out [open ${simTbOutDir}/elaborate.do  w]
+
+    # Set substitutions
+    set velab_new_sub "-64 ${elabOpt} "
+    set velab_old_sub "-64 "
+
+    # Find and replace the AFS path
+    while { [eof ${in}] != 1 } {
+        gets ${in} line
+
+        set line [regsub -- ${velab_old_sub} $line ${velab_new_sub}]
+        set line [regsub -- ${velab_old_sub} $line ${velab_new_sub}]
+
+        # Check if only a VHDL simulation
+   if { ${vList}   == "" &&
+        ${vhList}  == "" &&
+        ${svList}  == "" } {
+      # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
+      set line [string map { "xil_defaultlib.glbl" "" } ${line}]
+   }
+
+        puts ${out} ${line}
+    }
+
+    # Close the files
+    close ${in}
+    close ${out}
+
+} else {
+    # Copy the compile.do file
+    if { [file exists ${simTbOutDir}/[string tolower ${Simulator}]/compile.do] == 1 } {
+        exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/compile.do ${simTbOutDir}/compile.do
+    }
+
+    # Copy the elaborate.do file
+    if { [file exists ${simTbOutDir}/[string tolower ${Simulator}]/elaborate.do] == 1 } {
+        exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/elaborate.do ${simTbOutDir}/elaborate.do
+    }
+}
+
+#####################################################################################################
+#####################################################################################################
+#####################################################################################################
+
+# Copy the glbl.v file
+if { [file exists ${simTbOutDir}/[string tolower ${Simulator}]/glbl.v] == 1 } {
+    # Change the glbl.v path (Vivado 2017.2 fix)
+    exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/glbl.v ${simTbOutDir}/../glbl.v
+    exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/glbl.v ${simTbOutDir}/glbl.v
+}
+
+# Target specific VCS script
+SourceTclFile ${VIVADO_DIR}/post_vcs.tcl
+
+# Close the project (required for cd function)
+close_project
+
+# Set rogue Sim
+set rogueSimEn false
+
+# VCS Complete Message
+VcsCompleteMessage ${simTbOutDir} ${rogueSimEn}
