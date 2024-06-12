@@ -270,11 +270,11 @@ while { [eof ${in}] != 1 } {
     # Do not execute the simulation in sim_msim.sh build script
     if { [string match "*simulate.do*" ${line}] } {
         if { ${msimGui} } {
-            set line "echo \"\vsim -64 ${runOpt} -do \\\"do \{simulate.do\}\\\" -lib xil_defaultlib ${simTbFileName}_opt\" >> vsim\n"
+            set line "echo \"\vsim -64 ${runOpt} -do \\\"do \{simulate.do\}\\\" -lib xil_defaultlib ${simTbFileName}_opt\" > vsim\n"
             append line "chmod 0755 ${simTbOutDir}/simv\n"
             append line   echo \"Ready to simulate\""
         } else {
-            set line "echo \"vsim -64 -c ${runOpt} -do \\\"do \{simulate.do\}\\\" -lib ${simTbLibName} ${simTbFileName}_opt\" >> simv\n"
+            set line "echo \"vsim -64 -c ${runOpt} -do \\\"do \{simulate.do\}\\\" -lib ${simTbLibName} ${simTbFileName}_opt\" > simv\n"
             append line "chmod 0755 ${simTbOutDir}/simv\n"
             append line "echo \"Ready to simulate\""
         }
