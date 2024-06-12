@@ -285,7 +285,7 @@ while { [eof ${in}] != 1 } {
     set line [string map ${replaceString}  ${line}]
 
     # Change the glbl.v path (Vivado 2017.2 fix)
-    set replaceString "behav/vcs/glbl.v glbl.v"
+    set replaceString "behav/[string tolower ${Simulator}]/glbl.v glbl.v"
     set line [string map ${replaceString}  ${line}]
 
     # Write to file
@@ -345,7 +345,7 @@ if { [VersionCompare 2022.1] <= 0 } {
    if { ${vList}   == "" &&
         ${vhList}  == "" &&
         ${svList}  == "" } {
-      # Remove xil_defaultlib.glbl (bug fix for Vivado compiling VCS script)
+      # Remove xil_defaultlib.glbl (bug fix for Vivado compiling Msim script)
        set line [string map { "xil_defaultlib.glbl" "" } ${line}]
    }
 
@@ -407,7 +407,7 @@ if { ${msimVcdDump} } {
         gets ${in} line
         puts ${out} ${line}
     }
-    puts ${out} "vcd file sim.vcd"
+    puts ${out} "vcd file ${simTbFileName}.vcd"
     puts ${out} "vcd add -r *"
 
     # Close the files
@@ -430,8 +430,8 @@ if { [file exists ${simTbOutDir}/[string tolower ${Simulator}]/glbl.v] == 1 } {
     exec cp -f ${simTbOutDir}/[string tolower ${Simulator}]/glbl.v ${simTbOutDir}/glbl.v
 }
 
-# Target specific VCS script
-SourceTclFile ${VIVADO_DIR}/post_vcs.tcl
+# Target specific MSIM script
+SourceTclFile ${VIVADO_DIR}/post_msim.tcl
 
 # Close the project (required for cd function)
 close_project
@@ -439,5 +439,5 @@ close_project
 # Set rogue Sim
 set rogueSimEn false
 
-# VCS Complete Message
-VcsCompleteMessage ${simTbOutDir} ${rogueSimEn}
+# MSIM Complete Message
+MsimCompleteMessage ${simTbOutDir} ${rogueSimEn}
