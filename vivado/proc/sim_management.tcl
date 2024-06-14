@@ -78,3 +78,20 @@ proc VcsCompleteMessage {dirPath rogueSim} {
    puts "\t\$ ./simv -verdi &"
    puts "********************************************************\n\n"
 }
+
+## Print the MSIM build complete message
+proc MsimCompleteMessage {dirPath rogueSim} {
+   puts "\n\n********************************************************"
+   puts "The Modelsim/Questa simulation script has been generated."
+   puts "To compile and run the simulation:"
+   puts "\t\$ cd ${dirPath}/"
+   if { ${rogueSim} == true } {
+      if { $::env(SHELL) != "/bin/bash" } {
+         puts "\t\$ source setup_env.csh"
+      } else {
+         puts "\t\$ source setup_env.sh"
+      }
+   }
+   puts "\t\$ ./sim_msim.sh"
+   puts "********************************************************\n\n"
+}
