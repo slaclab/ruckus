@@ -18,7 +18,7 @@ on:
       version:
         required: true
         type: string
-      GH_REPO:
+      gitub_repo:
         required: true
         type: string
     secrets:
@@ -77,7 +77,7 @@ jobs:
       - name: Download And Extract
         env:
           GH_API: https://api.github.com
-          GH_REPO: ${{ inputs.GH_REPO }}
+          GH_REPO: https://api.github.com/repos/${{ inputs.gitub_repo }}
           AUTH: "Authorization: token ${{ secrets.GH_TOKEN }}"
           WGET_ARGS: "--content-disposition --auth-no-challenge --no-cookie"
           CURL_ARGS: "-LJO#"
@@ -86,14 +86,14 @@ jobs:
         run: |
           mkdir ${HOME}/download
           cd ${HOME}/download
-          GH_TAGS=${{ inputs.GH_REPO }}/releases/tags/${GITHUB_REF#refs/tags/}
+          GH_TAGS=https://api.github.com/repos/${{ inputs.gitub_repo }}/releases/tags/${GITHUB_REF#refs/tags/}
           echo GH_TAGS = $GH_TAGS
           echo curl -sH "$AUTH" $GH_TAGS
           response=$(curl -sH "$AUTH" $GH_TAGS)
           echo $response
           eval $(echo "$response" | grep -C3 "name.:.\+${FILENAME}" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
           echo $id
-          GH_ASSET="${{ inputs.GH_REPO }}/releases/assets/$id"
+          GH_ASSET="$GH_REPO/releases/assets/$id"
           echo $GH_ASSET
           echo curl $CURL_ARGS -H "Authorization: token ${GH_TOKEN}" -H 'Accept: application/octet-stream' "$GH_ASSET"
           curl $CURL_ARGS -H "Authorization: token ${GH_TOKEN}" -H 'Accept: application/octet-stream' "$GH_ASSET"
