@@ -21,7 +21,8 @@ on:
     secrets:
       CONDA_UPLOAD_TOKEN_TAG:
         required: true
-
+      GH_TOKEN:
+        required: true
 
 jobs:
   conda_build_lib:
