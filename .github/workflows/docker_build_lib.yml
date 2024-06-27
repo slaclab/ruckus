@@ -1,0 +1,62 @@
+# ----------------------------------------------------------------------------
+# Title      : Ruckus GitHub Actions CI Script
+# ----------------------------------------------------------------------------
+# This file is part of the 'Ruckus Package'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'Ruckus Package', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
+
+name: Docker Build for a Library
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_TOKEN:
+        required: true
+
+jobs:
+  docker_build:
+    name: Docker Build
+    runs-on: ubuntu-20.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+
+      # This step checks out a copy of your repository.
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Image Information
+        id: get_image_info
+        run: |
+          echo tag=`git describe --tags` >> ${GITHUB_OUTPUT}
+          echo branch=`echo ${GITHUB_REF} | awk 'BEGIN { FS = "/" } ; { print $3 }'` >> ${GITHUB_OUTPUT}
+
+      # Setup docker build environment
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Login to Dockerhub
+      - name: Login to Dockerhub
+        uses: docker/login-action@v1
+        with:
+          username: tidair
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build and push the docker image
+      - name: Build and push image to Dockerhub
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/rogue/Dockerfile
+          push: true
+          tags: tidair/rogue:${{ steps.get_image_info.outputs.tag }}, tidair/rogue:latest
+          build-args: branch=${{ steps.get_image_info.outputs.branch }}
