@@ -253,7 +253,7 @@ if { ${rogueSimPath} != "" } {
    set rogueSimEn true
 
    # Check the zeromq library exists and its version
-   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.2.0} --print-errors} libzmq]
+   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.1.0} --print-errors} libzmq]
    if { ${libzmq} != "" } {
       puts "\n\n\n\n\n********************************************************"
       if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
