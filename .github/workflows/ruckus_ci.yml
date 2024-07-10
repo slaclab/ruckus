@@ -54,36 +54,14 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
           publish_dir: html
 
+# ----------------------------------------------------------------------------
+
   gen_release:
-    name: Generate Release
-    runs-on: ubuntu-20.04
     needs: [test_and_document]
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
+    uses: slaclab/ruckus/.github/workflows/gen_release.yml@main
+    with:
+      version: '1.0.0'
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Get Image Information
-        id: get_image_info
-        run: |
-          echo ::set-output name=tag::`git describe --tags`
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r scripts/pip_requirements.txt
-
-      - name: Gen Release
-        env:
-          TRAVIS_REPO_SLUG: ${{ github.repository }}
-          TRAVIS_TAG: ${{ steps.get_image_info.outputs.tag }}
-          GH_REPO_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          python scripts/releaseGen.py
-
+# ----------------------------------------------------------------------------

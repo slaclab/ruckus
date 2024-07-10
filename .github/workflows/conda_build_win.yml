@@ -1,0 +1,59 @@
+# ----------------------------------------------------------------------------
+# Title      : Ruckus GitHub Actions CI Script
+# ----------------------------------------------------------------------------
+# This file is part of the 'Ruckus Package'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'Ruckus Package', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
+
+name: Anaconda Build for Windows
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      CONDA_UPLOAD_TOKEN_TAG:
+        required: true
+
+jobs:
+  conda_build_win:
+    name: Anaconda Build Windows
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: windows-latest
+    steps:
+
+      # This step checks out a copy of your repository.
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          C:\Miniconda\condabin\conda.bat activate base
+          C:\Miniconda\condabin\conda.bat install anaconda-client conda-build
+          C:\Miniconda\condabin\conda.bat update --all
+
+      - name: Get Image Information
+        id: get_image_info
+        run: |
+          echo ::set-output name=tag::`git describe --tags`
+
+      - name: Build And Upload
+        env:
+          IMAGE_VER: ${{ steps.get_image_info.outputs.tag }}
+          CONDA_UPLOAD_TOKEN_TAG: ${{ secrets.CONDA_UPLOAD_TOKEN_TAG }}
+        run: |
+          C:\Miniconda\condabin\conda.bat activate base
+          C:\Miniconda\condabin\conda.bat build software\conda-recipe --output-folder bld-dir -c conda-forge
+          C:\Miniconda\Scripts\anaconda.exe -t $env:CONDA_UPLOAD_TOKEN_TAG upload --force bld-dir\win-64\*.tar.bz2

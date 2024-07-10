@@ -253,7 +253,7 @@ if { ${rogueSimPath} != "" } {
    set rogueSimEn true
 
    # Check the zeromq library exists and its version
-   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.2.0} --print-errors} libzmq]
+   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.1.0} --print-errors} libzmq]
    if { ${libzmq} != "" } {
       puts "\n\n\n\n\n********************************************************"
       if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
@@ -270,14 +270,14 @@ if { ${rogueSimPath} != "" } {
    # Create the setup environment script: C-SHELL
    set envScript [open ${simTbOutDir}/setup_env.csh  w]
    puts  ${envScript} "limit stacksize 60000"
-   set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH ${simTbOutDir}:$::env(LD_LIBRARY_PATH)"
+   set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH \${LD_LIBRARY_PATH}:${simTbOutDir}"
    puts  ${envScript} ${LD_LIBRARY_PATH}
    close ${envScript}
 
    # Create the setup environment script: S-SHELL
    set envScript [open ${simTbOutDir}/setup_env.sh  w]
    puts  ${envScript} "ulimit -S -s 60000"
-   set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=$::env(LD_LIBRARY_PATH):${simTbOutDir}"
+   set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:${simTbOutDir}"
    puts  ${envScript} ${LD_LIBRARY_PATH}
    close ${envScript}
 
