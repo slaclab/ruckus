@@ -20,13 +20,12 @@ endif
 
 # Project Build Directory
 ifndef OUT_DIR
-export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
+export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))_workspace
 endif
 
-# Synthesis Variables
+# Build System Variables
 export VIVADO_VERSION   = $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
 export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
-export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
 # Source Files
 ifndef SRC_FILE
@@ -46,7 +45,7 @@ export PRJ_VERSION = v$(EXPORT_VERSION)
 
 # Specifies if we need to modify the ip/component.xml to support "all" FPGA family types
 ifndef ALL_XIL_FAMILY
-export ALL_XIL_FAMILY = 0
+export ALL_XIL_FAMILY = 1
 endif
 
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
