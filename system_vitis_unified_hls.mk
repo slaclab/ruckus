@@ -9,39 +9,17 @@
 ##############################################################################
 
 # Detect project name
-ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
-endif
 
 # Detect project path
-ifndef PROJ_DIR
 export PROJ_DIR = $(abspath $(PWD))
-endif
 
 # Project Build Directory
-ifndef OUT_DIR
 export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))_workspace
-endif
 
 # Build System Variables
-export VIVADO_VERSION   = $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
-export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
-
-# Source Files
-ifndef SRC_FILE
-export SRC_FILE = $(PROJ_DIR)/sources.tcl
-endif
-
-# Specifies the export configurations
-ifndef EXPORT_VENDOR
-export EXPORT_VENDOR = SLAC
-endif
-ifndef EXPORT_VERSION
-export EXPORT_VERSION = 1.0
-endif
-
-# Update legacy "PRJ_VERSION" variable
-export PRJ_VERSION = v$(EXPORT_VERSION)
+export VIVADO_VERSION = $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
+export RUCKUS_DIR     = $(TOP_DIR)/submodules/ruckus
 
 # Specifies if we need to modify the ip/component.xml to support "all" FPGA family types
 ifndef ALL_XIL_FAMILY
