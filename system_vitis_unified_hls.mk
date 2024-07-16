@@ -14,8 +14,8 @@ export PROJECT = $(notdir $(PWD))
 # Detect project path
 export PROJ_DIR = $(abspath $(PWD))
 
-# Project Build Directory
-export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))_workspace
+# Project Build Directory ("workspace")
+export OUT_DIR  = $(PROJ_DIR)/build
 
 # Build System Variables
 export VIVADO_VERSION = $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
@@ -52,17 +52,6 @@ test:
 .PHONY : proj
 proj:
 	$(call ACTION_HEADER,"Vitis HLS Create Project")
-	@test -d $(TOP_DIR)/build/ || { \
-			 echo ""; \
-			 echo "Build directory missing!"; \
-			 echo "You must create a build directory at the top level."; \
-			 echo ""; \
-			 echo "This directory can either be a normal directory:"; \
-			 echo "   mkdir $(TOP_DIR)/build"; \
-			 echo ""; \
-			 echo "Or by creating a symbolic link to a directory on another disk:"; \
-			 echo "   ln -s /tmp/build $(TOP_DIR)/build"; \
-			 echo ""; false; }
 	@test -d $(OUT_DIR)     || mkdir $(OUT_DIR)
 	@test -d $(PROJ_DIR)/ip || mkdir $(PROJ_DIR)/ip
 	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/hls/create_proj.py
