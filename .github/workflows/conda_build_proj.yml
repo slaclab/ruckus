@@ -10,7 +10,7 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-name: Anaconda Build for a Library
+name: Anaconda Build for a project
 
 on:
   workflow_call:
@@ -18,10 +18,14 @@ on:
       version:
         required: true
         type: string
+      gitub_repo:
+        required: true
+        type: string
     secrets:
       CONDA_UPLOAD_TOKEN_TAG:
         required: true
-
+      GH_TOKEN:
+        required: true
 
 jobs:
   conda_build_lib:
@@ -63,19 +67,42 @@ jobs:
         id: get_image_info
         env:
           CONDA_UPLOAD_TOKEN_TAG: ${{ secrets.CONDA_UPLOAD_TOKEN_TAG }}
-          OS_NAME: ${{ matrix.os }}
+          URL_BASE: https://github.com/${{ github.repository }}/releases/download
         run: |
           echo ::set-output name=token::$CONDA_UPLOAD_TOKEN_TAG
-          echo ::set-output name=os::linux-64
+          echo ::set-output name=url::${URL_BASE}/${GITHUB_REF#refs/tags/}/rogue_${GITHUB_REF#refs/tags/}.zip
+          echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
+          echo ::set-output name=file::rogue_${GITHUB_REF#refs/tags/}.zip
 
-      - name: Build
+      - name: Download And Extract
+        env:
+          GH_API: https://api.github.com
+          GH_REPO: https://api.github.com/repos/${{ inputs.gitub_repo }}
+          AUTH: "Authorization: token ${{ secrets.GH_TOKEN }}"
+          WGET_ARGS: "--content-disposition --auth-no-challenge --no-cookie"
+          CURL_ARGS: "-LJO#"
+          FILENAME: ${{ steps.get_image_info.outputs.file }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          mkdir ${HOME}/download
+          cd ${HOME}/download
+          GH_TAGS=https://api.github.com/repos/${{ inputs.gitub_repo }}/releases/tags/${GITHUB_REF#refs/tags/}
+          echo GH_TAGS = $GH_TAGS
+          echo curl -sH "$AUTH" $GH_TAGS
+          response=$(curl -sH "$AUTH" $GH_TAGS)
+          echo $response
+          eval $(echo "$response" | grep -C3 "name.:.\+${FILENAME}" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
+          echo $id
+          GH_ASSET="$GH_REPO/releases/assets/$id"
+          echo $GH_ASSET
+          echo curl $CURL_ARGS -H "Authorization: token ${GH_TOKEN}" -H 'Accept: application/octet-stream' "$GH_ASSET"
+          curl $CURL_ARGS -H "Authorization: token ${GH_TOKEN}" -H 'Accept: application/octet-stream' "$GH_ASSET"
+          unzip $FILENAME
+
+      - name: Build And Upload
         run: |
           export PATH="${HOME}/miniconda/bin:$PATH"
           source ${HOME}/miniconda/etc/profile.d/conda.sh
-          conda build conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge
-
-      - name: Upload
-        run: |
-          export PATH="${HOME}/miniconda/bin:$PATH"
-          source ${HOME}/miniconda/etc/profile.d/conda.sh
-          anaconda -t ${{ steps.get_image_info.outputs.token }} upload --force bld-dir/*/*.tar.bz2
+          cd ${HOME}/download/
+          conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c conda-forge
+          anaconda -t ${{ steps.get_image_info.outputs.token }} upload bld-dir/noarch/*.tar.bz2

@@ -648,7 +648,18 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
 
     if prev != "":
         print("\nGenerating release notes ...")
-        md = releaseNotes.getReleaseNotes(git.Git(gitDir), remRepo, oldTag=relOld, newTag=relNew)
+        try:
+            md = releaseNotes.getReleaseNotes(
+                locRepo = git.Git(gitDir),
+                remRepo = remRepo,
+                oldTag  = relOld,
+                newTag  = relNew,
+            )
+        except ValueError as e:
+            # Delete the new tag if an error occurs
+            git.Git(gitDir).tag('-d', relNew)
+            git.Git(gitDir).push('origin', f':refs/tags/{relNew}')
+            raise ValueError(f'Deleted tag {relNew} due to error: {e}')
     else:
         md = "No release notes"
 
