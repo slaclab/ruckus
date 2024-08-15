@@ -14,6 +14,9 @@ proc BuildIpCores { } {
    source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
    source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
+   # Attempt to upgrade before building IP cores
+   upgrade_ip [get_ips]
+
    # Check if the target project has IP cores
    if { [get_ips] != "" } {
       # Clear the list of IP cores
