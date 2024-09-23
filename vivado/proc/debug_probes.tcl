@@ -42,9 +42,7 @@ proc CreateDebugCore {ilaName} {
    set_property C_INPUT_PIPE_STAGES 2   [get_debug_cores ${ilaName}]
 
    # Force a reset of the implementation
-   if { [VersionCompare 2024.1] < 0} {
-      reset_run impl_1
-   }
+   reset_run impl_1
 }
 
 ## Sets the clock on the debug core
@@ -91,13 +89,8 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
    # Delete the last unused port
    delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
 
-   # Check if Vivado 2024.1 or later
-   if { [VersionCompare 2024.1] >= 0} {
-      # Implement debug core
-      implement_debug_core
-
    # Check if write_debug_probes is support
-   } elseif { [VersionCompare 2017.2] <= 0 } {
+   if { [VersionCompare 2017.2] <= 0 } {
       # Write the port map file
       write_debug_probes -force ${filePath}
 
