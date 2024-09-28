@@ -339,14 +339,14 @@ if { ${list} != "" } {
 
 # open the files
 set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
-set out [open ${simTbOutDir}/sim_vcs.sh  w]
+set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
 
 # Find and replace the AFS path
 while { [eof ${in}] != 1 } {
 
    gets ${in} line
 
-   # Do not execute the simulation in sim_vcs.sh build script
+   # Do not execute the simulation in sim_vcs_mx.sh build script
    if { [string match "*simulate.do" ${line}] } {
       set line "  echo \"Ready to simulate\""
 
@@ -397,7 +397,7 @@ close ${in}
 close ${out}
 
 # Update the permissions
-exec chmod 0755 ${simTbOutDir}/sim_vcs.sh
+exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
 
 #####################################################################################################
 #####################################################################################################
