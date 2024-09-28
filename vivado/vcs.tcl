@@ -71,7 +71,7 @@ proc VcsVersionCheck { } {
    set retVar -1
 
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09 T-2022.06 V-2023.12"
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09 T-2022.06 V-2023.12 W-2024.09"
 
    # Get Version Name
    set VersionNumber [GetVcsName]
@@ -154,21 +154,21 @@ if { [file exists ${simLibOutDir}] != 1 } {
    exec mkdir ${simLibOutDir}
 
    # Configure the simlib compiler
-   config_compile_simlib -simulator vcs_mx \
-   -cfgopt {vcs_mx.vhdl.unisim:   -nc -l +v2k -xlrm -kdb } \
-   -cfgopt {vcs_mx.vhdl.unimacro: -nc -l +v2k -xlrm -kdb } \
-   -cfgopt {vcs_mx.vhdl.unifast:  -nc -l +v2k -xlrm -kdb } \
-   -cfgopt {vcs_mx.vhdl.secureip: -nc -l      -xlrm -kdb } \
-   -cfgopt {vcs_mx.vhdl.xpm:      -nc -l +v2k -xlrm -kdb } \
-   -cfgopt {vcs_mx.verilog.unisim:   -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.unimacro: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.unifast:  -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.secureip: -sverilog -nc      +define+XIL_TIMING -kdb } \
-   -cfgopt {vcs_mx.verilog.xpm:      -sverilog -nc +v2k +define+XIL_TIMING -kdb }
+   config_compile_simlib -simulator vcs \
+   -cfgopt {vcs.vhdl.unisim:   -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs.vhdl.unimacro: -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs.vhdl.unifast:  -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs.vhdl.secureip: -nc -l      -xlrm -kdb } \
+   -cfgopt {vcs.vhdl.xpm:      -nc -l +v2k -xlrm -kdb } \
+   -cfgopt {vcs.verilog.unisim:   -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs.verilog.unimacro: -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs.verilog.unifast:  -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs.verilog.simprim:  -sverilog -nc +v2k +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs.verilog.secureip: -sverilog -nc      +define+XIL_TIMING -kdb } \
+   -cfgopt {vcs.verilog.xpm:      -sverilog -nc +v2k +define+XIL_TIMING -kdb }
 
    # Compile the simulation libraries
-   catch { compile_simlib -force -simulator vcs_mx -family all -language all -library all -directory ${simLibOutDir} }
+   catch { compile_simlib -force -simulator vcs -family all -language all -library all -directory ${simLibOutDir} }
 
    ##################################################################
    ##                synopsys_sim.setup bug fix
@@ -339,14 +339,14 @@ if { ${list} != "" } {
 
 # open the files
 set in  [open ${simTbOutDir}/vcs/${simTbFileName}.sh r]
-set out [open ${simTbOutDir}/sim_vcs_mx.sh  w]
+set out [open ${simTbOutDir}/sim_vcs.sh  w]
 
 # Find and replace the AFS path
 while { [eof ${in}] != 1 } {
 
    gets ${in} line
 
-   # Do not execute the simulation in sim_vcs_mx.sh build script
+   # Do not execute the simulation in sim_vcs.sh build script
    if { [string match "*simulate.do" ${line}] } {
       set line "  echo \"Ready to simulate\""
 
@@ -397,7 +397,7 @@ close ${in}
 close ${out}
 
 # Update the permissions
-exec chmod 0755 ${simTbOutDir}/sim_vcs_mx.sh
+exec chmod 0755 ${simTbOutDir}/sim_vcs.sh
 
 #####################################################################################################
 #####################################################################################################
