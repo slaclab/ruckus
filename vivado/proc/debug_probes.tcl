@@ -93,6 +93,7 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
    if { [VersionCompare 2017.2] <= 0 } {
       # Write the port map file
       write_debug_probes -force ${filePath}
+
    } else {
       # Check if not empty string
       if { ${filePath} != "" } {
