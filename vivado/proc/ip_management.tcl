@@ -16,6 +16,7 @@ proc BuildIpCores { } {
 
    # Attempt to upgrade before building IP cores
    upgrade_ip [get_ips]
+   export_ip_user_files -of_objects [get_ips] -no_script -sync -force -quiet
 
    # Check if the target project has IP cores
    if { [get_ips] != "" } {
