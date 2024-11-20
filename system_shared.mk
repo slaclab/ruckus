@@ -55,7 +55,7 @@ ifeq ($(GIT_STATUS),)
    ifeq ($(RECONFIG_STATIC_HASH), 0)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)
    else
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)_$(RECONFIG_STATIC_HASH)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)$(RECONFIG_STATIC_HASH)
    endif
 else
    export GIT_HASH_MSG   = dirty (uncommitted code)
@@ -70,7 +70,7 @@ else
    ifeq ($(RECONFIG_STATIC_HASH), 0)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty
    else
-      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty_$(RECONFIG_STATIC_HASH)
+      export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-dirty$(RECONFIG_STATIC_HASH)
    endif
 endif
 
