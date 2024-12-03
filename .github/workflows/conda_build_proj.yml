@@ -69,10 +69,10 @@ jobs:
           CONDA_UPLOAD_TOKEN_TAG: ${{ secrets.CONDA_UPLOAD_TOKEN_TAG }}
           URL_BASE: https://github.com/${{ github.repository }}/releases/download
         run: |
-          echo ::set-output name=token::$CONDA_UPLOAD_TOKEN_TAG
-          echo ::set-output name=url::${URL_BASE}/${GITHUB_REF#refs/tags/}/rogue_${GITHUB_REF#refs/tags/}.zip
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
-          echo ::set-output name=file::rogue_${GITHUB_REF#refs/tags/}.zip
+          echo "token=$CONDA_UPLOAD_TOKEN_TAG" >> $GITHUB_OUTPUT
+          echo "url=${URL_BASE}/${GITHUB_REF#refs/tags/}/rogue_${GITHUB_REF#refs/tags/}.zip" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "file=rogue_${GITHUB_REF#refs/tags/}.zip" >> $GITHUB_OUTPUT
 
       - name: Download And Extract
         env:

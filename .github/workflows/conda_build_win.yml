@@ -47,7 +47,7 @@ jobs:
       - name: Get Image Information
         id: get_image_info
         run: |
-          echo ::set-output name=tag::`git describe --tags`
+          echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
 
       - name: Build And Upload
         env:

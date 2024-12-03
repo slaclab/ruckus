@@ -65,8 +65,8 @@ jobs:
           CONDA_UPLOAD_TOKEN_TAG: ${{ secrets.CONDA_UPLOAD_TOKEN_TAG }}
           OS_NAME: ${{ matrix.os }}
         run: |
-          echo ::set-output name=token::$CONDA_UPLOAD_TOKEN_TAG
-          echo ::set-output name=os::linux-64
+          echo "token=$CONDA_UPLOAD_TOKEN_TAG" >> $GITHUB_OUTPUT
+          echo "os=linux-64" >> $GITHUB_OUTPUT
 
       - name: Build
         run: |
