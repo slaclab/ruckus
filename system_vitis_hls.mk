@@ -73,11 +73,6 @@ ifndef HDL_TYPE
 export HDL_TYPE = verilog
 endif
 
-# Specifies if we are skipping the csim
-ifndef SKIP_CSIM
-export SKIP_CSIM = 0
-endif
-
 # Specifies if we are skipping the cosim
 ifndef SKIP_COSIM
 export SKIP_COSIM = 0
@@ -125,7 +120,6 @@ test:
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
 	@echo HDL_TYPE: $(HDL_TYPE)
-	@echo SKIP_CSIM: $(SKIP_CSIM)
 	@echo SKIP_COSIM: $(SKIP_COSIM)
 	@echo EXPORT_VENDOR: $(EXPORT_VENDOR)
 	@echo EXPORT_VERSION: $(PRJ_VERSION)
@@ -159,7 +153,7 @@ $(SOURCE_DEPEND) :
 			 echo ""; false; }
 	@test -d $(OUT_DIR)     || mkdir $(OUT_DIR)
 	@test -d $(PROJ_DIR)/ip || mkdir $(PROJ_DIR)/ip
-	@cd $(OUT_DIR); vitis_hls -f $(RUCKUS_DIR)/vitis/hls/sources.tcl
+	@cd $(OUT_DIR); SKIP_CSIM=1 vitis_hls -f $(RUCKUS_DIR)/vitis/hls/sources.tcl
 
 ###############################################################
 #### Vitis HLS Batch Build Mode ###############################
@@ -167,7 +161,7 @@ $(SOURCE_DEPEND) :
 .PHONY : build
 build : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vitis HLS Build")
-	@cd $(OUT_DIR); vitis_hls -f $(RUCKUS_DIR)/vitis/hls/build.tcl
+	@cd $(OUT_DIR); SKIP_CSIM=0 vitis_hls -f $(RUCKUS_DIR)/vitis/hls/build.tcl
 
 ###############################################################
 #### Vitis HLS Interactive ####################################
@@ -175,7 +169,7 @@ build : $(SOURCE_DEPEND)
 .PHONY : interactive
 interactive : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vitis HLS Interactive")
-	@cd $(OUT_DIR); vitis_hls -f $(RUCKUS_DIR)/vitis/hls/interactive.tcl
+	@cd $(OUT_DIR); SKIP_CSIM=1 vitis_hls -f $(RUCKUS_DIR)/vitis/hls/interactive.tcl
 
 ###############################################################
 #### Vitis HLS Gui ############################################
@@ -183,7 +177,7 @@ interactive : $(SOURCE_DEPEND)
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vitis HLS GUI")
-	@cd $(OUT_DIR); vitis_hls -p $(PROJECT)_project
+	@cd $(OUT_DIR); SKIP_CSIM=1 vitis_hls -p $(PROJECT)_project
 
 ###############################################################
 #### Makefile Targets #########################################

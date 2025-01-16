@@ -15,20 +15,6 @@
 ## Create a Debug Core Function
 proc CreateDebugCore {ilaName} {
 
-   # Check if Vivado 2024.1 or later
-   if { [VersionCompare 2024.1] >= 0} {
-      # Check if the currently sourced script contains "post_synthesis.tcl"
-      if {[string match "*post_synthesis.tcl" [info script]]} {
-         puts "\n\n\n\n\n********************************************************"
-         puts "vivado/post_synthesis.tcl no longer works with Vivado 2024.1 (or later)"
-         puts "Please do the following operations on your post_synthesis.tcl script"
-         puts "1) Rename the script from post_synthesis.tcl to pre_opt_run.tcl"
-         puts "2) Remove the 'open_run synth_1' TCL command from the script"
-         puts "********************************************************\n\n\n\n\n"
-         exit -1
-      }
-   }
-
    # Delete the Core if it already exist
    delete_debug_core -quiet [get_debug_cores ${ilaName}]
 
@@ -89,8 +75,13 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
    # Delete the last unused port
    delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
 
+   # Vivado 2024.1 (or later) requires that you overwrite synth_1 .dcp
+   # after doing the ILA probe insertion via TCL (no longer auto-detected)
+   if { [VersionCompare 2024.1] >= 0 } {
+      write_checkpoint -force $::env(SYN_DIR)/$::env(PROJECT).dcp
+
    # Check if write_debug_probes is support
-   if { [VersionCompare 2017.2] <= 0 } {
+   } elseif { [VersionCompare 2017.2] <= 0 } {
       # Write the port map file
       write_debug_probes -force ${filePath}
 
