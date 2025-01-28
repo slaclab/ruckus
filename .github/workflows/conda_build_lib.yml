@@ -78,4 +78,4 @@ jobs:
         run: |
           export PATH="${HOME}/miniconda/bin:$PATH"
           source ${HOME}/miniconda/etc/profile.d/conda.sh
-          anaconda -t ${{ steps.get_image_info.outputs.token }} upload --force bld-dir/*/*.tar.bz2
+          anaconda -t ${{ steps.get_image_info.outputs.token }} upload --force bld-dir/*/*.conda

@@ -56,4 +56,4 @@ jobs:
         run: |
           C:\Miniconda\condabin\conda.bat activate base
           C:\Miniconda\condabin\conda.bat build software\conda-recipe --output-folder bld-dir -c conda-forge
-          C:\Miniconda\Scripts\anaconda.exe -t $env:CONDA_UPLOAD_TOKEN_TAG upload --force bld-dir\win-64\*.tar.bz2
+          C:\Miniconda\Scripts\anaconda.exe -t $env:CONDA_UPLOAD_TOKEN_TAG upload --force bld-dir\win-64\*.conda
