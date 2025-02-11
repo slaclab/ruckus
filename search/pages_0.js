@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ruckus_1',['ruckus',['../index.html',1,'']]]
+  ['ruckus_0',['ruckus',['../index.html',1,'']]]
 ];
