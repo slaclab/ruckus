@@ -19,7 +19,7 @@ jobs:
 
   test_and_document:
     name: Test And Generate Documentation
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
 
       # This step checks out a copy of your repository.
@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.12
 
       - name: Install dependencies
         run: |
