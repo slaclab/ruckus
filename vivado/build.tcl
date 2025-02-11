@@ -60,7 +60,12 @@ if { [CheckSynth] != true } {
 ########################################################
 ## Check if we re-synthesis any of the IP cores
 ########################################################
-BuildIpCores
+if {[llength [get_ips]] > 0} {
+    BuildIpCores
+} else {
+    puts "No IP cores found."
+}
+
 
 ########################################################
 ## Target Pre synthesis script
