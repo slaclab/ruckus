@@ -92,9 +92,9 @@ if { [info exists ::env(DEFAULTS_DIR)] != 1 } {
 
 # Copy the defaults into the dump directory
 if { [file isdirectory ${defaultsDir}] == 1 } {
-	exec cp -rf ${defaultsDir} ${ProjPythonDir}/.
+   exec cp -rf ${defaultsDir} ${ProjPythonDir}/.
 } else {
-	puts "Note: ${defaultsDir} doesn't exist"
+   puts "Note: ${defaultsDir} doesn't exist"
 }
 
 # Compress the python directory to the target's image directory
