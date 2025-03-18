@@ -170,6 +170,7 @@ if { ${notTig} } {
 
 # Messages: Change from ERROR to WARNING
 set_msg_config -id {Common 17-356} -new_severity {Warning};# Failed to install all user apps.
+set_msg_config -id {Common 17-69}  -new_severity {Warning};# No IP specified.  Please specify IP with 'objects'
 
 # DRC: Change from ERROR to WARNING
 set_property SEVERITY {Warning} [get_drc_checks {REQP-52}]; # DRC: using the GTGREFCLK port on a MGT  (GTP7 & GTX7)
