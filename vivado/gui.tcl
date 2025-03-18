@@ -28,9 +28,12 @@ if { [isVersal] } {
 # Call the user script
 SourceTclFile ${VIVADO_DIR}/gui.tcl
 
-# Attempt to upgrade before opening GUI
-upgrade_ip [get_ips]
-export_ip_user_files -of_objects [get_ips] -no_script -sync -force -quiet
+# Check if the target project has IP cores
+if { [get_ips] != "" } {
+   # Attempt to upgrade before opening GUI
+   upgrade_ip [get_ips]
+   export_ip_user_files -of_objects [get_ips] -no_script -sync -force -quiet
+}
 
 # Bug fix work around for Vivado due to post script changes
 if { [CheckSynth] == true } {
