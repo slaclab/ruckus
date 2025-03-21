@@ -1,4 +1,6 @@
 # ruckus
+[DOE Code](https://www.osti.gov/doecode/biblio/8165)
+
 A Makefile/TCL `hybrid` Firmware build system
 
 # Documentation
