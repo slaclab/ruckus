@@ -21,3 +21,6 @@ source $::env(RUCKUS_QUIET_FLAG) $::env(RUCKUS_DIR)/vivado/proc/ip_management.tc
 source $::env(RUCKUS_QUIET_FLAG) $::env(RUCKUS_DIR)/vivado/proc/output_files.tcl
 source $::env(RUCKUS_QUIET_FLAG) $::env(RUCKUS_DIR)/vivado/proc/project_management.tcl
 source $::env(RUCKUS_QUIET_FLAG) $::env(RUCKUS_DIR)/vivado/proc/sim_management.tcl
+
+# Target specific proc.tcl script
+SourceTclFile $::env(VIVADO_DIR)/proc.tcl
