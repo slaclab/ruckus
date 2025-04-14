@@ -134,6 +134,12 @@ ifndef IP_REPO
 export IP_REPO = $(OUT_DIR)/ip_repo
 endif
 
+# Workaround for "[Common 17-356] Failed to install all user apps" error message
+# https://adaptivesupport.amd.com/s/question/0D52E00006iHp31SAC/synthesis-errors-common-17354-could-not-open-c-for-writing-common-17356-failed-to-install-all-user-apps
+ifndef XILINX_LOCAL_USER_DATA
+export XILINX_LOCAL_USER_DATA = no
+endif
+
 ###############################################################
 
 ifndef SIM_CARGS_VERILOG
