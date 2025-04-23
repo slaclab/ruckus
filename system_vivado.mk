@@ -33,7 +33,7 @@ export REMOVE_UNUSED_CODE = 0
 endif
 
 ifndef PARALLEL_SYNTH
-export PARALLEL_SYNTH = $(shell cat /proc/cpuinfo | grep processor | wc -l)
+export PARALLEL_SYNTH := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 endif
 
 ifndef GIT_BYPASS
@@ -109,8 +109,8 @@ export VIVADO_PROJECT_SIM_TIME = 1000 ns
 endif
 
 # Synthesis Variables
-export VIVADO_VERSION   := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
-export VIVADO_INSTALL   = $(abspath  $(shell which vivado)/../..)
+export VIVADO_VERSION  := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
+export VIVADO_INSTALL  := $(abspath  $(shell which vivado)/../..)
 export VIVADO_DIR       = $(abspath $(PROJ_DIR)/vivado)
 export VIVADO_PROJECT   = $(PROJECT)_project
 export VIVADO_DEPEND    = $(OUT_DIR)/$(VIVADO_PROJECT).xpr
