@@ -62,8 +62,8 @@ export HDL_DIR = $(abspath $(PROJ_DIR)/hdl_output)
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 # Software Package Versions
-export FAB_VERSION     = $(shell git submodule | grep FABulous | sed 's/.*(//; s/).*//')
-export YOSYS_VERSION   = $(shell yosys -V | sed 's/.*Yosys //; s/ .*//')
+export FAB_VERSION    := $(shell git submodule | grep FABulous | sed 's/.*(//; s/).*//')
+export YOSYS_VERSION  := $(shell yosys -V | sed 's/.*Yosys //; s/ .*//')
 export VIVADO_VERSION  = -1.0
 
 # Override system_shared.mk build string

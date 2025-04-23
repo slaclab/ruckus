@@ -18,7 +18,7 @@ export PROJ_DIR = $(abspath $(PWD))
 export OUT_DIR  = $(PROJ_DIR)/build
 
 # Build System Variables
-export VIVADO_VERSION = $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
+export VIVADO_VERSION := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
 export RUCKUS_DIR     = $(TOP_DIR)/submodules/ruckus
 
 # Specifies if we need to modify the ip/component.xml to support "all" FPGA family types

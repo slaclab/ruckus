@@ -37,20 +37,20 @@ else
 endif
 
 # Generate build string
-export BUILD_SYS_NAME = $(shell uname -n)
-export BUILD_USER = $(shell id -u -n)
+export BUILD_SYS_NAME := $(shell uname -n)
+export BUILD_USER := $(shell id -u -n)
 BUILD_SVR_TYPE := $(shell grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d \")
 BUILD_DATE := $(shell date)
 BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
 export BUILD_STRING = $(PROJECT): Vivado v${VIVADO_VERSION}, ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}
 
 # Check the GIT status
-export GIT_STATUS = $(shell git update-index --refresh | sed -e 's/: needs update//g')
+export GIT_STATUS := $(shell git update-index --refresh | sed -e 's/: needs update//g')
 
 # Check for non-dirty git clone
 ifeq ($(GIT_STATUS),)
-   export GIT_HASH_LONG  = $(shell git rev-parse HEAD)
-   export GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
+   export GIT_HASH_LONG  := $(shell git rev-parse HEAD)
+   export GIT_HASH_SHORT := $(shell git rev-parse --short HEAD)
    export GIT_HASH_MSG   = $(GIT_HASH_LONG)
    ifeq ($(RECONFIG_STATIC_HASH), 0)
       export IMAGENAME = $(PROJECT)-$(PRJ_VERSION)-$(BUILD_TIME)-$(USER)-$(GIT_HASH_SHORT)

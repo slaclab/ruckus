@@ -68,7 +68,7 @@ export RUCKUS_PROC_TCL   = $(RUCKUS_DC_DIR)/proc.tcl
 export RUCKUS_QUIET_FLAG = -verbose
 
 ifndef PARALLEL_SYNTH
-export PARALLEL_SYNTH = $(shell cat /proc/cpuinfo | grep processor | wc -l)
+export PARALLEL_SYNTH := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 endif
 
 ifndef GIT_BYPASS
@@ -89,7 +89,7 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 # Override system_shared.mk build string
-export DC_VERSION   = $(shell dc_shell-xg-t -V | grep version | sed 's/ //g' | sed 's/version-/ /g')
+export DC_VERSION  := $(shell dc_shell-xg-t -V | grep version | sed 's/ //g' | sed 's/version-/ /g')
 export BUILD_STRING = $(PROJECT): $(DC_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Legacy Vivado Version
