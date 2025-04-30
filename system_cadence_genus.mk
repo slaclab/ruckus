@@ -69,7 +69,7 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
 
 # Override system_shared.mk build string
-export GENUS_VERSION = $(shell genus -version | grep Version: | sed 's/.*Version: //')
+export GENUS_VERSION := $(shell genus -version | grep Version: | sed 's/.*Version: //')
 export BUILD_STRING  = $(PROJECT): $(GENUS_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
 
 # Legacy Vivado Version

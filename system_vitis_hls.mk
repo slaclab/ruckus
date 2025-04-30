@@ -24,7 +24,7 @@ export OUT_DIR  = $(abspath $(TOP_DIR)/build/$(PROJECT))
 endif
 
 # Synthesis Variables
-export VIVADO_VERSION   = $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
+export VIVADO_VERSION  := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
 export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
