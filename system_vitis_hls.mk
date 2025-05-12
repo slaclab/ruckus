@@ -74,6 +74,11 @@ export HDL_TYPE = verilog
 endif
 
 # Specifies if we are skipping the cosim
+ifndef SKIP_CSIM
+export SKIP_CSIM = 0
+endif
+
+# Specifies if we are skipping the cosim
 ifndef SKIP_COSIM
 export SKIP_COSIM = 0
 endif
@@ -120,6 +125,7 @@ test:
 	@echo CFLAGS: $(CFLAGS)
 	@echo LDFLAGS: $(LDFLAGS)
 	@echo HDL_TYPE: $(HDL_TYPE)
+	@echo SKIP_CSIM: $(SKIP_CSIM)
 	@echo SKIP_COSIM: $(SKIP_COSIM)
 	@echo EXPORT_VENDOR: $(EXPORT_VENDOR)
 	@echo EXPORT_VERSION: $(PRJ_VERSION)
@@ -161,7 +167,7 @@ $(SOURCE_DEPEND) :
 .PHONY : build
 build : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vitis HLS Build")
-	@cd $(OUT_DIR); SKIP_CSIM=0 vitis_hls -f $(RUCKUS_DIR)/vitis/hls/build.tcl
+	@cd $(OUT_DIR); SKIP_CSIM=$(SKIP_CSIM) vitis_hls -f $(RUCKUS_DIR)/vitis/hls/build.tcl
 
 ###############################################################
 #### Vitis HLS Interactive ####################################
