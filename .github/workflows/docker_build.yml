@@ -62,5 +62,5 @@ jobs:
           context: .
           file: ./docker/rogue/Dockerfile
           push: true
-          tags: ghcr.io/slaclab/${{ inputs.docker_name }}:${{ steps.get_image_info.outputs.tag }}, ghcr.io/slaclab/${{ inputs.docker_name}}:latest
+          tags: ghcr.io/slaclab/${{ inputs.docker_name }}:${{ steps.get_image_info.outputs.tag }}, ghcr.io/slaclab/${{ inputs.docker_name }}:latest
           build-args: branch=${{ steps.get_image_info.outputs.branch }}
