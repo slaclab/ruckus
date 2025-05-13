@@ -10,7 +10,7 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-name: Docker Build for a Library
+name: Docker Build for Rogue
 
 on:
   workflow_call:
@@ -23,7 +23,7 @@ on:
         required: true
 
 jobs:
-  docker_build_rogue:
+  docker_build:
     name: Docker Build
     runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/')
