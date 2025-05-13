@@ -232,7 +232,7 @@ proc GetGitHash { } {
    while { [string bytelength $gitHash] != 40 } {
       set gitHash "0${gitHash}"
    }
-   return ${gitHash}
+   return [string toupper $gitHash]
 }
 
 ## Generate the Firmware Version string
@@ -277,11 +277,16 @@ proc GenBuildString { pkgDir } {
    set out [open ${pkgDir}/BuildInfoPkg.vhd w]
    puts ${out} "library ieee;"
    puts ${out} "use ieee.std_logic_1164.all;"
+   puts ${out} ""
    puts ${out} "library surf;"
    puts ${out} "use surf.StdRtlPkg.all;"
+   puts ${out} ""
    puts ${out} "package BuildInfoPkg is"
-   puts ${out} "constant BUILD_INFO_C : BuildInfoType :=x\"${gitHash}${fwVersion}${buildString}\";"
+   puts ${out} ""
+   puts ${out} "   constant BUILD_INFO_C : BuildInfoType := x\"${gitHash}${fwVersion}${buildString}\";"
+   puts ${out} ""
    puts ${out} "end BuildInfoPkg;"
+   puts ${out} ""
    close ${out}
    loadSource -lib ruckus -path ${pkgDir}/BuildInfoPkg.vhd
 }

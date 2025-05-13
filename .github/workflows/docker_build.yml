@@ -10,16 +10,19 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-name: Docker Build for a Library
+name: Docker Build for Package
 
 on:
   workflow_call:
     inputs:
-      version:
+      gh_username:
+        required: true
+        type: string
+      docker_name:
         required: true
         type: string
     secrets:
-      DOCKERHUB_TOKEN:
+      GH_TOKEN:
         required: true
 
 jobs:
@@ -46,10 +49,11 @@ jobs:
 
       # Login to Dockerhub
       - name: Login to Dockerhub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
-          username: tidair
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ input.gh_username }}
+          password: ${{ secrets.GH_TOKEN }}
 
       # Build and push the docker image
       - name: Build and push image to Dockerhub
@@ -58,5 +62,5 @@ jobs:
           context: .
           file: ./docker/rogue/Dockerfile
           push: true
-          tags: tidair/rogue:${{ steps.get_image_info.outputs.tag }}, tidair/rogue:latest
+          tags: ghcr.io/slaclab/${{ inputs.docker_name }}:${{ steps.get_image_info.outputs.tag }}, ghcr.io/slaclab/${{ inputs.docker_name }}:latest
           build-args: branch=${{ steps.get_image_info.outputs.branch }}
