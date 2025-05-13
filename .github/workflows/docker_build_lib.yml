@@ -23,7 +23,7 @@ on:
         required: true
 
 jobs:
-  docker_build:
+  docker_build_rogue:
     name: Docker Build
     runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/')
@@ -46,10 +46,11 @@ jobs:
 
       # Login to Dockerhub
       - name: Login to Dockerhub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
-          username: tidair
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: slacrherbst
+          password: ${{ secrets.GH_TOKEN }}
 
       # Build and push the docker image
       - name: Build and push image to Dockerhub
@@ -58,5 +59,5 @@ jobs:
           context: .
           file: ./docker/rogue/Dockerfile
           push: true
-          tags: tidair/rogue:${{ steps.get_image_info.outputs.tag }}, tidair/rogue:latest
+          tags: ghcr.io/slaclab/rogue:${{ steps.get_image_info.outputs.tag }}, ghcr.io/slaclab/rogue:latest
           build-args: branch=${{ steps.get_image_info.outputs.branch }}
