@@ -198,9 +198,9 @@ if { [info exists ::env(ALLOW_MULTI_DRIVEN)] != 1 || $::env(ALLOW_MULTI_DRIVEN) 
 # Check if Un-Driven Nets are **NOT** allowed
 ########################################################
 if { [info exists ::env(ALLOW_UN_DRIVEN)] != 1 || $::env(ALLOW_UN_DRIVEN) == 0 } {
-    set_msg_config -id {Synth 8-3848} -new_severity ERROR; # SYNTH: un-driven net
+    set_msg_config -id {Synth 8-3936} -new_severity ERROR; # SYNTH: un-driven net
 } else {
-    set_msg_config -id {Synth 8-3848} -new_severity "CRITICAL WARNING"; # SYNTH: un-driven net
+    set_msg_config -id {Synth 8-3936} -new_severity "CRITICAL WARNING"; # SYNTH: un-driven net
 }
 
 ########################################################
