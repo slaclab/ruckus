@@ -65,6 +65,14 @@ build : proj
 	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/hls/build.py
 
 ###############################################################
+#### Vitis HLS CSIM Mode ######################################
+###############################################################
+.PHONY : csim
+csim : proj
+	$(call ACTION_HEADER,"Vitis HLS CSIM Mode")
+	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/hls/build.py --csim
+
+###############################################################
 #### Vitis HLS Interactive ####################################
 ###############################################################
 .PHONY : interactive
