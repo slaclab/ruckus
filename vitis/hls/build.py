@@ -13,6 +13,13 @@ import vitis
 import os
 import shutil
 import zipfile
+import argparse
+
+parser = argparse.ArgumentParser(
+    prog="Vitis HLS build script"
+)
+parser.add_argument("-c", "--csim",default=False,action="store_true")
+args = parser.parse_args()
 
 # Project variables
 workspace = os.getenv("OUT_DIR")
@@ -31,6 +38,10 @@ hls_test_comp = client.get_component(comp_name)
 
 # Run c-simulation on the component
 hls_test_comp.run('C_SIMULATION')
+
+if args.csim:
+    vitis.dispose()
+    exit()
 
 # Run synthesis on the component
 hls_test_comp.run('SYNTHESIS')
