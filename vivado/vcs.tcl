@@ -71,7 +71,7 @@ proc VcsVersionCheck { } {
    set retVar -1
 
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09 T-2022.06 V-2023.12 W-2024.09"
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09 T-2022.06 V-2023.12 W-2024.09 X-2025.06"
 
    # Get Version Name
    set VersionNumber [GetVcsName]
@@ -270,6 +270,7 @@ if { ${rogueSimPath} != "" } {
    # Create the setup environment script: C-SHELL
    set envScript [open ${simTbOutDir}/setup_env.csh  w]
    puts  ${envScript} "limit stacksize 60000"
+   puts  ${envScript} "limit descriptors 65536"
    set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH \${LD_LIBRARY_PATH}:${simTbOutDir}"
    puts  ${envScript} ${LD_LIBRARY_PATH}
    close ${envScript}
@@ -277,8 +278,8 @@ if { ${rogueSimPath} != "" } {
    # Create the setup environment script: S-SHELL
    set envScript [open ${simTbOutDir}/setup_env.sh  w]
    puts  ${envScript} "ulimit -S -s 60000"
-   set LD_LIBRARY_PATH "export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:${simTbOutDir}"
-   puts  ${envScript} ${LD_LIBRARY_PATH}
+   puts  ${envScript} "ulimit -n 65536"
+   puts  ${envScript} "export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:${simTbOutDir}"
    close ${envScript}
 
    # Find the surf/axi/simlink/src directory
