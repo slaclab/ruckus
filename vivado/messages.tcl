@@ -195,30 +195,21 @@ if { [info exists ::env(ALLOW_MULTI_DRIVEN)] != 1 || $::env(ALLOW_MULTI_DRIVEN) 
 }
 
 ########################################################
-# Check if Un-Driven Nets are **NOT** allowed
-########################################################
-if { [info exists ::env(ALLOW_UN_DRIVEN)] != 1 || $::env(ALLOW_UN_DRIVEN) == 1 } {
-    set_msg_config -id {Synth 8-3848} -new_severity "CRITICAL WARNING"; # SYNTH: un-driven net
-} else {
-    set_msg_config -id {Synth 8-3848} -new_severity ERROR; # SYNTH: un-driven net
-}
-
-########################################################
 # Check if inferred latch are **NOT** allowed
 ########################################################
-if { [info exists ::env(ALLOW_LATCH)] != 1 || $::env(ALLOW_LATCH) == 1 } {
-    set_msg_config -id {Synth 8-327} -new_severity "CRITICAL WARNING"; # SYNTH: Inferred latch
-} else {
+if { [info exists ::env(ALLOW_LATCH)] != 1 || $::env(ALLOW_LATCH) == 0 } {
     set_msg_config -id {Synth 8-327} -new_severity ERROR; # SYNTH: Inferred latch
+} else {
+    set_msg_config -id {Synth 8-327} -new_severity "CRITICAL WARNING"; # SYNTH: Inferred latch
 }
 
 ###################################################################
 # Check if "Signal not in the sensitivity list" are **NOT** allowed
 ###################################################################
-if { [info exists ::env(ALLOW_PARTIAL_SENSE_LIST)] != 1 || $::env(ALLOW_PARTIAL_SENSE_LIST) == 1 } {
-    set_msg_config -id {Synth 8-614} -new_severity "CRITICAL WARNING";# SYNTH: Signal not in the sensitivity list
-} else {
+if { [info exists ::env(ALLOW_PARTIAL_SENSE_LIST)] != 1 || $::env(ALLOW_PARTIAL_SENSE_LIST) == 0 } {
     set_msg_config -id {Synth 8-614} -new_severity ERROR;# SYNTH: Signal not in the sensitivity list
+} else {
+    set_msg_config -id {Synth 8-614} -new_severity "CRITICAL WARNING";# SYNTH: Signal not in the sensitivity list
 }
 
 ########################################################
