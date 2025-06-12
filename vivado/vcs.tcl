@@ -271,8 +271,7 @@ if { ${rogueSimPath} != "" } {
    set envScript [open ${simTbOutDir}/setup_env.csh  w]
    puts  ${envScript} "limit stacksize 60000"
    puts  ${envScript} "limit descriptors 65536"
-   set LD_LIBRARY_PATH "setenv LD_LIBRARY_PATH \${LD_LIBRARY_PATH}:${simTbOutDir}"
-   puts  ${envScript} ${LD_LIBRARY_PATH}
+   puts  ${envScript} "setenv LD_LIBRARY_PATH \${LD_LIBRARY_PATH}:${simTbOutDir}"
    close ${envScript}
 
    # Create the setup environment script: S-SHELL
