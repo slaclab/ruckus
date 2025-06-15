@@ -166,12 +166,22 @@ proc GenerateBdWrappers { } {
 
    # Check if any .bd files exist
    if { ${bdList} != "" } {
+
       # Loop through the has block designs
       foreach bdpath ${bdList} {
-         # Create the wrapper
-         set wrapper_path [make_wrapper -force -files [get_files $bdpath] -top]
-         # Add the VHDL (or Verilog) to the project
-         add_files -force -fileset sources_1 ${wrapper_path}
+
+         # Attempt to create the wrapper and catch any errors
+         set result [catch {
+            set wrapper_path [make_wrapper -force -files [get_files $bdpath] -top]
+            # Add the wrapper to the project
+            add_files -force -fileset sources_1 ${wrapper_path}
+         } errMsg]
+
+         # Log the error if it occurred
+         if { $result != 0 } {
+            puts "WARNING: Failed to create wrapper for $bdpath. Error: $errMsg"
+         }
+
       }
    }
 
