@@ -40,9 +40,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          C:\Miniconda\condabin\conda.bat activate base
-          C:\Miniconda\condabin\conda.bat install anaconda-client conda-build
-          C:\Miniconda\condabin\conda.bat update --all
+          C:\miniforge3\condabin\conda.bat activate base
+          C:\miniforge3\condabin\conda.bat install anaconda-client conda-build
+          C:\miniforge3\condabin\conda.bat update --all
 
       - name: Get Image Information
         id: get_image_info
@@ -54,6 +54,6 @@ jobs:
           IMAGE_VER: ${{ steps.get_image_info.outputs.tag }}
           CONDA_UPLOAD_TOKEN_TAG: ${{ secrets.CONDA_UPLOAD_TOKEN_TAG }}
         run: |
-          C:\Miniconda\condabin\conda.bat activate base
-          C:\Miniconda\condabin\conda.bat build software\conda-recipe --output-folder bld-dir -c conda-forge
-          C:\Miniconda\Scripts\anaconda.exe -t $env:CONDA_UPLOAD_TOKEN_TAG upload --force bld-dir\win-64\*.conda
+          C:\miniforge3\condabin\conda.bat activate base
+          C:\miniforge3\condabin\conda.bat build software\conda-recipe --output-folder bld-dir -c conda-forge
+          C:\miniforge3\Scripts\anaconda.exe -t $env:CONDA_UPLOAD_TOKEN_TAG upload --force bld-dir\win-64\*.conda
