@@ -282,8 +282,6 @@ dir:
 	@test -d $(OUT_DIR)     || mkdir $(OUT_DIR)
 	@test -d $(RELEASE_DIR) || mkdir $(RELEASE_DIR)
 	@test -d $(IP_REPO)     || mkdir $(IP_REPO)
-	@cd $(OUT_DIR); rm -f firmware
-	@cd $(OUT_DIR); ln -s $(TOP_DIR) firmware
 
 ###############################################################
 #### Vivado Sources ###########################################

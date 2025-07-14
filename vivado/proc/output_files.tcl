@@ -46,18 +46,8 @@ proc CreateFpgaBit { } {
    # Copy the .ltx file (if it exists)
    CopyLtxFile
 
-   if { $::env(GEN_XSA_IMAGE) != 0 } {
-      # Check for Vivado 2019.2 (or newer)
-      if { [VersionCompare 2019.2] >= 0 } {
-         # Try to generate the .XSA file
-         set src_rc [catch { write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa } _RESULT]
-
-      # Else Vivado 2019.1 (or older)
-      } else {
-         # Try to generate the .HDF file
-         write_hwdef -force -file ${imagePath}.hdf
-      }
-   }
+   # Create the .XSA file for Vitis and Yocto(Linux)
+   CreateXsaFile
 
    # Create the MCS file (if target/vivado/promgen.tcl exists)
    CreatePromMcs
@@ -84,6 +74,9 @@ proc CreateVersalOutputs { } {
 
    # Copy the .ltx file (if it exists)
    CopyLtxFile
+
+   # Create the .XSA file for Vitis and Yocto(Linux)
+   CreateXsaFile
 }
 
 ## Create tar.gz of all cpsw files in firmware
@@ -115,5 +108,25 @@ proc CopyLtxFile { } {
       puts "Debug Probes file copied to ${imagePath}.ltx"
    } else {
       puts "No Debug Probes found"
+   }
+}
+
+## Create the .XSA file for Vitis and Yocto(Linux)
+proc CreateXsaFile { } {
+   # Get variables
+   source -quiet $::env(RUCKUS_DIR)/vivado/env_var.tcl
+   source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
+   set imagePath "${IMAGES_DIR}/$::env(IMAGENAME)"
+   if { $::env(GEN_XSA_IMAGE) != 0 } {
+      # Check for Vivado 2019.2 (or newer)
+      if { [VersionCompare 2019.2] >= 0 } {
+         # Try to generate the .XSA file
+         set src_rc [catch { write_hw_platform -fixed -force -include_bit -file ${imagePath}.xsa } _RESULT]
+
+      # Else Vivado 2019.1 (or older)
+      } else {
+         # Try to generate the .HDF file
+         write_hwdef -force -file ${imagePath}.hdf
+      }
    }
 }
