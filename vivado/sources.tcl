@@ -172,11 +172,5 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
    set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
 }
 
-# Auto disable the files that are not used to clean up the GUI view
-if { [VersionCompare 2020.1] >= 0 } {
-   reorder_files -fileset sources_1 -auto -disable_unused
-   reorder_files -fileset sim_1     -auto -disable_unused
-}
-
 # Close the project
 close_project
