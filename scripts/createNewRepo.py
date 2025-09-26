@@ -118,9 +118,7 @@ parser.add_argument(
     '--writeTeam',
     nargs    = '+',
     required = False,
-    default  = [ ['slaclab','tid-id-es'],
-                 ['slaclab','tid-id-ecs'],
-               ],
+    default  = [ ['slaclab','tid-id-es'], ['slaclab','tid-id-ecs'] ],
     help     = 'List of write teams [org,team_name]'
 )
 
@@ -128,8 +126,7 @@ parser.add_argument(
     '--readTeam',
     nargs    = '+',
     required = False,
-    default  = [ ['slaclab','tid-id'],
-               ],
+    default  = [ ['slaclab','tid-id'] ],
     help     = 'List of read teams'
 )
 
