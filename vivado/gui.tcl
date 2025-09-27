@@ -39,3 +39,9 @@ if { [get_ips] != "" } {
 if { [CheckSynth] == true } {
    set_property NEEDS_REFRESH 0 [get_runs impl_1]
 }
+
+## Auto disable the files that are not used to clean up the GUI view
+#if { [VersionCompare 2020.1] >= 0 } {
+#   reorder_files -fileset sources_1 sim_1 -auto -disable_unused
+#   reorder_files -fileset sim_1     -auto -disable_unused
+#}
