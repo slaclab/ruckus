@@ -224,6 +224,11 @@ def selectBuildImages(cfg, relName, relData):
                     baseList.add(target+fileName.split('.')[0])
 
         sortList = sorted(baseList)
+        if not sortList:
+            raise Exception(
+                f"No builds found for target {target}. "
+                f"Image directory is empty or missing expected files."
+            )
         for idx,val in enumerate(sortList):
             print(f"    {idx}: {val}")
 
