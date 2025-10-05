@@ -157,6 +157,40 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
    }
 }
 
+## Check the Vivado version range to a user defined value
+proc VersionRangeCheck { lockMinVersion lockMaxVersion {mustBeExact ""} } {
+   # Get the Vivado version
+   set VersionNumber [version -short]
+   if { [info exists ::env(BYPASS_VERSION_CHECK)] != 1 || $::env(BYPASS_VERSION_CHECK) == 0 } {
+      # Generate error message
+      set errMsg "\n\n*********************************************************\n"
+      set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+      set errMsg "${errMsg}However, Vivado Version Range Lock = \[${lockMinVersion}, ${lockMaxVersion}\]\n"
+      set errMsg "${errMsg}You need to change your Vivado software to a Version between ${lockMinVersion} and ${lockMaxVersion}\n"
+      set errMsg "${errMsg}*********************************************************\n\n"
+      # Check for less than
+      if { ${VersionNumber} < ${lockMinVersion} } {
+         puts ${errMsg}
+         return -1
+      } elseif { ${VersionNumber} > ${lockMaxVersion} } {
+         puts ${errMsg}
+         return -1
+      # Else within the min/max range
+      } else {
+         return 0
+      }
+   } else {
+      # Generate warning message
+      set warnMsg "\n\n*********************************************************\n"
+      set warnMsg "${warnMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+      set warnMsg "${warnMsg}The Vivado Version Range Lock = \[${lockMinVersion}, ${lockMaxVersion}\]\n"
+      set warnMsg "${warnMsg}However, BYPASS_VERSION_CHECK = 1\n"
+      set warnMsg "${warnMsg}*********************************************************\n\n"
+      puts ${warnMsg}
+      return 0
+   }
+}
+
 ## Compares currnet vivado version to a argument value
 proc VersionCompare { versionLock } {
 

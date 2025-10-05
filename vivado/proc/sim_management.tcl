@@ -75,7 +75,7 @@ proc VcsCompleteMessage {dirPath rogueSim} {
       }
    }
    puts "\t\$ ./sim_vcs_mx.sh"
-   puts "\t\$ ./simv -verdi &"
+   puts "\t\$ ./simv -verdi& (or ./simv -gui=dve&)"
    puts "********************************************************\n\n"
 }
 
