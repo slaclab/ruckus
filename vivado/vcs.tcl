@@ -234,7 +234,16 @@ foreach filePntr ${fileList} {
 #####################################################################################################
 
 # Export Xilinx & User IP Cores
-generate_target -force {simulation} [get_ips]
+set ip_list [get_ips]
+foreach ip $ip_list {
+   puts "Attempting to generate simulation target for IP: $ip"
+   if {[catch {generate_target -force {simulation} $ip} errMsg]} {
+      puts "WARNING: Failed to generate simulation for $ip"
+      puts "Reason: $errMsg"
+   } else {
+      puts "SUCCESS: Simulation target generated for $ip"
+   }
+}
 export_ip_user_files -force -no_script
 
 # Launch the scripts generator
