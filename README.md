@@ -27,6 +27,7 @@ Here's a full list of user defined TCL scripts:
 | pre_synthesis.tcl                 | vivado/pre_synthesis.tcl                 |
 | post_synthesis.tcl                | vivado/post_synthesis.tcl                |
 | post_route.tcl                    | vivado/post_route.tcl                    |
+| proc.tcl                          | vivado/proc.tcl                          |
 | gui.tcl                           | vivado/gui.tcl                           |
 | dcp.tcl                           | vivado/dcp.tcl                           |
 | post_build.tcl                    | vivado/build.tcl                         |
