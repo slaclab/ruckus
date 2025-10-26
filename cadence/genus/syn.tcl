@@ -64,8 +64,8 @@ if { [file exists ${PROJ_DIR}/syn/export.tcl] == 1 } {
    report timing > ${SYN_OUT_DIR}/reports/timing.rpt
    report power  > ${SYN_OUT_DIR}/reports/power.rpt
 
-   # Prepare design to INNOVUS
-   write_design -innovus ${design}
+   # Write the design to a Innovus-compatible file
+   write_db -common ${design}
 
    # Write outputs
    write_hdl  > ${SYN_OUT_DIR}/${design}_g.v
