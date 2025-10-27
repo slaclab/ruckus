@@ -8,14 +8,20 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Detect project name
+# Define project name
+ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
+endif
 
-# Detect project path
+# Define project path
+ifndef PROJ_DIR
 export PROJ_DIR = $(abspath $(PWD))
+endif
 
 # Project Build Directory ("workspace")
+ifndef OUT_DIR
 export OUT_DIR  = $(PROJ_DIR)/build
+endif
 
 # Build System Variables
 export VIVADO_VERSION := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
