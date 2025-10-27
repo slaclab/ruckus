@@ -79,7 +79,7 @@ $(function() {
 <p><a href="https://slaclab.github.io/ruckus/index.html">Doxygen Homepage</a></p>
 <p><a href="https://confluence.slac.stanford.edu/display/ppareg/Build+System%3A+Vivado+Support">Support Homepage</a></p>
 <h1>List of user defined TCL scripts</h1>
-<p>User defined TCL scripts are located in the target's vivado directory. These user defined TCL scripts are not required expect for when the make target is "prom". Then the promgen.tcl must be defined and exist.</p>
+<p>User defined TCL scripts are located in the target's vivado directory. These user defined TCL scripts are not required.</p>
 <p>Here's a full list of user defined TCL scripts:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -95,15 +95,65 @@ $(function() {
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">pre_synthesis.tcl   </td><td class="markdownTableBodyNone">vivado/pre_synthesis.tcl    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">pre_synth_run.tcl   </td><td class="markdownTableBodyNone">vivado/pre_synth_run.tcl    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">post_synth_run.tcl   </td><td class="markdownTableBodyNone">vivado/post_synth_run.tcl    </td></tr>
-<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">post_synthesis.tcl   </td><td class="markdownTableBodyNone">vivado/post_synthesis.tcl    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">post_route.tcl   </td><td class="markdownTableBodyNone">vivado/post_route.tcl    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">promgen.tcl   </td><td class="markdownTableBodyNone">system_vivado.mk   </td></tr>
+<td class="markdownTableBodyNone">proc.tcl   </td><td class="markdownTableBodyNone">vivado/proc.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">gui.tcl   </td><td class="markdownTableBodyNone">vivado/gui.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">dcp.tcl   </td><td class="markdownTableBodyNone">vivado/dcp.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_build.tcl   </td><td class="markdownTableBodyNone">vivado/build.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">batch.tcl   </td><td class="markdownTableBodyNone">vivado/batch.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">pre_msim.tcl   </td><td class="markdownTableBodyNone">vivado/msim.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">post_msim.tcl   </td><td class="markdownTableBodyNone">vivado/msim.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">pre_vcs.tcl   </td><td class="markdownTableBodyNone">vivado/vcs.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">post_vcs.tcl   </td><td class="markdownTableBodyNone">vivado/vcs.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">xsim.tcl   </td><td class="markdownTableBodyNone">vivado/xsim.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">sdk.tcl   </td><td class="markdownTableBodyNone">vivado/post_route.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">promgen.tcl   </td><td class="markdownTableBodyNone">vivado/promgen.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_route_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/route.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_route_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/route.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_synth_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/synth.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_synth_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/synth.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/opt.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/opt.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_phys_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/phys_opt.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_phys_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/phys_opt.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_place_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/place.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_place_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/place.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_post_place_power_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/post_place_power_opt.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_post_place_power_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/post_place_power_opt.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_post_route_phys_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/post_route_phys_opt.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_post_route_phys_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/post_route_phys_opt.tcl    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">pre_power_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/pre/power_opt.tcl    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">post_power_opt_run.tcl   </td><td class="markdownTableBodyNone">vivado/run/post/power_opt.tcl   </td></tr>
 </table>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
