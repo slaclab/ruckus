@@ -618,7 +618,12 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         else:
             print("Using github token from user's environment.")
 
-    gh = github.Github(auth=github.Auth.Token(token))
+    try:
+        # Try the new syntax (PyGithub >= 2.0)
+        gh = github.Github(auth=github.Auth.Token(token))
+    except AttributeError:
+        # Fallback for older PyGithub versions
+        gh = github.Github(token)
     remRepo = gh.get_repo(f'slaclab/{project}')
 
     # Check if old and new tag exist in local repo
