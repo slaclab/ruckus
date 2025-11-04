@@ -140,6 +140,10 @@ ifndef XILINX_LOCAL_USER_DATA
 export XILINX_LOCAL_USER_DATA = no
 endif
 
+ifndef GUI_JAVA_MEM
+export GUI_JAVA_MEM = -jvm Xmx4096m
+endif
+
 ###############################################################
 
 ifndef SIM_CARGS_VERILOG
@@ -296,7 +300,7 @@ $(SOURCE_DEPEND) : dir
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
-	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
+	@cd $(OUT_DIR); vivado $(GUI_JAVA_MEM) -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
 #### Vivado Batch #############################################
