@@ -141,7 +141,7 @@ export XILINX_LOCAL_USER_DATA = no
 endif
 
 ifndef VIVADO_GUI_JAVA_MEM
-export VIVADO_GUI_JAVA_MEM = -jvm Xmx4096m
+export VIVADO_GUI_JAVA_MEM =
 endif
 
 ###############################################################
