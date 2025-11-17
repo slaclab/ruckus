@@ -40,6 +40,9 @@ if { [file exists ${PROJ_DIR}/syn/import.tcl] == 1 } {
 
    # Before loading your design, make every block unique
    set init_design_uniquify 1
+
+   # Allow for VHDL real type
+   set_db hdl_enable_real_support true
 }
 
 # Load the top-level ruckus.tcl

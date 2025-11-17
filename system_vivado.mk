@@ -140,6 +140,10 @@ ifndef XILINX_LOCAL_USER_DATA
 export XILINX_LOCAL_USER_DATA = no
 endif
 
+ifndef VIVADO_GUI_JAVA_MEM
+export VIVADO_GUI_JAVA_MEM =
+endif
+
 ###############################################################
 
 ifndef SIM_CARGS_VERILOG
@@ -251,6 +255,7 @@ test:
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo VIVADO_INSTALL: $(VIVADO_INSTALL)
+	@echo VIVADO_GUI_JAVA_MEM: $(VIVADO_GUI_JAVA_MEM)
 	@echo XILINX_LOCAL_USER_DATA: $(XILINX_LOCAL_USER_DATA)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
@@ -296,7 +301,7 @@ $(SOURCE_DEPEND) : dir
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
-	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
+	@cd $(OUT_DIR); vivado $(VIVADO_GUI_JAVA_MEM) -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
 #### Vivado Batch #############################################

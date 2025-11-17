@@ -37,7 +37,7 @@ export PDK_PATH =
 endif
 
 ifndef OPERATING_CONDITION
-export OPERATING_CONDITION = tt0p9v25c
+export OPERATING_CONDITION =
 endif
 
 ifndef STD_CELL_LIB
