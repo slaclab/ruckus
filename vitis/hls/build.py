@@ -24,8 +24,16 @@ args = parser.parse_args()
 # Project variables
 workspace = os.getenv("OUT_DIR")
 comp_name = os.getenv("PROJECT")
-proj_zip  = f'{workspace}/{comp_name}/{comp_name}/{comp_name}.zip'
-build_zip = f'{os.getenv("PROJ_DIR")}/ip/{comp_name}.zip'
+syn_top   = os.getenv("SYNTOP")
+
+# Choose hls_config.syn.top if defined
+if not syn_top:
+    zip_name = comp_name
+else:
+    zip_name = syn_top
+
+proj_zip  = f'{workspace}/{comp_name}/{comp_name}/{zip_name}.zip'
+build_zip = f'{os.getenv("PROJ_DIR")}/ip/{zip_name}.zip'
 
 # Create a client object
 client = vitis.create_client()
