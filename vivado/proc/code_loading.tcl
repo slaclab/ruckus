@@ -318,8 +318,7 @@ proc loadBlockDesign args {
                # Check if the block design file has already been loaded
                if { [get_files -quiet [file tail $params(path)]] == ""} {
                   # Add block design file
-                  set locPath [import_files -force -norecurse $params(path)]
-                  export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+                  import_files -norecurse $params(path)
                }
             # Else it's a .TCL extension
             } else {
@@ -359,8 +358,7 @@ proc loadBlockDesign args {
                   # Check if the block design file has already been loaded
                   if { [get_files -quiet [file tail ${pntr}]] == ""} {
                      # Add block design file
-                     set locPath [import_files -force -norecurse ${pntr}]
-                     export_ip_user_files -of_objects [get_files ${locPath}] -force -quiet
+                     import_files -norecurse ${pntr}
                   }
                # Else it's a .TCL extension
                } else {
