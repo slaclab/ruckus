@@ -14,7 +14,6 @@ import os
 import shutil
 import zipfile
 import argparse
-import configparser
 
 parser = argparse.ArgumentParser(
     prog="Vitis HLS build script"
@@ -61,28 +60,11 @@ hls_test_comp.run('CO_SIMULATION')
 # Run package on the component
 hls_test_comp.run('PACKAGE')
 
-# Function to check if vivado.syn_dcp=1 defined in hls.cfg
-def vivado_syn_dcp_enabled():
-    hls_cfg_path = f'{os.getenv("PROJ_DIR")}/hls.cfg'
-    if not os.path.isfile(hls_cfg_path):
-        return False
-
-    cfg = configparser.ConfigParser()
-    cfg.read(hls_cfg_path)
-
-    # vivado.syn_dcp is typically under [vivado] or [syn]
-    for section in cfg.sections():
-        if cfg.has_option(section, "syn_dcp"):
-            try:
-                return cfg.getint(section, "syn_dcp") == 1
-            except ValueError:
-                return False
-
-    return False
-
 # Run implementation on the component
-if vivado_syn_dcp_enabled():
+if 'vivado.syn_dcp=1' in open(f'{os.getenv("PROJ_DIR")}/hls_config.cfg').read():
     hls_test_comp.run('IMPLEMENTATION')
+else:
+    print("vivado.syn_dcp=1 not detected in hls.cfg")
 
 # Close the client connection and terminate the vitis server
 vitis.dispose()
