@@ -69,6 +69,7 @@ proj:
 build : proj
 	$(call ACTION_HEADER,"Vitis HLS Build")
 	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/hls/build.py
+	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vitis/hls/dcp_rename_ref.tcl
 
 ###############################################################
 #### Vitis HLS CSIM Mode ######################################
