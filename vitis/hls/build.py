@@ -14,6 +14,7 @@ import os
 import shutil
 import zipfile
 import argparse
+import configparser
 
 parser = argparse.ArgumentParser(
     prog="Vitis HLS build script"
