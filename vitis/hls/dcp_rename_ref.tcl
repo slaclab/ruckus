@@ -12,23 +12,6 @@
 set cfg_file "$::env(PROJ_DIR)/hls_config.cfg"
 set dcp_name "bd_0_hls_inst_0.dcp"
 
-# Check config file and option
-set has_syn_dcp 0
-if {[file exists $cfg_file]} {
-   set fh [open $cfg_file r]
-   set cfg_data [read $fh]
-   close $fh
-
-   if {[regexp {vivado\.syn_dcp=1} $cfg_data]} {
-      set has_syn_dcp 1
-   }
-}
-
-if {!$has_syn_dcp} {
-   puts "vivado.syn_dcp=1 not detected in hls.cfg"
-   return
-}
-
 # Does the file exists
 set found_files [split [exec find $::env(OUT_DIR) -type f -name $dcp_name] "\n"]
 if {[llength $found_files] > 0 && [string length [lindex $found_files 0]] > 0} {
