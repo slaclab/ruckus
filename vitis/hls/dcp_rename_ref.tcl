@@ -38,7 +38,7 @@ if {[llength $found_files] > 0 && [string length [lindex $found_files 0]] > 0} {
    open_checkpoint $dcp_file
 
    # Change the .DCP to match the project's name (not bd_0_hls_inst_0)
-   rename_ref -ref [get_property TOP [current_design]] -to $::env(PROJECT)
+   rename_ref -ref [get_property TOP [current_design]] -to $::env(PROJECT)_0
 
    # Write the .DCP into the project's IP dir
    write_checkpoint $::env(PROJ_DIR)/ip/$::env(PROJECT).dcp -force
