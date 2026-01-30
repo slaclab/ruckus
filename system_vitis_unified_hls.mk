@@ -69,6 +69,10 @@ proj:
 build : proj
 	$(call ACTION_HEADER,"Vitis HLS Build")
 	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/hls/build.py
+	@if grep -q "vivado.syn_dcp=1" $(PROJ_DIR)/hls_config.cfg; then \
+		echo "vivado.syn_dcp=1 detected in hls.cfg"; \
+		cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vitis/hls/dcp_rename_ref.tcl; \
+	fi
 
 ###############################################################
 #### Vitis HLS CSIM Mode ######################################

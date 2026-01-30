@@ -60,6 +60,12 @@ hls_test_comp.run('CO_SIMULATION')
 # Run package on the component
 hls_test_comp.run('PACKAGE')
 
+# Run implementation on the component
+if 'vivado.syn_dcp=1' in open(f'{os.getenv("PROJ_DIR")}/hls_config.cfg').read():
+    hls_test_comp.run('IMPLEMENTATION')
+else:
+    print("vivado.syn_dcp=1 not detected in hls.cfg")
+
 # Close the client connection and terminate the vitis server
 vitis.dispose()
 
