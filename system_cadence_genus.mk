@@ -136,6 +136,16 @@ syn : dir
 	@cd $(SYN_DIR); genus -f $(RUCKUS_GENUS_DIR)/syn.tcl
 
 ###############################################################
+#### Export a Behavioral Verilog file #########################
+###############################################################
+.PHONY : behavioral_verilog
+behavioral_verilog : dir
+	$(call ACTION_HEADER,"Cadence Genus: Behavioral Verilog file")
+	@rm -rf $(SYN_DIR); mkdir $(SYN_DIR);
+	@mkdir $(SYN_OUT_DIR); mkdir $(SYN_OUT_DIR)/reports; mkdir $(SYN_OUT_DIR)/svf
+	@cd $(SYN_DIR); genus -f $(RUCKUS_GENUS_DIR)/behavioral_verilog.tcl
+
+###############################################################
 #### VCS Simulation ###########################################
 ###############################################################
 .PHONY : sim
