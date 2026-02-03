@@ -26,3 +26,8 @@ GenBuildString $::env(OUT_DIR)
 
 # Load the top-level ruckus.tcl
 loadRuckusTcl $::env(PROJ_DIR)
+
+# Check if doing GHDL Analysis [-a]
+if { [expr [info exists ::env(GHDL_ANALYSIS)]] != 0 } {
+   AnalyzeSrcFileLists
+}
