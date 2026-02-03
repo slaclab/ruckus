@@ -40,6 +40,10 @@ if { [file exists ${PROJ_DIR}/verilog/import.tcl] == 1 } {
    # Allow for VHDL real type
    set_db hdl_enable_real_support true
 
+   # Prevent optimization from removing init
+   set_db optimize_constant_0_flops false
+   set_db optimize_constant_1_flops false
+
 }
 
 # Load the top-level ruckus.tcl
@@ -67,7 +71,8 @@ if { [file exists ${PROJ_DIR}/verilog/export.tcl] == 1 } {
 
    # Write generic (technology-independent) Verilog
    exec rm -rf ${IMAGES_DIR}/${PROJECT}.v
-   write_hdl -generic > ${IMAGES_DIR}/${PROJECT}.v
+   # write_hdl -generic > ${IMAGES_DIR}/${PROJECT}.v
+   write_netlist -generic > ${IMAGES_DIR}/${PROJECT}.v
 }
 
 quit
