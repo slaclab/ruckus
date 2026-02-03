@@ -12,6 +12,10 @@ ifndef PRJ_VERSION
 export PRJ_VERSION = 0xFFFFFFFF
 endif
 
+ifndef PROJECT
+export PROJECT = $(notdir $(PWD))
+endif
+
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 0
 export RECONFIG_STATIC_HASH = 0
