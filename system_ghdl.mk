@@ -12,10 +12,6 @@ ifndef GIT_BYPASS
 export GIT_BYPASS = 1
 endif
 
-ifndef MAX_CORES
-export MAX_CORES = 8
-endif
-
 ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
 endif
@@ -32,48 +28,40 @@ ifndef MODULES
 export MODULES = $(TOP_DIR)/submodules
 endif
 
-ifndef PDK_PATH
-export PDK_PATH =
-endif
-
-ifndef OPERATING_CONDITION
-export OPERATING_CONDITION =
-endif
-
-ifndef STD_CELL_LIB
-export STD_CELL_LIB =
-endif
-
-ifndef STD_LEF_LIB
-export STD_LEF_LIB =
-endif
-
 ifndef RUCKUS_DIR
 export RUCKUS_DIR = $(MODULES)/ruckus
 endif
-export RUCKUS_GENUS_DIR  = $(RUCKUS_DIR)/cadence/genus
-export RUCKUS_PROC_TCL   = $(RUCKUS_GENUS_DIR)/proc.tcl
-export RUCKUS_QUIET_FLAG = -quiet
+export RUCKUS_GHDL_DIR = $(RUCKUS_DIR)/ghdl
+export RUCKUS_PROC_TCL = $(RUCKUS_GHDL_DIR)/proc.tcl
 
 # Project Build Directory
-export OUT_DIR     = $(abspath $(TOP_DIR)/build/$(PROJECT))
-export SYN_DIR     = $(OUT_DIR)/syn
-export SYN_OUT_DIR = $(OUT_DIR)/syn/out
-export SIM_DIR     = $(OUT_DIR)/sim
+ifndef OUT_DIR
+export OUT_DIR = $(abspath $(TOP_DIR)/build/$(PROJECT))
+endif
 
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 
-###############################################################
-
-include $(TOP_DIR)/submodules/ruckus/system_shared.mk
-
-# Override system_shared.mk build string
-export GENUS_VERSION := $(shell genus -version | grep Version: | sed 's/.*Version: //')
-export BUILD_STRING  = $(PROJECT): $(GENUS_VERSION), $(BUILD_SYS_NAME) ($(BUILD_SVR_TYPE)), Built $(BUILD_DATE) by $(BUILD_USER)
+# GHDL build flags
+ifndef GHDLFLAGS
+export GHDLFLAGS = --workdir=$(OUT_DIR) --std=08 --ieee=synopsys  -frelaxed-rules -fexplicit -Wno-elaboration -Wno-hide -Wno-specs -Wno-shared
+endif
 
 # Legacy Vivado Version
 export VIVADO_VERSION = -1.0
+
+# Define the top-level entity for 'ghdl -e'
+ifndef GHDL_TOP_ENTITY
+export GHDL_TOP_ENTITY =
+endif
+
+###############################################################
+
+include $(RUCKUS_DIR)/system_shared.mk
+
+# Override system_shared.mk build string
+export GHDL_VERSION   = $(shell ghdl -v 2>&1 | head -n 1 | awk '{print $$1, $$2}')
+export BUILD_STRING   = $(PROJECT): $(GHDL_VERSION), ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}
 
 .PHONY : all
 all: target
@@ -88,16 +76,10 @@ test:
 	@echo PROJ_DIR: $(PROJ_DIR)
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo MODULES: $(MODULES)
-	@echo MAX_CORES: $(MAX_CORES)
-	@echo PDK_PATH: $(PDK_PATH)
-	@echo OPERATING_CONDITION: $(OPERATING_CONDITION)
-	@echo STD_CELL_LIB: $(STD_CELL_LIB)
-	@echo STD_LEF_LIB: $(STD_LEF_LIB)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
 	@echo GIT_BYPASS: $(GIT_BYPASS)
 	@echo OUT_DIR: $(OUT_DIR)
-	@echo SYN_DIR: $(SYN_DIR)
-	@echo SYN_OUT_DIR: $(SYN_OUT_DIR)
+	@echo GHDLFLAGS: $(GHDLFLAGS)
 	@echo BUILD_STRING: $${BUILD_STRING}
 	@echo IMAGENAME: $(IMAGENAME)
 	@echo IMAGES_DIR: $(IMAGES_DIR)
@@ -111,48 +93,39 @@ test:
 ###############################################################
 .PHONY : dir
 dir: clean
-	@test -d $(TOP_DIR)/build/ || { \
-			 echo ""; \
-			 echo "Build directory missing!"; \
-			 echo "You must create a build directory at the top level."; \
-			 echo ""; \
-			 echo "This directory can either be a normal directory:"; \
-			 echo "   mkdir $(TOP_DIR)/build"; \
-			 echo ""; \
-			 echo "Or by creating a symbolic link to a directory on another disk:"; \
-			 echo "   ln -s $(TMP_DIR) $(TOP_DIR)/build"; \
-			 echo ""; false; }
 	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
-	@test -d $(IMAGES_DIR) || mkdir $(IMAGES_DIR)
 
 ###############################################################
-#### Cadence Synthesis Mode ###################################
+#### Load the Source Code #####################################
 ###############################################################
-.PHONY : syn
-syn : dir
-	$(call ACTION_HEADER,"Cadence Genus Synthesis")
-	@rm -rf $(SYN_DIR); mkdir $(SYN_DIR);
-	@mkdir $(SYN_OUT_DIR); mkdir $(SYN_OUT_DIR)/reports; mkdir $(SYN_OUT_DIR)/svf
-	@cd $(SYN_DIR); genus -f $(RUCKUS_GENUS_DIR)/syn.tcl
+.PHONY : load_source_code
+load_source_code : dir
+	$(call ACTION_HEADER,"GHDL: Load the Source Code")
+	@$(RUCKUS_DIR)/ghdl/load_source_code.tcl
 
 ###############################################################
-#### Export a Behavioral Verilog file #########################
+#### Import ###################################################
 ###############################################################
-.PHONY : behavioral_verilog
-behavioral_verilog : dir
-	$(call ACTION_HEADER,"Cadence Genus: Behavioral Verilog file")
-	@rm -rf $(SYN_DIR); mkdir $(SYN_DIR);
-	@mkdir $(SYN_OUT_DIR); mkdir $(SYN_OUT_DIR)/reports; mkdir $(SYN_OUT_DIR)/svf
-	@cd $(SYN_DIR); genus -f $(RUCKUS_GENUS_DIR)/behavioral_verilog.tcl
+.PHONY : import
+import : load_source_code
+	$(call ACTION_HEADER,"GHDL: Import (ghdl -i)")
+	@$(RUCKUS_DIR)/ghdl/import.tcl
 
 ###############################################################
-#### VCS Simulation ###########################################
+#### Analyze  #################################################
 ###############################################################
-.PHONY : sim
-sim : dir
-	$(call ACTION_HEADER,"VCS Simulation")
-	@rm -rf $(SIM_DIR); mkdir $(SIM_DIR);
-	@cd $(SIM_DIR); source $(RUCKUS_GENUS_DIR)/sim.sh
+.PHONY : analysis
+analysis : load_source_code
+	$(call ACTION_HEADER,"GHDL: Analyze (ghdl -a)")
+	@$(RUCKUS_DIR)/ghdl/analysis.tcl
+
+###############################################################
+#### Elaboration   ############################################
+###############################################################
+.PHONY : elaboration
+elaboration : analysis
+	$(call ACTION_HEADER,"GHDL: Elaboration (ghdl -e)")
+	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) $(GHDL_TOP_ENTITY)
 
 ###############################################################
 #### Clean ####################################################
