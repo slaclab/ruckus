@@ -7,6 +7,8 @@
 ## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
+# https://umarcor.github.io/ghdl/using/InvokingGHDL.html
+##############################################################################
 
 ifndef GIT_BYPASS
 export GIT_BYPASS = 1
@@ -50,10 +52,18 @@ endif
 # Legacy Vivado Version
 export VIVADO_VERSION = -1.0
 
-# Define the top-level entity for 'ghdl -e'
-ifndef GHDL_TOP_ENTITY
-export GHDL_TOP_ENTITY =
+# Define the top-level VHDL lib
+ifndef GHDL_TOP_LIB
+export GHDL_TOP_LIB = work
 endif
+
+# Define the default stop time
+ifndef GHDL_STOP_TIME
+export GHDL_STOP_TIME = 10ns
+endif
+
+# Create the simulation testbed run args
+export GHDL_RUN_ARGS = $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) --wave=$(PROJECT).ghw --stop-time=$(GHDL_STOP_TIME)
 
 ###############################################################
 
@@ -72,6 +82,8 @@ all: target
 
 .PHONY : test
 test:
+	@echo GHDL_TOP_LIB: $(GHDL_TOP_LIB)
+	@echo GHDL_STOP_TIME: $(GHDL_STOP_TIME)
 	@echo PROJECT: $(PROJECT)
 	@echo PROJ_DIR: $(PROJ_DIR)
 	@echo TOP_DIR: $(TOP_DIR)
@@ -112,6 +124,41 @@ import : load_source_code
 	@$(RUCKUS_DIR)/ghdl/import.tcl
 
 ###############################################################
+#### Elab-order ###############################################
+###############################################################
+.PHONY : elab_order
+elab_order : import
+	$(call ACTION_HEADER,"GHDL: Elab-order (ghdl --elab-order)")
+	@echo ghdl --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); ghdl --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+
+###############################################################
+#### Build   ##################################################
+###############################################################
+.PHONY : build
+build : elab_order
+	$(call ACTION_HEADER,"GHDL: build (ghdl -m)")
+	@echo ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+
+###############################################################
+#### Build   ##################################################
+###############################################################
+.PHONY : tb
+tb : build
+	$(call ACTION_HEADER,"GHDL: build (ghdl -r)")
+	@echo ghdl -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
+	@cd $(OUT_DIR); ghdl -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
+
+###############################################################
+#### gtkwave   ##################################################
+###############################################################
+.PHONY : gtkwave
+gtkwave : tb
+	$(call ACTION_HEADER,"GHDL: gtkwave $(PROJECT).ghw")
+	@cd $(OUT_DIR); gtkwave $(PROJECT).ghw
+
+###############################################################
 #### Analyze  #################################################
 ###############################################################
 .PHONY : analysis
@@ -125,7 +172,7 @@ analysis : load_source_code
 .PHONY : elaboration
 elaboration : analysis
 	$(call ACTION_HEADER,"GHDL: Elaboration (ghdl -e)")
-	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) $(GHDL_TOP_ENTITY)
+	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
 
 ###############################################################
 #### Clean ####################################################
