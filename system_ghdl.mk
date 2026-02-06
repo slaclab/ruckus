@@ -105,7 +105,8 @@ test:
 ###############################################################
 .PHONY : dir
 dir: clean
-	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
+	@test -d $(OUT_DIR)    || mkdir $(OUT_DIR)
+	@test -d $(IMAGES_DIR) || mkdir $(IMAGES_DIR)
 
 ###############################################################
 #### Load the Source Code #####################################
@@ -139,7 +140,11 @@ elab_order : import
 build : elab_order
 	$(call ACTION_HEADER,"GHDL: build (ghdl -m)")
 	@echo ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
-	@cd $(OUT_DIR); ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) 2>&1 | tee $(OUT_DIR)/$(PROJECT).elab_order
+	@sed -e '/^elaborate[[:space:]]/,$$d' \
+	     -e 's/^analyze[[:space:]]\+//' \
+	     $(OUT_DIR)/$(PROJECT).elab_order \
+	     > $(IMAGES_DIR)/$(PROJECT).elab_order
 
 ###############################################################
 #### Build   ##################################################
