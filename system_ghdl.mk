@@ -117,6 +117,14 @@ load_source_code : dir
 	@$(RUCKUS_DIR)/ghdl/load_source_code.tcl
 
 ###############################################################
+#### Analyze  #################################################
+###############################################################
+.PHONY : analysis
+analysis : load_source_code
+	$(call ACTION_HEADER,"GHDL: Analyze (ghdl -a)")
+	@$(RUCKUS_DIR)/ghdl/analysis.tcl
+
+###############################################################
 #### Import ###################################################
 ###############################################################
 .PHONY : import
@@ -164,18 +172,10 @@ gtkwave : tb
 	@cd $(OUT_DIR); gtkwave $(PROJECT).ghw
 
 ###############################################################
-#### Analyze  #################################################
-###############################################################
-.PHONY : analysis
-analysis : load_source_code
-	$(call ACTION_HEADER,"GHDL: Analyze (ghdl -a)")
-	@$(RUCKUS_DIR)/ghdl/analysis.tcl
-
-###############################################################
 #### Elaboration   ############################################
 ###############################################################
 .PHONY : elaboration
-elaboration : analysis
+elaboration : build
 	$(call ACTION_HEADER,"GHDL: Elaboration (ghdl -e)")
 	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
 
