@@ -150,9 +150,9 @@ build : elab_order
 	@echo ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
 	@cd $(OUT_DIR); ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) 2>&1 | tee $(OUT_DIR)/$(PROJECT).elab_order
 	@sed -e '/^elaborate[[:space:]]/,$$d' \
-	     -e 's/^analyze[[:space:]]\+//' \
-	     $(OUT_DIR)/$(PROJECT).elab_order \
-	     > $(IMAGES_DIR)/$(PROJECT).elab_order
+		-e 's/^analyze[[:space:]]\+//' \
+		$(OUT_DIR)/$(PROJECT).elab_order \
+		> $(IMAGES_DIR)/$(PROJECT).elab_order
 
 ###############################################################
 #### Build   ##################################################
@@ -178,6 +178,19 @@ gtkwave : tb
 elaboration : build
 	$(call ACTION_HEADER,"GHDL: Elaboration (ghdl -e)")
 	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+
+###############################################################
+#### Export VHDL → Verilog (preserve initializations) #########
+###############################################################
+.PHONY : export_verilog
+export_verilog : elaboration
+	$(call ACTION_HEADER,"GHDL: Export Verilog with initial values")
+	@cd $(IMAGES_DIR) && \
+	yosys -m ghdl -p "\
+		ghdl $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT); \
+		prep -top $(PROJECT); \
+		write_verilog -noattr $(PROJECT).v \
+	"
 
 ###############################################################
 #### Clean ####################################################
