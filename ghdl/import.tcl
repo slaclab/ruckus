@@ -11,7 +11,6 @@
 
 # Load RUCKUS environment and library
 source $::env(RUCKUS_PROC_TCL)
-source $::env(RUCKUS_DIR)/shared/proc.tcl
 
 if {[file exists "$::env(OUT_DIR)/SRC_VHDL"]} {
 
