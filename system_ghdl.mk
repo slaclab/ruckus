@@ -180,7 +180,7 @@ elaboration : build
 	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
 
 ###############################################################
-#### Export VHDL → Verilog (preserve initializations) #########
+#### Export VHDL to Verilog (preserve initializations) ########
 ###############################################################
 .PHONY : export_verilog
 export_verilog : elaboration
