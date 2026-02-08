@@ -46,7 +46,16 @@ export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 
 # GHDL build flags
 ifndef GHDLFLAGS
-export GHDLFLAGS = --workdir=$(OUT_DIR) --std=08 --ieee=synopsys  -frelaxed-rules -fexplicit -Wno-elaboration -Wno-hide -Wno-specs -Wno-shared
+export GHDLFLAGS = \
+	--workdir=$(OUT_DIR) \
+	--std=08 \
+	--ieee=synopsys \
+	-frelaxed-rules \
+	-fexplicit \
+	-Wno-elaboration \
+	-Wno-hide \
+	-Wno-specs \
+	-Wno-shared
 endif
 
 # Legacy Vivado Version
