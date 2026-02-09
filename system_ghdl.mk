@@ -44,6 +44,11 @@ endif
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 
+# Define the default stop time
+ifndef GHDL_CMD
+export GHDL_CMD = ghdl
+endif
+
 # GHDL build flags
 ifndef GHDLFLAGS
 export GHDLFLAGS = \
@@ -79,7 +84,7 @@ export GHDL_RUN_ARGS = $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJEC
 include $(RUCKUS_DIR)/system_shared.mk
 
 # Override system_shared.mk build string
-export GHDL_VERSION   = $(shell ghdl -v 2>&1 | head -n 1 | awk '{print $$1, $$2}')
+export GHDL_VERSION   = $(shell $(GHDL_CMD) -v 2>&1 | head -n 1 | awk '{print $$1, $$2}')
 export BUILD_STRING   = $(PROJECT): $(GHDL_VERSION), ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}
 
 .PHONY : all
@@ -91,6 +96,7 @@ all: target
 
 .PHONY : test
 test:
+	@echo GHDL_CMD: $(GHDL_CMD)
 	@echo GHDL_TOP_LIB: $(GHDL_TOP_LIB)
 	@echo GHDL_STOP_TIME: $(GHDL_STOP_TIME)
 	@echo PROJECT: $(PROJECT)
@@ -147,8 +153,8 @@ import : load_source_code
 .PHONY : elab_order
 elab_order : import
 	$(call ACTION_HEADER,"GHDL: Elab-order (ghdl --elab-order)")
-	@echo ghdl --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
-	@cd $(OUT_DIR); ghdl --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@echo $(GHDL_CMD) --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); $(GHDL_CMD) --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
 
 ###############################################################
 #### Build   ##################################################
@@ -156,8 +162,8 @@ elab_order : import
 .PHONY : build
 build : elab_order
 	$(call ACTION_HEADER,"GHDL: build (ghdl -m)")
-	@echo ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
-	@cd $(OUT_DIR); ghdl -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) 2>&1 | tee $(OUT_DIR)/$(PROJECT).elab_order
+	@echo $(GHDL_CMD) -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); $(GHDL_CMD) -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) 2>&1 | tee $(OUT_DIR)/$(PROJECT).elab_order
 	@sed -e '/^elaborate[[:space:]]/,$$d' \
 		-e 's/^analyze[[:space:]]\+//' \
 		$(OUT_DIR)/$(PROJECT).elab_order \
@@ -169,8 +175,8 @@ build : elab_order
 .PHONY : tb
 tb : build
 	$(call ACTION_HEADER,"GHDL: build (ghdl -r)")
-	@echo ghdl -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
-	@cd $(OUT_DIR); ghdl -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
+	@echo $(GHDL_CMD) -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
+	@cd $(OUT_DIR); $(GHDL_CMD) -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
 
 ###############################################################
 #### gtkwave   ##################################################

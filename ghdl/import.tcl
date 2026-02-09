@@ -28,8 +28,8 @@ if {[file exists "$::env(OUT_DIR)/SRC_VHDL"]} {
          lappend realFiles [GetRealPath $f]
       }
 
-      # puts "ghdl -i $::env(GHDLFLAGS) --work=${vhdlLibName} $realFiles"
-      exec ghdl -i {*}$::env(GHDLFLAGS) --work=${vhdlLibName} {*}$realFiles
+      # puts "$::env(GHDL_CMD) -i $::env(GHDLFLAGS) --work=${vhdlLibName} $realFiles"
+      exec $::env(GHDL_CMD) -i {*}$::env(GHDLFLAGS) --work=${vhdlLibName} {*}$realFiles
    }
 }
 

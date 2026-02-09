@@ -28,8 +28,8 @@ if {[file exist $::env(OUT_DIR)/SRC_VHDL]} {
       if { ${line} != ""} {
          set vhdlLib  [lindex [split ${line}] 1]
          set filePath [lindex [split ${line}] 3]
-         puts "ghdl -a ${filePath}"
-         exec bash -c "ghdl -a $::env(GHDLFLAGS) -P$::env(OUT_DIR) --work=${vhdlLib} ${filePath}"
+         puts "$::env(GHDL_CMD) -a ${filePath}"
+         exec bash -c "$::env(GHDL_CMD) -a $::env(GHDLFLAGS) -P$::env(OUT_DIR) --work=${vhdlLib} ${filePath}"
       }
    }
 }
