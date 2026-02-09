@@ -7,6 +7,8 @@
 ## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
+# https://umarcor.github.io/ghdl/using/InvokingGHDL.html
+##############################################################################
 
 ifndef GIT_BYPASS
 export GIT_BYPASS = 1
@@ -42,25 +44,47 @@ endif
 # Images Directory
 export IMAGES_DIR = $(abspath $(PROJ_DIR)/images)
 
+# Define the default stop time
+ifndef GHDL_CMD
+export GHDL_CMD = ghdl
+endif
+
 # GHDL build flags
 ifndef GHDLFLAGS
-export GHDLFLAGS = --workdir=$(OUT_DIR) --std=08 --ieee=synopsys  -frelaxed-rules -fexplicit -Wno-elaboration -Wno-hide -Wno-specs -Wno-shared
+export GHDLFLAGS = \
+	--workdir=$(OUT_DIR) \
+	--std=08 \
+	--ieee=synopsys \
+	-frelaxed-rules \
+	-fexplicit \
+	-Wno-elaboration \
+	-Wno-hide \
+	-Wno-specs \
+	-Wno-shared
 endif
 
 # Legacy Vivado Version
 export VIVADO_VERSION = -1.0
 
-# Define the top-level entity for 'ghdl -e'
-ifndef GHDL_TOP_ENTITY
-export GHDL_TOP_ENTITY =
+# Define the top-level VHDL lib
+ifndef GHDL_TOP_LIB
+export GHDL_TOP_LIB = work
 endif
+
+# Define the default stop time
+ifndef GHDL_STOP_TIME
+export GHDL_STOP_TIME = 10ns
+endif
+
+# Create the simulation testbed run args
+export GHDL_RUN_ARGS = $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) --wave=$(PROJECT).ghw --stop-time=$(GHDL_STOP_TIME)
 
 ###############################################################
 
 include $(RUCKUS_DIR)/system_shared.mk
 
 # Override system_shared.mk build string
-export GHDL_VERSION   = $(shell ghdl -v 2>&1 | head -n 1 | awk '{print $$1, $$2}')
+export GHDL_VERSION   = $(shell $(GHDL_CMD) -v 2>&1 | head -n 1 | awk '{print $$1, $$2}')
 export BUILD_STRING   = $(PROJECT): $(GHDL_VERSION), ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}
 
 .PHONY : all
@@ -72,6 +96,9 @@ all: target
 
 .PHONY : test
 test:
+	@echo GHDL_CMD: $(GHDL_CMD)
+	@echo GHDL_TOP_LIB: $(GHDL_TOP_LIB)
+	@echo GHDL_STOP_TIME: $(GHDL_STOP_TIME)
 	@echo PROJECT: $(PROJECT)
 	@echo PROJ_DIR: $(PROJ_DIR)
 	@echo TOP_DIR: $(TOP_DIR)
@@ -93,7 +120,8 @@ test:
 ###############################################################
 .PHONY : dir
 dir: clean
-	@test -d $(OUT_DIR) || mkdir $(OUT_DIR)
+	@test -d $(OUT_DIR)    || mkdir $(OUT_DIR)
+	@test -d $(IMAGES_DIR) || mkdir $(IMAGES_DIR)
 
 ###############################################################
 #### Load the Source Code #####################################
@@ -104,14 +132,6 @@ load_source_code : dir
 	@$(RUCKUS_DIR)/ghdl/load_source_code.tcl
 
 ###############################################################
-#### Import ###################################################
-###############################################################
-.PHONY : import
-import : load_source_code
-	$(call ACTION_HEADER,"GHDL: Import (ghdl -i)")
-	@$(RUCKUS_DIR)/ghdl/import.tcl
-
-###############################################################
 #### Analyze  #################################################
 ###############################################################
 .PHONY : analysis
@@ -120,12 +140,72 @@ analysis : load_source_code
 	@$(RUCKUS_DIR)/ghdl/analysis.tcl
 
 ###############################################################
+#### Import ###################################################
+###############################################################
+.PHONY : import
+import : load_source_code
+	$(call ACTION_HEADER,"GHDL: Import (ghdl -i)")
+	@$(RUCKUS_DIR)/ghdl/import.tcl
+
+###############################################################
+#### Elab-order ###############################################
+###############################################################
+.PHONY : elab_order
+elab_order : import
+	$(call ACTION_HEADER,"GHDL: Elab-order (ghdl --elab-order)")
+	@echo $(GHDL_CMD) --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); $(GHDL_CMD) --elab-order $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+
+###############################################################
+#### Build   ##################################################
+###############################################################
+.PHONY : build
+build : elab_order
+	$(call ACTION_HEADER,"GHDL: build (ghdl -m)")
+	@echo $(GHDL_CMD) -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+	@cd $(OUT_DIR); $(GHDL_CMD) -m $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT) 2>&1 | tee $(OUT_DIR)/$(PROJECT).elab_order
+	@sed -e '/^elaborate[[:space:]]/,$$d' \
+		-e 's/^analyze[[:space:]]\+//' \
+		$(OUT_DIR)/$(PROJECT).elab_order \
+		> $(IMAGES_DIR)/$(PROJECT).elab_order
+
+###############################################################
+#### Build   ##################################################
+###############################################################
+.PHONY : tb
+tb : build
+	$(call ACTION_HEADER,"GHDL: build (ghdl -r)")
+	@echo $(GHDL_CMD) -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
+	@cd $(OUT_DIR); $(GHDL_CMD) -r $(GHDL_RUN_ARGS)> >(grep -v "std_logic_arith.vhdl")
+
+###############################################################
+#### gtkwave   ##################################################
+###############################################################
+.PHONY : gtkwave
+gtkwave : tb
+	$(call ACTION_HEADER,"GHDL: gtkwave $(PROJECT).ghw")
+	@cd $(OUT_DIR); gtkwave $(PROJECT).ghw
+
+###############################################################
 #### Elaboration   ############################################
 ###############################################################
 .PHONY : elaboration
-elaboration : analysis
+elaboration : build
 	$(call ACTION_HEADER,"GHDL: Elaboration (ghdl -e)")
-	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) $(GHDL_TOP_ENTITY)
+	@ghdl -e $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT)
+
+###############################################################
+#### Export VHDL to Verilog (preserve initializations) ########
+###############################################################
+.PHONY : export_verilog
+export_verilog : elaboration
+	$(call ACTION_HEADER,"GHDL: Export Verilog with initial values")
+	@cd $(IMAGES_DIR) && \
+	yosys -m ghdl -p "\
+		ghdl $(GHDLFLAGS) -P$(OUT_DIR) --work=$(GHDL_TOP_LIB) $(PROJECT); \
+		prep -top $(PROJECT); \
+		write_verilog -noattr $(PROJECT).v \
+	"
 
 ###############################################################
 #### Clean ####################################################

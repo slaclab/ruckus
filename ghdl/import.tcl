@@ -17,13 +17,21 @@ if {[file exists "$::env(OUT_DIR)/SRC_VHDL"]} {
    set srcRoot [file normalize "$::env(OUT_DIR)/SRC_VHDL"]
 
    foreach vhdlLibDir [glob -type d "${srcRoot}/*"] {
+
       set vhdlLibName [file tail $vhdlLibDir]
+      set realLibDir  [GetRealPath $vhdlLibDir]
 
-      puts         "ghdl -i $::env(GHDLFLAGS) --work=${vhdlLibName} ${vhdlLibDir}/*"
-      exec bash -c "ghdl -i $::env(GHDLFLAGS) --work=${vhdlLibName} ${vhdlLibDir}/*"
+      set vhdlFiles [glob -nocomplain -types f -directory $realLibDir *.vhd]
+
+      set realFiles {}
+      foreach f $vhdlFiles {
+         lappend realFiles [GetRealPath $f]
+      }
+
+      exec $::env(GHDL_CMD) -i {*}$::env(GHDLFLAGS) --work=${vhdlLibName} {*}$realFiles
    }
-
 }
+
 
 if {[file exist $::env(OUT_DIR)/SRC_VERILOG]} {
 
