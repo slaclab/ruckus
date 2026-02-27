@@ -40,8 +40,8 @@ jobs:
       - name: Get Image Information
         id: get_image_info
         run: |
-          echo tag=`git describe --tags` >> ${GITHUB_OUTPUT}
-          echo branch=`echo ${GITHUB_REF} | awk 'BEGIN { FS = "/" } ; { print $3 }'` >> ${GITHUB_OUTPUT}
+          echo "tag=$(git describe --tags)" >> ${GITHUB_OUTPUT}
+          echo "branch=$(echo ${GITHUB_REF} | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> ${GITHUB_OUTPUT}
 
       # Setup docker build environment
       - name: Set up Docker Buildx
