@@ -57,7 +57,7 @@ jobs:
 
       # Build and push the docker image
       - name: Build and push image to GHCR / Docker registry
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/${{ inputs.docker_name }}/Dockerfile
