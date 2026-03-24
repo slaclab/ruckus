@@ -55,3 +55,8 @@ slprj*
 *.pdi
 *.bif
 *.elf
+
+# AI Agents
+.vscode/
+.cursor/
+.claude/
