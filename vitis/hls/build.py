@@ -105,7 +105,11 @@ if int(os.getenv("ALL_XIL_FAMILY")) > 0:
     # Replace the original component.xml with the modified one
     shutil.move(temp_path, component_path)
 
-    # Compress the modify IP directory to the target's image directory
+    # Remove stale zip to prevent "Zip file structure invalid" error on rebuild
+    if os.path.exists(build_zip):
+        os.remove(build_zip)
+
+    # Compress the modified IP directory to the target's image directory
     os.system( f'bash -c "cd {ip_path}; zip -r {build_zip} *"' )
 
 else:
