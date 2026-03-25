@@ -44,8 +44,9 @@ client.set_workspace(workspace)
 # Set the component
 hls_test_comp = client.get_component(comp_name)
 
-# Run c-simulation on the component
-hls_test_comp.run('C_SIMULATION')
+# Run c-simulation on the component if not explicitly skipped
+if os.getenv('SKIP_CSIM', '0') == '0':
+   hls_test_comp.run('C_SIMULATION')
 
 if args.csim:
     vitis.dispose()
@@ -54,8 +55,9 @@ if args.csim:
 # Run synthesis on the component
 hls_test_comp.run('SYNTHESIS')
 
-# Run co-simulation on the component
-hls_test_comp.run('CO_SIMULATION')
+# Run co-simulation on the component if not explicitly skipped
+if os.getenv('SKIP_COSIM', '0') == '0':
+   hls_test_comp.run('CO_SIMULATION')
 
 # Run package on the component
 hls_test_comp.run('PACKAGE')
