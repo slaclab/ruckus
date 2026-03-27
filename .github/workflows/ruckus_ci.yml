@@ -33,8 +33,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install doxygen doxygen-doc doxygen-latex doxygen-gui graphviz
           python -m pip install --upgrade pip
           pip install flake8
 
@@ -57,16 +55,6 @@ jobs:
           python -m compileall -f scripts/
           flake8 --count scripts/
 
-      - name: Generate Documentation
-        run: |
-          doxygen Doxyfile
-
-      - name: Deploy Documentation
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GH_TOKEN }}
-          publish_dir: html
 
 # ----------------------------------------------------------------------------
 
