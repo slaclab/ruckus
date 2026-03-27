@@ -33,8 +33,9 @@ Thumps.db
 *.swp
 build.info
 
-# Build directories 
+# Build directories
 build*
+docs/_build/
 images*
 bin*
 .Xil*
