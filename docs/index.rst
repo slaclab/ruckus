@@ -14,3 +14,9 @@ SLAC firmware build system standard library.
    :caption: Getting Started
 
    tutorial/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
+   reference/index
