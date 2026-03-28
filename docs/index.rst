@@ -20,3 +20,9 @@ SLAC firmware build system standard library.
    :caption: Reference
 
    reference/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: How-To Guides
+
+   how-to/index
