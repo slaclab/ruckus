@@ -18,7 +18,7 @@ These procedures are defined in ``vivado/proc/code_loading.tcl``.
 Call them from your ``ruckus.tcl`` to populate the Vivado project with RTL, IP cores,
 block designs, and constraints.
 
-.. function:: loadSource [-path <path>] [-dir <dir>] [-sim_only] [-lib <library>] [-fileType <type>]
+.. function:: loadSource [-path PATH] [-dir DIR] [-sim_only] [-lib LIBRARY] [-fileType TYPE]
 
    Add RTL source files to the Vivado project's ``sources_1`` fileset (or ``sim_1``
    when ``-sim_only`` is given).
@@ -74,7 +74,7 @@ block designs, and constraints.
       # Add a VHDL file and assign it to a named library
       loadSource -path $::DIR_PATH/rtl/surf/SurfPkg.vhd -lib surf
 
-.. function:: loadIpCore [-path <path>] [-dir <dir>]
+.. function:: loadIpCore [-path PATH] [-dir DIR]
 
    Import a Vivado IP core (``.xci`` or ``.xcix``) into the project's ``sources_1``
    fileset via ``import_ip``.
@@ -97,7 +97,7 @@ block designs, and constraints.
       loadIpCore -path $::DIR_PATH/ip/MyFifo.xci
       loadIpCore -dir  $::DIR_PATH/ip/
 
-.. function:: loadBlockDesign [-path <path>] [-dir <dir>]
+.. function:: loadBlockDesign [-path PATH] [-dir DIR]
 
    Import or regenerate a Vivado block design (``.bd`` or ``.tcl``).
 
@@ -126,7 +126,7 @@ block designs, and constraints.
       # Regenerate a block design from its TCL script
       loadBlockDesign -path $::DIR_PATH/bd/system.tcl
 
-.. function:: loadConstraints [-path <path>] [-dir <dir>]
+.. function:: loadConstraints [-path PATH] [-dir DIR]
 
    Add timing or physical constraints to the project's ``constrs_1`` fileset.
 
