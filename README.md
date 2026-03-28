@@ -1,57 +1,52 @@
 # ruckus
-[DOE Code](https://www.osti.gov/doecode/biblio/8165)
 
-A Makefile/TCL `hybrid` Firmware build system
+[![DOE Code](https://www.osti.gov/assets/img/doe_code_logo.png)](https://www.osti.gov/doecode/biblio/8165)
 
-# Documentation
+A Makefile/TCL hybrid firmware build system for SLAC FPGA and ASIC projects.
 
-[An Introduction to Ruckus Presentation](https://docs.google.com/presentation/d/1kvzXiByE8WISo40Xd573DdR7dQU4BpDQGwEgNyeJjTI/edit?usp=sharing)
+ruckus provides a standard library of TCL procedures and Makefile targets that
+abstract Vivado, Vitis HLS, GHDL, Cadence Genus, and Synopsys DC build flows into
+a consistent `make bit` / `make syn` interface. It handles source loading, IP core
+management, hook script injection, and firmware release packaging.
 
-[Doxygen Homepage](https://slaclab.github.io/ruckus/index.html)
+## Documentation
 
-[Support Homepage](https://confluence.slac.stanford.edu/display/ppareg/Build+System%3A+Vivado+Support)
+**Full documentation:** https://slaclab.github.io/ruckus/
 
-# List of user defined TCL scripts
+- [Getting Started Tutorial](https://slaclab.github.io/ruckus/tutorial/first_vivado_build.html)
+- [TCL API Reference](https://slaclab.github.io/ruckus/reference/tcl_api.html)
+- [Makefile Reference](https://slaclab.github.io/ruckus/reference/makefile_reference.html)
+- [How-To Guides](https://slaclab.github.io/ruckus/how-to/index.html)
 
-User defined TCL scripts are located in the target's vivado directory.
-These user defined TCL scripts are not required.
+## Prerequisites
 
-Here's a full list of user defined TCL scripts:
+- Linux operating system
+- Licensed EDA tool installation (Vivado, Vitis, Cadence Genus, or Synopsys DC)
+- Python 3 with pip packages: `gitpython pygithub pyyaml`
 
-| User Filename                     | source .TCL location                     |
-|-----------------------------------|------------------------------------------|
-| project_setup.tcl                 | vivado/project.tcl                       |
-| properties.tcl                    | vivado/properties.tcl                    |
-| messages.tcl                      | vivado/messages.tcl                      |
-| sources.tcl                       | vivado/sources.tcl                       |
-| pre_synthesis.tcl                 | vivado/pre_synthesis.tcl                 |
-| post_synthesis.tcl                | vivado/post_synthesis.tcl                |
-| post_route.tcl                    | vivado/post_route.tcl                    |
-| proc.tcl                          | vivado/proc.tcl                          |
-| gui.tcl                           | vivado/gui.tcl                           |
-| dcp.tcl                           | vivado/dcp.tcl                           |
-| post_build.tcl                    | vivado/build.tcl                         |
-| batch.tcl                         | vivado/batch.tcl                         |
-| pre_msim.tcl                      | vivado/msim.tcl                          |
-| post_msim.tcl                     | vivado/msim.tcl                          |
-| pre_vcs.tcl                       | vivado/vcs.tcl                           |
-| post_vcs.tcl                      | vivado/vcs.tcl                           |
-| xsim.tcl                          | vivado/xsim.tcl                          |
-| sdk.tcl                           | vivado/post_route.tcl                    |
-| promgen.tcl                       | vivado/promgen.tcl                       |
-| pre_route_run.tcl                 | vivado/run/pre/route.tcl                 |
-| post_route_run.tcl                | vivado/run/post/route.tcl                |
-| pre_synth_run.tcl                 | vivado/run/pre/synth.tcl                 |
-| post_synth_run.tcl                | vivado/run/post/synth.tcl                |
-| pre_opt_run.tcl                   | vivado/run/pre/opt.tcl                   |
-| post_opt_run.tcl                  | vivado/run/post/opt.tcl                  |
-| pre_phys_opt_run.tcl              | vivado/run/pre/phys_opt.tcl              |
-| post_phys_opt_run.tcl             | vivado/run/post/phys_opt.tcl             |
-| pre_place_run.tcl                 | vivado/run/pre/place.tcl                 |
-| post_place_run.tcl                | vivado/run/post/place.tcl                |
-| pre_post_place_power_opt_run.tcl  | vivado/run/pre/post_place_power_opt.tcl  |
-| post_post_place_power_opt_run.tcl | vivado/run/post/post_place_power_opt.tcl |
-| pre_post_route_phys_opt_run.tcl   | vivado/run/pre/post_route_phys_opt.tcl   |
-| post_post_route_phys_opt_run.tcl  | vivado/run/post/post_route_phys_opt.tcl  |
-| pre_power_opt_run.tcl             | vivado/run/pre/power_opt.tcl             |
-| post_power_opt_run.tcl            | vivado/run/post/power_opt.tcl            |
+## Basic Usage
+
+```bash
+# Clone your firmware repository (ruckus is typically a submodule)
+git clone --recursive https://github.com/slaclab/MyFirmware
+cd MyFirmware/firmware/targets/MyTarget
+
+# Create build directory (one-time setup)
+mkdir ../../../../build
+
+# Run the build
+make bit
+```
+
+In your project `Makefile`:
+
+```makefile
+ifndef PRJ_PART
+export PRJ_PART = xcku15p-ffva1760-2-e
+endif
+
+include $(TOP_DIR)/submodules/ruckus/system_vivado.mk
+```
+
+See the [full documentation](https://slaclab.github.io/ruckus/) for complete setup
+instructions, all supported tool backends, and the firmware release workflow.

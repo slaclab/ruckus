@@ -33,8 +33,11 @@ Thumps.db
 *.swp
 build.info
 
-# Build directories 
+# Build directories
 build*
+docs/_build/
+# Exception: documentation files whose names start with "build"
+!docs/**/build_*.rst
 images*
 bin*
 .Xil*
@@ -55,3 +58,10 @@ slprj*
 *.pdi
 *.bif
 *.elf
+
+# AI Agents
+.vscode/
+.cursor/
+.claude/
+.planning/
+CLAUDE.md

@@ -23,6 +23,16 @@ ifndef OUT_DIR
 export OUT_DIR  = $(PROJ_DIR)/build
 endif
 
+# Specifies if we are skipping the cosim
+ifndef SKIP_CSIM
+export SKIP_CSIM = 0
+endif
+
+# Specifies if we are skipping the cosim
+ifndef SKIP_COSIM
+export SKIP_COSIM = 0
+endif
+
 # Build System Variables
 export VIVADO_VERSION := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
 export RUCKUS_DIR     = $(TOP_DIR)/submodules/ruckus
@@ -48,6 +58,8 @@ test:
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo OUT_DIR: $(OUT_DIR)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
+	@echo SKIP_CSIM: $(SKIP_CSIM)
+	@echo SKIP_COSIM: $(SKIP_COSIM)
 	@echo BUILD_STRING: $${BUILD_STRING}
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)

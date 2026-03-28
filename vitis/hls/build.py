@@ -44,8 +44,9 @@ client.set_workspace(workspace)
 # Set the component
 hls_test_comp = client.get_component(comp_name)
 
-# Run c-simulation on the component
-hls_test_comp.run('C_SIMULATION')
+# Run c-simulation on the component if not explicitly skipped
+if os.getenv('SKIP_CSIM', '0') == '0':
+   hls_test_comp.run('C_SIMULATION')
 
 if args.csim:
     vitis.dispose()
@@ -54,8 +55,9 @@ if args.csim:
 # Run synthesis on the component
 hls_test_comp.run('SYNTHESIS')
 
-# Run co-simulation on the component
-hls_test_comp.run('CO_SIMULATION')
+# Run co-simulation on the component if not explicitly skipped
+if os.getenv('SKIP_COSIM', '0') == '0':
+   hls_test_comp.run('CO_SIMULATION')
 
 # Run package on the component
 hls_test_comp.run('PACKAGE')
@@ -105,7 +107,11 @@ if int(os.getenv("ALL_XIL_FAMILY")) > 0:
     # Replace the original component.xml with the modified one
     shutil.move(temp_path, component_path)
 
-    # Compress the modify IP directory to the target's image directory
+    # Remove stale zip to prevent "Zip file structure invalid" error on rebuild
+    if os.path.exists(build_zip):
+        os.remove(build_zip)
+
+    # Compress the modified IP directory to the target's image directory
     os.system( f'bash -c "cd {ip_path}; zip -r {build_zip} *"' )
 
 else:
