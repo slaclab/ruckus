@@ -27,6 +27,31 @@ Replace the example paths with your actual library installation paths.
 
    include $(TOP_DIR)/submodules/ruckus/system_synopsys_dc.mk
 
+Top-Level ruckus.tcl Structure
+------------------------------
+
+Unlike the Vivado build flow, the Synopsys Design Compiler flow requires you to call
+``GenBuildString`` and ``AnalyzeSrcFileLists`` explicitly in your project's top-level
+``ruckus.tcl``. The key difference from the Cadence Genus flow is that
+``AnalyzeSrcFileLists`` is called after **each** ``loadRuckusTcl`` with a ``-vhdlLib``
+argument naming the library that was just loaded, rather than once at the end.
+
+.. code-block:: tcl
+
+   # Load RUCKUS environment and library
+   source $::env(RUCKUS_QUIET_FLAG) $::env(RUCKUS_PROC_TCL)
+
+   # Load the surf library
+   loadRuckusTcl "$::env(TOP_DIR)/submodules/surf"
+   AnalyzeSrcFileLists -vhdlLib "surf"
+
+   # Load ruckus library (ruckus.BuildInfoPkg.vhd only)
+   GenBuildString $::env(SYN_DIR)
+   AnalyzeSrcFileLists -vhdlLib "ruckus"
+
+   # Analyze source code loaded into ruckus for Synopsys DC
+   AnalyzeSrcFileLists -vhdlLib "work" -vhdlTop $::env(PROJECT)
+
 Steps
 -----
 
