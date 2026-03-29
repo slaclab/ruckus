@@ -35,7 +35,7 @@ The IMAGENAME Formula
      - ``20240315143022``
    * - ``USER``
      - Unix ``$USER`` environment variable at build time
-     - ``jsmith``
+     - ``smith``
    * - ``GIT_HASH_SHORT``
      - ``git rev-parse --short HEAD`` (7 characters); replaced with ``dirty`` if there are
        uncommitted changes in the working tree
@@ -46,17 +46,17 @@ A Real Example, Decoded
 
 .. code-block:: none
 
-   Simple10GbeRudpKcu105Example-0x02180000-20240315143022-jsmith-a1b2c3d.bit
+   Simple10GbeRudpKcu105Example-0x02180000-20240315143022-smith-a1b2c3d.bit
 
 Decoded: project ``Simple10GbeRudpKcu105Example``, firmware version ``0x02180000``
-(v2.18.0.0), built 2024-03-15 at 14:30:22, by user ``jsmith``, from git commit
+(v2.18.0.0), built 2024-03-15 at 14:30:22, by user ``smith``, from git commit
 ``a1b2c3d``.
 
 If there are uncommitted local changes, ``GIT_HASH_SHORT`` is replaced with ``dirty``:
 
 .. code-block:: none
 
-   Simple10GbeRudpKcu105Example-0x02180000-20240315143022-jsmith-dirty.bit
+   Simple10GbeRudpKcu105Example-0x02180000-20240315143022-smith-dirty.bit
 
 The ``dirty`` suffix acts as a deliberate traceability gate — ruckus by default refuses to
 build with uncommitted changes unless ``GIT_BYPASS=1`` is set in the project Makefile. This
