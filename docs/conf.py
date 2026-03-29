@@ -3,7 +3,7 @@ import subprocess
 
 project = "ruckus"
 author = "SLAC National Accelerator Laboratory"
-copyright = "2024, SLAC National Accelerator Laboratory"
+copyright = "2026, SLAC National Accelerator Laboratory"
 
 try:
     release = subprocess.check_output(
@@ -19,7 +19,8 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-html_theme = "furo"
+html_theme = "sphinx_rtd_theme"
+html_theme_options = {"titles_only": True, "navigation_depth": -1}
 html_title = "ruckus"
 html_baseurl = "https://slaclab.github.io/ruckus/"
 
