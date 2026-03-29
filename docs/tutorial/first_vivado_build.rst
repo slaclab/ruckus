@@ -311,14 +311,14 @@ When the build succeeds, output files appear in
 .. code-block:: none
 
    images/
-   └── Simple10GbeRudpKcu105Example-0x02180000-20240315143022-jsmith-a1b2c3d.bit
+   └── Simple10GbeRudpKcu105Example-0x02180000-20240315143022-smith-a1b2c3d.bit
 
 The filename encodes:
 
 - **Project name** — ``Simple10GbeRudpKcu105Example``
 - **Firmware version** — ``0x02180000`` (from ``PRJ_VERSION`` in ``shared_version.mk``)
 - **Build timestamp** — ``20240315143022`` (UTC, format ``YYYYMMDDHHMMSS``)
-- **Username** — ``jsmith`` (the ``$USER`` shell variable at build time)
+- **Username** — ``smith`` (the ``$USER`` shell variable at build time)
 - **Git commit hash** — ``a1b2c3d`` (short hash of the HEAD commit)
 
 If git shows uncommitted changes at build time, the git hash is replaced with ``dirty``:
@@ -326,7 +326,7 @@ If git shows uncommitted changes at build time, the git hash is replaced with ``
 .. code-block:: none
 
    images/
-   └── Simple10GbeRudpKcu105Example-0x02180000-20240315143022-jsmith-dirty.bit
+   └── Simple10GbeRudpKcu105Example-0x02180000-20240315143022-smith-dirty.bit
 
 The ``dirty`` suffix is a signal that the bitstream was built from a modified working
 tree — it cannot be reproduced exactly from the git history. For reproducible builds,
