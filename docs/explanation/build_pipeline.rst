@@ -151,8 +151,15 @@ when interactive exploration or debugging is needed; ``make gui`` is the natural
 point for any session where direct access to the Vivado GUI is required.
 
 
-Partial Flows: SYNTH_ONLY and SYNTH_DCP
------------------------------------------
+Dynamic Function eXchange (DFX) and Partial Build Flows
+---------------------------------------------------------
+
+AMD's current terminology for partial FPGA reconfiguration is **Dynamic Function eXchange
+(DFX)**; the legacy name is *partial reconfiguration*. See AMD UG909 for the full DFX
+design flow. The partial build flows below (``SYNTH_ONLY``, ``SYNTH_DCP``) are the
+ruckus mechanisms most commonly used when working with DFX projects — the synthesized
+checkpoint (DCP) produced by ``make dcp`` serves as the static-region input for a
+subsequent DFX implementation run.
 
 Two environment variables enable partial builds:
 
