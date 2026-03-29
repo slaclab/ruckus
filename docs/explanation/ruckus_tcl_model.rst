@@ -116,28 +116,39 @@ The call sequence when ``make bit`` is run:
 .. code-block:: none
 
    sources.tcl: set ::DIR_PATH ""; loadRuckusTcl $PROJ_DIR
-     ::DIR_PATH = firmware/targets/Simple10GbeRudpKcu105Example/
+     ::DIR_PATH [SET]   = firmware/targets/Simple10GbeRudpKcu105Example/
+
      ruckus.tcl: loadRuckusTcl $::env(TOP_DIR)/submodules/surf
-       ::DIR_PATH = firmware/submodules/surf/         <- saved, then set
+       ::DIR_PATH [SAVE]    = firmware/targets/Simple10GbeRudpKcu105Example/
+       ::DIR_PATH [SET]     = firmware/submodules/surf/
        surf/ruckus.tcl: loadSource -dir "$::DIR_PATH/hdl"
                            ^ resolves to firmware/submodules/surf/hdl/   OK
-       ::DIR_PATH = firmware/targets/Simple10GbeRudpKcu105Example/   <- restored
+       ::DIR_PATH [RESTORE] = firmware/targets/Simple10GbeRudpKcu105Example/
+
      ruckus.tcl: loadRuckusTcl $::env(TOP_DIR)/shared
-       ::DIR_PATH = firmware/shared/                  <- saved, then set
+       ::DIR_PATH [SAVE]    = firmware/targets/Simple10GbeRudpKcu105Example/
+       ::DIR_PATH [SET]     = firmware/shared/
        shared/ruckus.tcl: loadSource -dir "$::DIR_PATH/rtl"
                               ^ resolves to firmware/shared/rtl/   OK
-       ::DIR_PATH = firmware/targets/Simple10GbeRudpKcu105Example/   <- restored
+       ::DIR_PATH [RESTORE] = firmware/targets/Simple10GbeRudpKcu105Example/
+
      ruckus.tcl: loadSource -dir "$::DIR_PATH/hdl"
                     ^ resolves to firmware/targets/Simple10GbeRudpKcu105Example/hdl/   OK
 
-Each ``ruckus.tcl`` sees its own directory in ``$::DIR_PATH`` for the duration of its
-execution. The surf library's ``$::DIR_PATH/hdl`` resolves to ``firmware/submodules/surf/hdl/``;
-the shared module's ``$::DIR_PATH/rtl`` resolves to ``firmware/shared/rtl/``; the top-level
-target's ``$::DIR_PATH/hdl`` resolves to
-``firmware/targets/Simple10GbeRudpKcu105Example/hdl/``. All three are correct because
-``loadRuckusTcl`` sets and restores ``::DIR_PATH`` around each ``source`` call.
+.. note::
 
-The key invariant: at any point during the recursive load, ``$::DIR_PATH`` equals the
-directory of the ``ruckus.tcl`` that is currently running. Writing ``$::DIR_PATH/`` as a
-prefix on every path argument is not optional — it is the mechanism that makes the recursive
-loading model correct.
+   **What to notice:**
+   Every ``loadRuckusTcl`` call performs the same three-step discipline around the
+   ``source`` call it wraps:
+
+   1. **[SAVE]** — the caller's ``::DIR_PATH`` is stashed in a local variable
+      (``LOC_PATH``) before anything changes.
+   2. **[SET]** — ``::DIR_PATH`` is updated to the directory being entered,
+      so the child ``ruckus.tcl`` sees its own directory in ``$::DIR_PATH``.
+   3. **[RESTORE]** — after the child returns, ``::DIR_PATH`` is written back
+      from ``LOC_PATH``, so the caller resumes with the correct path.
+
+   The key invariant: at any point during the recursive load, ``$::DIR_PATH``
+   equals the directory of the ``ruckus.tcl`` that is currently running.
+   Writing ``$::DIR_PATH/`` as a prefix on every path argument is not optional —
+   it is the mechanism that makes the recursive loading model correct.

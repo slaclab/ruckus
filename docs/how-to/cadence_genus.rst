@@ -29,6 +29,32 @@ Replace the example paths with your actual PDK installation paths.
 
    include $(TOP_DIR)/submodules/ruckus/system_cadence_genus.mk
 
+Top-Level ruckus.tcl Structure
+------------------------------
+
+Unlike the Vivado build flow (which automatically calls ``GenBuildString`` and
+``AnalyzeSrcFileLists`` internally), the Cadence Genus flow requires you to call
+these procedures explicitly in your project's top-level ``ruckus.tcl``. The
+``GenBuildString`` call generates the build-metadata VHDL package; ``AnalyzeSrcFileLists``
+passes all source files collected by prior ``loadRuckusTcl`` calls to Genus for analysis.
+
+.. code-block:: tcl
+
+   # Load RUCKUS environment and library
+   source $::env(RUCKUS_QUIET_FLAG) $::env(RUCKUS_PROC_TCL)
+
+   # Load ruckus library (ruckus.BuildInfoPkg.vhd only)
+   GenBuildString $::env(SYN_DIR)
+
+   # Load the surf library
+   loadRuckusTcl "$::env(TOP_DIR)/submodules/surf"
+
+   # Load the work library
+   loadRuckusTcl "$::env(TOP_DIR)/shared"
+
+   # Analyze source code loaded into ruckus for Cadence Genus
+   AnalyzeSrcFileLists
+
 Steps
 -----
 
