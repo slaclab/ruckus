@@ -231,7 +231,7 @@ else \
 fi
 endef
 
-include $(TOP_DIR)/submodules/ruckus/system_shared.mk
+include $(MODULES)/ruckus/system_shared.mk
 
 .PHONY : all
 all: target
