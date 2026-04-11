@@ -45,6 +45,7 @@ bin*
 .ipynb_checkpoints*
 *.jou
 slprj*
+linux*
 
 # Only .bit.gz and .mcs.gz should be committed to git
 *.bit
