@@ -346,6 +346,19 @@ Partial Reconfiguration Variables
 
    :default: ``0`` (disabled)
 
+Versal Segmented Configuration Variables
+-----------------------------------------
+
+.. envvar:: USE_SEGMENTED_CONFIG
+
+   Enables Vivado 2025.1+ Segmented Configuration mode on Versal targets. When set
+   to ``1``, the build emits two PDIs (``${IMAGENAME}_static.pdi`` for ``BOOT.BIN``
+   and ``${IMAGENAME}_dynamic.pdi`` for runtime PL reload) instead of the single
+   ``${IMAGENAME}.pdi``. Ignored on non-Versal targets (soft-warn at build time).
+   See :doc:`../how-to/segmented_configuration` for the full opt-in workflow.
+
+   :default: ``0`` (standard single-PDI Versal build)
+
 Vitis / SDK Variables
 ----------------------
 

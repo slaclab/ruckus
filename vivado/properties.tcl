@@ -50,6 +50,11 @@ set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/
 if { [isVersal] } {
    set_property STEPS.WRITE_DEVICE_IMAGE.TCL.PRE ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
    set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST "" [get_runs impl_1]
+
+   # Enable Segmented Configuration if requested
+   if { $::env(USE_SEGMENTED_CONFIG) != 0 } {
+      EnableSegmentedConfig
+   }
 } else {
    set_property STEPS.WRITE_BITSTREAM.TCL.PRE    ${RUCKUS_DIR}/vivado/messages.tcl [get_runs impl_1]
    set_property STEPS.WRITE_BITSTREAM.TCL.POST "" [get_runs impl_1]

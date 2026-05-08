@@ -329,6 +329,58 @@ These procedures are defined in ``vivado/proc/``.
 
       CreateXsaFile
 
+.. function:: EnableSegmentedConfig
+
+   Enable Versal Segmented Configuration on the current project.
+
+   :returns: Nothing on success. Calls ``exit -1`` for Vivado < 2025.1.
+
+   Sets ``SEGMENTED_CONFIGURATION 1`` on the current project so that
+   ``write_device_image`` emits two PDIs (``<design>_boot.pdi`` and
+   ``<design>_pld.pdi``) instead of the standard single PDI. No-op with a
+   warning when the target is not Versal. Hard error when the active Vivado
+   version is older than 2025.1.
+
+   Defined in ``vivado/proc/SegmentedConfiguration.tcl``. Called automatically
+   from ``vivado/properties.tcl`` when ``USE_SEGMENTED_CONFIG = 1`` is exported
+   by the target Makefile (the recommended opt-in path — see
+   :doc:`/how-to/segmented_configuration`). Users do not normally call this
+   directly.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      # Enabled implicitly by setting USE_SEGMENTED_CONFIG = 1 in the
+      # target Makefile. Direct invocation is for advanced users only.
+      EnableSegmentedConfig
+
+.. function:: ExportSegmentedPdi
+
+   Copy the Segmented Configuration PDIs to the ``images/`` directory with the
+   SLAC ``IMAGENAME`` suffix convention.
+
+   :returns: Nothing. Calls ``exit -1`` if the expected boot/PLD PDIs are not
+             found in the implementation directory.
+
+   Discovers the Vivado-emitted ``*_boot.pdi`` (becomes ``<IMAGENAME>_static.pdi``,
+   feeds ``BOOT.BIN``) and ``*_pld.pdi`` (becomes ``<IMAGENAME>_dynamic.pdi``,
+   the runtime-loadable artifact) under :envvar:`IMPL_DIR`, copies both to
+   :envvar:`IMAGES_DIR` when :envvar:`GEN_PDI_IMAGE` ``!= 0``, and gzips them
+   when :envvar:`GEN_PDI_IMAGE_GZIP` ``!= 0``. Also emits ``.ltx`` and ``.xsa``
+   to maintain parity with the single-PDI Versal path it replaces.
+
+   Defined in ``vivado/proc/SegmentedConfiguration.tcl``. Called automatically
+   from ``vivado/build.tcl`` when ``USE_SEGMENTED_CONFIG = 1``. Users do not
+   normally call this directly.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      # Called implicitly during build.tcl when USE_SEGMENTED_CONFIG = 1.
+      ExportSegmentedPdi
+
 Shared Utility Procedures
 -------------------------
 

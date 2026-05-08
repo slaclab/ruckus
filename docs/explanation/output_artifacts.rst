@@ -72,7 +72,12 @@ on the target device type and the active build flags:
   which is the default)
 - ``.mcs`` — PROM programming file (produced when ``GEN_MCS_IMAGE=1``; default on)
 - ``.ltx`` — ILA/VIO debug probe file (produced automatically when debug cores are present)
-- ``.pdi`` — Versal device image (produced for Versal targets instead of ``.bit``)
+- ``.pdi`` — Versal device image (produced for Versal targets instead of ``.bit``).
+  When the target opts into Segmented Configuration (``USE_SEGMENTED_CONFIG=1`` —
+  see :doc:`/how-to/segmented_configuration`), the single ``.pdi`` is replaced by
+  a pair: ``<IMAGENAME>_static.pdi`` (becomes ``base-design.pdi`` inside ``BOOT.BIN``)
+  and ``<IMAGENAME>_dynamic.pdi`` (the runtime-loadable artifact, typically shipped
+  to the Linux rootfs as ``/boot/pl.pdi``).
 - ``.xsa`` — Xilinx Support Archive for Vitis/PetaLinux (produced when ``GEN_XSA_IMAGE=1``;
   default off)
 
