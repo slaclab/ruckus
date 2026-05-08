@@ -100,6 +100,11 @@ ifndef RECONFIG_PBLOCK
 export RECONFIG_PBLOCK = 0
 endif
 
+# Versal Segmented Configuration Variables
+ifndef USE_SEGMENTED_CONFIG
+export USE_SEGMENTED_CONFIG = 0
+endif
+
 # Vivado Simulation Variables
 ifndef VIVADO_PROJECT_SIM
 export VIVADO_PROJECT_SIM = $(PROJECT)
