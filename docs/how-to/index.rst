@@ -16,4 +16,5 @@ setting up a project for the first time, see
    synopsys_dc
    firmware_release
    dfx_partial_reconfig
+   segmented_configuration
    microblaze_elf
