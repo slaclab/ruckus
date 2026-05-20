@@ -1,11 +1,13 @@
 Makefile Reference
 ==================
 
-This page documents the targets and environment variables provided by
-``system_vivado.mk``. Include this file from your project's ``Makefile`` to access
-the Vivado build pipeline.
+This page documents the targets and environment variables provided by the
+ruckus backend Makefile fragments — ``system_vivado.mk`` (Vivado) and
+``system_vitis_unified_aie.mk`` (Vitis AIE). Include one of these from your
+project's ``Makefile`` to access the corresponding build pipeline.
 
-For build pipeline context see :doc:`/explanation/build_pipeline`.
+For Vivado build pipeline context see :doc:`/explanation/build_pipeline`. For
+the AIE workflow walkthrough see :doc:`/how-to/vitis_aie`.
 
 .. contents::
    :local:
@@ -379,3 +381,208 @@ Vitis / SDK Variables
    Legacy alias for :envvar:`VITIS_SRC_PATH`. Used with Vivado 2019.1 and older.
 
    :default: unset
+
+Vitis AIE Targets
+-----------------
+
+These targets are provided by ``system_vitis_unified_aie.mk`` (Vitis 2025.1+
+unified toolchain). For the end-to-end workflow see :doc:`/how-to/vitis_aie`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - Target
+     - Description
+   * - ``proj``
+     - Idempotently create the Vitis workspace and AIE component
+       (``vitis -s create_proj.py``). No-op if the component already exists.
+   * - ``build``
+     - Build the AIE graph for the ``hw`` target (``vitis -s build.py``).
+       Emits ``libadf.a`` under ``$(OUT_DIR)/$(PROJECT)/build/hw/``.
+   * - ``x86sim``
+     - Build for the x86 simulator (``vitis -s build.py --x86sim``).
+   * - ``package``
+     - Wrap ``libadf.a`` + ``$(AIE_XSA_INPUT)`` into the dynamic PDI
+       (``bash package.sh``). Uses ``v++ --package`` (primary) or ``bootgen``
+       (fallback when ``USE_BOOTGEN_FALLBACK=1``).
+   * - ``program``
+     - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` and
+       ``$(AIE_DTBO)`` to the target board.
+   * - ``gui``
+     - Open the same workspace in the Vitis Unified IDE
+       (``vitis -w $(OUT_DIR)``).
+   * - ``interactive``
+     - Drop into a Python REPL with the ``vitis`` module loaded
+       (``vitis -i``).
+   * - ``test``
+     - Print all AIE environment variable values.
+   * - ``clean``
+     - Delete the build directory (``rm -rf $(OUT_DIR)``).
+
+Vitis AIE Variables
+-------------------
+
+These variables drive ``system_vitis_unified_aie.mk``. The platform/part,
+sources, and top-level graph variables must be set in the consuming
+Makefile **before** the ``include`` line; ``AIE_XSA_INPUT`` and ``AIE_DTBO``
+are recipe-time requirements passed on the ``make`` command line.
+
+.. envvar:: AIE_PLATFORM
+
+   Absolute path to the platform ``.xpfm``. Use this for dev boards with an
+   AMD-shipped xpfm (e.g. ``xilinx_vek280_base_*``). Mutually exclusive with
+   :envvar:`AIE_PART` — set exactly one.
+
+   :default: unset (the Makefile errors at parse time if neither
+             ``AIE_PLATFORM`` nor ``AIE_PART`` is defined)
+
+   .. code-block:: makefile
+
+      export AIE_PLATFORM := $(firstword $(wildcard \
+          $(XILINX_VITIS)/base_platforms/xilinx_vek280_base_*/xilinx_vek280_base_*.xpfm))
+
+   The wildcard pattern keeps the same Makefile working across Vitis
+   releases — AMD bumps the numeric suffix per release (``202510_1`` in
+   2025.1, ``202520_1`` in 2025.2, …) so a literal path would pin the
+   project to one Vitis version.
+
+.. envvar:: AIE_PART
+
+   Versal device ID (e.g. ``xcve2802-vsvh1760-2MP-e-S``). Use this for
+   custom AIE boards without a shipped xpfm. The PL clock hint comes from
+   the cfg's ``pl-freq=`` line. Mutually exclusive with :envvar:`AIE_PLATFORM`.
+
+   :default: unset
+
+.. envvar:: AIE_SOURCES
+
+   Whitespace-separated list of source paths. Each entry is either:
+
+   - a **file** path → imports just that file, **or**
+   - a **directory** path → imports every ``.cpp`` / ``.cc`` / ``.h`` /
+     ``.hpp`` file in that directory (**non-recursive** — subdirectories
+     are not walked).
+
+   All imports land flat at the component root. Mix local and shared
+   sources freely (including submodule paths).
+
+   :default: unset (parse-time error)
+
+   .. code-block:: makefile
+
+      SHARED_AIE := $(TOP_DIR)/submodules/aie-common-kernels
+      export AIE_SOURCES = \
+          $(CURDIR)/aie \
+          $(CURDIR)/aie/kernels \
+          $(SHARED_AIE)/util.cc
+
+.. envvar:: AIE_TOP_LEVEL_FILE
+
+   Top-level graph file **basename** only (e.g. ``graph.cpp``). All
+   ``AIE_SOURCES`` entries land flat at the component root, so this is
+   just the filename — never a path.
+
+   :default: unset (parse-time error)
+
+.. envvar:: AIE_XSA_INPUT
+
+   Absolute path to the Vivado-built ``.xsa``, required by the ``package``
+   target. Pass on the ``make`` command line:
+
+   .. code-block:: bash
+
+      make AIE_XSA_INPUT=<path>/<image>.xsa package
+
+   :default: unset (parse-time error from the ``package`` target)
+
+   .. note::
+
+      Supplied at the command line rather than baked into the Makefile
+      because the Vivado-side ``IMAGENAME`` embeds ``BUILD_TIME`` and is
+      not predictable from inside the AIE archetype.
+
+.. envvar:: AIE_DTBO
+
+   Absolute path to the matching ``.dtbo`` device-tree overlay, required
+   by the ``program`` target. Checked at recipe time (not parse time) so
+   other targets are unaffected.
+
+   :default: unset (recipe-time error from the ``program`` target)
+
+.. envvar:: AIE_BOARD_IP
+
+   ``user@host`` for the ``program`` target. Forwarded to
+   ``$(AIE_PROGRAM_SCRIPT)`` as the ``-i`` flag when set.
+
+   :default: unset (the default ``program.sh`` errors if no ``-i`` is
+             passed — most consumers set a project default with
+             ``AIE_BOARD_IP ?= root@<dev-ip>``)
+
+.. envvar:: OUT_DIR
+
+   Vitis workspace root. The AIE component is created at
+   ``$(OUT_DIR)/$(PROJECT)/``.
+
+   :default: ``$(PROJ_DIR)/build``
+
+.. envvar:: AIE_IP_DIR
+
+   Final deliverable directory for the dynamic PDI. Mirrors the unified
+   HLS convention of writing artifacts to ``$(PROJ_DIR)/ip/``.
+
+   :default: ``$(PROJ_DIR)/ip``
+
+.. envvar:: AIE_PDI
+
+   Output dynamic PDI path written by ``make package``.
+
+   :default: ``$(AIE_IP_DIR)/$(PROJECT)_aie_dynamic.pdi``
+
+.. envvar:: AIE_PKG_DIR
+
+   Scratch directory used by the package step (``v++ --package`` working
+   tree).
+
+   :default: ``$(OUT_DIR)/aie_package``
+
+.. envvar:: VPP_LOG
+
+   Log file path for the ``v++ --package`` invocation.
+
+   :default: ``$(OUT_DIR)/vpp_package.log``
+
+.. envvar:: USE_BOOTGEN_FALLBACK
+
+   Set to ``1`` to package via ``bootgen`` instead of ``v++ --package``.
+   Both paths produce a functionally equivalent dynamic PDI for the
+   AIE-overlay case.
+
+   :default: ``0``
+
+.. envvar:: AIE_PROGRAM_SCRIPT
+
+   Deploy helper invoked by ``make program``. The default helper is a
+   generic Versal/PetaLinux deploy: scp PDI+DTBO to
+   ``/boot/{pl.pdi,pl.dtbo}``, ssh-reboot, verify
+   ``/sys/class/fpga_manager/fpga0/state == operating``. Override to
+   point at a project-specific helper when richer verification
+   (application-specific systemd checks, ``xsdb`` readout, etc.) is
+   required.
+
+   :default: ``$(RUCKUS_DIR)/vitis/aie/program.sh``
+
+   The helper must accept the following flag contract:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 18 82
+
+      * - Flag
+        - Meaning
+      * - ``-p <path>``
+        - Runtime PDI to upload (required)
+      * - ``-d <path>``
+        - Matching device-tree overlay (required)
+      * - ``-i <user@host>``
+        - Board target (forwarded from :envvar:`AIE_BOARD_IP`)

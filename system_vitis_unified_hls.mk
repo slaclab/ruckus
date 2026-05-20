@@ -34,6 +34,7 @@ export SKIP_COSIM = 0
 endif
 
 # Build System Variables
+# VIVADO_VERSION feeds BUILD_STRING in system_shared.mk ("Vivado v...").
 export VIVADO_VERSION := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
 export RUCKUS_DIR     = $(TOP_DIR)/submodules/ruckus
 
