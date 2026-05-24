@@ -110,6 +110,14 @@ for from_loc, basenames in groups.items():
     aie_comp.import_files(from_loc=from_loc, files=basenames)
 
 aie_comp.update_top_level_file(top_level_file=aie_top_level_file)
+
+# Vitis 2025.2 attaches a default cfg file at component creation; AIE
+# components reject a second cfg file. Strip whatever is already attached
+# so add_cfg_file() below installs our $(PROJ_DIR)/aie_config.cfg cleanly.
+existing_cfg = aie_comp.report().get('cfg_files', []) or []
+for cfg in existing_cfg:
+    aie_comp.remove_cfg_file(cfg)
+
 aie_comp.add_cfg_file(aie_config)
 
 aie_comp.report()
