@@ -22,12 +22,19 @@
 #                        without an xpfm — e.g. xcve2802-vsvh1760-2MP-e-S).
 #                        Exactly one must be set; the Makefile asserts this.
 #   AIE_SOURCES          whitespace-separated list of source paths. Each
-#                        entry is either:
+#                        entry has the form `path[:dest_subdir]`:
 #                          - a FILE path → imports just that file
 #                          - a DIRECTORY path → imports every source file
 #                            in that directory (non-recursive)
 #                        Source extensions: .cpp .cc .h .hpp
-#                        All files land flat at the component root.
+#                        Without `:dest_subdir`, files land flat at the
+#                        component root. With `:dest_subdir`, they are
+#                        imported into <component>/<dest_subdir>/ — needed
+#                        for the AMD canonical layout where graph.h does
+#                        `adf::source(loop) = "kernels/loopback.cc";`.
+#                        Example:
+#                          AIE_SOURCES = $(CURDIR)/aie \
+#                                        $(CURDIR)/aie/kernels:kernels
 #   AIE_TOP_LEVEL_FILE   top-level graph file basename (e.g. graph.cpp)
 #
 # Convention (not configurable, mirrors the HLS flow):
@@ -48,10 +55,21 @@ aie_part           = os.getenv("AIE_PART")
 aie_sources        = os.getenv("AIE_SOURCES", "").split()
 aie_top_level_file = os.getenv("AIE_TOP_LEVEL_FILE")
 
-# Hardcoded — same convention as HLS's `cfg_file = '../../hls_config.cfg'`.
-# Resolves to $(PROJ_DIR)/aie_config.cfg (component dir is OUT_DIR/PROJECT,
-# OUT_DIR is PROJ_DIR/build, so ../../ lands in PROJ_DIR).
-aie_config         = '../../aie_config.cfg'
+# PROJ_DIR is the parent of OUT_DIR (the script runs with cwd=OUT_DIR per
+# system_vitis_unified_aie.mk). User cfg lives at PROJ_DIR/aie_config.cfg
+# by convention, mirroring HLS's hls_config.cfg.
+proj_dir         = os.path.abspath(os.path.join(workspace, '..'))
+aie_config_user  = os.path.join(proj_dir, 'aie_config.cfg')
+
+# Generated cfg actually attached to the component. We synthesize this so
+# that include= directives derived from AIE_SOURCES dest_subdirs are
+# always present alongside the user's [aie] settings — without it, the
+# aiecompiler can't resolve `adf::source("kernels/loopback.cc")` paths.
+# Lives at PROJ_DIR/aie_config.generated.cfg; included paths are relative
+# to v++'s working directory (<comp>/build/<target>/), so `../..` is the
+# component root and `../../<subdir>` is <comp>/<subdir>/.
+aie_config_generated     = os.path.join(proj_dir, 'aie_config.generated.cfg')
+aie_config_generated_rel = '../../aie_config.generated.cfg'
 
 if not aie_sources:
     raise SystemExit("create_proj: AIE_SOURCES is empty — list the files "
@@ -63,18 +81,25 @@ if os.path.isdir(f'{workspace}/{comp_name}'):
     print(f'AIE component "{comp_name}" already exists at {workspace}/{comp_name} — skipping create_proj.')
     raise SystemExit(0)
 
-# Expand each AIE_SOURCES entry. Files are taken as-is; directories are
-# globbed non-recursively for SRC_EXTENSIONS. Missing entries error loudly.
+# Expand each AIE_SOURCES entry. Each entry is `path[:dest_subdir]` —
+# files are taken as-is; directories are globbed non-recursively for
+# SRC_EXTENSIONS. Missing entries error loudly. `dest_subdir` (optional)
+# selects an in-component destination directory; default is component
+# root (flat). Each expanded item is recorded as (abs_file_path, dest_subdir).
 expanded = []
-for entry in aie_sources:
+for raw_entry in aie_sources:
+    if ':' in raw_entry:
+        entry, dest_subdir = raw_entry.rsplit(':', 1)
+    else:
+        entry, dest_subdir = raw_entry, ''
     abspath = os.path.abspath(entry)
     if os.path.isfile(abspath):
-        expanded.append(abspath)
+        expanded.append((abspath, dest_subdir))
     elif os.path.isdir(abspath):
         for name in sorted(os.listdir(abspath)):
             full = os.path.join(abspath, name)
             if os.path.isfile(full) and name.endswith(SRC_EXTENSIONS):
-                expanded.append(full)
+                expanded.append((full, dest_subdir))
     else:
         raise SystemExit(f"create_proj: AIE_SOURCES entry not found: {entry}")
 
@@ -100,25 +125,52 @@ else:
         template = "empty",
     )
 
-# Group expanded paths by parent directory so we issue one import_files()
-# call per directory. All files land flat at the component root.
+# Group expanded paths by (parent dir, dest_subdir) so we issue one
+# import_files() call per (source dir, destination) pair. Files with no
+# dest_subdir land flat at the component root.
 groups = defaultdict(list)
-for path in expanded:
-    groups[os.path.dirname(path)].append(os.path.basename(path))
+for path, dest_subdir in expanded:
+    groups[(os.path.dirname(path), dest_subdir)].append(os.path.basename(path))
 
-for from_loc, basenames in groups.items():
-    aie_comp.import_files(from_loc=from_loc, files=basenames)
+for (from_loc, dest_subdir), basenames in groups.items():
+    if dest_subdir:
+        aie_comp.import_files(from_loc=from_loc, files=basenames,
+                              dest_dir_in_cmp=dest_subdir)
+    else:
+        aie_comp.import_files(from_loc=from_loc, files=basenames)
 
 aie_comp.update_top_level_file(top_level_file=aie_top_level_file)
 
+# Synthesize PROJ_DIR/aie_config.generated.cfg from auto-derived
+# include= directives + the user's aie_config.cfg. Include paths are
+# relative to v++'s working directory (<comp>/build/<target>/), so
+# `../..` is the component root and `../../<subdir>` reaches each
+# AIE_SOURCES dest_subdir. The component root is always added so that
+# graph.h / kernels.h are discoverable.
+unique_dests = sorted({d for _, d in expanded if d})
+include_lines = ['include=../..']
+include_lines += [f'include=../../{d}' for d in unique_dests]
+header = '\n'.join(include_lines) + '\n\n'
+if os.path.isfile(aie_config_user):
+    with open(aie_config_user, 'r') as f:
+        user_body = f.read()
+else:
+    user_body = ''
+with open(aie_config_generated, 'w') as f:
+    f.write('# Auto-generated by ruckus vitis/aie/create_proj.py — DO NOT EDIT.\n')
+    f.write('# Edits to aie_config.cfg are merged on every `make proj`.\n')
+    f.write('# include= paths are derived from AIE_SOURCES dest_subdirs.\n\n')
+    f.write(header)
+    f.write(user_body)
+
 # Vitis 2025.2 attaches a default cfg file at component creation; AIE
 # components reject a second cfg file. Strip whatever is already attached
-# so add_cfg_file() below installs our $(PROJ_DIR)/aie_config.cfg cleanly.
+# so add_cfg_file() below installs the generated cfg cleanly.
 existing_cfg = aie_comp.report().get('cfg_files', []) or []
 for cfg in existing_cfg:
     aie_comp.remove_cfg_file(cfg)
 
-aie_comp.add_cfg_file(aie_config)
+aie_comp.add_cfg_file(aie_config_generated_rel)
 
 aie_comp.report()
 

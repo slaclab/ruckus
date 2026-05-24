@@ -68,7 +68,7 @@ $(error Define only one of AIE_PLATFORM or AIE_PART, not both — use AIE_PLATFO
 endif
 
 ifndef AIE_SOURCES
-$(error AIE_SOURCES not set — define it in the target's AIE Makefile as a whitespace-separated list of file and/or directory paths. File entries import that one file; directory entries import every .cpp/.cc/.h/.hpp file in the directory (non-recursive). All imports land flat at the component root. e.g. AIE_SOURCES = $$(CURDIR)/aie $$(CURDIR)/aie/kernels $$(TOP_DIR)/submodules/aie-lib/util.cc)
+$(error AIE_SOURCES not set — define it in the target's AIE Makefile as a whitespace-separated list of `path[:dest_subdir]` entries. File entries import that one file; directory entries import every .cpp/.cc/.h/.hpp file in the directory (non-recursive). Without `:dest_subdir`, files land flat at the component root; with `:dest_subdir`, they import into <component>/<dest_subdir>/ (matches the AMD-canonical `kernels/` layout where graph.h does `adf::source(loop) = "kernels/loopback.cc";`). e.g. AIE_SOURCES = $$(CURDIR)/aie $$(CURDIR)/aie/kernels:kernels $$(TOP_DIR)/submodules/aie-lib/util.cc)
 endif
 
 ifndef AIE_TOP_LEVEL_FILE
