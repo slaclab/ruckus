@@ -45,9 +45,15 @@ echo "Using AIE archive: ${LIBADF}"
 mkdir -p "${AIE_PKG_DIR}" "${AIE_IP_DIR}"
 echo "==== package (USE_BOOTGEN_FALLBACK=${USE_BOOTGEN_FALLBACK}) ===="
 
-if [ "${USE_BOOTGEN_FALLBACK}" = "1" ]; then
+# bootgen path — assemble AIE CDO bins into a dynamic PDI directly. Used
+# when (a) USE_BOOTGEN_FALLBACK=1 is set explicitly, or (b) v++ --package
+# rejected AIE_XSA_INPUT as a non-accelerated platform. SLAC's standard
+# Versal SoC firmware XSAs (axi-soc-versal-core) are non-accelerated, so
+# the auto-fallback covers the SLAC default flow without the caller
+# having to know about the bootgen escape hatch.
+run_bootgen() {
   echo "---- bootgen fallback ----"
-  # Locate the AIE CDO bin files emitted by the component build.
+  local AIE_CDO_DIR
   AIE_CDO_DIR=$(find "${OUT_DIR}/${PROJECT}" -type d -path "*/ps/cdo" 2>/dev/null | head -1)
   if [ -z "${AIE_CDO_DIR}" ]; then
     echo "ERROR: AIE CDO directory (ps/cdo) not found under ${OUT_DIR}/${PROJECT}"
@@ -70,9 +76,14 @@ all:
     }
 }
 EOF
-  bootgen -arch versal -image "${AIE_PKG_DIR}/aie_overlay.bif" -o "${AIE_PDI}" -w 2>&1 | tee "${VPP_LOG}"
+  bootgen -arch versal -image "${AIE_PKG_DIR}/aie_overlay.bif" -o "${AIE_PDI}" -w 2>&1 | tee -a "${VPP_LOG}"
+}
+
+if [ "${USE_BOOTGEN_FALLBACK}" = "1" ]; then
+  run_bootgen
 else
   echo "---- v++ --package primary ----"
+  set +e
   v++ --package \
       --target hw \
       --platform "${AIE_XSA_INPUT}" \
@@ -80,14 +91,32 @@ else
       --package.boot_mode sd \
       "${LIBADF}" \
       2>&1 | tee "${VPP_LOG}"
-  PDI=$(find "${AIE_PKG_DIR}" -name "pl.pdi" -o -name "*_pld.pdi" -o -name "*.pdi" 2>/dev/null | head -1)
-  if [ -z "${PDI}" ]; then
-    echo "ERROR: v++ --package produced no PDI under ${AIE_PKG_DIR}"
-    echo "       Inspect ${VPP_LOG}; engage USE_BOOTGEN_FALLBACK=1"
-    echo "       Re-run with: make USE_BOOTGEN_FALLBACK=1 package"
-    exit 1
+  VPP_RC=${PIPESTATUS[0]}
+  set -e
+
+  if [ "${VPP_RC}" -ne 0 ]; then
+    # AMD policy: v++ --package rejects non-accelerated platforms (stock
+    # SoC XSAs without PFM acceleration metadata). SLAC SoC XSAs are
+    # always non-accelerated, so auto-fall back to bootgen on this exact
+    # rejection. Any other failure stays a hard error.
+    if grep -qE "non-accelerated platform|\[v\+\+ 60-1606\]" "${VPP_LOG}"; then
+      echo "INFO: v++ --package rejected '${AIE_XSA_INPUT}' as a non-accelerated platform — falling back to bootgen automatically."
+      run_bootgen
+    else
+      echo "ERROR: v++ --package failed (rc=${VPP_RC}). See ${VPP_LOG}."
+      echo "       Force the bootgen path with: make USE_BOOTGEN_FALLBACK=1 package"
+      exit "${VPP_RC}"
+    fi
+  else
+    PDI=$(find "${AIE_PKG_DIR}" -name "pl.pdi" -o -name "*_pld.pdi" -o -name "*.pdi" 2>/dev/null | head -1)
+    if [ -z "${PDI}" ]; then
+      echo "ERROR: v++ --package succeeded but produced no PDI under ${AIE_PKG_DIR}"
+      echo "       Inspect ${VPP_LOG}; engage USE_BOOTGEN_FALLBACK=1"
+      echo "       Re-run with: make USE_BOOTGEN_FALLBACK=1 package"
+      exit 1
+    fi
+    cp -f "${PDI}" "${AIE_PDI}"
   fi
-  cp -f "${PDI}" "${AIE_PDI}"
 fi
 
 echo "AIE dynamic PDI staged: ${AIE_PDI}"
