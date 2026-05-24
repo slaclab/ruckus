@@ -30,6 +30,11 @@ if [ ! -f "${AIE_XSA_INPUT}" ]; then
   echo "       Build the upstream Vivado target's XSA first."
   exit 1
 fi
+# Resolve AIE_XSA_INPUT to an absolute path BEFORE the `cd "${AIE_PKG_DIR}"`
+# below. Callers commonly pass it as a relative path (e.g.
+# AIE_XSA_INPUT=../../targets/.../foo.xsa from the AIE project dir) and
+# v++ resolves --platform against its own cwd.
+AIE_XSA_INPUT=$(realpath "${AIE_XSA_INPUT}")
 
 # Locate the AIE component's hw libadf.a. The Vitis Unified IDE places it
 # under <workspace>/<comp>/build/hw/ but the exact subdir can vary across
