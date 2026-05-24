@@ -45,6 +45,12 @@ echo "Using AIE archive: ${LIBADF}"
 mkdir -p "${AIE_PKG_DIR}" "${AIE_IP_DIR}"
 echo "==== package (USE_BOOTGEN_FALLBACK=${USE_BOOTGEN_FALLBACK}) ===="
 
+# Localize stray outputs. v++ and bootgen drop _x/, v++.package_summary,
+# v++_package.log, xcd.log, and .Xil/ in the invocation cwd. Run them from
+# AIE_PKG_DIR so all of that lands under build/aie_package/ instead of
+# polluting PROJ_DIR.
+cd "${AIE_PKG_DIR}"
+
 # bootgen path — assemble AIE CDO bins into a dynamic PDI directly. Used
 # when (a) USE_BOOTGEN_FALLBACK=1 is set explicitly, or (b) v++ --package
 # rejected AIE_XSA_INPUT as a non-accelerated platform. SLAC's standard
@@ -89,6 +95,9 @@ else
       --platform "${AIE_XSA_INPUT}" \
       --package.out_dir "${AIE_PKG_DIR}" \
       --package.boot_mode sd \
+      --temp_dir "${AIE_PKG_DIR}/_x" \
+      --log_dir "${AIE_PKG_DIR}/_x/logs" \
+      --report_dir "${AIE_PKG_DIR}/_x/reports" \
       "${LIBADF}" \
       2>&1 | tee "${VPP_LOG}"
   VPP_RC=${PIPESTATUS[0]}

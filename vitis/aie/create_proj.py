@@ -65,11 +65,12 @@ aie_config_user  = os.path.join(proj_dir, 'aie_config.cfg')
 # that include= directives derived from AIE_SOURCES dest_subdirs are
 # always present alongside the user's [aie] settings — without it, the
 # aiecompiler can't resolve `adf::source("kernels/loopback.cc")` paths.
-# Lives at PROJ_DIR/aie_config.generated.cfg; included paths are relative
-# to v++'s working directory (<comp>/build/<target>/), so `../..` is the
-# component root and `../../<subdir>` is <comp>/<subdir>/.
-aie_config_generated     = os.path.join(proj_dir, 'aie_config.generated.cfg')
-aie_config_generated_rel = '../../aie_config.generated.cfg'
+# Lives under OUT_DIR (build/), keeping PROJ_DIR clean — the file is a
+# regenerable build artifact, not user-managed. include= paths are
+# relative to v++'s working directory (<comp>/build/<target>/), so
+# `../..` is the component root and `../../<subdir>` is <comp>/<subdir>/.
+aie_config_generated     = os.path.join(workspace, 'aie_config.generated.cfg')
+aie_config_generated_rel = '../aie_config.generated.cfg'
 
 if not aie_sources:
     raise SystemExit("create_proj: AIE_SOURCES is empty — list the files "
