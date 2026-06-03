@@ -11,6 +11,7 @@ setting up a project for the first time, see
 
    vivado_build
    vitis_hls
+   vitis_aie
    ghdl_simulation
    cadence_genus
    synopsys_dc
