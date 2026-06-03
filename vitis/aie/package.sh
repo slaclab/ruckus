@@ -70,9 +70,36 @@ run_bootgen() {
     echo "ERROR: AIE CDO directory (ps/cdo) not found under ${OUT_DIR}/${PROJECT}"
     exit 1
   fi
+
+  # Derive id_code/extended_id_code from the Vivado XSA's dynamic (_pld) PDI.
+  # Without an explicit id_code, bootgen stamps a generic Versal IDCODE
+  # (0x04ca8093) into the partial PDI's image header table and the PLM
+  # rejects the runtime load with "IDCODE Checks failed" (PLM Error Status
+  # 0x03260014). The XSA always carries the device-correct values in its
+  # *_pld.pdi image header table; bootgen -read exposes them.
+  local PLD_MEMBER ID_CODE EXT_ID_CODE BG_READ
+  PLD_MEMBER=$(unzip -Z1 "${AIE_XSA_INPUT}" 2>/dev/null | grep -E '_pld\.pdi$' | head -1)
+  if [ -z "${PLD_MEMBER}" ]; then
+    echo "ERROR: no *_pld.pdi found inside ${AIE_XSA_INPUT} — cannot derive id_code"
+    echo "       for the AIE partial PDI (required to pass the PLM IDCODE check)."
+    exit 1
+  fi
+  unzip -p "${AIE_XSA_INPUT}" "${PLD_MEMBER}" > "${AIE_PKG_DIR}/_pld_idcode_probe.pdi"
+  BG_READ=$(bootgen -arch versal -read "${AIE_PKG_DIR}/_pld_idcode_probe.pdi" 2>/dev/null)
+  rm -f "${AIE_PKG_DIR}/_pld_idcode_probe.pdi"
+  ID_CODE=$(echo "${BG_READ}" | grep -oE 'id_code \(0x18\) : 0x[0-9a-fA-F]+' | grep -oE '0x[0-9a-fA-F]+$' | head -1)
+  EXT_ID_CODE=$(echo "${BG_READ}" | grep -oE 'extended_id_code \(0x44\) : 0x[0-9a-fA-F]+' | grep -oE '0x[0-9a-fA-F]+$' | head -1)
+  if [ -z "${ID_CODE}" ] || [ -z "${EXT_ID_CODE}" ]; then
+    echo "ERROR: failed to parse id_code/extended_id_code from ${PLD_MEMBER} (bootgen -read)"
+    exit 1
+  fi
+  echo "Derived id_code=${ID_CODE} extended_id_code=${EXT_ID_CODE} from ${PLD_MEMBER}"
+
   cat > "${AIE_PKG_DIR}/aie_overlay.bif" <<EOF
 all:
 {
+    id_code = ${ID_CODE}
+    extended_id_code = ${EXT_ID_CODE}
     image
     {
         name=aie_image, id=0x1c000000
