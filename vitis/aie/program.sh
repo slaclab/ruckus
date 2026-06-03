@@ -10,36 +10,40 @@
 # ----------------------------------------------------------------------------
 #
 # program.sh — generic AIE PDI deploy helper invoked by the `program` target
-# in system_vitis_unified_aie.mk. Uploads the dynamic PDI + matching DTBO
-# (and optional partition.conf sidecar) to /boot/aie/<name>.{pdi,dtbo,
-# partition.conf} on the target board, optionally reboots, and verifies that
-# the Phase-2 startup-app-init boot loop loaded the AIE and the
-# aie-partition-init@<name>.service instance is active.
+# in system_vitis_unified_aie.mk. Uploads the dynamic PDI (and optional
+# partition.conf sidecar) to /boot/aie/<name>.{pdi,partition.conf} on the
+# target board, optionally reboots, and verifies that the Phase-2
+# startup-app-init boot loop loaded the AIE (journal line + fpga_manager
+# dmesg write) and the aie-partition-init@<name>.service instance is active.
+#
+# No device-tree overlay is deployed: the AIE PDI is a CDO-only partial PDI
+# that the boot loop delivers via /sys/class/fpga_manager/fpga0/firmware
+# (the ai_engine DT node is already live from the design's pl.dtbo).
 #
 # The <name> is the -p PDI basename minus .pdi, with any legacy dynamic-PDI
 # suffix stripped: AieLoopback.pdi -> AieLoopback (legacy
-# AieLoopback_aie_dynamic.pdi -> AieLoopback still works). The dtbo is renamed
-# to <name>.dtbo at the destination so all three triple members share the
-# normalized basename (required for the Phase-2 boot loop to find them).
+# AieLoopback_aie_dynamic.pdi -> AieLoopback still works). The pair members
+# share the normalized basename (required for the Phase-2 boot loop to find
+# them).
 #
 # Required flags:
 #   -p <path>        runtime PDI to upload
-#   -d <path>        matching device-tree overlay
 #   -i <user@host>   board target (no default — required)
 #
 # Optional flags:
 #   -c <path>        partition.conf sidecar (default: derived from PDI dir as
 #                    $(dirname PDI)/<name>.partition.conf); warn-not-fail if
-#                    absent — pdi+dtbo still upload, aie-partition-init will
+#                    absent — the pdi still uploads, aie-partition-init will
 #                    not start for this image
-#   -r               stage-only: upload triple to /boot/aie/ without rebooting
+#   -r               stage-only: upload pair to /boot/aie/ without rebooting
 #                    or verifying (useful when scheduling a maintenance window)
 #   -h               show this help
 #
 # Exit codes:
-#   0  success: triple deployed and AIE loaded (journalctl confirms) with
-#      aie-partition-init@<name>.service active and /sys/class/aie present
-#   1  local pre-flight failed (missing/invalid -p/-d/-i, or static-PDI guard)
+#   0  success: pair deployed and AIE loaded (journalctl + fpga_manager dmesg
+#      confirm) with aie-partition-init@<name>.service active and
+#      /sys/class/aie present
+#   1  local pre-flight failed (missing/invalid -p/-i, or static-PDI guard)
 #   2  scp/ssh failure during upload
 #   3  post-reboot verification failed (board didn't come up, or AIE load line
 #      never appeared within PL_LOAD_TIMEOUT, or systemd/sysfs check failed)
@@ -48,7 +52,6 @@ set -euo pipefail
 
 BOARD_IP=""
 PDI_LOCAL=""
-DTBO_LOCAL=""
 CONF_LOCAL=""
 DO_REBOOT=1
 BOARD_UP_TIMEOUT=90
@@ -56,10 +59,10 @@ PL_LOAD_TIMEOUT=30
 
 show_help() {
     cat <<'EOF'
-Usage: program.sh -p <pdi> -d <dtbo> -i <user@host> [-c <conf>] [-r] [-h]
+Usage: program.sh -p <pdi> -i <user@host> [-c <conf>] [-r] [-h]
 
-AIE PDI deploy helper. Uploads PDI + DTBO (+ optional partition.conf sidecar)
-to /boot/aie/<name>/ on the target board, optionally reboots, and verifies
+AIE PDI deploy helper. Uploads PDI (+ optional partition.conf sidecar)
+to /boot/aie/<name>.* on the target board, optionally reboots, and verifies
 that the AIE design loaded via the startup-app-init boot loop.
 
 The <name> is the PDI basename minus .pdi, with any legacy _aie_dynamic or
@@ -67,7 +70,6 @@ _dynamic suffix stripped: AieLoopback.pdi -> AieLoopback.
 
 Flags:
   -p <path>        runtime PDI to upload (required; must not be *_static*)
-  -d <path>        matching device-tree overlay (required)
   -i <user@host>   board target (required, e.g. root@192.168.1.10)
   -c <path>        partition.conf sidecar; if omitted, derived from PDI dir
                    as <pdi-dir>/<name>.partition.conf (warn-not-fail if absent)
@@ -77,11 +79,10 @@ EOF
     exit 0
 }
 
-while getopts "i:p:d:c:rh" flag; do
+while getopts "i:p:c:rh" flag; do
     case "$flag" in
         i) BOARD_IP="$OPTARG" ;;
         p) PDI_LOCAL="$OPTARG" ;;
-        d) DTBO_LOCAL="$OPTARG" ;;
         c) CONF_LOCAL="$OPTARG" ;;
         r) DO_REBOOT=0 ;;
         h) show_help ;;
@@ -95,7 +96,7 @@ done
 # This round-trips through the Phase-2 boot loop's own derivation:
 #   base="${pdi%.pdi}"; name="$(basename "$base")"
 # so the uploaded /boot/aie/<name>.pdi filename matches what the boot loop
-# expects for the dtbo, conf, and aie-partition-init@<name>.service lookups.
+# expects for the conf and aie-partition-init@<name>.service lookups.
 derive_name() {
     local name
     name="$(basename "$PDI_LOCAL" .pdi)"
@@ -124,12 +125,6 @@ preflight() {
         fail=$(( fail + 1 ))
     else
         echo "[PASS] PDI present at $PDI_LOCAL ($(stat -c%s "$PDI_LOCAL") bytes)"
-    fi
-    if [[ -z "$DTBO_LOCAL" ]] || [[ ! -s "$DTBO_LOCAL" ]]; then
-        echo "[FAIL] -d missing or empty (DTBO='$DTBO_LOCAL')"
-        fail=$(( fail + 1 ))
-    else
-        echo "[PASS] DTBO present at $DTBO_LOCAL ($(stat -c%s "$DTBO_LOCAL") bytes)"
     fi
     if [[ -n "$BOARD_IP" ]]; then
         if ssh -o ConnectTimeout=5 -o BatchMode=yes -o ForwardX11=no \
@@ -163,11 +158,6 @@ upload() {
     scp -o BatchMode=yes -o ConnectTimeout=5 -o ForwardX11=no \
         "$PDI_LOCAL" "$BOARD_IP:/boot/aie/${name}.pdi"
     echo "[PASS] ${name}.pdi uploaded"
-
-    echo "---- scp $(basename "$DTBO_LOCAL") -> $BOARD_IP:/boot/aie/${name}.dtbo ----"
-    scp -o BatchMode=yes -o ConnectTimeout=5 -o ForwardX11=no \
-        "$DTBO_LOCAL" "$BOARD_IP:/boot/aie/${name}.dtbo"
-    echo "[PASS] ${name}.dtbo uploaded"
 
     # Upload partition.conf sidecar if present (D-02b): warn-not-fail if absent.
     if [[ -s "$conf_src" ]]; then
@@ -207,7 +197,7 @@ wait_for_board_up() {
 }
 
 # Poll journalctl for the Phase-2 startup-app-init AIE load log line.
-# The boot loop emits: AIE load: $pdi + $dtbo
+# The boot loop emits: AIE load: $pdi
 # We match the leading substring: AIE load: /boot/aie/<name>.pdi
 # journalctl -b restricts to the current boot so a line from a prior boot
 # cannot produce a false success (D-03b).
@@ -228,11 +218,20 @@ wait_for_aie_load_complete() {
     return 1
 }
 
-# Final one-shot check: aie-partition-init@<name>.service must be active AND
-# /sys/class/aie must exist (confirms the xilinx-ai-engine driver enumerated
-# the partition). No dependence on fpga_manager/fpga0/state (D-03).
+# Final one-shot check: the fpga_manager must have actually written the PDI
+# (dmesg "writing <name>.pdi" — the journal "AIE load:" echo alone proved
+# false-positive when the load path silently failed), the
+# aie-partition-init@<name>.service must be active AND /sys/class/aie must
+# exist (confirms the xilinx-ai-engine driver enumerated the partition).
+# No dependence on fpga_manager/fpga0/state (D-03).
 check_aie_active() {
     local name="$1"
+    if ! ssh -o ConnectTimeout=5 -o BatchMode=yes -o ForwardX11=no \
+             "$BOARD_IP" "dmesg | grep -q 'writing ${name}.pdi'" >/dev/null 2>&1; then
+        echo "[FAIL] no fpga_manager dmesg record of writing ${name}.pdi — PDI never reached the PLM"
+        return 1
+    fi
+    echo "[PASS] fpga_manager wrote ${name}.pdi (dmesg)"
     local svc_state
     svc_state=$(ssh -o ConnectTimeout=5 -o BatchMode=yes -o ForwardX11=no \
         "$BOARD_IP" "systemctl is-active aie-partition-init@${name}.service" 2>&1) || true
@@ -267,7 +266,6 @@ print_summary() {
     echo "--------------------------------------------------------------"
     echo "  Board IP:           $BOARD_IP"
     echo "  PDI uploaded:       $PDI_LOCAL"
-    echo "  DTBO uploaded:      $DTBO_LOCAL"
     echo "  Conf uploaded:      ${CONF_UPLOADED:-<none — aie-partition-init will not start>}"
     echo "  Dest dir:           /boot/aie/${name}"
     echo "  Reboot performed:   $([[ $DO_REBOOT -eq 1 ]] && echo yes || echo no)"
@@ -280,8 +278,8 @@ CONF_UPLOADED=""
 
 NAME=$(derive_name)
 
-printf '[%s] program.sh start: BOARD_IP=%s PDI=%s DTBO=%s DO_REBOOT=%s\n' \
-    "$(date -Iseconds)" "$BOARD_IP" "$PDI_LOCAL" "$DTBO_LOCAL" "$DO_REBOOT"
+printf '[%s] program.sh start: BOARD_IP=%s PDI=%s DO_REBOOT=%s\n' \
+    "$(date -Iseconds)" "$BOARD_IP" "$PDI_LOCAL" "$DO_REBOOT"
 
 preflight                  || exit 1
 upload "$NAME"             || exit 2
