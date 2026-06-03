@@ -403,9 +403,9 @@ unified toolchain). For the end-to-end workflow see :doc:`/how-to/vitis_aie`.
    * - ``x86sim``
      - Build for the x86 simulator (``vitis -s build.py --x86sim``).
    * - ``package``
-     - Wrap ``libadf.a`` + ``$(AIE_XSA_INPUT)`` into the dynamic PDI
-       (``bash package.sh``). Uses ``v++ --package`` (primary) or ``bootgen``
-       (fallback when ``USE_BOOTGEN_FALLBACK=1``).
+     - Wrap ``libadf.a`` + the newest ``.xsa`` in ``$(VIVADO_XSA_DIR)`` into
+       the dynamic PDI (``bash package.sh``). Uses ``v++ --package``
+       (primary) or ``bootgen`` (fallback when ``USE_BOOTGEN_FALLBACK=1``).
    * - ``program``
      - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` and
        ``$(AIE_DTBO)`` to the target board.
@@ -424,9 +424,10 @@ Vitis AIE Variables
 -------------------
 
 These variables drive ``system_vitis_unified_aie.mk``. The platform/part,
-sources, and top-level graph variables must be set in the consuming
-Makefile **before** the ``include`` line; ``AIE_XSA_INPUT`` and ``AIE_DTBO``
-are recipe-time requirements passed on the ``make`` command line.
+sources, top-level graph, and XSA-directory variables must be set in the
+consuming Makefile **before** the ``include`` line; ``VIVADO_XSA_DIR`` and
+``AIE_DTBO`` are asserted at recipe time so only ``package``/``program``
+require them.
 
 .. envvar:: AIE_PLATFORM
 
@@ -485,22 +486,28 @@ are recipe-time requirements passed on the ``make`` command line.
 
    :default: unset (parse-time error)
 
-.. envvar:: AIE_XSA_INPUT
+.. envvar:: VIVADO_XSA_DIR
 
-   Absolute path to the Vivado-built ``.xsa``, required by the ``package``
-   target. Pass on the ``make`` command line:
+   Directory containing the Vivado-built ``.xsa`` images, required by the
+   ``package`` target. Set it in the consuming AIE Makefile before the
+   ``include`` line:
 
-   .. code-block:: bash
+   .. code-block:: makefile
 
-      make AIE_XSA_INPUT=<path>/<image>.xsa package
+      export VIVADO_XSA_DIR = $(abspath $(CURDIR)/../../targets/<target>/images)
 
-   :default: unset (parse-time error from the ``package`` target)
+   The ``package`` step auto-selects the newest ``.xsa`` by the
+   ``BUILD_TIME`` timestamp encoded in the image filename
+   (``<project>-<version>-<YYYYMMDDhhmmss>-<user>-<githash>.xsa``) and
+   hard-errors if the directory contains no ``.xsa``.
+
+   :default: unset (recipe-time error from the ``package`` target)
 
    .. note::
 
-      Supplied at the command line rather than baked into the Makefile
-      because the Vivado-side ``IMAGENAME`` embeds ``BUILD_TIME`` and is
-      not predictable from inside the AIE archetype.
+      A directory is used instead of an explicit file path because the
+      Vivado-side ``IMAGENAME`` embeds ``BUILD_TIME`` and is not
+      predictable from inside the AIE archetype.
 
 .. envvar:: AIE_DTBO
 

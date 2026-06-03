@@ -76,12 +76,16 @@ $(error AIE_TOP_LEVEL_FILE not set — define it in the target's AIE Makefile (e
 endif
 
 ##############################################################################
-## AIE_XSA_INPUT is required by the package step (not by proj/build/clean/gui).
-## It must be supplied by the caller at the command line because the Vivado-side
-## IMAGENAME embeds $(BUILD_TIME), so the .xsa filename produced by an
-## earlier `make pdi` in the upstream Vivado target is not predictable from
-## within this AIE archetype's make invocation. Asserted at recipe-time inside
-## `package` so that clean/gui/proj/build/x86sim/interactive/test do not require it.
+## VIVADO_XSA_DIR is required by the package step (not by proj/build/clean/gui).
+## It points at the upstream Vivado target's images/ directory; the package
+## step auto-selects the newest .xsa by the $(BUILD_TIME) timestamp encoded
+## in the IMAGENAME (<project>-<version>-<YYYYMMDDhhmmss>-<user>-<hash>.xsa).
+## A directory is used instead of an explicit file path because IMAGENAME
+## embeds $(BUILD_TIME), so the .xsa filename produced by an earlier
+## `make pdi` in the upstream Vivado target is not predictable from within
+## this AIE archetype's make invocation. Asserted at recipe-time inside
+## `package` so that clean/gui/proj/build/x86sim/interactive/test do not
+## require it.
 ##############################################################################
 ## Derived / packaging-related paths. Mirrors the HLS convention of writing
 ## the final deliverable to $(PROJ_DIR)/ip/, keeping the AIE archetype
@@ -162,7 +166,7 @@ test:
 	@echo AIE_PART:          $(AIE_PART)
 	@echo AIE_SOURCES:       $(AIE_SOURCES)
 	@echo AIE_TOP_LEVEL_FILE:$(AIE_TOP_LEVEL_FILE)
-	@echo AIE_XSA_INPUT:     $(AIE_XSA_INPUT)
+	@echo VIVADO_XSA_DIR:    $(VIVADO_XSA_DIR)
 
 ###############################################################
 #### Project Creation #########################################
@@ -195,9 +199,9 @@ x86sim : proj
 .PHONY : package
 package : build
 	$(call ACTION_HEADER,"Vitis AIE Package")
-	@if [ -z "$(AIE_XSA_INPUT)" ]; then \
-	  echo "ERROR: AIE_XSA_INPUT not set — pass the absolute path to the Vivado-built .xsa,"; \
-	  echo "       e.g. make AIE_XSA_INPUT=<path>/<image>.xsa package"; \
+	@if [ -z "$(VIVADO_XSA_DIR)" ]; then \
+	  echo "ERROR: VIVADO_XSA_DIR not set — define the directory containing the Vivado-built .xsa"; \
+	  echo "       in the target's AIE Makefile, e.g. export VIVADO_XSA_DIR = \$$(TOP_DIR)/targets/<target>/images"; \
 	  exit 1; \
 	fi
 	@bash $(RUCKUS_DIR)/vitis/aie/package.sh

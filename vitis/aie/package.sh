@@ -20,21 +20,38 @@
 # remains bash.
 #
 # Required env vars (set by system_vitis_unified_aie.mk):
-#   AIE_XSA_INPUT  AIE_PKG_DIR  AIE_IP_DIR  AIE_PDI  VPP_LOG
+#   VIVADO_XSA_DIR  AIE_PKG_DIR  AIE_IP_DIR  AIE_PDI  VPP_LOG
 #   OUT_DIR  PROJECT  USE_BOOTGEN_FALLBACK
 
 set -euo pipefail
 
-if [ ! -f "${AIE_XSA_INPUT}" ]; then
-  echo "ERROR: AIE_XSA_INPUT not found at ${AIE_XSA_INPUT}"
+if [ ! -d "${VIVADO_XSA_DIR}" ]; then
+  echo "ERROR: VIVADO_XSA_DIR '${VIVADO_XSA_DIR}' is not a directory"
+  echo "       Point it at the upstream Vivado target's images/ directory."
+  exit 1
+fi
+# Resolve VIVADO_XSA_DIR to an absolute path BEFORE the `cd "${AIE_PKG_DIR}"`
+# below. Callers commonly define it as a relative path (e.g.
+# VIVADO_XSA_DIR=../../targets/.../images from the AIE project dir) and
+# v++ resolves --platform against its own cwd.
+VIVADO_XSA_DIR=$(realpath "${VIVADO_XSA_DIR}")
+
+# Select the newest .xsa by the BUILD_TIME timestamp encoded in the
+# IMAGENAME (<project>-<version>-<YYYYMMDDhhmmss>-<user>-<githash>.xsa).
+# Files without a 14-digit timestamp sort as oldest (ts=0).
+XSA_INPUT=$(
+  for f in "${VIVADO_XSA_DIR}"/*.xsa; do
+    [ -e "${f}" ] || continue
+    ts=$(basename "${f}" | grep -oE '[0-9]{14}' | head -1)
+    echo "${ts:-0} ${f}"
+  done | sort -n -k1,1 | tail -1 | cut -d' ' -f2-
+)
+if [ -z "${XSA_INPUT}" ]; then
+  echo "ERROR: no .xsa found in ${VIVADO_XSA_DIR}"
   echo "       Build the upstream Vivado target's XSA first."
   exit 1
 fi
-# Resolve AIE_XSA_INPUT to an absolute path BEFORE the `cd "${AIE_PKG_DIR}"`
-# below. Callers commonly pass it as a relative path (e.g.
-# AIE_XSA_INPUT=../../targets/.../foo.xsa from the AIE project dir) and
-# v++ resolves --platform against its own cwd.
-AIE_XSA_INPUT=$(realpath "${AIE_XSA_INPUT}")
+echo "Using XSA: ${XSA_INPUT}"
 
 # Locate the AIE component's hw libadf.a. The Vitis Unified IDE places it
 # under <workspace>/<comp>/build/hw/ but the exact subdir can vary across
@@ -58,7 +75,7 @@ cd "${AIE_PKG_DIR}"
 
 # bootgen path — assemble AIE CDO bins into a dynamic PDI directly. Used
 # when (a) USE_BOOTGEN_FALLBACK=1 is set explicitly, or (b) v++ --package
-# rejected AIE_XSA_INPUT as a non-accelerated platform. SLAC's standard
+# rejected XSA_INPUT as a non-accelerated platform. SLAC's standard
 # Versal SoC firmware XSAs (axi-soc-versal-core) are non-accelerated, so
 # the auto-fallback covers the SLAC default flow without the caller
 # having to know about the bootgen escape hatch.
@@ -78,13 +95,13 @@ run_bootgen() {
   # 0x03260014). The XSA always carries the device-correct values in its
   # *_pld.pdi image header table; bootgen -read exposes them.
   local PLD_MEMBER ID_CODE EXT_ID_CODE BG_READ
-  PLD_MEMBER=$(unzip -Z1 "${AIE_XSA_INPUT}" 2>/dev/null | grep -E '_pld\.pdi$' | head -1)
+  PLD_MEMBER=$(unzip -Z1 "${XSA_INPUT}" 2>/dev/null | grep -E '_pld\.pdi$' | head -1)
   if [ -z "${PLD_MEMBER}" ]; then
-    echo "ERROR: no *_pld.pdi found inside ${AIE_XSA_INPUT} — cannot derive id_code"
+    echo "ERROR: no *_pld.pdi found inside ${XSA_INPUT} — cannot derive id_code"
     echo "       for the AIE partial PDI (required to pass the PLM IDCODE check)."
     exit 1
   fi
-  unzip -p "${AIE_XSA_INPUT}" "${PLD_MEMBER}" > "${AIE_PKG_DIR}/_pld_idcode_probe.pdi"
+  unzip -p "${XSA_INPUT}" "${PLD_MEMBER}" > "${AIE_PKG_DIR}/_pld_idcode_probe.pdi"
   BG_READ=$(bootgen -arch versal -read "${AIE_PKG_DIR}/_pld_idcode_probe.pdi" 2>/dev/null)
   rm -f "${AIE_PKG_DIR}/_pld_idcode_probe.pdi"
   ID_CODE=$(echo "${BG_READ}" | grep -oE 'id_code \(0x18\) : 0x[0-9a-fA-F]+' | grep -oE '0x[0-9a-fA-F]+$' | head -1)
@@ -124,7 +141,7 @@ else
   set +e
   v++ --package \
       --target hw \
-      --platform "${AIE_XSA_INPUT}" \
+      --platform "${XSA_INPUT}" \
       --package.out_dir "${AIE_PKG_DIR}" \
       --package.boot_mode sd \
       --temp_dir "${AIE_PKG_DIR}/_x" \
@@ -141,7 +158,7 @@ else
     # always non-accelerated, so auto-fall back to bootgen on this exact
     # rejection. Any other failure stays a hard error.
     if grep -qE "non-accelerated platform|\[v\+\+ 60-1606\]" "${VPP_LOG}"; then
-      echo "INFO: v++ --package rejected '${AIE_XSA_INPUT}' as a non-accelerated platform — falling back to bootgen automatically."
+      echo "INFO: v++ --package rejected '${XSA_INPUT}' as a non-accelerated platform — falling back to bootgen automatically."
       run_bootgen
     else
       echo "ERROR: v++ --package failed (rc=${VPP_RC}). See ${VPP_LOG}."

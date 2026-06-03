@@ -77,6 +77,10 @@ A minimal consumer ``Makefile`` looks like:
    export AIE_PLATFORM := $(firstword $(wildcard \
        $(XILINX_VITIS)/base_platforms/xilinx_vek280_base_*/xilinx_vek280_base_*.xpfm))
 
+   # Directory of Vivado-built .xsa images; `make package` auto-selects
+   # the newest by the BUILD_TIME timestamp encoded in the filename.
+   export VIVADO_XSA_DIR = $(abspath $(CURDIR)/../../targets/<VivadoTarget>/images)
+
    AIE_BOARD_IP ?= root@10.0.0.191
 
    include ../../submodules/ruckus/system_vitis_unified_aie.mk
@@ -111,11 +115,14 @@ Steps
 
    .. code-block:: bash
 
-      make AIE_XSA_INPUT=<absolute-path-to>.xsa package
+      make package
 
-   ``AIE_XSA_INPUT`` is supplied on the command line because the Vivado-side
-   ``IMAGENAME`` embeds ``BUILD_TIME``, so the ``.xsa`` filename produced by
-   an earlier Vivado run is not predictable from inside the AIE archetype.
+   The ``.xsa`` is auto-discovered from :envvar:`VIVADO_XSA_DIR` (set in
+   the consuming Makefile): the newest ``.xsa`` wins, by the ``BUILD_TIME``
+   timestamp encoded in the image filename. A directory is used because the
+   Vivado-side ``IMAGENAME`` embeds ``BUILD_TIME``, so the ``.xsa`` filename
+   produced by an earlier Vivado run is not predictable from inside the AIE
+   archetype.
 
    The package step's output is ``$(AIE_PDI)`` —
    ``$(PROJ_DIR)/ip/$(PROJECT)_aie_dynamic.pdi`` by default.
@@ -165,9 +172,9 @@ Available Targets
    * - ``make x86sim``
      - Build for the x86 simulator (``vitis -s build.py --x86sim``).
    * - ``make package``
-     - Wrap ``libadf.a`` + ``$(AIE_XSA_INPUT)`` into the dynamic PDI
-       (``bash package.sh``). Uses ``v++ --package`` (primary) or
-       ``bootgen`` (fallback when ``USE_BOOTGEN_FALLBACK=1``).
+     - Wrap ``libadf.a`` + the newest ``.xsa`` in ``$(VIVADO_XSA_DIR)``
+       into the dynamic PDI (``bash package.sh``). Uses ``v++ --package``
+       (primary) or ``bootgen`` (fallback when ``USE_BOOTGEN_FALLBACK=1``).
    * - ``make program``
      - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` and
        ``$(AIE_DTBO)`` to ``$(AIE_BOARD_IP)``.
@@ -230,10 +237,14 @@ Plus:
 - :envvar:`AIE_TOP_LEVEL_FILE` — top-level graph file **basename** only
   (e.g. ``graph.cpp``), because all imports land flat at the component root.
 
+- :envvar:`VIVADO_XSA_DIR` — directory containing the Vivado-built ``.xsa``
+  images, required by the ``package`` target (asserted at recipe time, not
+  parse time). The newest ``.xsa`` — by the ``BUILD_TIME`` timestamp encoded
+  in the image filename — is selected automatically; the build hard-errors
+  if the directory contains no ``.xsa``.
+
 And on the command line (recipe-time, not parse-time):
 
-- :envvar:`AIE_XSA_INPUT` — absolute path to the Vivado-built ``.xsa``,
-  required by the ``package`` target.
 - :envvar:`AIE_DTBO` — absolute path to the matching ``.dtbo``, required by
   the ``program`` target.
 - :envvar:`AIE_BOARD_IP` — ``user@host`` for the ``program`` target.
@@ -352,11 +363,12 @@ Troubleshooting
    Set exactly one. ``AIE_PLATFORM`` for dev boards with an AMD-shipped
    ``.xpfm``; ``AIE_PART`` for custom Versal AIE boards without one.
 
-**"AIE_XSA_INPUT not set"**
-   Only the ``package`` target requires the ``.xsa``. Pass it on the
-   command line — do not bake an ``IMAGENAME``-derived path into the
-   Makefile, because the upstream Vivado ``IMAGENAME`` embeds
-   ``BUILD_TIME`` and is not predictable from this archetype.
+**"VIVADO_XSA_DIR not set" / "no .xsa found in ..."**
+   Only the ``package`` target requires the ``.xsa``. Set
+   ``VIVADO_XSA_DIR`` in the consuming Makefile to the upstream Vivado
+   target's ``images/`` directory and build that target's ``.xsa`` first —
+   the newest ``.xsa`` (by the filename-encoded ``BUILD_TIME`` timestamp)
+   is selected automatically.
 
 **"AIE_DTBO not set"**
    ``make program`` requires the matching device-tree overlay path.
