@@ -406,9 +406,14 @@ unified toolchain). For the end-to-end workflow see :doc:`/how-to/vitis_aie`.
      - Wrap ``libadf.a`` + the newest ``.xsa`` in ``$(VIVADO_XSA_DIR)`` into
        the dynamic PDI (``bash package.sh``). Uses ``v++ --package``
        (primary) or ``bootgen`` (fallback when ``USE_BOOTGEN_FALLBACK=1``).
+   * - ``partition_conf``
+     - Invoke ``$(AIE_PARTITION_CONF_SCRIPT)`` to extract the AIE partition
+       geometry (``PARTITION_ID`` + ``UID``) from the Vitis-emitted
+       ``aie_partition.json`` and write ``ip/$(PROJECT).partition.conf``.
+       The default ``target`` chain is ``package partition_conf``.
    * - ``program``
-     - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` and
-       ``$(AIE_DTBO)`` to the target board.
+     - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` (plus the
+       ``partition.conf`` sidecar) to ``/boot/aie/`` on the target board.
    * - ``gui``
      - Open the same workspace in the Vitis Unified IDE
        (``vitis -w $(OUT_DIR)``).
@@ -425,9 +430,8 @@ Vitis AIE Variables
 
 These variables drive ``system_vitis_unified_aie.mk``. The platform/part,
 sources, top-level graph, and XSA-directory variables must be set in the
-consuming Makefile **before** the ``include`` line; ``VIVADO_XSA_DIR`` and
-``AIE_DTBO`` are asserted at recipe time so only ``package``/``program``
-require them.
+consuming Makefile **before** the ``include`` line; ``VIVADO_XSA_DIR`` is
+asserted at recipe time so only ``package`` requires it.
 
 .. envvar:: AIE_PLATFORM
 
@@ -458,15 +462,21 @@ require them.
 
 .. envvar:: AIE_SOURCES
 
-   Whitespace-separated list of source paths. Each entry is either:
+   Whitespace-separated list of ``path[:dest_subdir]`` entries. The
+   ``path`` half is either:
 
    - a **file** path → imports just that file, **or**
    - a **directory** path → imports every ``.cpp`` / ``.cc`` / ``.h`` /
      ``.hpp`` file in that directory (**non-recursive** — subdirectories
      are not walked).
 
-   All imports land flat at the component root. Mix local and shared
-   sources freely (including submodule paths).
+   Without ``:dest_subdir``, imports land flat at the component root; with
+   ``:dest_subdir``, they import into ``<component>/<dest_subdir>/``
+   (matches the AMD-canonical ``kernels/`` layout where ``graph.h`` does
+   ``adf::source(loop) = "kernels/loopback.cc";``). ``include=`` paths for
+   the component root and every ``dest_subdir`` are auto-merged into the
+   generated cfg. Mix local and shared sources freely (including
+   submodule paths).
 
    :default: unset (parse-time error)
 
@@ -475,14 +485,14 @@ require them.
       SHARED_AIE := $(TOP_DIR)/submodules/aie-common-kernels
       export AIE_SOURCES = \
           $(CURDIR)/aie \
-          $(CURDIR)/aie/kernels \
+          $(CURDIR)/aie/kernels:kernels \
           $(SHARED_AIE)/util.cc
 
 .. envvar:: AIE_TOP_LEVEL_FILE
 
-   Top-level graph file **basename** only (e.g. ``graph.cpp``). All
-   ``AIE_SOURCES`` entries land flat at the component root, so this is
-   just the filename — never a path.
+   Top-level graph file **basename** only (e.g. ``graph.cpp``). The
+   top-level graph imports at the component root, so this is just the
+   filename — never a path.
 
    :default: unset (parse-time error)
 
@@ -509,13 +519,16 @@ require them.
       Vivado-side ``IMAGENAME`` embeds ``BUILD_TIME`` and is not
       predictable from inside the AIE archetype.
 
-.. envvar:: AIE_DTBO
+.. envvar:: AIE_CONF
 
-   Absolute path to the matching ``.dtbo`` device-tree overlay, required
-   by the ``program`` target. Checked at recipe time (not parse time) so
-   other targets are unaffected.
+   Optional ``partition.conf`` sidecar path, forwarded to
+   ``$(AIE_PROGRAM_SCRIPT)`` as the ``-c`` flag when set. When unset the
+   default helper auto-derives it from the PDI directory as
+   ``<pdi-dir>/<name>.partition.conf`` — which matches the ``ip/`` pair
+   written by the default ``target`` chain, so most consumers never set
+   it.
 
-   :default: unset (recipe-time error from the ``program`` target)
+   :default: unset (helper auto-derives the path)
 
 .. envvar:: AIE_BOARD_IP
 
@@ -542,9 +555,13 @@ require them.
 
 .. envvar:: AIE_PDI
 
-   Output dynamic PDI path written by ``make package``.
+   Output dynamic PDI path written by ``make package``. Named
+   ``$(PROJECT).pdi`` so ``ip/`` matches the normalized
+   ``/boot/aie/<name>`` pair basename — the deploy helper uploads it
+   verbatim, and still strips a legacy ``_aie_dynamic`` / ``_dynamic``
+   suffix if a consumer overrides ``AIE_PDI`` to keep one.
 
-   :default: ``$(AIE_IP_DIR)/$(PROJECT)_aie_dynamic.pdi``
+   :default: ``$(AIE_IP_DIR)/$(PROJECT).pdi``
 
 .. envvar:: AIE_PKG_DIR
 
@@ -570,12 +587,14 @@ require them.
 .. envvar:: AIE_PROGRAM_SCRIPT
 
    Deploy helper invoked by ``make program``. The default helper is a
-   generic Versal/PetaLinux deploy: scp PDI+DTBO to
-   ``/boot/{pl.pdi,pl.dtbo}``, ssh-reboot, verify
-   ``/sys/class/fpga_manager/fpga0/state == operating``. Override to
-   point at a project-specific helper when richer verification
-   (application-specific systemd checks, ``xsdb`` readout, etc.) is
-   required.
+   generic Versal/PetaLinux deploy: scp the PDI + ``partition.conf``
+   sidecar to ``/boot/aie/<name>.{pdi,partition.conf}``, ssh-reboot, then
+   verify the startup-app-init boot loop loaded the AIE (journal
+   ``AIE load:`` line + ``fpga_manager`` dmesg write),
+   ``aie-partition-init@<name>.service`` is active, and ``/sys/class/aie``
+   exists. Override to point at a project-specific helper when richer
+   verification (application-specific systemd checks, ``xsdb`` readout,
+   etc.) is required.
 
    :default: ``$(RUCKUS_DIR)/vitis/aie/program.sh``
 
@@ -589,7 +608,22 @@ require them.
         - Meaning
       * - ``-p <path>``
         - Runtime PDI to upload (required)
-      * - ``-d <path>``
-        - Matching device-tree overlay (required)
       * - ``-i <user@host>``
-        - Board target (forwarded from :envvar:`AIE_BOARD_IP`)
+        - Board target (required; forwarded from :envvar:`AIE_BOARD_IP`)
+      * - ``-c <path>``
+        - ``partition.conf`` sidecar (optional; forwarded from
+          :envvar:`AIE_CONF` when set — auto-derived from the PDI
+          directory otherwise)
+
+.. envvar:: AIE_PARTITION_CONF_SCRIPT
+
+   ``partition.conf`` extractor invoked by ``make partition_conf``. The
+   default helper reads the AIE partition geometry from the Vitis-emitted
+   ``aie_partition.json`` (``Work/arch/``) and writes
+   ``$(AIE_IP_DIR)/$(PROJECT).partition.conf`` with two lines —
+   ``PARTITION_ID=<hex>`` and ``UID=<hex>`` — consumed on-board by
+   ``aie-partition-init``. Driven purely by the ``OUT_DIR`` / ``PROJECT``
+   / ``AIE_IP_DIR`` env vars. Override only if a project needs bespoke
+   partition.conf emission.
+
+   :default: ``$(RUCKUS_DIR)/vitis/aie/emit_partition_conf.sh``

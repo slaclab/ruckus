@@ -2,8 +2,9 @@ How to Build a Vitis AI Engine (AIE) Graph
 ============================================
 
 **Goal:** Compile an AI Engine graph from C++ sources, package the resulting
-``libadf.a`` against a Vivado-built ``.xsa`` into a dynamic PDI, and (optionally)
-deploy the PDI + matching device-tree overlay to a Versal/PetaLinux board.
+``libadf.a`` against a Vivado-built ``.xsa`` into a dynamic PDI with a matching
+``partition.conf`` sidecar, and (optionally) deploy the pair to ``/boot/aie/``
+on a Versal/PetaLinux board.
 
 .. note::
 
@@ -49,10 +50,11 @@ are split out from Vivado targets). A typical tree:
        <VivadoTarget>/
          Makefile               <- includes system_vivado.mk; produces the .xsa
 
-The AIE project is fully self-contained: ``make package`` writes the final
-dynamic PDI to ``$(PROJ_DIR)/ip/`` (matching the HLS convention of writing
-deliverables into ``ip/``) so the Vivado target does not need to know where
-the AIE archetype lives on disk.
+The AIE project is fully self-contained: ``make`` writes the final
+deliverable pair — ``$(PROJECT).pdi`` + ``$(PROJECT).partition.conf`` — to
+``$(PROJ_DIR)/ip/`` (matching the HLS convention of writing deliverables
+into ``ip/``) so the Vivado target does not need to know where the AIE
+archetype lives on disk.
 
 Makefile include line:
 
@@ -64,11 +66,9 @@ A minimal consumer ``Makefile`` looks like:
 
 .. code-block:: makefile
 
-   target: build
-
    export AIE_SOURCES = \
        $(abspath $(CURDIR)/aie) \
-       $(abspath $(CURDIR)/aie/kernels)
+       $(abspath $(CURDIR)/aie/kernels):kernels
 
    export AIE_TOP_LEVEL_FILE = graph.cpp
 
@@ -84,6 +84,11 @@ A minimal consumer ``Makefile`` looks like:
    AIE_BOARD_IP ?= root@10.0.0.191
 
    include ../../submodules/ruckus/system_vitis_unified_aie.mk
+
+No ``target:`` rule is needed — the include provides the default chain
+``target: package partition_conf`` (build → package → emit the
+``partition.conf`` sidecar), so a bare ``make`` produces the full
+``ip/`` deliverable pair.
 
 Steps
 -----
@@ -125,22 +130,39 @@ Steps
    archetype.
 
    The package step's output is ``$(AIE_PDI)`` —
-   ``$(PROJ_DIR)/ip/$(PROJECT)_aie_dynamic.pdi`` by default.
+   ``$(PROJ_DIR)/ip/$(PROJECT).pdi`` by default. The PDI is a CDO-only
+   partial PDI loaded at runtime through
+   ``/sys/class/fpga_manager/fpga0/firmware``; no device-tree overlay is
+   part of the deliverable (the ``ai_engine`` DT node is already live from
+   the design's ``pl.dtbo``).
 
-5. Deploy the PDI + matching DTBO to a Versal/PetaLinux board:
+5. Emit the ``partition.conf`` sidecar for the ``/boot/aie/`` runtime:
 
    .. code-block:: bash
 
-      make AIE_DTBO=<absolute-path-to>.dtbo \
-           AIE_BOARD_IP=root@<board-ip> \
-           program
+      make partition_conf
+
+   Extracts the AIE partition geometry (``PARTITION_ID`` + ``UID``) from
+   the Vitis-emitted ``aie_partition.json`` and writes
+   ``$(PROJ_DIR)/ip/$(PROJECT).partition.conf`` — consumed on-board by
+   ``aie-partition-init``. A bare ``make`` runs steps 2, 4, and 5 in one go
+   (default chain ``target: package partition_conf``).
+
+6. Deploy the pdi+conf pair to a Versal/PetaLinux board:
+
+   .. code-block:: bash
+
+      make AIE_BOARD_IP=root@<board-ip> program
 
    The default deploy helper (``$(RUCKUS_DIR)/vitis/aie/program.sh``) scp's
-   the PDI and DTBO to ``/boot/{pl.pdi,pl.dtbo}``, reboots the board, waits
-   for ssh liveness, then verifies ``/sys/class/fpga_manager/fpga0/state``
-   reports ``operating``.
+   the PDI and ``partition.conf`` to
+   ``/boot/aie/<name>.{pdi,partition.conf}``, reboots the board, waits for
+   ssh liveness, then verifies the startup-app-init boot loop loaded the
+   AIE (journal ``AIE load:`` line + ``fpga_manager`` dmesg write), that
+   ``aie-partition-init@<name>.service`` is active, and that
+   ``/sys/class/aie`` exists.
 
-6. Open the same workspace interactively in the Vitis IDE:
+7. Open the same workspace interactively in the Vitis IDE:
 
    .. code-block:: bash
 
@@ -152,7 +174,8 @@ Steps
 
       make interactive
 
-**Output:** dynamic PDI at ``$(PROJ_DIR)/ip/$(PROJECT)_aie_dynamic.pdi``.
+**Output:** deliverable pair at ``$(PROJ_DIR)/ip/$(PROJECT).pdi`` +
+``$(PROJ_DIR)/ip/$(PROJECT).partition.conf``.
 
 Available Targets
 -----------------
@@ -175,9 +198,14 @@ Available Targets
      - Wrap ``libadf.a`` + the newest ``.xsa`` in ``$(VIVADO_XSA_DIR)``
        into the dynamic PDI (``bash package.sh``). Uses ``v++ --package``
        (primary) or ``bootgen`` (fallback when ``USE_BOOTGEN_FALLBACK=1``).
+   * - ``make partition_conf``
+     - Invoke ``$(AIE_PARTITION_CONF_SCRIPT)`` to extract the AIE
+       partition geometry from the Vitis-emitted ``aie_partition.json``
+       and write ``ip/$(PROJECT).partition.conf``. Part of the default
+       ``target`` chain.
    * - ``make program``
-     - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` and
-       ``$(AIE_DTBO)`` to ``$(AIE_BOARD_IP)``.
+     - Invoke ``$(AIE_PROGRAM_SCRIPT)`` to deploy ``$(AIE_PDI)`` (and the
+       ``partition.conf`` sidecar) to ``$(AIE_BOARD_IP)``.
    * - ``make gui``
      - Open the same workspace in the Vitis Unified IDE
        (``vitis -w $(OUT_DIR)``).
@@ -207,18 +235,23 @@ The consuming target's AIE Makefile must define these **before** including
 
 Plus:
 
-- :envvar:`AIE_SOURCES` — whitespace-separated list of source paths. Each
-  entry is either:
+- :envvar:`AIE_SOURCES` — whitespace-separated list of ``path[:dest_subdir]``
+  entries. The ``path`` half is either:
 
   - a **file** path → imports just that file, **or**
   - a **directory** path → imports every ``.cpp`` / ``.cc`` / ``.h`` /
     ``.hpp`` file in that directory (**non-recursive** — subdirectories are
     not walked).
 
-  All imports land **flat** at the component root. This mirrors the trust
-  model of HLS's ``hls_config.cfg`` (``syn.file=`` / ``tb.file=``) — the
-  application owns the source list; ruckus does no Python-side recursive
-  globbing.
+  Without ``:dest_subdir``, imports land **flat** at the component root.
+  With ``:dest_subdir``, they import into ``<component>/<dest_subdir>/`` —
+  needed for the AMD-canonical ``kernels/`` layout where ``graph.h`` does
+  ``adf::source(loop) = "kernels/loopback.cc";``. ``include=`` paths for
+  the component root and every ``dest_subdir`` are auto-merged into the
+  generated cfg, so headers in those directories resolve without manual
+  ``Xpreproc=-I`` lines. This mirrors the trust model of HLS's
+  ``hls_config.cfg`` (``syn.file=`` / ``tb.file=``) — the application owns
+  the source list; ruckus does no Python-side recursive globbing.
 
   Mix local and shared sources freely:
 
@@ -227,15 +260,17 @@ Plus:
      SHARED_AIE := $(TOP_DIR)/submodules/aie-common-kernels
      export AIE_SOURCES = \
          $(CURDIR)/aie \
-         $(CURDIR)/aie/kernels \
+         $(CURDIR)/aie/kernels:kernels \
          $(SHARED_AIE)/util.cc
 
-  The first entry pulls in everything directly under ``aie/``; the second
-  pulls in everything under ``aie/kernels/``; the third names one file from
-  a submodule.
+  The first entry pulls in everything directly under ``aie/`` (flat at the
+  component root); the second pulls in everything under ``aie/kernels/``
+  into the component's ``kernels/`` subdirectory; the third names one file
+  from a submodule.
 
 - :envvar:`AIE_TOP_LEVEL_FILE` — top-level graph file **basename** only
-  (e.g. ``graph.cpp``), because all imports land flat at the component root.
+  (e.g. ``graph.cpp``), because the top-level graph imports at the
+  component root.
 
 - :envvar:`VIVADO_XSA_DIR` — directory containing the Vivado-built ``.xsa``
   images, required by the ``package`` target (asserted at recipe time, not
@@ -245,10 +280,13 @@ Plus:
 
 And on the command line (recipe-time, not parse-time):
 
-- :envvar:`AIE_DTBO` — absolute path to the matching ``.dtbo``, required by
-  the ``program`` target.
 - :envvar:`AIE_BOARD_IP` — ``user@host`` for the ``program`` target.
   Forwarded to ``$(AIE_PROGRAM_SCRIPT)`` as the ``-i`` flag.
+- :envvar:`AIE_CONF` — optional override for the ``partition.conf`` sidecar
+  path, forwarded to ``$(AIE_PROGRAM_SCRIPT)`` as the ``-c`` flag when set.
+  When unset the helper auto-derives it from the PDI directory as
+  ``<pdi-dir>/<name>.partition.conf`` — which matches the ``ip/`` pair
+  written by the default ``target`` chain, so most consumers never set it.
 
 aie_config.cfg
 --------------
@@ -270,6 +308,13 @@ location is hardcoded (not configurable), mirroring the unified HLS flow's
 When ``AIE_PART`` is in use (no xpfm), the ``pl-freq=`` line is the **only**
 hint Vitis has for the PL clock frequency, so it must be set.
 
+The cfg actually attached to the component is a generated file
+(``$(OUT_DIR)/aie_config.generated.cfg``) that merges auto-derived
+``include=`` lines — the component root plus every ``AIE_SOURCES``
+``dest_subdir`` — ahead of the user's ``aie_config.cfg`` body. Edits to
+``aie_config.cfg`` are re-merged on every ``make proj``; never edit the
+generated file directly.
+
 Customising the Deploy Step
 ---------------------------
 
@@ -277,14 +322,27 @@ Customising the Deploy Step
 ``$(RUCKUS_DIR)/vitis/aie/program.sh`` — a generic Versal/PetaLinux deploy
 helper that:
 
-1. Pre-flights the PDI/DTBO paths and ssh reachability
-2. Refuses to upload a ``*_static.pdi`` filename (which belongs in
-   ``BOOT.BIN``, not as a runtime overlay)
-3. ``scp``'s ``$(AIE_PDI)`` → ``$(AIE_BOARD_IP):/boot/pl.pdi`` and
-   ``$(AIE_DTBO)`` → ``$(AIE_BOARD_IP):/boot/pl.dtbo``
-4. Reboots the board (skippable with ``-r``)
-5. Waits for ssh liveness, then verifies
-   ``/sys/class/fpga_manager/fpga0/state == operating``
+1. Derives the normalized ``<name>`` from the ``-p`` PDI basename minus
+   ``.pdi`` (a legacy ``_aie_dynamic`` / ``_dynamic`` suffix is stripped,
+   so ``AieLoopback_aie_dynamic.pdi`` still deploys as ``AieLoopback``)
+2. Pre-flights the PDI path and ssh reachability, and refuses to upload a
+   ``*_static*`` filename (which belongs in ``BOOT.BIN``, not as a runtime
+   overlay)
+3. ``scp``'s ``$(AIE_PDI)`` → ``$(AIE_BOARD_IP):/boot/aie/<name>.pdi`` and
+   the ``partition.conf`` sidecar →
+   ``$(AIE_BOARD_IP):/boot/aie/<name>.partition.conf`` (warn-not-fail if
+   the sidecar is absent — the PDI still uploads, but
+   ``aie-partition-init`` will not start for that image)
+4. Reboots the board (skippable with ``-r`` for stage-only uploads)
+5. Waits for ssh liveness, then verifies the Phase-2 startup-app-init boot
+   loop loaded the AIE: the journal ``AIE load: /boot/aie/<name>.pdi``
+   line, the ``fpga_manager`` dmesg record of writing ``<name>.pdi``, an
+   active ``aie-partition-init@<name>.service``, and the presence of
+   ``/sys/class/aie``
+
+No device-tree overlay is deployed: the AIE PDI is a CDO-only partial PDI
+delivered via ``/sys/class/fpga_manager/fpga0/firmware`` — the
+``ai_engine`` DT node is already live from the design's ``pl.dtbo``.
 
 Projects that need richer verification (application-specific systemd
 checks, ``xsdb`` readout, etc.) override the default by pointing
@@ -299,15 +357,17 @@ the same flag contract:
      - Meaning
    * - ``-p <path>``
      - Runtime PDI to upload (required)
-   * - ``-d <path>``
-     - Matching device-tree overlay (required)
    * - ``-i <user@host>``
-     - Board target (forwarded from ``$(AIE_BOARD_IP)`` when set)
+     - Board target (required; forwarded from ``$(AIE_BOARD_IP)`` when set)
+   * - ``-c <path>``
+     - ``partition.conf`` sidecar (optional; forwarded from ``$(AIE_CONF)``
+       when set — auto-derived from the PDI directory otherwise)
 
-The default helper additionally accepts ``-r`` (dry-run: skip reboot) and
-``-h`` (show help); custom helpers may ignore those if not relevant. The
-helper's exit codes follow the convention 0 = success, 1 = local pre-flight
-failed, 2 = scp/ssh failure, 3 = post-reboot verification failed.
+The default helper additionally accepts ``-r`` (stage-only: upload without
+rebooting or verifying) and ``-h`` (show help); custom helpers may ignore
+those if not relevant. The helper's exit codes follow the convention
+0 = success, 1 = local pre-flight failed, 2 = scp/ssh failure,
+3 = post-reboot verification failed.
 
 Key Variables
 -------------
@@ -327,8 +387,10 @@ Key Variables
      - ``$(PROJ_DIR)/ip``
      - Final deliverable directory (matches the HLS convention).
    * - ``AIE_PDI``
-     - ``$(AIE_IP_DIR)/$(PROJECT)_aie_dynamic.pdi``
-     - Output dynamic PDI path written by ``make package``.
+     - ``$(AIE_IP_DIR)/$(PROJECT).pdi``
+     - Output dynamic PDI path written by ``make package``. Named
+       ``$(PROJECT).pdi`` so ``ip/`` matches the normalized
+       ``/boot/aie/<name>`` pair basename.
    * - ``AIE_PKG_DIR``
      - ``$(OUT_DIR)/aie_package``
      - Scratch directory used by the package step.
@@ -342,6 +404,10 @@ Key Variables
      - ``$(RUCKUS_DIR)/vitis/aie/program.sh``
      - Deploy helper invoked by ``make program``. Override for project-
        specific verification.
+   * - ``AIE_PARTITION_CONF_SCRIPT``
+     - ``$(RUCKUS_DIR)/vitis/aie/emit_partition_conf.sh``
+     - ``partition.conf`` extractor invoked by ``make partition_conf``.
+       Override only for bespoke partition.conf emission.
 
 See :doc:`../reference/makefile_reference` for the full AIE variable
 reference.
@@ -370,18 +436,21 @@ Troubleshooting
    the newest ``.xsa`` (by the filename-encoded ``BUILD_TIME`` timestamp)
    is selected automatically.
 
-**"AIE_DTBO not set"**
-   ``make program`` requires the matching device-tree overlay path.
-   Typically lives next to the Vivado ``.xsa`` under the upstream target's
-   ``images/`` directory.
+**"no <name>.partition.conf found" warning from ``make program``**
+   The deploy helper could not find the ``partition.conf`` sidecar next to
+   the PDI (and no ``AIE_CONF`` override was given). The PDI still uploads,
+   but ``aie-partition-init@<name>.service`` will not start for that image.
+   Run ``make partition_conf`` (or a bare ``make``) first so the sidecar
+   lands in ``ip/`` next to the PDI.
 
 **"Refusing to upload static PDI as runtime overlay"**
    The default deploy helper refuses any ``-p`` argument containing
    ``_static`` in the filename. ``<name>_static.pdi`` is the ``BOOT.BIN``
    half of a segmented-configuration build (see
-   :doc:`segmented_configuration`); the runtime overlay is
-   ``<name>_aie_dynamic.pdi`` (or ``<name>_dynamic.pdi`` for a
-   non-AIE segmented build). Point ``-p`` at the dynamic half.
+   :doc:`segmented_configuration`); the runtime overlay is ``<name>.pdi``
+   (legacy ``<name>_aie_dynamic.pdi`` / ``<name>_dynamic.pdi`` names also
+   work — the suffix is stripped on upload). Point ``-p`` at the dynamic
+   half.
 
 **``v++ --package`` fails on packaging**
    As a fallback path, set ``USE_BOOTGEN_FALLBACK=1`` to package via
@@ -389,8 +458,11 @@ Troubleshooting
    dynamic PDI for the AIE-overlay case.
 
 **Subdirectory headers go missing from the component**
-   ``AIE_SOURCES`` directory entries are **non-recursive** and all imports
-   land flat at the component root. If your graph ``#include``\ s a header
-   via a subdirectory path (e.g. ``#include "kernels/foo.h"``), either
-   rewrite the include as a bare basename or add ``aie/kernels`` as a
-   separate ``AIE_SOURCES`` entry so the header lands at the root.
+   ``AIE_SOURCES`` directory entries are **non-recursive**. If your graph
+   references sources via a subdirectory path (e.g.
+   ``#include "kernels/foo.h"`` or
+   ``adf::source(k) = "kernels/foo.cc";``), add the directory as a
+   separate entry with a matching ``:dest_subdir`` (e.g.
+   ``aie/kernels:kernels``) so the files import into
+   ``<component>/kernels/`` — the matching ``include=`` path is auto-added
+   to the generated cfg.
