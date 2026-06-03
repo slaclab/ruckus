@@ -95,8 +95,12 @@ ifndef AIE_IP_DIR
 export AIE_IP_DIR = $(PROJ_DIR)/ip
 endif
 
+# AIE dynamic-overlay PDI deliverable. Named $(PROJECT).pdi (not
+# $(PROJECT)_aie_dynamic.pdi) so ip/ matches the normalized /boot/aie/<name>
+# triple basename — program.sh uploads it verbatim, and still strips a legacy
+# _aie_dynamic/_dynamic suffix if a consumer overrides AIE_PDI to keep one.
 ifndef AIE_PDI
-export AIE_PDI = $(AIE_IP_DIR)/$(PROJECT)_aie_dynamic.pdi
+export AIE_PDI = $(AIE_IP_DIR)/$(PROJECT).pdi
 endif
 
 # Imported device-tree overlay deliverable. `make dtbo` copies/extracts

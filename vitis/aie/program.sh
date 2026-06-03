@@ -16,9 +16,10 @@
 # the Phase-2 startup-app-init boot loop loaded the AIE and the
 # aie-partition-init@<name>.service instance is active.
 #
-# The <name> is derived from the -p PDI basename by stripping the dynamic-PDI
-# suffix: AieLoopback_aie_dynamic.pdi -> AieLoopback. The dtbo is renamed to
-# <name>.dtbo at the destination so all three triple members share the
+# The <name> is the -p PDI basename minus .pdi, with any legacy dynamic-PDI
+# suffix stripped: AieLoopback.pdi -> AieLoopback (legacy
+# AieLoopback_aie_dynamic.pdi -> AieLoopback still works). The dtbo is renamed
+# to <name>.dtbo at the destination so all three triple members share the
 # normalized basename (required for the Phase-2 boot loop to find them).
 #
 # Required flags:
@@ -61,8 +62,8 @@ AIE PDI deploy helper. Uploads PDI + DTBO (+ optional partition.conf sidecar)
 to /boot/aie/<name>/ on the target board, optionally reboots, and verifies
 that the AIE design loaded via the startup-app-init boot loop.
 
-The <name> is derived from the PDI basename by stripping _aie_dynamic or
-_dynamic suffixes: AieLoopback_aie_dynamic.pdi -> AieLoopback.
+The <name> is the PDI basename minus .pdi, with any legacy _aie_dynamic or
+_dynamic suffix stripped: AieLoopback.pdi -> AieLoopback.
 
 Flags:
   -p <path>        runtime PDI to upload (required; must not be *_static*)
@@ -89,7 +90,8 @@ while getopts "i:p:d:c:rh" flag; do
 done
 
 # Derive the normalized <name> from the PDI basename (D-01):
-#   AieLoopback_aie_dynamic.pdi -> AieLoopback_aie_dynamic -> AieLoopback
+#   AieLoopback.pdi -> AieLoopback  (legacy AieLoopback_aie_dynamic.pdi ->
+#   AieLoopback_aie_dynamic -> AieLoopback also collapses via the strips below)
 # This round-trips through the Phase-2 boot loop's own derivation:
 #   base="${pdi%.pdi}"; name="$(basename "$base")"
 # so the uploaded /boot/aie/<name>.pdi filename matches what the boot loop
@@ -109,12 +111,12 @@ preflight() {
         fail=$(( fail + 1 ))
     fi
     # Defend against uploading the static (boot-image) PDI as the runtime
-    # overlay. The pair is <name>_static.pdi (BOOT.BIN half) vs
-    # <name>_dynamic.pdi / <name>_aie_dynamic.pdi (the overlay).
+    # overlay. The pair is <name>_static.pdi (BOOT.BIN half) vs the dynamic
+    # overlay (<name>.pdi, or legacy <name>_dynamic.pdi / <name>_aie_dynamic.pdi).
     if [[ -n "$PDI_LOCAL" ]] && [[ "$PDI_LOCAL" == *_static* ]]; then
         echo "[FAIL] -p filename '$PDI_LOCAL' contains '_static'."
         echo "       Refusing to upload static PDI as runtime overlay;"
-        echo "       pass the *_aie_dynamic.pdi (or *_dynamic.pdi) instead."
+        echo "       pass the dynamic overlay PDI (<name>.pdi) instead."
         fail=$(( fail + 1 ))
     fi
     if [[ -z "$PDI_LOCAL" ]] || [[ ! -s "$PDI_LOCAL" ]]; then
