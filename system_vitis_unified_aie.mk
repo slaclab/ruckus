@@ -201,7 +201,8 @@ program:
 	bash $(AIE_PROGRAM_SCRIPT) \
 	  -p $(AIE_PDI) \
 	  -d $(AIE_DTBO) \
-	  $(if $(AIE_BOARD_IP),-i $(AIE_BOARD_IP),)
+	  $(if $(AIE_BOARD_IP),-i $(AIE_BOARD_IP),) \
+	  $(if $(AIE_CONF),-c $(AIE_CONF),)
 
 ###############################################################
 #### Vitis AIE Interactive ####################################
