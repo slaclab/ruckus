@@ -99,6 +99,35 @@ ifndef AIE_PDI
 export AIE_PDI = $(AIE_IP_DIR)/$(PROJECT)_aie_dynamic.pdi
 endif
 
+# Imported device-tree overlay deliverable. `make dtbo` copies/extracts
+# AIE_DTBO_SRC here so ip/ holds the full /boot/aie/ runtime triple
+# (pdi + partition.conf + dtbo) under the normalized $(PROJECT) basename the
+# axi-soc-versal-core boot loop expects.
+ifndef AIE_IP_DTBO
+export AIE_IP_DTBO = $(AIE_IP_DIR)/$(PROJECT).dtbo
+endif
+
+# Member extracted from AIE_DTBO_SRC when it is a *.tar.gz/.tgz archive. The
+# axi-soc-versal-core PetaLinux image ships the overlay as linux/pl.dtbo;
+# override only for a non-standard image layout.
+ifndef AIE_DTBO_TAR_MEMBER
+export AIE_DTBO_TAR_MEMBER = linux/pl.dtbo
+endif
+
+# AIE_DTBO_SRC is set by the consumer Makefile (a loose .dtbo or a
+# *.linux.tar.gz image archive, possibly a glob). Mark it for export so
+# import_dtbo.sh sees it in its environment; harmless (exported empty) when
+# the consumer leaves it unset.
+export AIE_DTBO_SRC
+
+# Device-tree overlay deployed alongside AIE_PDI by `make program`. Defaults to
+# the copy imported into ip/ by `make dtbo`, so once the default build (or an
+# explicit `make dtbo`) has populated ip/, `make program` needs no AIE_DTBO
+# override. Set AIE_DTBO=<path> to deploy a different overlay.
+ifndef AIE_DTBO
+export AIE_DTBO = $(AIE_IP_DTBO)
+endif
+
 ifndef VPP_LOG
 export VPP_LOG = $(OUT_DIR)/vpp_package.log
 endif
@@ -120,8 +149,32 @@ ifndef AIE_PROGRAM_SCRIPT
 export AIE_PROGRAM_SCRIPT = $(RUCKUS_DIR)/vitis/aie/program.sh
 endif
 
+# AIE_PARTITION_CONF_SCRIPT — helper invoked by `make partition_conf` to extract
+# AIE partition geometry from the Vitis-emitted aie_partition.json and write
+# ip/<PROJECT>.partition.conf for the /boot/aie/ runtime (aie-partition-init).
+# Defaults to the ruckus-shipped vitis/aie/emit_partition_conf.sh; driven purely
+# by the OUT_DIR/PROJECT/AIE_IP_DIR env vars exported above. Override only if a
+# project needs bespoke partition.conf emission.
+ifndef AIE_PARTITION_CONF_SCRIPT
+export AIE_PARTITION_CONF_SCRIPT = $(RUCKUS_DIR)/vitis/aie/emit_partition_conf.sh
+endif
+
+# AIE_IMPORT_DTBO_SCRIPT — helper invoked by `make dtbo` to populate
+# ip/<PROJECT>.dtbo from AIE_DTBO_SRC (a loose .dtbo or a *.linux.tar.gz image
+# archive). Defaults to the ruckus-shipped vitis/aie/import_dtbo.sh; driven by
+# the AIE_DTBO_SRC / AIE_DTBO_TAR_MEMBER / AIE_IP_DTBO env vars exported above.
+ifndef AIE_IMPORT_DTBO_SCRIPT
+export AIE_IMPORT_DTBO_SCRIPT = $(RUCKUS_DIR)/vitis/aie/import_dtbo.sh
+endif
+
 .PHONY : all
 all: target
+
+# Default full chain: build → package → emit partition.conf sidecar → (when
+# AIE_DTBO_SRC is set) import the device-tree overlay into ip/. Project AIE
+# Makefiles inherit this and need not define their own `target`.
+.PHONY : target
+target: package partition_conf $(if $(strip $(AIE_DTBO_SRC)),dtbo)
 
 ###############################################################
 #### Printout Env. Variables ##################################
@@ -139,6 +192,9 @@ test:
 	@echo AIE_SOURCES:       $(AIE_SOURCES)
 	@echo AIE_TOP_LEVEL_FILE:$(AIE_TOP_LEVEL_FILE)
 	@echo AIE_XSA_INPUT:     $(AIE_XSA_INPUT)
+	@echo AIE_DTBO_SRC:      $(AIE_DTBO_SRC)
+	@echo AIE_IP_DTBO:       $(AIE_IP_DTBO)
+	@echo AIE_DTBO:          $(AIE_DTBO)
 
 ###############################################################
 #### Project Creation #########################################
@@ -179,11 +235,32 @@ package : build
 	@bash $(RUCKUS_DIR)/vitis/aie/package.sh
 
 ###############################################################
+#### Emit partition.conf sidecar for /boot/aie/ runtime #######
+###############################################################
+.PHONY : partition_conf
+partition_conf: package
+	$(call ACTION_HEADER,"Emit AIE partition.conf")
+	@bash $(AIE_PARTITION_CONF_SCRIPT)
+
+###############################################################
+#### dtbo — import the device-tree overlay into ip/ ###########
+###############################################################
+# Populates ip/$(PROJECT).dtbo from AIE_DTBO_SRC (a loose .dtbo or a
+# *.linux.tar.gz image archive) so ip/ carries the full /boot/aie/ runtime
+# triple (pdi + partition.conf + dtbo). Logic lives in import_dtbo.sh; it is
+# driven by the AIE_DTBO_SRC / AIE_DTBO_TAR_MEMBER / AIE_IP_DTBO env vars.
+.PHONY : dtbo
+dtbo:
+	$(call ACTION_HEADER,"Import AIE .dtbo into ip/")
+	@bash $(AIE_IMPORT_DTBO_SCRIPT)
+
+###############################################################
 #### program — deploy AIE_PDI to the target board #############
 ###############################################################
 # Wraps $(AIE_PROGRAM_SCRIPT) — defaults to ruckus's vitis/aie/program.sh,
-# overridable per project. Caller must pass AIE_DTBO=<path> on the command
-# line. AIE_BOARD_IP is forwarded as `-i` if set. Asserts are recipe-time
+# overridable per project. AIE_DTBO defaults to the overlay imported into ip/
+# by `make dtbo`; override AIE_DTBO=<path> to deploy a different one.
+# AIE_BOARD_IP is forwarded as `-i` if set. Asserts are recipe-time
 # (not parse-time) so other targets aren't affected.
 .PHONY : program
 program:
@@ -193,9 +270,9 @@ program:
 	  echo "       Override AIE_PROGRAM_SCRIPT to point at your deploy helper."; \
 	  exit 1; \
 	fi
-	@if [ -z "$(AIE_DTBO)" ]; then \
-	  echo "ERROR: AIE_DTBO not set — pass the absolute path to the matching .dtbo."; \
-	  echo "       e.g. make AIE_DTBO=<vivado-target>/images/<name>.dtbo program"; \
+	@if [ ! -r "$(AIE_DTBO)" ]; then \
+	  echo "ERROR: AIE_DTBO '$(AIE_DTBO)' not readable — run 'make dtbo' to import it,"; \
+	  echo "       or pass AIE_DTBO=<path> to deploy a specific overlay."; \
 	  exit 1; \
 	fi
 	bash $(AIE_PROGRAM_SCRIPT) \
