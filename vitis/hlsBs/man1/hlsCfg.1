@@ -1,0 +1,217 @@
+.TH hlsCfg 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsCfg \- cleans,creates,replaces,and lists, HLS configuration files.
+.SH SYNOPSIS
+.B hlsCfg [COMPONENTS] [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsCfg
+Cleans, creates, replaces and lists HLS configuration files and, optionally,
+their associated HLS components.
+
+.SH COMPONENTS
+A list of component names to perform the action (\fIclean\fR, \fIcreate\fR,
+\fIetc\fR) on. These may be explict names or wildcard specifications.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.TP
+\fB\-w, \-\-workspace = \fIWORKSPACE\fR
+The target workspace. Although typically specified in the project file, this
+overrides that defintion and is useful for one-of/throw-away experimentation.
+The environment variable \fBHLS_PROJECT_WORKSPACE\fR can also be used.
+
+.TP
+\fB\-\-components=...
+A list of component names.  This acts the same as the postional
+arguments, but due to shell's lack of a formal binding syntax for
+lists together and handling of wildcards for positional arguments (see
+Caveats), this is more explicit and reliable.
+
+.TP
+\fB\-\-no-component\fR
+Inhibits the creation of the associated component. Rarely used, but there for
+completeness. The default is to create the component.
+
+.TP
+\fB\-\-verbose
+Enables more extensive output which is useful for diagnostics.  The default
+is 'False'.
+
+.TP
+\fB\-\-project = \fIHLS_PROJECT_FILE\fR
+A project file is the standard method used by all the \fBhls\fR build utilities
+of capturing the stable command line options in a file that can be saved in GIT.
+Default is the environment variable \fIHLS_PROJECT\fR.
+
+
+.SH ACTIONS
+.TP
+\fB\-\-dry-run\fR
+Only reports the actions the command would do, but does not run the command.
+Particularly useful and recommended for destructive commands, e.g. \fB--clean\fR
+and \fB--replace\fR.
+
+.TP
+\fB\-\-clean\fR = (existing, missing, cruft, kruft, Kruft, all)
+Cleans, i.e. removes a category of configuration files and, optionally, their
+components. The default category is existing.  Given the heuristic nature of
+files cateogorized as \fBcruft\fR it is recommended to first do either
+\fB--list\fR or \fB--dry-run\fR.
+
+.TP
+\fB\-\-create\fR = (existing, missing, cruft, kruft, Kruft, all)
+Creates the configuration files. While any of the categories may be specified,
+only \fImissing\fR makes practical sense and is the default.
+
+.TP
+\fB\-\-list\fR = (existing, missing, cruft, kruft, Kruft, all)
+Lists the status of the specified categories of configuration files. The default
+is \fIall\fR, i.e. \fIexisting\fR, \fImissing\fR and \fIcruft\fR.
+
+.TP
+\fB\-\-replace\fR = (existing, missing, cruft, kruft, Kruft, all)
+Replaces the configuration files. The default is \fIexisting\fR. Since this is
+effectively a --\fIremove\fR and --\fIcreate\fR, use with caution. As a bow to
+convenience, specifying \fI--missing\fR will create the file. See the examples.
+
+
+.SH Features 
+\fBhlsCfg\fR is capable of generating one or many configuration files.
+Multiple configuration files are specified as an explicit list or generated
+from a wildcard specification. Multiple configurations/components are useful
+when generating test suites and exploring implementation variations.
+
+NOTE: This is a powerful command which has many options. Fortunately, the more
+involved invocations are used only infrequently, perhaps only once to generate
+the files.
+
+.SH Key Concepts
+Key concepts are the actions (\fBclean, create, replace, list)\fR and
+the targets of those actions. Targets are specified in two complementary ways:
+   1) Explicitly by name or wildcards as positional or \fB--target\fR=...
+   parameters
+   2) Categories, these refer to the target's state
+         a. existing -- i.e. already exist in the file system
+         b. missing  -- i.e. do not exist
+         c. cruft    -- i.e. exist but are not among the known set
+
+See the \fBCategory\fR section for details.
+
+
+.SH Project File
+Given the number of parameters needed to specify a configuration file it is
+impractical to capture all on the command line.  Since it is a file,
+it can be saved in GIT and used to regenerate the configuration files upon
+check-out. It acts much like a super shell script.
+
+Since, except in rare circumstances, all file specifications in the configuration
+files are relative, the configuration files themselves can be saved to GIT.
+Whether one chooses to or not is personal prefences.
+
+While, in general, generated/derived files are not saved to GIT there are
+reasons to save it. The first is just convenience, relieving the next check-up
+from regenerating the configuration files. A more substantive reason is, for
+example, because not all configuration parameters are available in this facility
+(there are many, many and they vary release to release), the configuration file
+may have been editted to include such parameters. If it is not saved, somehow
+these options need to be redone, which leads to just where is this information
+saved.
+
+A complete description of contents of the project file is given elsewhere.
+
+NOTE: There are a limited number of configuration parameters on the command line.
+These override/augment the definitions in the project file. They are not meant
+to completely specify a configuration file but rather to enable one-of/what-if
+experimentation.
+
+
+.SH Categories
+With the configurations and components being specified in the project file,
+there is now the concept of known and unknown configuration/components. This can
+be used to categorize configuration files found in directories known to contain
+the project's configuration files as:
+    1. existing
+    2. missing
+    3. cruft
+
+The existing and missing categories are self-explanatory, This \fBcruft\fR
+category is meant to deal files that have crept into directories known to
+contain configuration files but are not known. Given the power of this command
+and the inevitable typos, this creep is also inevitable.  The issue is - are
+these left-over configuration files or just some random files?
+
+By definition such files are not known to the system so this categorization is,
+by nature, heurestic. Is a file with the extension .cfg a configuration file,
+what about .cfg-sav? Some heurestics are better than others, so \fBcruft\fR is
+further categorized as either low (\fBkruft\fR) or high (\fBKruft\fR) confidence
+with \fBcruft\fR specifying both.
+
+The intersection of categories with the named targets form the actual target
+set of the actions.
+
+
+.SH Examples:
+In the following assumes an HLS_PROJECT file containing the details
+
+  $ hlsCfg --create 
+  Creates all the missing configuration files and their associated components
+
+  $ hlsCfg 'avg*' --create
+  Creates all the missingconfiguration files that satisfy the wildcard
+  specification.
+
+  $ hlsCfg --create --dry-run
+  Reports, but does not create the missing configuration/components files.
+
+  $ hlsCfg --clean=(existing,cruft)
+  This ostensibly cleans all the configuration/component files, but
+  due to the potential of this being the moral equivalent of \fIrm -rf\fR, an
+  explicit named target is required by \fBhlsCfg\fR.  The same is true
+  of \fB--replace\fR.
+
+  $ hlsCfg 'avg*' --clean=(existing,Kruft)
+  Cleans all the configuration/component files satisfying the wildcard
+  specification. The default category is \fBexisting\fR, but this example
+  includes the high confidence \fBcruft\fR category. It is highly recommended
+  to include \fB--dry-run\fR to avoid costly mistakes. This is
+  particularly true when cleaning \fBcruft\fR.
+
+.SH Caveats
+Because the shell typically expands wildcard specifications, care must be taken.
+While the intent is to apply the wildcard to set of known configurations in the
+project file, the shell applies it to the files in the current directory.
+
+This can be particularly bewildering because of another shell quirk. If there
+are no files satisfying the translation in the current directory, the wildcard
+specification is passed as is and work as intended.  This can lead to the
+command successfully executing because no files satisfy the wildcard to
+having the same command (typically using command recall) fail because it is now
+executed in a different directory that does have files satisfying the criteria.
+
+Two methods of specifying wildcards are recommended to avoid this
+    1. If specified as a positional parameter, as in the above examples, always
+       quote the specification to prevent translation by the shell.
+    2. Specifying this with the /fB--targets/fR=(...) qualifier. 
+       This is preferred, particularly if including this command in a script;
+       the intent is explicit and clear.
+
+If specifying more than 1 target, because the shell's command line has no
+explicit binding, a second recommendation is to specify lists of targets as a
+comma separated list. This avoids certain ambuities of what does/does not belong in the list.
+
+     $ hlsCfg --targets=a,b,c --clean
+     -or-
+     $ hlsCfg "a b c" --clean
+     -or-
+     $ hlsCfg a,b,c --clean
+     --not-
+     $ hls --targets=a b c --clean
+
+.SH AUTHOR
+Written by JJRussell
+

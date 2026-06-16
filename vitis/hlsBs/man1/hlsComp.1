@@ -1,0 +1,197 @@
+.TH hlsComp 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsComp \- cleans, creates, removes, lists, components in the workspace from
+configuration files
+
+.SH SYNOPSIS
+.B hlsComp [COMPONENTS] [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsComp
+This command manages the components in the workspace. It is mainly used
+to add components for configuration files not created with \fBhlsCfg\fR, .e.g.
+configuration files created through the IDE or that already exist. 
+
+.SH COMPONENTS
+A list of the names of the components, either as fully specified or
+with wildcards. 
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.TP
+\fB\-\-verbose
+Enables more extensive output which is useful for diagnostics.  The default
+is 'False'.
+
+.TP
+\fB\-w, \-\-workspace = \fIWORKSPACE\fR
+The target workspace. Note that for existing projects, the workspace is almost
+all the information that is needed.  If there is no need to categorize
+components as \fBexisting\fR, \fBmissing\fR, etc no project file or a very
+minimal one just specifying the workspace is needed.
+
+.TP
+\fB\-\-targets=...\fR
+A list of component names.  Functionally this acts the same as the postional
+\fBCOMPENENTS\fR arguments, but due to shell's lack of a formal binding syntax
+for lists and the shell's handling of wildcards for positional arguments this
+is more explicit and reliable.
+
+.TP
+\fB\-\-configurations=...\fR
+A list of configuration files, either explicitly with full path names or with
+wildcards. This defines the complete set of known configuration files and their
+corresponding components. It is the basis of categorizing components as
+\fBexisting\fR, \fBmissing\fR or \fBcruft\fR.
+
+.TP
+\fB\-\-components=...\fR
+The name(s) of the components to create.  This defaults to naming the component
+after the configuration file name. This provides a practical means of specifying
+the component name when multiple configuration files are provided. The default
+is essentially \fB{cfg_name}\fB, but can be overridden with this option. See the
+examples.
+
+.TP
+\fB\-\-project = \fIHLS_PROJECT_FILE\fR
+A project file is the standard method used by all the \fBhls\fR build utilities
+of capturing the stable command line options in a file that can be saved in GIT.
+For existing projects, the formality of a project file is not necessary. There
+are simpler ways. Only for more complex projects is a project file needed. It is
+mainly for consistency with other \fBhls\fR build utilities. Default is the
+environment variable \fIHLS_PROJECT\fR.
+
+.TP
+\fB\-\-no-project
+This prevents the use of any existing project file which may or may not exist.
+Typically used when one wishes to specify all the relevant parameters (in this
+utility these are \fBworkspace\fR and \fBconfigurations\fR and, possibly
+\fBcomponents\fR if wish something other than the default. A common usage is
+in one-of experimentation.
+
+.SH ACTIONS
+.TP
+\fB\-\-clean\fR = (existing, missing, cruft, kruft, Kruft, all)
+Cleans, i.e. removes a category of components. The default category is
+\fBexisting\fR.  Given the heuristic nature of files cateogorized as
+\fBcruft\fR it is recommended to first do either \fB--list\fR or \fB--dry-run\fR.
+
+.TP
+\fB\-\-create\fR = (existing, missing, cruft, kruft, Kruft, all)
+Creates the component files. While any of the categories may be specified,
+only \fBmissing\fR makes practical sense and is the default.
+
+.TP
+\fB\-\-list\fR = (existing, missing, cruft, kruft, Kruft, all)
+Lists the status of the specified categories of component files. The default
+is \fIall\fR, i.e. \fBexisting\fR, \fBmissing\fR and \fBcruft\fR.
+
+.TP
+\fB\-\-replace\fR = (existing, missing, cruft, kruft, Kruft, all)
+Replaces the components. The default is \fBexisting\fR. Since this is effectively
+a --\fBremove\fR and --\fBcreate\fR, use with caution.  As a bow to convenience,
+specifying \fBmissing\fR will also create any missing component. See the
+examples.
+
+.TP
+\fB\-\-dry-run\fR
+Only reports the actions the command would do, but does not run the command.
+Particularly useful and recommended for destructive commands, e.g. \fB--clean\fR
+and \fB--replace\fR.
+
+
+.SH Project File
+A project file is used to capture values of various options that could be
+specified on the command line. This saves both typing and remembering what they
+are. Given that \fBhlsComp\fR is generally used in very simple existing projects,
+no project file or a very minimal one is needed specifying
+    1. The workspace
+    2. The configuration file(s)
+    3. The mapping of a configuration file name to a component
+
+
+.SH Component Selection
+Which components are selected for a given action is by the intersection of the
+positional component list (and its equivalent \fB--targets\fR and the components
+current state. The current state is one
+    1. Existing, the component exists and is consistent with a configuration file
+    2. Missing,  The configuration file does not have a corresponding component
+    3. Cruft,    A component found in the workspace or its reference to its
+                 parent configuration file is inconsistent with the
+                 configuration file specification.
+Each action can specify the a category or categories to target. For \fB--list\fR
+all categories are possible, For others only certain categories make sense. For
+example, only \fBexisting\fR makes sense for \fB--replace\fR.  For the most part
+the utilites permit any combination and warn one of using inappropriate ones.
+
+
+.SH Overriding with Command Line Options
+The \fBhls\fR utilities are constructed so parameters can be specified at 3
+levels depending on their permanency
+    1. In the project file
+    2. Indirectly overriden on the command line
+    3. Directly overriden on the command line
+
+The \fBproject file\fR is the most permanent and \fBoverriding\fR directly on
+the command line the least. The disadvantegous of overriding directly on the
+command line is, except for command recall, they are lost to history and even
+then, they may be seen as just a random collection of options.
+
+The third option is offers something in between, allowing one to capture
+command line options in a file.  This allows the options some degree of
+permanency and, since it is a file, it can be given a meaningful name. The
+disadvantage is, due the complexity in some utilites, not all options offered
+in the project file are available.
+
+The command line syntax is \fI@<MY_OPTIONS>\fR, i.e. the file name preceded by
+an \fB@\fR. The file is trivially formatted, one option (no spaces) per line.
+See the example below.
+
+.SH Examples:
+
+  Example 1
+  $ hlsComp $MY_PROJECT/test.cfg --create \
+           --workspace=$MY_PROJECT/ws/{vitis_version}
+    Creates the component \fBtest\fR in the workspace. Note no project
+    file is needed in this case
+
+  Example 2
+  $ hlsComp $MY_PROJECT/*.cfg --create
+            --workspace=$MY_PROJECT/ws/{vitis_version}
+    Creates any missing components in the workspace named after the
+    configuration files satisfying the wildcard specification.
+
+  Example 3
+  $ hlsComp --create
+            --workspace=$MY_PROJECT/ws/{vitis_version}  
+            --configurations=/MY_PROJECT/cfg/*.cfg 
+            --configurations=my-{cfg_name}
+            
+    Similar to the previous command, but adds the \fImy-\fR prefix to the
+    component name.  Adding a prefix may be useful in one-of experimentation.
+
+  Example 4
+  $ hlsComp --workspace=$MY_PROJECT/ws/{vitis_version}
+            --list=missing
+            --configurations=$MY_PROJECT/cfg/*.cfg 
+
+    Will list only the missing components.
+
+  Example 5
+  $ hlsComp '*' --create @MyOption.txt
+  
+  Assuming \fBMyOptions.txt\fR contains
+       --workspace=$MY_PROJECT/ws/{vitis_version}
+       --configurations=$MY_PROJECT/cfg/*.cfg
+       --components=my-{cfg_name}
+  This duplicates tExample 3.  The ordering is somewhat important, but
+  only in the sense that the last instance supercedes previous ones.
+  This is handy for one-of experimentation.
+
+.SH AUTHOR
+Written by JJRussell
+

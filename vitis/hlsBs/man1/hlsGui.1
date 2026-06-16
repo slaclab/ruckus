@@ -1,0 +1,52 @@
+.TH hlsGui 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsws \- 
+.SH SYNOPSIS
+.B hlsGui [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsWs
+Starts the Vitis/HLS GUI/IDE
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.TP
+\fB\-w, \-\-workspace = \fIWORKSPACE\fR
+GUI is started in this workspace
+
+.TP
+\fB\-\-no-workspace\fR
+GUI is started without a workspace
+
+.SH Workspace
+While the workspace can be specified as a command line option, it is usually
+more convenient to capture it in the project file, an indirect file or in the
+environment variable \fBHLS_PROJECT_WORKSPACE\fR. This saves both typing and
+remembering its exact specification. 
+                                                                                
+.SH Caveat
+Due to a limitation imposed by AMD/Xilinx/Vitis/HLS, commands that modify
+the configuration or components, e.g. \fIhlsCfg\fR, \fIhlsCmp\fR, and initial
+builds from \fIhlsRun\fR will fail if a GUI of the same VITIS version is
+running.
+
+     These commands attempt to start a Vitis server which will fail if
+     a server is already running.  Since the GUI starts a server, the
+     GUI must be exited before these commands can be invoked.
+
+.SH Examples
+To start the HLS Gui in the workspace $MY_PROJECT/ws/v2024.1
+
+   $ hlsGui --workspace=$MY_PROJECT/ws/v2024.1
+
+To start the HLS Gui using the specification in the project file
+
+   $ hlsGui
+
+To just start the hlsGui, with no workspace specified
+
+   $ hlsGui --no-workspace

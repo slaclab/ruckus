@@ -1,0 +1,37 @@
+.TH hlsVer 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsVer \- Sets the Xilinx/Vitis Version
+.SH SYNOPSIS
+.B hlsVer VERSION [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsVer
+Sets the Xilinx/Vitis Version by calling the appropriate settings64.sh script.
+To function, the environment variable \fBHLS_PROJECT_XILINX_SETUP must point
+to root XILINX tool directories.  This may be a colon delimited list if the
+XILINX versions are not all under the same root directory.
+
+Note: This should be viewed as a standalone command. While it is used internally
+by \fBhlsProject\fR. While it can be used within the HLS project build framework,
+it is meant to be a convenience to HLS work that is not using the hls project build
+framework. See the examples.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.SH Examples:
+  $ hlsVer 2024.1
+  Sets the XILINX version to 2024.1
+
+  $ hlsVer 2024.2
+  $ hlsProject
+  Set the XILINX version to 2024.2 then invokes \fBhlsProject\fR to propogate
+  the version to the necessary places.  Doing a bare \fBhlsVer\fR to set the
+  version will leave the hls project build environment in an inconsistent state.
+
+.SH AUTHOR
+Written by JJRussell
+

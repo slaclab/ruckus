@@ -1,0 +1,279 @@
+.TH hlsBs 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsBs \- A quick reference for the hls commands
+
+.SH DESCRIPTION
+A quick reference guide for suite of hls commands along with a brief
+synopsis of what they do.
+
+While command parameters and options can be specified on the command
+line in the traditional manner, by using a project file or indirect file
+(see below) to capture commonly used options, many commands can be
+invoked with just the command, eliminating both tedium and typos when
+using them interactively.
+
+The output files of the \fBhlsBs\fR utilities are compatible with the
+HLS GUI, meaning the various products, in particular the configuration
+and components, can be created and used by either the \BhlsBs\fR utilities
+or the standard issue XILINX development environment.  This necessitated
+compromises since the HLS GUI imposes certain restrictions on the
+modularity of the commands.
+
+
+.SH COMMANDS
+The following is synopsis of the commands, roughly in the order of
+chonological use.  The \fBhlsWs\fR and \fBhlsCfg\fR fall into the use
+(almost) once category, The \fBhlsRun\fR and the \fBhlsExe\fR and
+\fBhlsGdb\fR development aid tools are commands that will be used
+almost exclusively once the workspace, configuration files and
+components are created.
+
+More detailed help can be found by either, \fIe.g.\fR
+  - $ hlsCfg [-h | --help]
+  - $ man hlsCfg
+
+.TP
+.B hlsProject
+This sets up an HLS project for the specified XILINX/HLS version. Typically
+one does a \fB$ source setup_hls.sh\fR to make all the commands available, then
+an \fBhlsProject\fR to set the Vitis version.
+   $ hlsProject 2024.2
+
+.TP
+.B hlsWs
+Manage the workspace, by \fBcreating\fR, \fBremoving\fR, \fBreplacing\fR,
+\fBlisting\fR and checking its \fBstatus\fR.
+   $ hlsWs --workspace=<WORKSPACE> [ACTION]
+
+.TP
+.B hlsGui
+Starts the Vitis IDE/GUI in the specified workspace or no workspace.
+   $ hlsGui --workspace=<WORKSPACE>
+
+.TP
+.B hlsCfg
+Manages the configuration files by \fBcreating\fR, \fBcleaning\fR,
+\fBreplacing and \fBlisting\fR and optionally (by default) creating its
+corresponding HLS component during configuration file creation.
+   $ hlsCfg <COMPONENTS> [OPTIONS]
+
+.TP
+.B hlsComp
+Manages the HLS components \fBcreating\fR, \fBcleaning\fR,
+\fBreplacing and \fBlisting\fR. This is generally used for creating
+the components from existing/legacy configuration files. \fBhlsCfg\fR is the
+usual way of creating the HLS component.
+   $ hlsComp <COMPONENTS> [OPTIONS] 
+
+.TP
+.B hlsRun
+Run any single or combination of the various stages, \fBcsim\fR,
+\fBsynthesis\fRl \fBcosim\fR, \fBpackage\fR, \fBimplementation\fR and
+\fBip\fR on one or more HLS components.  Useful in scripts which act
+on a single components or a collection of HLS components.
+   $ hlsRun <COMPONENTS> [OPTIONS]
+
+.TP
+.B hlsExe
+Runs \fBcsim\fR on 1 HLS component. Because it allows easy modification of
+the command line parameters, it is useful to examine/explore different
+combinations of the command line parameters such as different test files.
+   $ hlsExe <COMPONENT> [CSIM OPTIONS]
+
+.TP
+.B hlsGdb
+Runs \fBcsim\fR on 1 HLS component under the debugger. Because, just
+as \fBhlsExe\fR, it allows easy modification of the command line
+parameters, it is useful in debugging issues with different
+combinations of the command line parameters, e.g. a particular set of
+input data that is causing problems.
+   $ hlsGdb <COMPONENT> [CSIM OPTIONS]
+
+.TP
+.B hlsCtx
+This displays all the 'hidden' HLS_PROJECT context, in particular its
+environment variables.  Since these environment variables are all of
+the form \fBHLS_PROJECT_\fR<what>, can also be seen by
+   $ printenv | grep \fBHLS_PROJECT_\fR
+  
+
+.SH GENERALITIES
+All commands, except \fBhlsWs\fR and \fBhlsGui\fR take the component name(s)
+as their positional parameters. The component name(s) may be 
+    a) A single explicit component name
+    b) A single wildcarded component name
+    c) A list of any combination of explicit and wildcarded component names.
+
+The components are the targets of the command's actions.
+
+NOTE: \fBhlsExe\fR and \fBhlsGdb\fR usage logically target only a single
+component.
+
+
+.SH \fBCaveat\fR -- aka Beware of the Shell
+Wildcarding in the \fBhlsBs\fR commands refers to the
+component names in the \fBworkspace\fR, but the shell tries to satisfy
+any wildcarding in the current working directory. Unless the current
+working directory is the workspace,  this can result in mysterious behavior.
+It is recommended to
+    a) Single quote any wildcarded component names on the command line
+       to prevent the shell from trying to satisfy the wildcard
+    b) Use the alternative --components=<COMPONENTS>
+
+Because it is very explicit, b) is the perferred method.  It also
+avoids the danger inherent in the shell's handling of command line
+parameters of positional parameters that immediately following an option
+expecting additional parameters. For example
+   $ hlsCfg --clean '*'
+   
+Here --clean can accept a list of target categoryies (existing,
+missing, cruft) but will 'eat' the '*' positional parameter.  The
+safer option is to use --components='*'.  As a bonus by using the '=',
+the single quotes are unnecessary.
+
+
+.SH PRODUCTS and WORKSPACE Only Specification
+Many commands only need the \fBworkspace\fR or the \fBproducts\fR directory.
+For simple projects, this greatly simplifies their usage.
+
+The \fBworkspace\fR and the \fBproducts_root\fR can be specified in the
+following ways
+   1. In a project file
+      This is the most formal way. A project file is meant for large
+      and/or mature projects.
+
+      A large project might be a test suite involving multiple
+      components, variations of the same component (think different
+      implementations to explore resource/performance trade-offs) and
+      different test vectors.
+
+      Using a project file with a mature project allows other users to
+      check the code out from the GIT repository and build and run it
+      without detailed knowledge.
+
+      By default the project file is the environment variable HLS_PRODUCT_PRJ.
+      The default can be neutered by \fB\-\-no-product\fR, which is handy for
+      one-of ad hoc experimentation.
+      
+   2. In an indirect file.
+      This is a file containing the \fB\-\-workspace\fR=<\fIWORKSPACE\fR or
+      --products_root=<\fIPRODUCTS>\fR a single line.  This file is
+      the invoked by specifying it on the command line as
+      \fB@FILE\fR. Note any command line option can be placed in this
+      file; it is not limited to just the workspace/products root
+      
+   3. Directly on the command line as \fB\-\-workspace\fR=<\fIWORKSPACE\fR
+      as \fB\-\-\PRODUCTS_ROOT\fR
+   
+   4. By the environment variable \fBHLS_PROJECT_WORKSPACE\fR and
+      \fBHLS_PROJECT_PRODUCTS\fR. This is not recommended except in the
+      simplest projects, since it is very easy to lose track of what
+      its value is. In practice, when used with other command line
+      parameters, this can be used to easily create an ad-hoc
+      workspace to experiment in.
+
+   5. Finally, if no workspace/products_root is specified, it defaults in
+      the following order.
+        a) If HLS_PROJECT_PRODUCTS or --products_root is set then
+             ${products_root}/ws/{version}
+             
+        b) If HLS_PROJECT_PRODUCTS and --products_root is not set, then
+           taken from HLS_PROJECT_ROOT or --project_root=
+             ${project_root}/products/ws/{version}
+             
+        c) If none set --> \fBERROR\fR
+      
+.SH INDIRECT FILE
+An  indirect file may contain one of more command line options. It
+represents a middle ground between the high formality of a project file and the
+ad hoc nature of command line parameters. Giving it a meaningful name allows
+some self-documentation, particularly when doing command recall.
+
+The format is simple, but somewhat unforgiving (no comments, no extra spaces,
+etc), just one option per line. For example
+     --workspace=MyWorkspace
+     --ntests=40
+
+.TP Caveats
+Also note, that while there is no \fBinclude\fR capability in the file, one
+can specify multiple indirecct files, allowing a semblance of modularity.
+
+.SH PROJECT FILE
+While this is very formal, it offers the most control and accountability.
+Almost all its complexity is related to creating the \fBHLS\fR configuration
+file and its corresponding component.
+
+The project file is a Python file with 3 methods
+   1. get_workspace () -- the workspace
+   2. get_root      () -- the package's root directory
+   3. get_products  () -- a description of the product (.cfg/components)
+
+All but \fBget_products\fR are very simple. A manual of how to write
+\fBget_products\fR is in the works.
+
+It is anticipated that many projects will fall into a couple of
+standard forms.  For example, a very simple one building one
+configuration/one component, or, projects building SNL networks.
+
+Identifying such patterns, allows much of the boilerplate to be
+captured in a common file and included in the user's project file.
+The users' project file contains only the specifics, becoming a
+fill-in-a-form exercise.
+
+As an example, an SNL project has a template that limits the user's
+project file to including it and the following
+
+    product = snl.create_product (networks      =     networks,
+                                  fpgas         =        fpgas,
+                                  cfg_template  = cfg_template,
+                                  cmp_template  = '{cfg_name}',
+                                  csim_argv     =    csim_argv,
+                                  cosim_argv    =   cosim_argv,
+                                  package       =      package,
+                                  vivado        =       vivado,
+                                  ip            =           ip)
+
+    return product
+
+where you just specify
+   1. networks     = The SNL network(s) (which may be wildcarded)
+   2. fpgas        = The list of FPGAs (part, clock, uncertainity)
+   3. cfg_template = how to form the configuration file name
+   4. cmp_template = how to form the component name
+   5. csim_argv    = The argv's for running csim
+   6. cosim_argv   = The argv's for running cosim
+   7. package      = The packaging specification (vendor, version, etc)
+   8. vivado       = The vivado specification
+   9. ip           = The ip specification
+
+
+.SH About Command Line Flexibility
+A goal of \fBhls\fR suite of commands was to provide flexibility in
+specifying command line options, wishing to avoid editing the HLS
+configuration fil,e while at the same time encouraging experimentation.
+The \fBhls\fR commands are structured to treat the HLS configuration
+file to be 'write-once'.
+
+To do this, many of the options specified in the configuration file can be
+overriden when invoking the command by either directly typing the option or
+using an indirect file.
+
+An example of the direct usage might be to alter the number of tests run
+
+    $ hlsExe <component> --ntests=5
+
+or changing an input file
+
+    $ hlsExe <component> input=new-input --golden=new-golden
+
+The second example might be better accomplish with an indirect file
+
+    $ hlsExe <component> @MyProblemChild
+
+with MyProblemChild containing
+     --input=input-problem-child.dat
+     --golden=golden-problem-child.dat
+
+Future plans are to extend this, \fIe.g.\fR so that changing the FPGA clock
+and uncertainity can be changed.  (These are intrinisically configuration
+file parameters, so are more complicated to modify.)

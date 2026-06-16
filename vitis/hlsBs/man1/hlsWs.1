@@ -1,0 +1,119 @@
+.TH hlsWs 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsWs \- creates,removes,lists, gives the status of an HLS workspaces
+.SH SYNOPSIS
+.B hlsWs [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsWs
+Manages an HLS workspace. It can create, remove,
+replace, list or get the status of the specified workspace
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.TP
+\fB\-w, \-\-workspace = \fIWORKSPACE\fR
+The target workspace. 
+
+.TP
+\fB\-\-project = \fBHLS PROJECT FILE\fR
+A project file is the standard \fBhls\fR method of capturing some of the
+stable command line options in a file. 
+
+.SH Actions
+
+.TP
+\fB\-\-dry-run\fR
+Only reports the actions the command would do, but does not run the command
+
+.TP
+\fB\-\-create\fR
+Creates the workspace if it does not already exist
+
+.TP
+\fB\-\-list\fR 
+ Lists the contents of the workspace, typically HLS components + VITIS/HLS
+ specific files
+
+.TP
+\fB\-\-remove\fR
+Removes the workspace and all the files associated with it. Use with caution
+
+.TP
+\fB\-\-replace\fR
+Replaces the workspace. Since this is effectively a --\fIremove\fR and
+--\fIcreate\fR, use with caution
+
+.TP
+\fB\-\-status\fR
+A brief status report giving the full path of the workspace and whether it
+exists or not
+
+
+.SH Project File
+A project file is used to capture values of various options that could be
+specified on the command line. This saves both typing and remembering what they
+are.
+
+While the project file itself may be specified on the command line via the
+\fB--project=\fR options, more typically it is specified with the environment
+variable \fBHLS_PROJECT_PRJ\fR.
+
+For the \fBhlsWs\fR command, it is convenient to place the definition of the
+workspace in this file. This reduces commands to, \fIe.g.\fR
+   $ hlsWs --create
+
+.SH Suggestions on Specifying the HLS Workspace:
+While the HLS workspace may be placed anywhere, it is typically placed near the
+top of the project's direct tree. Two suggestions
+
+1. Since the contents are not usually saved to the GIT repository, one should
+pick a name that will be ignored by the \fI.gitignore\fR file.
+
+2. While the workspace can be any legitimate filename, a strong suggestion is
+to include the VITIS version number in the name. This allows easy changing from
+one Vitis Version to another.
+ 
+To make this easy, the Vitis version number can be automatically included
+in the workspace name using the usual python variable substition pattern,
+\fIe.g.\fR
+
+   $ hlsWs --workspace=${[MY_PROJECT}/ws/{vitis-version}
+
+This allows movement between Vitis versions, making it easy to compare one
+version with another. Better yet is to include this definition in the
+\fBproject file\fR.
+
+.SH Defaults
+The workspace defaults to
+      <PROJECT_ROOT>/products/ws/{vitis_version}  ..or..
+      <PRODUCTS_ROOT/ws/{vitis_version}
+
+where PROJECT_ROOT/PRODUCTS are generally specified by the environment variables
+HLS_PROJECT_ROOT/HLS_PROJECT_PRODUCT.
+
+
+.SH Examples:
+In the following assume the Vitis version is v2024.1
+
+  $ hlsWs --create --workspace=$MY_PROJECT/ws/{vitis_version}
+
+  Creates:  $MY_PROJECT/ws/v2024.1
+
+  $ hlsWs --create --dry-run
+
+  This will use the definition of the workspace found in the HLS_PROJECT file
+  to report what would have been created if --dry-run had not been specified.
+ 
+  $ hlsWs  --status
+  This will use the definition of the workspace found in the HLS_PROJECT file
+  to display the status of the workspace. This is useful if one has forgotten
+  the name of the workspace since it is buried in the HLS_PROJECT file.
+
+.SH AUTHOR
+Written by JJRussell
+
