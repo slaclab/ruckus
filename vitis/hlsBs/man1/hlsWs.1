@@ -17,12 +17,12 @@ Displays this message\
 
 .TP
 \fB\-w, \-\-workspace = \fIWORKSPACE\fR
-The target workspace. 
+The target workspace.
 
 .TP
 \fB\-\-project = \fBHLS PROJECT FILE\fR
 A project file is the standard \fBhls\fR method of capturing some of the
-stable command line options in a file. 
+stable command line options in a file.
 
 .SH Actions
 
@@ -35,7 +35,7 @@ Only reports the actions the command would do, but does not run the command
 Creates the workspace if it does not already exist
 
 .TP
-\fB\-\-list\fR 
+\fB\-\-list\fR
  Lists the contents of the workspace, typically HLS components + VITIS/HLS
  specific files
 
@@ -77,7 +77,7 @@ pick a name that will be ignored by the \fI.gitignore\fR file.
 2. While the workspace can be any legitimate filename, a strong suggestion is
 to include the VITIS version number in the name. This allows easy changing from
 one Vitis Version to another.
- 
+
 To make this easy, the Vitis version number can be automatically included
 in the workspace name using the usual python variable substition pattern,
 \fIe.g.\fR
@@ -108,7 +108,7 @@ In the following assume the Vitis version is v2024.1
 
   This will use the definition of the workspace found in the HLS_PROJECT file
   to report what would have been created if --dry-run had not been specified.
- 
+
   $ hlsWs  --status
   This will use the definition of the workspace found in the HLS_PROJECT file
   to display the status of the workspace. This is useful if one has forgotten
@@ -116,4 +116,3 @@ In the following assume the Vitis version is v2024.1
 
 .SH AUTHOR
 Written by JJRussell
-

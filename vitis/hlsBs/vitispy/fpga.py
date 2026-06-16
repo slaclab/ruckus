@@ -23,7 +23,7 @@ class Fpga :
     def add (self, cfg_file) :    # Fpga
         cfg_file.set_value (                 key = 'part',  value = self.part)
         cfg_file.set_value (section = 'hls', key = 'clock', value = self.clock)
-        
+
         if (self.uncertainity) :
             cfg_file.set_value (section = 'hls', key = 'uncertainity',
                                                value = self.uncertainity)

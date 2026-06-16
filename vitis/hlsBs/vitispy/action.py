@@ -42,7 +42,7 @@ class Action :
     Clean        : int = 2
     Create       : int = 4
     Replace      : int = 8
-        
+
     def __init__ (self, args) :
         self.action = 0
         if args.list    is not None : self.action |= Action.List
@@ -71,8 +71,8 @@ class Action :
 
         if msk == 0 : msk = default_opt
         return msk
-            
-        
+
+
     @staticmethod
     def isList (action) :
         return True if (action &     List) else False
@@ -80,7 +80,7 @@ class Action :
     @staticmethod
     def isClean (action) :
         return True if (action &    Clean) else False
-    
+
     @staticmethod
     def isCreate (action) :
         return True if (action &   Create) else False

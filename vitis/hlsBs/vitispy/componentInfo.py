@@ -8,9 +8,9 @@ class ComponentInfo :
     ErrNoCompPath = 2
     ErrJsonDecode = 4
     ErrUnknown    = 8
-    
+
     def __init__ (self, component_path, silence_error = False) :
-                    
+
         vitis_comp_path = os.path.join (component_path, 'vitis-comp.json')
         self.errs = 0
 
@@ -26,9 +26,9 @@ class ComponentInfo :
                 # so check if the cfg is relative and add the component path
                 if (os.path.isabs (cfg) == False) :
                     cfg = os.path.join (component_path, cfg)
-                    
+
                 self.cfg_files = os.path.realpath (cfg)
-                
+
                 work_dir = data['configuration']['work_dir']
                 if (os.path.isabs (work_dir) == False) :
                     work_dir = os.path.join (component_path, work_dir)
@@ -48,7 +48,7 @@ class ComponentInfo :
                         self.csim_argv = ''
                         self.sim_argv  = ''
                         self.syn_dcp   = False
-                        
+
                         look : int = 15
                         for line in file :
 
@@ -57,7 +57,7 @@ class ComponentInfo :
                                 self.csim_argv = re.sub (pattern, replace, line[idx+9:])
                                 look &= ~1
                                 if look == 0 : break
-                                
+
                             elif  (look & 2) and (line[0:8] == "sim.argv") :
                                 idx = line[8:].find ('--')
                                 self.sim_argv = re.sub (pattern, replace, line[idx+8:])
@@ -67,34 +67,33 @@ class ComponentInfo :
                             elif (look & 4) and (line[0:7] == 'syn.top') :
                                 idx = line[7:].find ('=')
                                 self.hls_top_level = line[idx+7+1:].strip ()
-                                look &= ~4 
+                                look &= ~4
                                 if look == 0: break
 
                             elif (look&8) and (line[0:16]=='vivado.syn_dcp=1'):
                                 look        &= ~8
                                 self.syn_dcp = True
                                 if look == 0: break
-                                                    
+
 
                 except FileNotFoundError:
                     self.errs |= ComponentInfo.ErrNoCfgFile
                     if not silence_error :
                         print (f"Error; The {self.cfg_files} was not found")
-                    
-                    
+
+
         except FileNotFoundError:
-            self.errs |= ComponentInfo.ErrNoCompPath 
+            self.errs |= ComponentInfo.ErrNoCompPath
             if not silence_error :
                 print(f"Error: The file '{vitis_comp_path}' was not found.")
-                
+
         except json.JSONDecodeError as e:
             self.errs |= ComponentInfo.ErrJsonFile
             if not silence_error :
                 print(f"Error decoding JSON from '{vitis_comp_path}': {e}")
-                
+
         except Exception as e:
             self.errs |= ComponentInfo.ErrUnknown
             if not silence_error :
                 print(f"An unexpected error occurred: {e}")
 # ------------------------------------------------------------------------------
-

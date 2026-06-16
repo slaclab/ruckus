@@ -14,7 +14,7 @@ class DryRun :
     def __bool__ (self) :
         return self.dry_run
 
-    
+
     def print (self, printer) :
         if self.dry_run :
             printer.line ('Dry run', str(self.dry_run) + "   <--- Note")

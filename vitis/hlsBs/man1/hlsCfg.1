@@ -80,7 +80,7 @@ effectively a --\fIremove\fR and --\fIcreate\fR, use with caution. As a bow to
 convenience, specifying \fI--missing\fR will create the file. See the examples.
 
 
-.SH Features 
+.SH Features
 \fBhlsCfg\fR is capable of generating one or many configuration files.
 Multiple configuration files are specified as an explicit list or generated
 from a wildcard specification. Multiple configurations/components are useful
@@ -158,7 +158,7 @@ set of the actions.
 .SH Examples:
 In the following assumes an HLS_PROJECT file containing the details
 
-  $ hlsCfg --create 
+  $ hlsCfg --create
   Creates all the missing configuration files and their associated components
 
   $ hlsCfg 'avg*' --create
@@ -196,7 +196,7 @@ executed in a different directory that does have files satisfying the criteria.
 Two methods of specifying wildcards are recommended to avoid this
     1. If specified as a positional parameter, as in the above examples, always
        quote the specification to prevent translation by the shell.
-    2. Specifying this with the /fB--targets/fR=(...) qualifier. 
+    2. Specifying this with the /fB--targets/fR=(...) qualifier.
        This is preferred, particularly if including this command in a script;
        the intent is explicit and clear.
 
@@ -214,4 +214,3 @@ comma separated list. This avoids certain ambuities of what does/does not belong
 
 .SH AUTHOR
 Written by JJRussell
-

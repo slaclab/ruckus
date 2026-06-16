@@ -25,7 +25,7 @@ def is_creatable (path):
        False if the path cannot be created
     '''
     path = os.path.abspath(path)
-    
+
     # If it already exists, technically it's "creatable" or already there
     if os.path.exists(path):
         return os.path.isdir(path)
@@ -52,10 +52,10 @@ def sanitize (file, rel_path) :
 
     elif ((file[0:1] == '/') or (file[0:1] == '\\')) :
         return file
-    
+
     elif rel_path        :
         return os.path.relpath (os.path.realpath (os.path.expandvars (file)), rel_path)
-    
+
     else                 :
         return os.path.realpath (os.path.expandvars (file))
 # ------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ def get_files (string, template) :
         # which has already been expanded
         # -------------------------------------------------------
         if string : file = os.path.expandvars (file)
-        
+
         if os.path.isdir (file) :
             file_dir = file
             file_nam = None
@@ -152,14 +152,14 @@ def get_files (string, template) :
 
             if not __is_candidate (os.path.realpath(f), candidates) : continue
 
-                
+
             # --------------------
             # Ignore if not a file
             # --------------------
             if (not os.path.isfile (f)) : continue
-            
+
             f = os.path.abspath (f)
-            
+
             # -----------------------------------
             # Only add if not already in the list
             # -----------------------------------
@@ -174,7 +174,7 @@ def get_files (string, template) :
 def get_components (workspace, components) :
 
     if (not components) : components = ['*']
-    
+
     # ---------------------------------------------
     # Initialize the return component list to empty
     # ---------------------------------------------
@@ -198,7 +198,7 @@ def get_components (workspace, components) :
         # Get all the files in this list
         # ------------------------------
         for c in cs :
-            
+
             # -------------------------
             # Ignore if not a directory
             # -------------------------
@@ -223,4 +223,3 @@ def get_components (workspace, components) :
 
     return cmp_list
 # ------------------------------------------------------------------------------
-

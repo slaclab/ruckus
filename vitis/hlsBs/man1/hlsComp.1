@@ -11,11 +11,11 @@ configuration files
 .B hlsComp
 This command manages the components in the workspace. It is mainly used
 to add components for configuration files not created with \fBhlsCfg\fR, .e.g.
-configuration files created through the IDE or that already exist. 
+configuration files created through the IDE or that already exist.
 
 .SH COMPONENTS
 A list of the names of the components, either as fully specified or
-with wildcards. 
+with wildcards.
 
 .SH OPTIONS
 .TP
@@ -167,23 +167,23 @@ See the example below.
 
   Example 3
   $ hlsComp --create
-            --workspace=$MY_PROJECT/ws/{vitis_version}  
-            --configurations=/MY_PROJECT/cfg/*.cfg 
+            --workspace=$MY_PROJECT/ws/{vitis_version}
+            --configurations=/MY_PROJECT/cfg/*.cfg
             --configurations=my-{cfg_name}
-            
+
     Similar to the previous command, but adds the \fImy-\fR prefix to the
     component name.  Adding a prefix may be useful in one-of experimentation.
 
   Example 4
   $ hlsComp --workspace=$MY_PROJECT/ws/{vitis_version}
             --list=missing
-            --configurations=$MY_PROJECT/cfg/*.cfg 
+            --configurations=$MY_PROJECT/cfg/*.cfg
 
     Will list only the missing components.
 
   Example 5
   $ hlsComp '*' --create @MyOption.txt
-  
+
   Assuming \fBMyOptions.txt\fR contains
        --workspace=$MY_PROJECT/ws/{vitis_version}
        --configurations=$MY_PROJECT/cfg/*.cfg
@@ -194,4 +194,3 @@ See the example below.
 
 .SH AUTHOR
 Written by JJRussell
-

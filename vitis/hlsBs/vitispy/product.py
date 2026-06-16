@@ -1,6 +1,6 @@
 import os
 from .version     import Version
-    
+
 class Product :
 
     from .fpga        import Fpga
@@ -10,7 +10,7 @@ class Product :
     from .dictionary  import Dictionary_of_Fpgas  as Fpgas
     from .dictionary  import Dictionary_of_Values as Values
 
-    
+
     # --------------------------------------------------------------------------
     class Vivado :
         def __init__ (self, flow, syn_dcp) :
@@ -34,26 +34,26 @@ class Product :
             printer.line ('Vivado.flow'   , self.flow)
             printer.line ('      .syn_dcp', self.syn_dcp)
             return
-        # ----------------------------------------------------------------------           
+        # ----------------------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------------------
         def add (self, cfg_file) :
             cfg_file.set_value (section = 'hls', key = 'vivado.flow',           value = self.flow)
             cfg_file.set_value (section = 'hls', key = 'vivado.syn_dcp',        value = self.syn_dcp)
             return
         # ----------------------------------------------------------------------
-        
+
     # --------------------------------------------------------------------------
     # End: Product.Vivado
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     # Holds the HLS configuration Package specification
     # --------------------------------------------------------------------------
     class Package :
-            
+
         # ----------------------------------------------------------------------
         # Capture the package specification
         # ----------------------------------------------------------------------
@@ -92,7 +92,7 @@ class Product :
 
                 # This is printed with configuration/component
                 #if self.name : print (f"\n{'Name'          :{n}s}: {self.name}")
-                
+
                 print ()
                 printer.line ('Ip    .Vendor',  self.vendor)
                 printer.line ('      .Library', self.library)
@@ -109,7 +109,7 @@ class Product :
         # END: Product.Package.Ip
         # ---------------------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------------------
         # Manages the package Output specification
         # ----------------------------------------------------------------------
@@ -142,7 +142,7 @@ class Product :
                 printer.line ('      .syn',    'True' if self.syn else 'False')
                 return
             # ------------------------------------------------------------------
-            
+
 
             # ------------------------------------------------------------------
             # Add the package command line parameters to the parser
@@ -153,25 +153,25 @@ class Product :
                 parser.add_argument ('--syn',    action = 'store_true', help='Synthesis Output')
                 return
             # ------------------------------------------------------------------
-            
+
         # ----------------------------------------------------------------------
         # END: Product.Output
         # ----------------------------------------------------------------------
-        
+
         # ----------------------------------------------------------------------
         # Add package to configuration
         # ----------------------------------------------------------------------
         def add (self, cfg_file) :         # Package
 
             cfg_file.set_value (section = 'hls', key = 'flow_target',           value = 'vivado')
-            
+
             cfg_file.set_value (section = 'hls', key = 'package.ip.name',       value = self.ip.name)
             cfg_file.set_value (section = 'hls', key = 'package.ip.vendor',     value = self.ip.vendor)
             cfg_file.set_value (section = 'hls', key = 'package.ip.library',    value = self.ip.library)
             cfg_file.set_value (section = 'hls', key = 'package.ip.version',    value = self.ip.version)
             cfg_file.set_value (section = 'hls', key = 'package.output.format', value = self.output.format)
             cfg_file.set_value (section = 'hls', key = 'package.output.syn',    value = self.output.syn)
-                
+
             return
         # ----------------------------------------------------------------------
 
@@ -184,14 +184,14 @@ class Product :
             return
         # ----------------------------------------------------------------------
 
-        
+
         # ---------------------------------------------------------------------
         def print (self, printer) :                  # Package
             self.ip    .print (printer)
             self.output.print (printer)
             return
         # ----------------------------------------------------------------------
-            
+
         # ----------------------------------------------------------------------
         def __init__ (self, ip, output) :     # Package
             self.ip     = ip
@@ -206,7 +206,7 @@ class Product :
     # END: Product.Package
     # --------------------------------------------------------------------------
 
-    
+
     # ----------------------------------------------------------------------
     class Targets :
         def __init__ (self, *dictionaries) :
@@ -217,7 +217,7 @@ class Product :
     # ----------------------------------------------------------------------
 
 
-    # ----------------------------------------------------------------------            
+    # ----------------------------------------------------------------------
     def __init__ (self, project, targets, package, vivado) :
 
         self.targets         = targets
@@ -244,4 +244,3 @@ class Product :
 # ------------------------------------------------------------------------------
 # END: Product
 # ------------------------------------------------------------------------------
-

@@ -31,17 +31,17 @@ class Configuration :
         self.verbose        = args.verbose
         self.create         = args.create  is not None
         self.replace        = args.replace is not None
-        
+
         if create_components :
             self.comp       = Component (project, args, self.workspace)
         else :
             self.comp       = None
             self.client     = None
 
-            
+
         # ---------------------------------------------------
         # Currently only need a Vitis client if
-        #  1. not a dry_run 
+        #  1. not a dry_run
         #  2. doing a create or replace
         #
         # This accomplishes to goals
@@ -67,12 +67,12 @@ class Configuration :
         if self.comp : caption += ' + Component'
 
         printer.header (caption)
-        
+
         if (self.workspace) :
             printer.line ("Workspace", self.workspace)
 
         self.project.print_project (printer, verbose)
-        
+
         if self.verbose :
 
             if self.project.spc_print and self.project.spc_print.com_print :
@@ -82,13 +82,13 @@ class Configuration :
                         itm = item[1]
                         if item[2] :
                             itm = os.path.realpath(os.path.expandvars (itm))
-                            
+
                         printer.line (item[0], itm)
 
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def print_argv (printer, label, argv) :
@@ -96,7 +96,7 @@ class Configuration :
         sep    = ':'
         prefix = '-'
         opts   = argv.split (' -')
-        
+
         for opt in opts :
             if len (opt) :
                 printer.itemPlain (label, prefix + opt, sep)
@@ -106,7 +106,7 @@ class Configuration :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     # Print the configuration specification parameters
     # --------------------------------------------------------------------------
@@ -122,7 +122,7 @@ class Configuration :
 
 
         if not verbose :  return
-        
+
         # ----------------------------
         # Project specific information
         # ----------------------------
@@ -141,16 +141,16 @@ class Configuration :
         if self.verbose :
             printer.itemPlain ("Package.name",  self.project.package.ip.name)
             printer.itemPlain ("Top HLS",       self.top)
-            
+
             if hasattr (self,    'sim_argv') and self.sim_argv   :
                 self.print_argv (printer, "Sim_argv",   self.sim_argv)
-                
+
             if hasattr (self,  'csim_argv') and self.csim_argv  :
                 self.print_argv (printer, "CSim_argv",  self.csim_argv)
-                
+
             if hasattr (self, 'cosim_argv') and self.cosim_argv :
                 self.print_argv (printer, "CoSim_argv", self.cosim_argv)
-            
+
         if (self.dry_run) :
             printer.itemPlain ("Action", "Dry Run <-- Note", '*')
 
@@ -195,14 +195,14 @@ class Configuration :
             else           : self.csim_argv = None
         else :
             self.csim_argv = None
-        
+
         if 'cosim_argv' in build :
             cosim_argv = build['cosim_argv']
             if cosim_argv : self.cosim_argv = cosim_argv.format_map (target.map)
             else          : self.cosim_argv = None
         else :
             self.cosim_argv = None
-            
+
 
         # -------------------------------------------------------------------
         # Complete package IP
@@ -226,11 +226,11 @@ class Configuration :
                 else :
                     return False, [message]
 
-        self.fpga = target.fpga            
+        self.fpga = target.fpga
         if not self.dry_run :
 
             cfg_file = self.client.get_config_file(path = cfg_path)
-            
+
             # --------------------------------
             # Fpga Part + clock + uncertainity
             # --------------------------------
@@ -270,7 +270,7 @@ class Configuration :
 
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     # Compose cfg path by adding the extension if it is missing
     # ---------------------------------------------------------
@@ -290,7 +290,7 @@ class Configuration :
             Workspace.set (client, self.comp.workspace)
         return
     # --------------------------------------------------------------------------
-    
+
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -300,7 +300,7 @@ class Configuration :
         return file
     # --------------------------------------------------------------------------
 
-    
+
     class SafeDict (dict):
         def __missing__(self, key):
             return f"{{{key}}}"  # Returns the original placeholder like {key}
@@ -313,7 +313,7 @@ class Configuration :
                      cfg_name,
                      rel_path,
                      src_file) :
-        
+
         target_dict = Configuration.SafeDict ({'target_file' : tgt_path,
                                                'target_name' : tgt_name,
                                                'cfg_name'    : cfg_name})
@@ -343,7 +343,7 @@ class Configuration :
                 else :
                     inc_path = exp_path
                     inc_dir  = file
-            
+
             # -----------------------------
             # Check the include path exists
             # -----------------------------
@@ -361,7 +361,7 @@ class Configuration :
         return errs, incs
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def expand_defs (defines, tgt_name, tgt_path, cfg_name, src_file) :
@@ -372,7 +372,7 @@ class Configuration :
         src_dir     = os.path.split (src_file)[0]
         defs        = ''
         errs        = 0
-        
+
         if not isinstance (defines, list) : defines = [defines]
 
         for d in defines :
@@ -427,7 +427,7 @@ class Configuration :
                 exp_file = os.path.expandvars (file)
                 rel_path = os.path.expandvars (
                            d['rel_path']).format_map (target_dict)
-                
+
                 if os.path.isabs (exp_file):
                     abs_file = exp_file
                     rel_file = Configuration.make_relative (file, rel_path)
@@ -459,7 +459,7 @@ class Configuration :
                     f"     : Value = {value}\n"
                     f"    -> {src_file}", file = sys.stderr)
                 errs += 1
-        
+
         return errs, defs
     # --------------------------------------------------------------------------
 
@@ -479,7 +479,7 @@ class Configuration :
         first       = True
         key_file    = label + '.file'
         key_cflags  = label + '.file_cflags'
-        
+
         for file in files :
 
             file_path = os.path.expandvars (file['file'])
@@ -490,7 +490,7 @@ class Configuration :
                        file = sys.stderr)
                 errors += 1
                 continue
-            
+
             cc_file    = Configuration.make_relative (file_path,
                                                       cfg_path,
                                                       False)
@@ -536,7 +536,7 @@ class Configuration :
                 if defs : cflags += defs
 
             # -----------------------------------------
-            # Bizarrely must write the subsequent files 
+            # Bizarrely must write the subsequent files
             # with a different method than the first
             # -----------------------------------------
             if first :
@@ -560,7 +560,7 @@ class Configuration :
         return errors
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def add_files (self,
                    build,
@@ -624,7 +624,7 @@ class Configuration :
             cfg_file.set_value (section = 'hls',
                                 key     = 'sim.argv',
                                 value   = self.sim_argv)
-            
+
         if  self.csim_argv :
             cfg_file.set_value (section = 'hls',
                                 key     = 'csim.argv',
@@ -637,5 +637,5 @@ class Configuration :
 
         return
     # --------------------------------------------------------------------------
-                                  
+
 # ------------------------------------------------------------------------------

@@ -115,8 +115,8 @@ def doit () :
                "       b) specify one in an indirect file or project file\n"
                "       c) set HLS_WORKSPACE\n")
         sys.exit (-1)
-    
-    
+
+
     ws            = Workspace.get (workspace)
     dry_run       = DryRun (args.dry_run)
 
@@ -132,13 +132,13 @@ def doit () :
         else      :
             msg = "Cannot remove, does not exist"
             flag = False
-        
+
 
         if not dry_run :
             if exists : Workspace.remove (ws)
             print_ws ("Workspace - Removing", ws, dry_run, msg, flag)
             status = 0
-            
+
         else       :
             print_ws ("Workspace - Removing",
                       ws,
@@ -156,10 +156,10 @@ def doit () :
                 client = vitis.create_client ()
                 Workspace.replace (client, ws)
                 status = 0
-                
+
             else :
                 status = 1
-                
+
             print_ws ("Workspace - Replace", ws, dry_run, "Replaced")
 
         else :
@@ -167,15 +167,15 @@ def doit () :
                 client = vitis.create_client ()
                 Workspace.create (client, ws)
                 status = 0
-                
+
             else :
                 status = 2
-                
+
             print_ws ("Workspace - Replace", ws, dry_run, "Created")
-                
+
         return status
         # ----------------------------------------------------------------------
-    
+
     elif args.status :
         # ----------------------------------------------------------------------
         state_msg = "Exists" if exists else "Does not exist"
@@ -183,7 +183,7 @@ def doit () :
         if exists : status =  0
         else      : status = -1
         # ----------------------------------------------------------------------
-    
+
     elif args.list :
         # ----------------------------------------------------------------------
         printer = Printer (15)
@@ -197,7 +197,7 @@ def doit () :
         else :
             printer.line   ("State", 'Exists', ':')
             printer.separator ('-')
-            
+
             printer.line ("Components", '')
             wc   = os.path.join (ws, '*')
             cmps = glob.glob (wc)
@@ -237,10 +237,10 @@ def doit () :
 
             printer.footer ()
             status = 0
-            
+
         return status
         # ----------------------------------------------------------------------
-        
+
     elif args.create :
         # ----------------------------------------------------------------------
         if not exists :
@@ -251,7 +251,7 @@ def doit () :
             check = is_creatable (ws)
 
             if not check :
-                print_ws ("Workspace - Create", ws, dry_run, check, 
+                print_ws ("Workspace - Create", ws, dry_run, check,
                           "Failed, the workspace is an invalid path", False)
                 if dry_run : status = 2
                 else       : status = 1
@@ -259,23 +259,23 @@ def doit () :
             elif not dry_run :
                 client = vitis.create_client ()
                 Workspace.create (client, ws)
-            
+
                 print_ws ("Workspace - Create", ws, dry_run, "Created")
             else :
                   print_ws ("Workspace - Create", ws, dry_run, "Created")
-                
+
             if dry_run : status = 1
             else       : status = 0
 
         else :
-            
+
             print_ws ("Workspace - Create",
                       ws,
                       dry_run,
                       "Already Exists, use --replace", False)
             if dry_run : status =  2
             else       : status =  1
-                
+
         return status
         # ----------------------------------------------------------------------
 
@@ -289,11 +289,10 @@ def doit () :
         return status
     # --------------------------------------------------------------------------
 
-    
+
 # ------------------------------------------------------------------------------
 
 
 if __name__ == '__main__' :
     status = doit ()
     sys.exit (status)
-

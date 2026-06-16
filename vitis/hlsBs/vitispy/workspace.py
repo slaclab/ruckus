@@ -11,7 +11,7 @@ class Workspace :
 
         try:
             client.set_workspace (path = ws)
-            
+
         except Exception as e:
             print (f"\n{'='*78}\n"
                    f"Error: In setting the workspace\n"
@@ -53,7 +53,7 @@ class Workspace :
     @staticmethod
     def exists (ws) :
         return os.path.exists (ws)
-    
+
     @staticmethod
     def add_arguments (parser) :
         parser.add_argument ('--workspace',

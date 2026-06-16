@@ -14,7 +14,7 @@ class Component :
     def compose_cfg_file (cfg_file, cmp_name) :
         if (cfg_file) : return cfg_file
         else          : return cmp_name + '.cfg'
-        
+
     def get_cfg_path (self) :
         return self.cfg_path
 
@@ -41,13 +41,13 @@ class Component :
             printer.itemPlain (item, None)
             caption = ' '
         return
-    
+
     # ------------------------------------------------------------------------------
     def print (self, printer, print_cfg_file) :
         printer.line ('Workspace', self.workspace)
-        
+
         if (self.clean) :
-            comp_label = 'Component     name'            
+            comp_label = 'Component     name'
             if (not self.configurations) :
                 printer.line (comp_label, os.path.join (self.workspace, '*'))
 
@@ -73,7 +73,7 @@ class Component :
         return True
     # ------------------------------------------------------------------------------
 
-    
+
     # ------------------------------------------------------------------------------
     def execute (self, client, cmp_name, cfg_path) :
 
@@ -82,7 +82,7 @@ class Component :
         # -----------------------------------------------------------------
         self.cmp_name = cmp_name
         self.cfg_file = cfg_path
-        
+
         # -------------------------------------
         # Check if the component already exists
         # -------------------------------------
@@ -102,7 +102,7 @@ class Component :
             # -----------------------------------------------------
             if (not self.replace) :
                 return False, True, "WARNING: Using existing, (add --replace to replace)"
-            
+
             # --------------------------------------------------
             # Before removing the component,
             # check that a configuration file has been specified
@@ -114,7 +114,7 @@ class Component :
                     shutil.rmtree (self.cmp_dir)
                     self._create_hls_component (client)
                 return True, True, "Replaced"
-                
+
         else :
 
             # ---------------------------------------------------
@@ -124,8 +124,8 @@ class Component :
                 return False, False, "No configuration file specified"
 
             if (self.clean) :
-                return False, False, "Clean failed, component does not exist" 
-            
+                return False, False, "Clean failed, component does not exist"
+
             # Create component in the workspace
             if (not self.dry_run) : self._create_hls_component (client)
             return  True, False, "Created"

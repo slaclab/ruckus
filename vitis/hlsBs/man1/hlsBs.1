@@ -63,7 +63,7 @@ Manages the HLS components \fBcreating\fR, \fBcleaning\fR,
 \fBreplacing and \fBlisting\fR. This is generally used for creating
 the components from existing/legacy configuration files. \fBhlsCfg\fR is the
 usual way of creating the HLS component.
-   $ hlsComp <COMPONENTS> [OPTIONS] 
+   $ hlsComp <COMPONENTS> [OPTIONS]
 
 .TP
 .B hlsRun
@@ -95,11 +95,11 @@ This displays all the 'hidden' HLS_PROJECT context, in particular its
 environment variables.  Since these environment variables are all of
 the form \fBHLS_PROJECT_\fR<what>, can also be seen by
    $ printenv | grep \fBHLS_PROJECT_\fR
-  
+
 
 .SH GENERALITIES
 All commands, except \fBhlsWs\fR and \fBhlsGui\fR take the component name(s)
-as their positional parameters. The component name(s) may be 
+as their positional parameters. The component name(s) may be
     a) A single explicit component name
     b) A single wildcarded component name
     c) A list of any combination of explicit and wildcarded component names.
@@ -125,7 +125,7 @@ avoids the danger inherent in the shell's handling of command line
 parameters of positional parameters that immediately following an option
 expecting additional parameters. For example
    $ hlsCfg --clean '*'
-   
+
 Here --clean can accept a list of target categoryies (existing,
 missing, cruft) but will 'eat' the '*' positional parameter.  The
 safer option is to use --components='*'.  As a bonus by using the '=',
@@ -154,17 +154,17 @@ following ways
       By default the project file is the environment variable HLS_PRODUCT_PRJ.
       The default can be neutered by \fB\-\-no-product\fR, which is handy for
       one-of ad hoc experimentation.
-      
+
    2. In an indirect file.
       This is a file containing the \fB\-\-workspace\fR=<\fIWORKSPACE\fR or
       --products_root=<\fIPRODUCTS>\fR a single line.  This file is
       the invoked by specifying it on the command line as
       \fB@FILE\fR. Note any command line option can be placed in this
       file; it is not limited to just the workspace/products root
-      
+
    3. Directly on the command line as \fB\-\-workspace\fR=<\fIWORKSPACE\fR
       as \fB\-\-\PRODUCTS_ROOT\fR
-   
+
    4. By the environment variable \fBHLS_PROJECT_WORKSPACE\fR and
       \fBHLS_PROJECT_PRODUCTS\fR. This is not recommended except in the
       simplest projects, since it is very easy to lose track of what
@@ -176,13 +176,13 @@ following ways
       the following order.
         a) If HLS_PROJECT_PRODUCTS or --products_root is set then
              ${products_root}/ws/{version}
-             
+
         b) If HLS_PROJECT_PRODUCTS and --products_root is not set, then
            taken from HLS_PROJECT_ROOT or --project_root=
              ${project_root}/products/ws/{version}
-             
+
         c) If none set --> \fBERROR\fR
-      
+
 .SH INDIRECT FILE
 An  indirect file may contain one of more command line options. It
 represents a middle ground between the high formality of a project file and the

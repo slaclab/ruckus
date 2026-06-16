@@ -8,7 +8,7 @@ from   importlib.machinery import SourceFileLoader
 # ------------------------------------------------------------------------------
 class ImportFile :
     def __init__ (self, file) :
-    
+
         self.file_path   = os.path.expandvars (file)
         self.module_name = os.path.splitext   (os.path.split (self.file_path)[1])[0]
 
@@ -17,7 +17,7 @@ class ImportFile :
         # This allows arbitray file extensions
         # ------------------------------------------------------
         loader    = SourceFileLoader(self.module_name, self.file_path)
-    
+
         # Create the module spec from this loader directly
         self.spec = importlib.util.spec_from_loader(self.module_name, loader)
 

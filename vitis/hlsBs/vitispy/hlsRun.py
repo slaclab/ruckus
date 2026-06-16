@@ -54,12 +54,12 @@ def add_arguments (parser) :
                          nargs    = '*',
                          default  = None,
                          help     = 'The target component(s)')
-                         
+
     parser.add_argument ('--list',
                          help    = 'List available components to run',
                          action  = 'store_true',
                          default = False)
-                         
+
     parser.add_argument ('--csim',
                          help    = 'run csim',
                          nargs   = '*',
@@ -70,18 +70,18 @@ def add_arguments (parser) :
                          help    = 'run synthesis',
                          action  = 'store_true',
                          default = False)
-    
+
     parser.add_argument ('--cosim',
                          help    = 'run cosim',
                          nargs   = '*',
                          const   = '--no_value--',
                          action  = SplitArgs)
-        
+
     parser.add_argument ('--package',
                          help    = 'run package',
                          action  = 'store_true',
                          default = False)
-        
+
     parser.add_argument ('--implementation',
                          help    = 'run implementation',
                          action  = 'store_true',
@@ -92,13 +92,13 @@ def add_arguments (parser) :
                          nargs   = '*',
                          const   = '--no_value--',
                          action  =  SplitArgs)
-    
+
     parser.add_argument ('--all',
                          help   = 'run all',
                          nargs  = '*',
                          const  = '--no_value--',
                          action = SplitArgs)
-        
+
     parser.add_argument ('--exclude',
                          help='list of run options to exclude')
 
@@ -106,7 +106,7 @@ def add_arguments (parser) :
                          help    = 'make using the fast method',
                          action  = 'store_true',
                          default = False)
-        
+
     DryRun.add_arguments (parser)
 
     Project.    add_arguments (parser)
@@ -133,7 +133,7 @@ def report (verbose, printer, project, workspace, components, run) :
     print ()
     if run : run.print (printer)
     printer.separator ('-', 40)
-    
+
     return;
 # ------------------------------------------------------------------------------
 
@@ -159,7 +159,7 @@ def merge (x, y) :
 
 
 
-    
+
 # ------------------------------------------------------------------------------
 class Options :
     def __init__ (self,
@@ -182,8 +182,8 @@ class Options :
 
         if  all is not None :
             self.stages = Run.Stage.All
-            
-        else     :        
+
+        else     :
             if  csim is not None  : self.stages |= Run.Stage.CSim
             if  synthesis         : self.stages |= Run.Stage.Synthesis
             if  cosim is not None : self.stages |= Run.Stage.CoSim
@@ -197,7 +197,7 @@ class Options :
             self. csim_set ( csim)
             self.cosim_set (cosim)
             self.stages |= self.ip_set (ip)
-                         
+
         else:
             if self.stages & Run.Stage.CSim   :
                 self.csim_set  (csim)
@@ -224,7 +224,7 @@ class Options :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def csim_set (self, list) :
 
@@ -239,7 +239,7 @@ class Options :
         # -------------------------------------------------------
         self.csim_fast_msk = Run.Msk.CSimFastValid [msk];
         self.csim_slow_msk = Run.Msk.CSimSlowValid [msk];
-        
+
         return
     # --------------------------------------------------------------------------
 
@@ -255,12 +255,12 @@ class Options :
         # Modify the mask for limitations of the HLS actions
         # --------------------------------------------------
         self.cosim_msk = Run.Msk.CoSimValid[msk]
-        
+
         return
     # --------------------------------------------------------------------------
 
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def ip_set (ip_list) :
@@ -287,7 +287,7 @@ class Options :
         return msk
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def is_in (s, list) :
@@ -307,7 +307,7 @@ class Options :
             return 0
 
         msk = 0
-        
+
         # If empty list, return the default action mask
         if len(list) == 0 :
             msk  = default_msk;
@@ -329,11 +329,11 @@ class Options :
     # --------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
-    
+
 # ------------------------------------------------------------------------------
 def noComponentsFound (printer, workspace, components) :
 
-    import difflib 
+    import difflib
     printer.line (f"Warning: No components found using {components},"
                    "choices are", sep = '*')
 
@@ -365,7 +365,7 @@ def noComponentsFound (printer, workspace, components) :
         printer.item (icmp, cmp_name, sep, '')
         icmp    += 1
 
-        
+
     if len (matches) :
         print ()
         matches.sort ()
@@ -394,7 +394,7 @@ def doit () :
     printer       =  Printer (18, 78, 20)
     needs         =  Project.Need.Workspace
     if args.ip is not None : needs |= Project.Need.Products_Root
-                
+
     project       =  Project (needs,
                               args.project,
                               args.root,
@@ -421,7 +421,7 @@ def doit () :
                        args.dry_run,
                        args.verbose)
 
-    
+
     # ----------------------------
     # Setup IP family augmentation
     # ----------------------------
@@ -437,9 +437,9 @@ def doit () :
                              dgn_dir  = args.ip_dgn_dir,
                              jou_file = args.ip_dcp_jou_file,
                              log_file = args.ip_dcp_log_file)
-            
+
         ip.set_dir (project.products_root)
-        
+
     else :
         ip = None
 
@@ -457,19 +457,19 @@ def doit () :
                 idx += 1
         else :
             noComponentsFound (printer, workspace, components)
-            
+
         printer.footer ()
 
         return 0
-                         
-    
+
+
     if options.stages == 0 :
         print ("ERROR: No action was specify\n"
                "       Specify one of: --csim, --synthesis, --cosim, "
                "--package, --implementation, --ip",
                file = sys.stderr)
         return -1
-            
+
     run       = Run  (options, project.root, ip, printer)
     workspace = Workspace.get (workspace)
 
@@ -491,7 +491,7 @@ def doit () :
     else :
         noComponentsFound (printer, workspace, components)
 
-            
+
     printer.footer ()
 # ------------------------------------------------------------------------------
 

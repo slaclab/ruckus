@@ -68,7 +68,7 @@ def check_project_file (project_file) :
 
 # ------------------------------------------------------------------------------
 '''
-   Returns the full component path 
+   Returns the full component path
 
    Args:
      workspace:  The workspace directory.
@@ -95,13 +95,13 @@ def get_component_path (workspace, component) :
     if not exists :
         print (f"ERROR: Workspace {ws} was not found", file=sys.stderr)
         sys.exit (-1)
-    
+
     componentPath = os.path.join  (ws, component)
     exists        = os.path.isdir (componentPath)
     if not exists :
         print (f"ERROR: Component {componentPath} was not found", file=sys.stderr)
         sys.exit (-2)
-    else :    
+    else :
         return componentPath
 # ------------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ def get (org_file, command) :
     parser  = argparse.ArgumentParser (prog       = 'hlsCsimGet',
                                        add_help   = False,
                                        fromfile_prefix_chars='@',
-                                       epilog='', 
+                                       epilog='',
                                        description=
 '''
     Returns the csim.exe command complete with argv as a string to be
@@ -133,7 +133,7 @@ def get (org_file, command) :
 
     if args.help :
         sys.exit (1)
-        
+
     workspace     = args.workspace
     components    = args.components
 
@@ -169,14 +169,13 @@ def get (org_file, command) :
     componentPath = get_component_path (workspace, components)
     info          = ComponentInfo      (componentPath)
     exists        = os.path.isfile     (info.csim_exe)
-    
+
     if not exists :
         print (f"ERROR: Executable {info.csim_exe} was not found",
                file=sys.stderr)
         sys.exit (-3)
-        
+
     cmd  = info.csim_exe + ' ' + os.path.expandvars (info.csim_argv)
     print (cmd)
-    sys.exit (0) 
+    sys.exit (0)
 # ------------------------------------------------------------------------------
-

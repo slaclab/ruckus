@@ -1,4 +1,3 @@
-
 function setup {
     ### --------------------------------
     ### Get the full path of this script
@@ -11,7 +10,7 @@ function setup {
     if [ $called != $0 ]; then
 
         local script_fn
-        
+
         ### ---------------------------------------
         ### Correctly called by sourcing the script
         ### Get the absolute path to the script
@@ -24,7 +23,7 @@ function setup {
         fi
 
     else
-        
+
         ### ---------------------------------------------------
         ### Incorrectly called by directly executing the script
         ### ---------------------------------------------------
@@ -147,7 +146,7 @@ function hlsCtx ()
     fi
 
     echo "HLS Project environment variables"
-    
+
     if [[ -n "${HLS_PROJECT_XILINX_SETUP}"   ]] ; then
         echo   "HLS_PROJECT_XILINX_SETUP   = ${HLS_PROJECT_XILINX_SETUP}"
     fi
@@ -187,7 +186,7 @@ function hlsWs ()
     if  [[ $status != "0" ]] ; then
         return $? 2>/dev/null; exit
     fi
-       
+
     (export LD_LIBRARY_PATH=$HLS_PROJECT_LD_LIBRARY_PATH; set -f; \
      $hlsPython ${HLS_BS_ROOT}/vitispy/hlsWs.py  $(hlsPrj) $@)
 }
@@ -301,7 +300,7 @@ function hlsExe ()
     if [[ $HLS_PROJECT_XILINX_VERSION == "2023.2" ]] ; then
         export LD_LIBRARY_PATH=${XILINX_HLS}/lnx64/tools/fpo_v7_1
     fi
-    
+
     csim_exe=$(${HLS_BS_ROOT}/vitispy/hlsExe.py $(hlsPrj) $@)
     status=$?
     if test $status -ne 0
@@ -375,12 +374,12 @@ function hlsProject ()
             return $?
         fi
 
-    # Else maybe already setup     
+    # Else maybe already setup
     elif [[ -n ${XILINX_HLS} ]]; then
         eval `python ${HLS_BS_ROOT}/vitispy/hlsVersion.py`
         export HLS_PROJECT_XILINX_VERSION=${HLS_XILINX_VERSION}
     fi
-        
+
 
     # Check that everything is in order
     hlsCheck
@@ -389,7 +388,7 @@ function hlsProject ()
         return $? 2>/dev/null; exit
     fi
 
-    
+
     unset HLS_PROJECT_LD_LIBRARY_PATH
     unset HLS_PROJECT_IMPORT_PYPATHS
     unset HLS_PROJECT_PYPATHS

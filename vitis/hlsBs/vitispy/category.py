@@ -3,7 +3,7 @@ import os
 class Category :
     '''
     Categorize a list of options to be acted by an action as
-            Command option  Target       Applies to 
+            Command option  Target       Applies to
          1.     'existing'  Existing     Existing targets
          2.      'missing'  Missing      Missing  targets
          3.        'kruft'  CruftLo      Low confidence cruft
@@ -11,17 +11,17 @@ class Category :
          5.        'cruft'  CruftLo & Hi Bot low and high confidence cruft
 
     Existing and missing are fairly self-explanatory, e.g. list=existing of
-    list=missing.  
+    list=missing.
 
     Cruft is more nuanced. Cruft refers to targets that are unknown to the
     current project. For example a configuration file is added, then the naming
     convention changes. The original file still exists, but is not among the
-    new project's configuration files. 
+    new project's configuration files.
 
-    Continuing with this example, if component associated with this leftover 
+    Continuing with this example, if component associated with this leftover
     configuration file exists in the workspace, that component contains a
     reference to its configuration file. One can be highly confident that this
-    is a leftover configuration file as opposed to some random file.  
+    is a leftover configuration file as opposed to some random file.
 
     Contrast this with the case where the component does not exist. All one has
     to go on from the project definition is that there is a list of directories
@@ -29,7 +29,7 @@ class Category :
     these directories also, there is no hard way to distinguish what is or is
     not a configuration file, so some heurestic has been chosen.  In the case
     of configurations file, this heurestic is whether the file extension matches
-    that used by the directory defined in the list of projects. Normally this 
+    that used by the directory defined in the list of projects. Normally this
     would be '.cfg', but that is simple a convention.  This method has slightly
     more generality. One could try to read the files contents, but this is error
     prone.  What's to say this is just not some file that looks like a
@@ -116,7 +116,7 @@ class Category :
         else :                  cmp_template = components
 
         categories  = Category ()
-    
+
         # ---------------------------------------------------------
         # Construct all the legitimate configuration and components
         # ---------------------------------------------------------
@@ -130,10 +130,10 @@ class Category :
         for cfg in configurations :
             paths = glob.glob (cfg)
             for cfg_path in paths :
-            
+
                 # Check if already seen
                 if cfg_path in cfg_paths : continue
-            
+
                 # Add to seen list
                 cfg_paths.append (cfg_path)
                 cfg_name = os.path.split (os.path.splitext (cfg_path)[0])[1]
@@ -157,7 +157,7 @@ class Category :
 
                 exists   = os.path.isdir (cmp_path)
                 target   = Target (cmp_name, cmp_path, cfg_path, 0)
-                
+
                 # Categorize as existing or missing
                 if exists :
                     cmp_info       = ComponentInfo (cmp_path, True)
@@ -204,7 +204,7 @@ class Category :
 
         import glob
         from .targets import TargetMin
-        
+
         categories  =  Category ()
         cmp_names   = []
         cmp_ignores = ['_ide', 'logs']
@@ -215,11 +215,11 @@ class Category :
 
             for cmp_path in paths :
                 if not os.path.isdir (cmp_path) : continue
-                
+
                 cmp_name = os.path.split (cmp_path)[1]
                 if cmp_name in cmp_names        : continue
                 if cmp_name in cmp_ignores      : continue
-                
+
                 cmp_names.append   (cmp_name)
                 target = TargetMin (cmp_name, cmp_path)
                 if target.errs : categories.cruft_hi.append (target)

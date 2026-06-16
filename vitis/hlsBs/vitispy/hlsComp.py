@@ -242,7 +242,7 @@ class Executer :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def byCategories (self, client) :
 
@@ -286,7 +286,7 @@ class Executer :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def execute (self,
                  client,
@@ -294,12 +294,12 @@ class Executer :
                  print_none) :
 
         printer   = self.printer
-        
+
         if len (targets) == 0 and print_none :
             printer.itemPlain ('None', None, None)
             return True
 
-    
+
         idx = 0
         lf  = True
         for target in targets :
@@ -318,7 +318,7 @@ class Executer :
             if cmp_name is None :
                 name = ("Component not present in workspace, "
                         "check cfg file as a possible stray")
-                
+
             printer.item (idx, 'Component',  name, cmp_sep)
             if (cfg_path and self.verbose) or cmp_name is None :
                 printer.itemPlain ('Configuration', cfg_path, cfg_sep)
@@ -398,7 +398,7 @@ def doit () :
     parser = argparse.ArgumentParser (add_help              = False,
                                       fromfile_prefix_chars ='@')
     add_arguments  (parser)
-    
+
     args = parser.parse_args ()
     if args.help :
         display_manpage (__file__)
@@ -441,7 +441,7 @@ def doit () :
             if not action & (Action.List | Action.Clean) :
                 return noConfigurationList ()
             else :
-                noCfgAction = True            
+                noCfgAction = True
     else :
         full = hasattr (project, 'get_products')
 
@@ -462,19 +462,19 @@ def doit () :
     if not exists :
         return nonExistentWorkspace (workspace)
 
-    # ---------------------------------------------------    
+    # ---------------------------------------------------
     # Check if doing list or clean with no configurations
     # ---------------------------------------------------
     if noCfgAction :
         opts       &= ~Category.Missing
         categories  = Category.categorizeByComponent (workspace, cmpList)
-        
+
 
     # Check if doing the cheap version, i.e. do project products
     elif not full :
         if not args.components : args.components = '{cfg_name}'
 
-        configurations = os.path.expandvars (args.configurations)        
+        configurations = os.path.expandvars (args.configurations)
         components     = os.path.expandvars (args.components)
         categories     = Category.getCategories (workspace,
                                                  configurations,
@@ -494,11 +494,11 @@ def doit () :
         if  not targets :
             msg    = label + " Components"
             return Targets.no_candidate_targets (targets, msg, project)
-        
+
         categories = Category.byComponents (targets)
 
 
-    
+
     # ---------------------------------------------
     # Create HLS client only if necessary.
     # It is time wise expensive and dumps confusing
@@ -520,7 +520,7 @@ def doit () :
         printer.line   ('Workspace',          workspace)
         printer.line   ('Component Filter',   cmpList)
 
-    elif not full: 
+    elif not full:
         printer.header (label + ' Components')
         printer.line   ('Workspace',          workspace)
         printer.line   ('Configurations',     args.configurations)

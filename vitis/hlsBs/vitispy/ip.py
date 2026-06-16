@@ -22,7 +22,7 @@ from .version       import Version
 # ------------------------------------------------------------------------------
 
 
-# ------------------------------------------------------------------------------   
+# ------------------------------------------------------------------------------
 class Ip :
     """
     Augments the usually single FPGA in the component.xml file with a family of
@@ -49,7 +49,7 @@ class Ip :
              name:             The output zip file's name (optional)
              family:           The family of permissable FPGAS
              cmp_dir:          The component directory, i.e. where to look
-                               for the original .zip file which contains 
+                               for the original .zip file which contains
                                component.xml
 
              info:             Contains general information about the component
@@ -93,8 +93,8 @@ class Ip :
                   f"        {dir}")
             self.status = -1
             return
-                 
-        
+
+
         if not nam  : nam = '{cmp_name}'
         if not ext  : ext = '.zip'
 
@@ -136,7 +136,7 @@ class Ip :
     # --------------------------------------------------------------------------
     @staticmethod
     def get_xil_family (family) :
-        
+
         xil_family = ""
         if family :
             families = family.split (',')
@@ -166,7 +166,7 @@ class Ip :
 
         if verbose or self.msg :
             printer.itemPlain ("HLS.zip", self.hls_zip)
-            
+
         if verbose and self.family :
             margin    = printer.m + printer.i
             available = 80 - margin
@@ -186,7 +186,7 @@ class Ip :
                 caption = ''
                 beg = end+1
 
-            
+
         if self.msg :
             printer.itemPlain ('', self.msg, '*')
 
@@ -198,11 +198,11 @@ class Ip :
     def execute (self, printer, verbose) :
 
         if self.status : return self.status
-        
+
         # --------------------------------------
         # Ensure the ip project direction exists
         # -------------------------------------------
-        if not os.path.exists (self.prj_ip_dir) : 
+        if not os.path.exists (self.prj_ip_dir) :
             os.system (f'mkdir -p {self.prj_ip_dir}')
 
         # ---------------------------------------------------
@@ -210,7 +210,7 @@ class Ip :
         # ---------------------------------------------------
         if self.family :
 
-            # Make a temporary directory to hold the unzip contents 
+            # Make a temporary directory to hold the unzip contents
             unzip_dir = tempfile.TemporaryDirectory ()
             unzip_cmd = ['unzip', self.hls_zip, '-d', unzip_dir.name]
             with subprocess.Popen (unzip_cmd,
@@ -231,7 +231,7 @@ class Ip :
                 if not exists :
                     self.msg = "Non existent xml file"
                     return -1
-                
+
                 # ------------------------------------------------
                 # Tried 2 methods, a memory and an auxilliary file
                 # ------------------------------------------------
@@ -250,7 +250,7 @@ class Ip :
             # Just a straight copy from the hls directory -> ip directory
             # -----------------------------------------------------------
             shutil.copy (self.hls_zip, self.prj_ip_zip)
-            
+
         return 0
     # -------------------------------------------------------------------------
 
@@ -325,7 +325,7 @@ class Ip :
         The advantage of this method is low memory usage, but at the expense
         of managing the temporary file.
         """
-        
+
         # -----------------------------------------------------------------
         # Open both the original xml file and the temporary file to receive
         # -----------------------------------------------------------------
@@ -357,7 +357,7 @@ class Ip :
             return status
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def rezip (zipped_file, dirname, printer, verbose) :
@@ -378,14 +378,14 @@ class Ip :
                                cwd     = dirname,
                                text    = True,
                                bufsize = 1)  as process :
-            
+
             if verbose :
                 for line in process.stdout :
                     print (line, end = '')
-                    
+
             process.wait ()
-                    
+
             return process.returncode
     # --------------------------------------------------------------------------
-            
+
 # ------------------------------------------------------------------------------

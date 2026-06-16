@@ -12,13 +12,13 @@ from   .dry_run       import DryRun
 from   .ip            import Ip
 from   .dcp           import Dcp
 
-class Run :    
+class Run :
     # --------------------------------------------------------------------------
     @dataclass
     class Msk :
         '''
         Description:
-        Defines the permitted combinations of clean, make, and run for 
+        Defines the permitted combinations of clean, make, and run for
         both the fast and slow implementation of csim and cosim by using
         an array to map the requested actions to a valid one.
 
@@ -36,7 +36,7 @@ class Run :
         Make         : int = 2
         Run          : int = 4
 
-        
+
         # ------------------------------------------
         # Vitis HLS does not permit
         #   1. A bare clean, insists on clean & make
@@ -76,7 +76,7 @@ class Run :
                                      Clean | Make | Run])  # clean, make,run
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     class  Stage :
         '''
@@ -100,8 +100,8 @@ class Run :
             self.ip     = ip
             return
     # --------------------------------------------------------------------------
-    
-    
+
+
     # --------------------------------------------------------------------------
     def __init__ (self, options, root, ip,  printer) :
         '''
@@ -123,7 +123,7 @@ class Run :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def get_msg (msk, slow) :
@@ -136,7 +136,7 @@ class Run :
                    'Clean,Make,Run -- Make added, no Run without a Make',
                    'Make,Run',
                    'Clean,Make,Run'][msk] + ' (fast)'
-                
+
         else :
             msg = ['?',
                    'Clean,Make -- HLS insists on the Make',
@@ -150,7 +150,7 @@ class Run :
         return msg;
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def print (self, printer) :
 
@@ -164,30 +164,30 @@ class Run :
         implementation = stages & Run.Stage.Implementation != 0
         ip_zip         = stages & Run.Stage.Ip_Zip         != 0
         ip_dcp         = stages & Run.Stage.Ip_Dcp         != 0
-        
+
         if csim :
             csim_msg = self.get_msg (options.csim_msk, options.slow)
 
         if cosim :
             cosim_msg = self.get_msg (options.cosim_msk, True)
-                
+
         if self.options.dry_run : printer.line ("Dry Run", True);
 
         if  csim          :
             printer.line ('Run CSim',                   csim_msg)
-            
+
         if  synthesis      :
             printer.line ('Run Synthesis',            synthesis)
-            
+
         if  cosim :
             printer.line ('Run CoSim',                cosim_msg)
-            
+
         if  package        :
             printer.line ('Run Package',               package)
-            
+
         if  implementation :
             printer.line ('Run Implementation', implementation)
-            
+
         if  ip_zip        :
             printer.line ('Run Ip Zip',                 ip_zip)
 
@@ -196,7 +196,7 @@ class Run :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def announce (self, sep, caption, verbose = False) :
         if verbose or self.options.verbose :
@@ -211,7 +211,7 @@ class Run :
         # Execute the cmd command
         with subprocess.Popen(cmd,
                               cwd     = bld_dir,
-                              stdout  = subprocess.PIPE, 
+                              stdout  = subprocess.PIPE,
                               stderr  = subprocess.PIPE,
                               text    = True,
                               bufsize = 1) as process :
@@ -232,7 +232,7 @@ class Run :
 
         # Execute the cmd command
         with subprocess.Popen(cmd,
-                              stdout  = subprocess.PIPE, 
+                              stdout  = subprocess.PIPE,
                               stderr  = subprocess.PIPE,
                               text    = True,
                               bufsize = 1) as process :
@@ -241,20 +241,20 @@ class Run :
 
             for line in process.stderr :
                 report (self.printer, True, line)
-                
-                                                          
+
+
             # Wait for the process to fully complete and get the return code
             status = process.wait()
             return status
     # --------------------------------------------------------------------------
 
 
-    
+
     # --------------------------------------------------------------------------
     def do_csim_slow (self, info) :
 
         slow_msk = self.options.csim_slow_msk
-        
+
         # -------------------------------------------------------------
         # Either explicitly requested the slow or csim.mk did not exist,
         # so must run the slow version
@@ -268,8 +268,8 @@ class Run :
             # Make only
             aux_cfg      = os.path.join (Directory.cfg, "csim_make.cfg")
             self.announce (False, "Building:")
-                
-        elif slow_msk == (Run.Msk.Clean | Run.Msk.Make) : 
+
+        elif slow_msk == (Run.Msk.Clean | Run.Msk.Make) :
             # Only the clean + make
             aux_cfg      = os.path.join (Directory.cfg, "csim_cleanMake.cfg")
             self.announce (False, "Cleaning & Building")
@@ -283,11 +283,11 @@ class Run :
             # Clean & Run, impossible
             self.announce (False, "ERROR: Cannot Clean & Run without Make")
             return
-                
+
         elif slow_msk == (Run.Msk.Make  | Run.Msk.Run) :
             aux_cfg      = os.path.join (Directory.cfg, "csim_makeRun.cfg")
             self.announce (False, "Building & Running:")
-                
+
         elif slow_msk == (Run.Msk.Clean | Run.Msk.Make | Run.Msk.Run) :
             # Clean Make + Run
             aux_cfg      = os.path.jion (Direct.cfg, "csim_cleanMakeRun.cfg")
@@ -316,16 +316,16 @@ class Run :
 
 
         with subprocess.Popen(run_cmd,
-                              stdout=subprocess.PIPE, 
+                              stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE,
-                              text=True, 
+                              text=True,
                               bufsize=1) as process :
             for line in process.stdout :
                 report_vitis (self.printer, self.options.verbose, line)
 
             for line in process.stderr :
                 report_vitis (self.printer, True, line)
-                
+
             # --------------------------------------------------------------
             # Wait for the process to fully complete and get the return code
             # --------------------------------------------------------------
@@ -338,7 +338,7 @@ class Run :
     def do_csim_fast (self, bld_dir, info) :
 
         separator = False
-        
+
         # -------------------------------------------------------
         if self.options.csim_fast_msk & Run.Msk.Clean :
             clean_cmd  = ['make', '-f', 'csim.mk', 'clean']
@@ -354,7 +354,7 @@ class Run :
         if self.options.csim_fast_msk & Run.Msk.Make :
             if Version.version == "2023.2" :
                 os.environ["LIBRARY_PATH"] = "/usr/lib/x86_64-linux-gnu"
-                
+
             make_cmd   = ['make', '-f', 'csim.mk']
             separator  = self.announce (separator, 'Building:')
             status     = self.do_fast_cmd (make_cmd,
@@ -364,7 +364,7 @@ class Run :
 
         # -------------------------------------------------------
 
-        
+
         # -------------------------------------------------------
         if self.options.csim_fast_msk & Run.Msk.Run :
             self.announce (separator, 'Running:')
@@ -374,8 +374,8 @@ class Run :
             status     = os.system (cmd)
             return status
         # -------------------------------------------------------
-        
-    
+
+
     # --------------------------------------------------------------------------
     def do_csim (self, info) :
 
@@ -386,7 +386,7 @@ class Run :
         # If requested, try the fast csim
         # -------------------------------
         if not self.options.slow :
-                        
+
             bld_dir        = os.path.join   (info.work_dir,
                                              'hls',
                                              'csim',
@@ -396,7 +396,7 @@ class Run :
             if (self.options.csim_msk & Run.Msk.Clean) and not csim_mk_exists :
                 self.announce (separator, "Clean ignored, does not exist")
                 return 0
-            
+
             if csim_mk_exists :
                 status = self.do_csim_fast (bld_dir, info)
                 return status
@@ -407,7 +407,7 @@ class Run :
         # ----------------------------------------------------------------
         self.do_csim_slow (info)
 
-                    
+
         return
     # --------------------------------------------------------------------------
 
@@ -420,17 +420,17 @@ class Run :
         # ----------------------------------
         msk = self.options.cosim_msk & ~Run.Msk.Clean
 
-        
+
         if msk == Run.Msk.Make :
             # Make only
             aux_cfg      = os.path.join (Directory.cfg, "cosim_make.cfg")
             self.announce (False, "Building:")
-                
+
         elif msk == Run.Msk.Run:
             # Run only, impossible
             self.announce (False, "ERROR: HLS demands a Make with a Run")
             return -1
-                
+
         elif msk == (Run.Msk.Make | Run.Msk.Run) :
             # Make & Run
             aux_cfg      = os.path.join (Directory.cfg, "csim_makeRun.cfg")
@@ -459,9 +459,9 @@ class Run :
 
 
         with subprocess.Popen(run_cmd,
-                              stdout=subprocess.PIPE, 
+                              stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE,
-                              text=True, 
+                              text=True,
                               bufsize=1) as process :
             for line in process.stdout :
                 report_vitis (self.printer, self.options.verbose, line)
@@ -469,13 +469,13 @@ class Run :
             for line in process.stderr :
                 report_vitis (self.printer, True, line)
 
-                
-            # Wait for the process to fully complete and get the return code    
+
+            # Wait for the process to fully complete and get the return code
             status = process.wait ()
             return status
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def execute (self, cmp_path) :
 
@@ -487,14 +487,14 @@ class Run :
                                         'No configuration file found, consider removing this components', '?')
 
                 return
-            
+
         config    = "--config "    + info.cfg_files
         work_dir  = "--work_dir "  + info.work_dir
         status    = 0
         dry_run   = self.options.dry_run
 
-        
-        if  (self.options.dry_run and 
+
+        if  (self.options.dry_run and
              not self.options.stages & (Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp)) :
             status = 0
             return status;
@@ -507,7 +507,7 @@ class Run :
             if status != 0 : return status
         # ----------------------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------------------
         # SYNTHESIS
         # ---------
@@ -517,7 +517,7 @@ class Run :
                        '--mode',     'hls',
                        '--config',   info.cfg_files,
                        '--work_dir', info.work_dir]
-            
+
             status  = self.do_vitis_cmd (syn_cmd, self.report_vitis_syn)
             if status != 0 : return
         # ----------------------------------------------------------------------
@@ -546,7 +546,7 @@ class Run :
             if status != 0 : return status
         # ----------------------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------------------
         # IMPLEMENTATION
         # --------------
@@ -556,12 +556,12 @@ class Run :
                         '--mode',    'hls',
                         '--config',   info.cfg_files,
                         '--work_dir', info.work_dir]
-            
+
             status   = self.do_vitis_cmd (impl_cmd, self.report_vitis_run)
             if status != 0 : return status
         # ----------------------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------------------
         # IP
         # --
@@ -591,7 +591,7 @@ class Run :
             if status != 0 : return status
         # ----------------------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------------------
         # DCP Rename
         # ----------
@@ -620,7 +620,7 @@ class Run :
             else :
                 status = 0
         # ----------------------------------------------------------------------
-            
+
         return status
     # --------------------------------------------------------------------------
 
@@ -632,7 +632,7 @@ class Run :
         if verbose :
             print (line, end = '')
             return
-        
+
         suppress = True
 
         if "ERROR"      in line[0: 5] : suppress = False
@@ -647,7 +647,7 @@ class Run :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def report_vitis_run (printer, verbose, line) :
@@ -655,7 +655,7 @@ class Run :
         if  verbose :
             print (line, end='', flush = True)
             return
-        
+
         suppress = False
         if "INFO"       in line[0:4]   :  suppress = True
         if "**"         in line[0:6]   :  suppress = True
@@ -676,7 +676,7 @@ class Run :
         if  verbose :
             print (line, end='', flush = True)
             return
-        
+
         suppress = False
         if   "INFO"                     in line[0: 4] : suppress = True
         elif "WARNING: [RTGEN 206-101]" in line[0:24] : suppress = True
@@ -704,19 +704,19 @@ class Run :
                 if 'Done!' == line[0:5] : continue
                 if '..'    == line[0:2] : continue
                 printer.itemPlain (line.strip (), "")
-                
+
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     @staticmethod
     def report_fastMake (printer, verbose, line) :
-        
+
         if verbose :
             line = line.strip ();
             if len (line) : printer.itemPlain (line, "")
-            
+
 
         return
     # --------------------------------------------------------------------------
@@ -726,5 +726,5 @@ class Run :
     cosim:      bool
     package:    bool
     ip:         bool
-               
+
 # ------------------------------------------------------------------------------

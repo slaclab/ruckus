@@ -1,11 +1,11 @@
 import os
 
-class VitisVersion :                
+class VitisVersion :
     '''
     DESCRIPTION
     Determines the Vitis versioning.
 
-    There are two methods, a fast and slow method.  
+    There are two methods, a fast and slow method.
       1. The slow method launches the vitis --version command
       2. The fast method looks for the version in the XILINX_HLS path
 
@@ -49,7 +49,7 @@ class VitisVersion :
                 return
         # ----------------------------------------------------------
 
-        
+
         # ----------------------------------------------------------
         # SLOW search -- find the version in the Vitis splash banner
         # ----------------------------------------------------------
@@ -58,7 +58,7 @@ class VitisVersion :
         try:
             result = subprocess.run (['vitis', '--version'],
                                       capture_output=True, text=True)
- 
+
         except FileNotFoundError:
             print ("failure")
             return "Vitis not found in PATH"
@@ -70,8 +70,8 @@ class VitisVersion :
             self.version = full[1:7]
             self.major   = full[1:5]
             self.minor   = full[6:7]
-            
-        return 
+
+        return
     # --------------------------------------------------------------------------
 
 

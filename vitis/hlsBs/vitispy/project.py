@@ -139,9 +139,9 @@ class Project:
         def __init__ (self, root) :
             import subprocess
             from   directory import Directory
-            
+
             self.repo = None
-            
+
             script = os.path.join (Directory.sh, 'git.sh')
             cmd = [ 'sh', script]
             with subprocess.Popen (cmd,
@@ -154,7 +154,7 @@ class Project:
                 for line in process.stdout :
                     line = line.strip()
                     info = eval (line)
-                    
+
                     self.repo       = info['Repo']
                     self.tag        = info['Tag']
                     self.dirty      = info['Dirty']
@@ -163,7 +163,7 @@ class Project:
                     self.hash_short = info['HashShort']
                     self.hash_msg   = info['HashMsg']
                     break
-                
+
                 status = process.wait ()
 
         def print (self, printer, pad : int, verbose) :
@@ -454,7 +454,7 @@ class Project:
 
         if not verbose :
             return
-        
+
         if self.git.repo :
             print ()
             self.git.print (printer, pad, verbose)

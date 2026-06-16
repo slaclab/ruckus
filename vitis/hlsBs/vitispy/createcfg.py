@@ -18,7 +18,7 @@ def get_args () :
 
     configuration.add_arguments  (parser, True)
     component.add_arguments      (parser, False)
-    
+
     args = parser.parse_args ()
     return args
 # ------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ def print_cfg (cfg, comp) :
 args     = get_args ()
 
 # SNL network definition
-network  = configuration.network (args.net_file, args.net_name) 
+network  = configuration.network (args.net_file, args.net_name)
 
 # Fpga attributes
 fpga     = configuration.fpga     (args.fpga, args.clock, args.uncertainity)

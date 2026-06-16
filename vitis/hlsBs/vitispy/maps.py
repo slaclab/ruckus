@@ -11,7 +11,7 @@ if __name__  == '__main__' :
     from vitispy.dictionary import *
     from vitispy.project    import Project
     from vitispy.maps       import Maps
-    
+
 else :
     import   os,glob
     from .dictionary import Dictionary
@@ -20,7 +20,7 @@ else :
 
 # ------------------------------------------------------------------------------
 class Maps () :
-            
+
     def __init__ (self, dictionaries) :
 
         srcs = {}
@@ -30,20 +30,20 @@ class Maps () :
         if isinstance (dictionaries, Dictionary) :
             # dictionaries is just one dictionary
             self.compile (srcs, dictionaries)
-            
+
         else :
             # Is this a list,tuple of dictionaries
             is_list = all(issubclass (type(x), Dictionary) for x in dictionaries)
             if is_list :
-            
+
                 for dictionary in dictionaries :
                     n = self.compile (srcs, dictionary)
 
-            # Is this a lists or tuples of dictionaries 
+            # Is this a lists or tuples of dictionaries
             elif isinstance (dictionaries, (list, tuple)) :
 
                 for dictionaryList in dictionaries :
-                    
+
                     # Is this a single dictionary
                     if isinstance (dictionaryList, Dictionary) :
                         self.compile (srcs, dictionaryList)
@@ -59,7 +59,7 @@ class Maps () :
                                "         a) A single dictionary\n"
                                "         b) A list or tuple of dictionaries\n"
                                "         c) A lists or tuples of dictionaries\n")
-                        
+
         # -------------------------------------------------------------
         # Calculate the number permutations/combinations in all the
         # compiled 'srcs' and make a list of dictionaries large enough
@@ -144,11 +144,11 @@ class Maps () :
                 print (f"WARNING: Ignoring duplicate secondary {dkey} entry of\n"
                                f"         {v}")
                 return -1
-            
+
             derived.append ([dkey, v])
-            
+
         return derived
-    
+
     @staticmethod
     def add_srcs (srcs, primary_key, primary_val, kvs, sep) :
 
@@ -159,8 +159,8 @@ class Maps () :
             # ----------------------------------------
             derived = Maps.add_derived (srcs, primary_key, kvs, sep)
             srcs[primary_key] = [[primary_val, derived]]
-            return 
-        
+            return
+
         else :
 
             # --------------------------------------------------
@@ -168,7 +168,7 @@ class Maps () :
             # before appending
             # --------------------------------------------------
             if primary_val in srcs[primary_key] :
-                
+
                 print (f"WARNING: Ignoring duplicate {key} entry of\n"
                        f"         {primary_val}")
                 return -1
@@ -180,7 +180,7 @@ class Maps () :
         return
     # ------------------------------------------------------------------------------
 
-    
+
     # ------------------------------------------------------------------------------
     @staticmethod
     def compile (srcs, dictionary) :
@@ -191,13 +191,13 @@ class Maps () :
         Args:
            srcs      : Expanded source information consisting of the primary
                        key information and derived entries
-           dictionary: The user's dictionary definition 
+           dictionary: The user's dictionary definition
 
         Examples of dictionaries
 
            dictionary = Dictionary('fpga', ['Fpgas', [fpga0, fpga1])
            dictionary = Dictionary('file', ['Files', ['cfgs/*.cfg'])
-        
+
            or the preferred in user code since it hides implementation details
 
            dictionary = Dictionary_of_Fpgas('fpga', [fpga0, fpga1])
@@ -212,7 +212,7 @@ class Maps () :
                 kvs = [ [ 'id' , build[0] ]]
                 Maps.add_srcs (srcs, key, build[1], kvs, '_')
             return len (vs)
-        
+
         if dtype == 'Files' :
             errs   = 0
             nfiles = 0
@@ -230,7 +230,7 @@ class Maps () :
                 elif errs :
                     # No reason to expand after have errors
                     continue
-                    
+
                 for file in files :
                     path = os.path.realpath (os.path.expandvars (file))
                     dirs, namext = os.path.split (path)
@@ -246,7 +246,7 @@ class Maps () :
 
             if errs : exit (-1)
             return nfiles
-                    
+
         if dtype == 'Fpgas' :
 
             for fpga in vs :
@@ -255,7 +255,7 @@ class Maps () :
                         [        'part', fpga.part        ],
                         [       'clock', fpga.clock       ],
                         ['uncertainity', fpga.uncertainity] ]
-                
+
                 Maps.add_srcs (srcs, key, fpga, kvs, '_')
             return len (vs)
 
@@ -302,6 +302,6 @@ if __name__ == "__main__" :
         s = template.format_map (map)
         print (f"{idx:3d}: {s}")
         idx += 1
-        
+
     sys.exit (0)
 # ------------------------------------------------------------------------------

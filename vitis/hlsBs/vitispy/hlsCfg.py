@@ -37,7 +37,7 @@ def add_arguments (parser) :
     hlsIp.Ip .add_arguments (parser)
     DryRun.   add_arguments (parser)
     Project.  add_arguments (parser)
-    
+
     parser. add_argument ('--no-components',
                           help    = 'Inhibit component(s) in any action',
                           action  = 'store_true',
@@ -90,7 +90,7 @@ def check_project_file (project_file) :
 
     return True
 # ------------------------------------------------------------------------------
-                
+
 
 # ------------------------------------------------------------------------------
 def check_for_lock (spath) :
@@ -98,12 +98,12 @@ def check_for_lock (spath) :
 
     # Count the number of lock files
     nlocks = 0
-    
+
     # Match all .txt files recursively starting from the current directory
     spath = Path (spath).rglob ('*')
     for file in spath :
         if os.path.isdir (file) : continue
-        
+
         # Open the file to get a file descriptor
         with open(file, 'r+') as f :
             fd = f.fileno()
@@ -111,7 +111,7 @@ def check_for_lock (spath) :
                 # F_TEST checks for existing locks without blocking
                 os.lockf(fd, os.F_TEST, 0)
                 continue
-        
+
             except OSError:
                 nlocks += 1 # Locked by another process
                 print ("ERROR: Locked file\n"
@@ -147,7 +147,7 @@ class DoAction :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def byCategory (self, category, category_label, seps) :
         print ()
@@ -167,22 +167,22 @@ class DoAction :
                 if self.project.spc_print and self.project.spc_print.target_label :
                     target_label = self.project.spc_print.target_label
                     self.printer.item (idx, target_label, target.tgt_name)
-                    
+
                 self.exe (None, target.cfg_path, cmp_path, seps)
             else :
                 self.exe (idx,  target.cfg_path, cmp_path, seps)
-                
+
             if  cmp_path and left : print ()
-            
+
         return
         # ----------------------------------------------------------------------
-    
+
     # --------------------------------------------------------------------------
     def byCategories (self, categories) :
 
         if self.opts & Category.Existing :
             self.byCategory (categories.existing, self.labels[0], [':', '*'])
-            
+
 
         if self.opts & Category.Missing :
             self.byCategory (categories.missing,  self.labels[1], [':', '*'])
@@ -198,7 +198,7 @@ class DoAction :
             left    = nhi
             if  self.opts & Category.CruftLo : left += nlo
 
-            
+
             if left == 0 :
                 self.printer.itemPlain ("None", None)
                 return
@@ -228,7 +228,7 @@ class DoAction :
 '''
 # ------------------------------------------------------------------------------
 class Lister (DoAction) :
-    
+
     # --------------------------------------------------------------------------
     def __init__ (self, printer, project, cmp, verbose, opts) :
         labels  = ['Existing', 'Missing', 'Cruft', 'Cruft']
@@ -279,7 +279,7 @@ def listConfigurations (project, categories, cmp, verbose, opts) :
     what = "Listing Configurations"
     if cmp : what += " & Components"
     printer.header (f"{what}")
- 
+
     if (project.workspace) :
         printer.line ("Workspace", project.workspace)
 
@@ -298,7 +298,7 @@ def listConfigurations (project, categories, cmp, verbose, opts) :
 '''
 # ------------------------------------------------------------------------------
 class Cleaner (DoAction) :
-    
+
     # --------------------------------------------------------------------------
     def __init__ (self, printer, project, cmp, dry_run, verbose, opts) :
         labels  = [" Cleaning Existing -> Missing",
@@ -330,7 +330,7 @@ class Cleaner (DoAction) :
                 self.printer.itemPlain (
                     'Fate',
                     'WARNING: Does not exist, "clean" ignored', '*')
-                
+
         elif not self.dry_run :
             os.unlink (cfg_path)
 
@@ -350,13 +350,13 @@ class Cleaner (DoAction) :
             else :
                 # -----------------------------------------------------------
                 # Ambivalent about this
-                # 
+                #
                 #  PROs: Makes an attempt to ensure all can be deleted
                 #  CONs: Somewhat expensive for something that rarely happens
                 # -----------------------------------------------------------
                 ##nlocks = check_for_lock (cmp_path)
                 ##if nlocks : exit (-1)
-                
+
                 if not self.dry_run  :
                     import shutil
                     try :
@@ -365,7 +365,7 @@ class Cleaner (DoAction) :
                         print ()
                         self.printer.itemPlain ("ERROR", e.strerror)
                         self.printer.itemPlain ("",      e.filename)
-                        exit (-1)    
+                        exit (-1)
         return
 # ------------------------------------------------------------------------------
 
@@ -415,15 +415,15 @@ def cleanConfigurations (project, categories, cmp, dry_run, verbose, opts) :
 
    Args:
      cfg:        Instaniation of the configuration class
-     categories: The categories (existing, missing to create the 
-                 configurations and, optionally the components 
+     categories: The categories (existing, missing to create the
+                 configurations and, optionally the components
 '''
 # ------------------------------------------------------------------------------
 def createConfigurations (cfg, categories, dry_run, verbose, opts, replace) :
 
     printer = Printer (14, 78, 14)
     cfg.print_common (printer, verbose)
-    
+
     if opts & Category.Existing :
         print ()
         if not replace :
@@ -433,7 +433,7 @@ def createConfigurations (cfg, categories, dry_run, verbose, opts, replace) :
             printer.line ("Replacing Existing")
 
         idx       = 1
-        targets   = categories.existing 
+        targets   = categories.existing
         left      = len (targets)
         for target in targets :
             if idx != 1 and cfg.comp: print ()
@@ -445,7 +445,7 @@ def createConfigurations (cfg, categories, dry_run, verbose, opts, replace) :
         print ()
         printer.line ('Creating Missing -> Existing')
         idx       = 1
-        targets   = categories.missing 
+        targets   = categories.missing
         left      = len (targets)
         if left == 0 :
             printer.itemPlain ('None Missing', '')
@@ -456,7 +456,7 @@ def createConfigurations (cfg, categories, dry_run, verbose, opts, replace) :
                 cfg.print (printer, idx, target, status, [':', '*'], message, verbose)
                 idx += 1
 
-            
+
     printer.footer ()
 
     vitis.dispose ()
@@ -525,7 +525,7 @@ def nonExistentWorkspace (workspace) :
 # ------------------------------------------------------------------------------
 '''
    Reads the project files and with the command line parameters creates the
-   necessary data structures to optionally, list, clean or create the 
+   necessary data structures to optionally, list, clean or create the
    configuration files and optionally the component files.
 '''
 # ------------------------------------------------------------------------------
@@ -535,13 +535,13 @@ def main () :
     # lambda to print an error when an implicit '*' is used when cleaning
     # -------------------------------------------------------------------
     noCompleteClean = (lambda :
-    print (                                                                    
-    "\n"                                                                       
-    "ERROR: To avoid cleaning more than intended, hlsCfg requires that\n"      
+    print (
+    "\n"
+    "ERROR: To avoid cleaning more than intended, hlsCfg requires that\n"
     "       postional args or --targets='*' must be specified, e.g.\n"
-    "\n"                                                                       
-    "        $ hlsCfg '*' --clean             or\n"                                     
-    "        $ hlsCfg --targets='*'\n",                                  
+    "\n"
+    "        $ hlsCfg '*' --clean             or\n"
+    "        $ hlsCfg --targets='*'\n",
     file = sys.stderr))
 
 
@@ -555,7 +555,7 @@ def main () :
     if args.help :
         display_manpage (__file__)
         exit (0)
-    
+
 
     # ----------------------------------------
     # Extract the project specific information
@@ -572,7 +572,7 @@ def main () :
     if project.error :
         status = project.report (needs)
         return status
-    
+
     # ----------------------------------------------------------------
     # Kludge since argparse for python < 3.9 does not support negation
     # ----------------------------------------------------------------
@@ -595,7 +595,7 @@ def main () :
 
     targets   = [None] * 2
 
-    
+
     # ---------------------------------------------------------
     # Assign a string to the action, mainly for error reporting
     # ---------------------------------------------------------
@@ -610,7 +610,7 @@ def main () :
     exists    = os.path.isdir (workspace)
     if not exists :
         return nonExistentWorkspace (workspace)
-    
+
     # ---------------------------------------------------
     # Get all the possible targets & check there are some
     # ---------------------------------------------------
@@ -660,7 +660,7 @@ def main () :
         return  0
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     # Creating/Replacing, this is the default
     # ---------------------------------------

@@ -22,16 +22,16 @@ else:
    from   .printer       import Printer
 
 
-    
+
 # -----------------------------------------------------------------------------
 class TargetMin :
    def __init__ (self, cmp_name, cmp_path) :
       self.cmp_path = os.path.relpath (cmp_path)
       self.cmp_name = cmp_name
-        
+
       cmp_info   = ComponentInfo (cmp_path, True)
       self.errs = cmpInfo.errs
-      
+
       if cmp_info.errs :
          self.cfg_path = None
          self.cfg_name = None
@@ -46,7 +46,7 @@ class TargetMin :
 class Target :
    '''
    A target is a candidate for an eventual build of HLS configuration file and
-   its component. This method 
+   its component. This method
       - Adds the vitis version and the configuration name to the map
       - Resolves the originating target path and configuration and the
         component path.
@@ -118,7 +118,7 @@ class Target :
              f"build     = {self.build}\n",
              f"fpga      = {self.fpga}\n")
    # --------------------------------------------------------------------------
-             
+
 # ------------------------------------------------------------------------------
 
 
@@ -145,7 +145,7 @@ class Targets :
             self.accepts  = []
             self.rejects  = []
             return
-      
+
       # -------------------------------
       # If not list, convert it to one
       # ------------------------------
@@ -158,7 +158,7 @@ class Targets :
             match = fnmatch.fnmatch (target.cmp_name, flt)
             if match : filtered.accepts.append (target)
             else     : filtered.rejects.append (target)
-               
+
       return filtered
    # --------------------------------------------------------------------------
 
@@ -193,12 +193,12 @@ class Targets :
       for target in targets :
          printer.item (idx, target.cmp_name, '')
          idx += 1
-        
+
       printer.footer ()
       return -1
    # --------------------------------------------------------------------------
 
-   
+
    # --------------------------------------------------------------------------
    def __init__ (self, workspace, products) :
       '''
@@ -209,13 +209,13 @@ class Targets :
          products   :  The list of products. This comes from the users
                        project file
       '''
-      
+
       self.workspace = workspace
       self.targets   = []
       cmps           = []
       for product in products :
          for prd_target in product.targets:
-         
+
             # -------------------------------------
             # Retrieve the target member infomation
             # -------------------------------------
@@ -260,7 +260,7 @@ class Targets :
             and is known to this project and exists
          2. Missing  -- a configuration file that both is accepted by the
                         filters
-            and is known to this project and but is absent 
+            and is known to this project and but is absent
          3. Cruft   --- A file in any of the directories with the file
                         extensions used by that directory used when creating
                         a configuration file
@@ -279,7 +279,7 @@ class Targets :
         to contain configuratin files
 
       CAVEAT
-      The Existing and Missing catagories a hard concepts, i.e. 
+      The Existing and Missing catagories a hard concepts, i.e.
          1. Either the file is known to be a target of this project or it isn't
          2. Either the file exists in the file system or it doesn't
 
@@ -288,16 +288,16 @@ class Targets :
          1. The components in the workspace are examined and to see if the json
             file contains a reference to the file
 
-      If the corresponding component does not exist, this failes and a 
+      If the corresponding component does not exist, this failes and a
       heuristic method.
 
-      By definition, such files are not known to the project, whether it is 
-      configuration file or not cannot be definitely determined. Consider 2 
+      By definition, such files are not known to the project, whether it is
+      configuration file or not cannot be definitely determined. Consider 2
       files
-      'file1.cfg' and 'file2.txt',  It only by some convention that 
+      'file1.cfg' and 'file2.txt',  It only by some convention that
       'file1.cfg' is thought to be a configuration file and 'file2.txt' is not.
-      
-      How some unknown file got there and the naming conventions used by its 
+
+      How some unknown file got there and the naming conventions used by its
       producer are unknownable.  There are 2 ways to address this
 
         1. Demand the user provide a template giving the naming convenion.
@@ -325,7 +325,7 @@ class Targets :
             self.cmp_name = None
             if cmp_path :
                self.cmp_name = os.path.split (cmp_path)[1]
-           
+
       class Categories :
          def __init__ (self) :
             self.existing = []
@@ -356,7 +356,7 @@ class Targets :
       if len (filtered.accepts) == 0:
          Targets.no_user_targets (filtered.rejected, 'classifying', filters)
          return None
-      category.missing  = filtered.accepts          
+      category.missing  = filtered.accepts
 
       # -----------------------------------------------------------
       # This changes any target specfic symbol translation to '*'
@@ -377,10 +377,10 @@ class Targets :
       cmp_paths = glob.glob (cmp_wc)
       for cmp_path in cmp_paths :
 
-            
+
          # Ignore the _ide,logs, etc directories in the workspace
          if cmp_path in ignore_paths : continue
-            
+
          # Component path must be a directory
          if not os.path.isdir (cmp_path) : continue
 
@@ -401,11 +401,11 @@ class Targets :
          for cfg_path in cfg_paths :
             if cfg_path in cfg_files : continue
             cfg_files.append (cfg_paths)
-                  
+
             # --------------------------------------
             # Check if in the pool of all candidates
             # --------------------------------------
-            tgt = (next ((target for target in targets 
+            tgt = (next ((target for target in targets
                        if target.cfg_path == cfg_path), None))
 
             if not tgt:
@@ -439,7 +439,7 @@ class Targets :
             # directories to see if there is an cruft in there. This is
             # somewhat heurestic, no way to do it completely right, so
             # it is not critical.
-            # 
+            #
             # Retrieve the configuration template and isolate the directory
             # and file extension. This is where all files of interest are
             # thought to reside.
@@ -468,7 +468,7 @@ class Targets :
             # -----------------------------
             cfg_wcs.append (cfg_wc)
             files = glob.glob (cfg_wc)
-         
+
             for file in files :
                # ---------------------------------------
                # If have already seen this file, move on
@@ -493,7 +493,7 @@ class Targets :
                # --------------------------------------
                if (any((cruft for cruft in category.cruft_hi
                      if cruft.cfg_path == file))) : continue
-                             
+
 
                # ---------------------------------------------------
                # Check if in the pool of known, but rejected targets
@@ -513,7 +513,7 @@ class Targets :
 # ------------------------------------------------------------------------------
 
 
-              
+
 
 # ------------------------------------------------------------------------------
 if __name__ == "__main__" :
@@ -533,20 +533,20 @@ if __name__ == "__main__" :
 
    workspace = 'tmp/jj/ws'
 
-   
+
    # ------------------------------------------------------
    # Retrieve the candidate products and form their targets
    # -----------------------------------------------------
    project.get_products ()
-   
+
    tgt      = Targets (workspace, project.products)
    targets  = tgt.targets
-   
+
    print ("All targets")
    for target in targets :
       print (target.cmp_name)
 
-   
+
    trim = sys.arg[1] if (len (sys.argv) >  1) else '*'
    classes = Targets.classify (workspace, project.products, targets, trim, None)
    print (f"\n\nResults")
@@ -562,9 +562,9 @@ if __name__ == "__main__" :
    for target in filtered.accepts :
       print (target.cmp_name)
 
-      
-   print (f"\nFiltered rejects {trim}")      
+
+   print (f"\nFiltered rejects {trim}")
    for target in filtered.rejects :
       print (target.cmp_name)
-      
+
 # ------------------------------------------------------------------------------

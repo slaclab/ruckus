@@ -5,7 +5,7 @@ class Dictionary :
     Class following the pattern of a normal python dictionary except the value
     is a 2 element list consisting of 'type' and a 'value'. The value(s)
     will be compiled into one or more 2 element lists, where the first element
-    is a type and the second a single value or a list of values of 'type' 
+    is a type and the second a single value or a list of values of 'type'
     e.g. 'Files', 'Fpgas', etc
 
 
@@ -31,7 +31,7 @@ class Dictionary :
         return
     # --------------------------------------------------------------------------
 
-    
+
     # --------------------------------------------------------------------------
     def __str__ (self) :
         return "key = {}\n, tvs = {}".format (self.key, self.tvs)

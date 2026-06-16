@@ -27,14 +27,14 @@ class Printer :
     def prefixed_line (self, label, field, value, sep=':') :
         self.line (f"{label:{self.p}s}{field}", value, sep)
         return
-    
+
     def line (self, label, value = None, sep=':') :
         if value :
             print (f"{label:{self.n}s}{sep} {value}")
         else :
             print (label)
-        return 
-    
+        return
+
     def item (self, idx, caption, itm, sep = ':') :
         if idx is None :
             self.itemPlain (caption, itm, sep)
@@ -49,11 +49,11 @@ class Printer :
         else     : print (f"{' ':3s}  {caption:{self.i}s}")
         return
 
-    
+
     def footer  (self) :
         self.separator ('=')
         return
-    
+
     n : int
     s : int
 # ------------------------------------------------------------------------------

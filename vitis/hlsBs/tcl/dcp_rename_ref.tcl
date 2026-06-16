@@ -37,10 +37,10 @@ if {[llength $found_files] > 0 && [string length [lindex $found_files 0]] > 0} {
 
     #puts "hls_dcp_name = $hls_dcp_name"
     #puts "hls_dcp_file = $hls_dcp_file"
-    
+
     # Open the .DCP file
     open_checkpoint $hls_dcp_file  ${level}
-        
+
     # Change the .DCP to match the project's name (not bd_0_hls_inst_0)
     rename_ref ${level} -ref [get_property TOP [current_design]] -to $dcp_name
 

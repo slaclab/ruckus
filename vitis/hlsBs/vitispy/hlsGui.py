@@ -80,7 +80,7 @@ def startGui () :
     # Have explicitly asked for no workspace
     # --------------------------------------
     if args.no_workspace :
-        
+
         if args.verbose : print ("Starting GUI with no workspace")
         cmd = [ 'vitis']
 
@@ -105,7 +105,7 @@ def startGui () :
 
     # Execute the cmd command
     with subprocess.Popen(cmd,
-                          stdout  = subprocess.PIPE, 
+                          stdout  = subprocess.PIPE,
                           text    = True,
                           bufsize = 1) as process :
         for line in process.stdout :
@@ -113,7 +113,7 @@ def startGui () :
                 print (line, end = '')
             else :
                 pass
-                                                          
+
         # Wait for the process to fully complete and get the return code
         status = process.wait()
 
@@ -127,4 +127,3 @@ if __name__ == "__main__" :
    status = startGui ()
    sys.exit (status)
 # ------------------------------------------------------------------------------
-   

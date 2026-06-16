@@ -4,25 +4,25 @@
     to make the scripts execute uniformily across all VITIS versions > 2024.1
 
     Args:
-      action:  'get' 
+      action:  'get'
 
     Action
-      Launches vitis -s this script with a 'set' as a command line parameter.  
+      Launches vitis -s this script with a 'set' as a command line parameter.
       This same script is then run within the VITIS HLS runtime environment where
       it extracts the VITIS HLS runtime context.
-     
-      It returns a string of 2 bash shell semi-colon separate commands that 
+
+      It returns a string of 2 bash shell semi-colon separate commands that
       sets 2 environment variables
          hlsPython          : Used as python interpreter for the selected
                               VITIS version
-         HLS_PROJECT_IMPORT_PYPATHS: Used internally by the python scripts 
+         HLS_PROJECT_IMPORT_PYPATHS: Used internally by the python scripts
                             to set the PYTHONPATH and LD_LIBRARY_PATH
 
-     This string can then be used to set these environment variables in the 
+     This string can then be used to set these environment variables in the
      calling bash shell:
          eval `python $RUCKUS_ROOT/<install_dir>/hlsPythonContext get
 '''
-# ------------------------------------------------------------------------------ 
+# ------------------------------------------------------------------------------
 
 
 import sys
@@ -67,7 +67,7 @@ elif sys.argv[1] == 'extract' :
         else                            : pypaths += pypath     + ':'
     pypaths += "\'"
 
-    
+
     ld_library_path = os.getenv ('LD_LIBRARY_PATH')
     if ld_library_path is None : ld_library_path = ''
     else                       : ld_library_path = "\'" + ld_library_path + "\'"
@@ -75,11 +75,11 @@ elif sys.argv[1] == 'extract' :
 
     import_pypaths = os.path.realpath (os.path.join (vitis_root_vitispy, 'import_pypaths.py'))
 
-    # Format the exported python intepreter and python paths       
+    # Format the exported python intepreter and python paths
     output = ("export hlsPython="                   + sys.executable  + '; '
            +  "export HLS_PROJECT_LD_LIBRARY_PATH=" + ld_library_path + '; '
            +  "export HLS_PROJECT_IMPORT_PYPATHS="  + import_pypaths  + '; '
            +  "export HLS_PROJECT_PYPATHS="         + paths)
 
     print (output)
-# -------------------------------------------------------------------------------    
+# -------------------------------------------------------------------------------

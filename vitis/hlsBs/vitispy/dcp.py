@@ -21,7 +21,7 @@ from .directory     import Directory
 # ------------------------------------------------------------------------------
 
 
-# ------------------------------------------------------------------------------   
+# ------------------------------------------------------------------------------
 class Dcp :
     """
     Renames the generically named .dcp files to something unique
@@ -30,7 +30,7 @@ class Dcp :
     # --------------------------------------------------------------------------
     @staticmethod
     def get_file (file, def_dir, def_nam, def_ext) :
-        
+
         if file :
             dir, namext = os.path.split (file)
             nam, ext    = os.path.splitext (namext)
@@ -38,12 +38,12 @@ class Dcp :
             if not dir : dir = def_dir
             if not nam : nam = def_nam
             if not ext : ext = def_ext
-        
+
         else :
             dir = def_dir
             nam = def_nam
             ext = def_ext
-            
+
         file = os.path.expandvars (os.path.join (dir, nam) + ext)
         file = file.format (vitis_version = Version.version,
                             cmp_name      = def_nam)
@@ -53,7 +53,7 @@ class Dcp :
         # -------------------------------------------------------------
         if not os.path.isabs (file) :
             file = os.path.expandvars (os.path.join (def_dir, file))
-        
+
         return file
     # --------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ class Dcp :
             # --------------------------------------------------------
             if not os.path.isabs (dgn_dir) :
                 dgn_dir = os.path.join (self.dcp_dir, dgn_dir)
-        
+
         dgn_dir = os.path.realpath (dgn_dir)
         if not os.path.isdir (dgn_dir) :
             Path(dgn_dir).mkdir(parents=True, exist_ok=True)
@@ -134,7 +134,7 @@ class Dcp :
         else :
             dcp_file = dcp_file.format (cmp_name   = cmp_name,
                                         dcp_rename = dcp_rename)
-        
+
         self.dcp_file = self.get_file (dcp_file,
                                        self.dcp_dir,
                                        None,
@@ -151,7 +151,7 @@ class Dcp :
                                         dcp_name   = dcp_name,
                                         dcp_rename = dcp_rename)
         self.jou_file = self.get_file (jou_file, dgn_dir,      None, '.jou')
-        
+
         if not log_file :
             jog_file = dcp_name
         else :
@@ -194,8 +194,8 @@ class Dcp :
 
         if self.jou_file : cmd += ['-journal', self.jou_file]
         if self.log_file : cmd += ['-log'    , self.log_file]
-        
-        
+
+
         cmd += ['-tclargs',
                 self.hls_dir,
                 self.dcp_rename,
@@ -209,12 +209,11 @@ class Dcp :
             for line in process.stdout :
                 if  verbose :
                     if line[0] == '#' : continue
-                    print (line, end = '')                    
+                    print (line, end = '')
                 else:
                     pass
-            
+
             status = process.wait ()
 
         return status
     # --------------------------------------------------------------------------
-
