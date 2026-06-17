@@ -1,6 +1,16 @@
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# This file is part of the 'SLAC Firmware Standard Library'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'SLAC Firmware Standard Library', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
 
-''' Extracts the Vits HLS python run-time environment/context in an attempt
+# ------------------------------------------------------------------------------
+''' 
+    Extracts the Vits HLS python run-time environment/context in an attempt
     to make the scripts execute uniformily across all VITIS versions > 2024.1
 
     Args:

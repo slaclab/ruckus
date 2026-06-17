@@ -1,3 +1,13 @@
+# ----------------------------------------------------------------------------
+# This file is part of the 'SLAC Firmware Standard Library'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'SLAC Firmware Standard Library', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
+
 import sys
 import os
 import subprocess
@@ -393,20 +403,20 @@ class Run :
                                              'build')
             csim_mk_exists = os.path.isfile (os.path.join (bld_dir, "csim.mk"))
 
-            if (self.options.csim_msk & Run.Msk.Clean) and not csim_mk_exists :
-                self.announce (separator, "Clean ignored, does not exist")
-                return 0
-
+            # --------------------------------------------------------
+            # Demand the make file exists to do the 'fast' option
+            # Technically not needed if only doing run, but seems very
+            # strange to have the csim.exe and not the csim.mk
+            # --------------------------------------------------------
             if csim_mk_exists :
                 status = self.do_csim_fast (bld_dir, info)
                 return status
 
-        # ----------------------------------------------------------------
-        # csim fast not request or was unable to fulfill because make file
+        # ------------------------------------------------------------------
+        # csim fast not requested or was unable to fulfill because make file
         # did not exist
-        # ----------------------------------------------------------------
+        # ------------------------------------------------------------------
         self.do_csim_slow (info)
-
 
         return
     # --------------------------------------------------------------------------
