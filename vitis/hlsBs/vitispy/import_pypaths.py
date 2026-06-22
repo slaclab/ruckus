@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-''' 
+'''
     Adds the paths in HLS_PROJECT_PYPATHS to sys.path
 
     This acts to make a consistent interface for the various AMD/XILINX VITIS

@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-''' 
+'''
     Extracts the Vits HLS python run-time environment/context in an attempt
     to make the scripts execute uniformily across all VITIS versions > 2024.1
 

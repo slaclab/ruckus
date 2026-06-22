@@ -375,6 +375,11 @@ function hlsBs ()
 # ----------------------------------------------------------------------
 function hlsVersion ()
 {
+    if [[ "$1" == @(-h|--h|--he|--hel|--help) ]]; then
+        man hlsVersion
+        return 0
+    fi
+
     # If passed a version, use it
     if [[ -n "$1" ]]; then
         hlsVer $1
