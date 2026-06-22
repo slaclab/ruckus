@@ -56,10 +56,10 @@ function hlsCheck ()
         echo -e \
           "\nERROR: HLS project has not been setup\n"\
              "      Try\n"\
-             "          $ hlsProject <vitis_version>\n"\
+             "          $ hlsVersion <vitis_version>\n"\
              "      ..or..\n"\
              "          $ hlsVer <vitis_version>\n"\
-             "          $ hlsProject\n"
+             "          $ hlsVersion\n"
 
         return -1 ; exit
     fi
@@ -71,9 +71,8 @@ function hlsCheck ()
         echo -e \
           "\nERROR: vitis command was not found\n"\
              "      This likely because the HLS vitis setup has not been done\n"\
-             "      Try either\n"\
-             "          $ hlsVer     <vitis_version>\n"\
-             "          $ hlsProject <vitis_version>\n"
+             "      Try\n"\
+             "          $ hlsVersion <vitis_version>\n"
         return -1 ; exit
 
     fi
@@ -374,7 +373,7 @@ function hlsBs ()
 
 
 # ----------------------------------------------------------------------
-function hlsProject ()
+function hlsVersion ()
 {
     # If passed a version, use it
     if [[ -n "$1" ]]; then
@@ -386,7 +385,8 @@ function hlsProject ()
 
     # Else maybe already setup
     elif [[ -n ${XILINX_HLS} ]]; then
-        eval `python ${HLS_BS_ROOT}/vitispy/hlsVersion.py`
+        eval `python ${HLS_BS_ROOT}/vitispy/hlsSetVersion.py`
+        echo "Using existing Xilinx version = ${HLS_XILINX_VERSION}"
         export HLS_PROJECT_XILINX_VERSION=${HLS_XILINX_VERSION}
     fi
 
@@ -406,7 +406,7 @@ function hlsProject ()
 
 
 
-    eval `python ${HLS_BS_ROOT}/vitispy/hlsVersion.py`
+    eval `python ${HLS_BS_ROOT}/vitispy/hlsSetVersion.py`
 
     # ---------------------------------
     # Only works for versions > v2023.2
@@ -469,5 +469,5 @@ export -f hlsRun
 export -f hlsExe
 export -f hlsGdb
 export -f hlsBs
-export -f hlsProject
+export -f hlsVersion
 export -f hlsAddManpath

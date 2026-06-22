@@ -363,7 +363,7 @@ class Targets :
       # --------------------------------------------------
       filtered = Targets.filter (targets, filters)
       if len (filtered.accepts) == 0:
-         Targets.no_user_targets (filtered.rejected, 'classifying', filters)
+         Targets.no_user_targets (filtered.rejects, 'classifying', filters)
          return None
       category.missing  = filtered.accepts
 
@@ -430,7 +430,7 @@ class Targets :
                   category.missing.remove  (tgt)
                   category.existing.append (tgt)
                else:
-                  tgt = (next ((target for target in filtered.rejected
+                  tgt = (next ((target for target in filtered.rejects
                           if target.cfg_path == cfg_path), None))
 
                   if not tgt :

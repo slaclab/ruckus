@@ -8,14 +8,16 @@ hlsVer \- Sets the Xilinx/Vitis Version
 .TP
 .B hlsVer
 Sets the Xilinx/Vitis Version by calling the appropriate settings64.sh script.
-To function, the environment variable \fBHLS_PROJECT_XILINX_SETUP must point
-to root XILINX tool directories.  This may be a colon delimited list if the
+To function, the environment variable \fBHLS_PROJECT_XILINX_SETUP\fR must point
+to the root XILINX tool directories.  This may be a colon delimited list if the
 XILINX versions are not all under the same root directory.
 
-Note: This should be viewed as a standalone command. While it is used internally
-by \fBhlsProject\fR. While it can be used within the HLS project build framework,
-it is meant to be a convenience to HLS work that is not using the hls project build
-framework. See the examples.
+Note: This should be viewed as a standalone command. It is meant to be a
+convenience to HLS work that is not using the **hlsBs** project build framework.
+**hlsVersion** is the standard method to initialize the **hlsBs** framework to
+use a specific version.
+
+See the examples.
 
 .SH OPTIONS
 .TP
