@@ -151,7 +151,6 @@ class Project:
             from   directory import Directory
 
             self.repo = None
-
             script = os.path.join (Directory.sh, 'git.sh')
             cmd = [ 'sh', script]
             with subprocess.Popen (cmd,
@@ -286,12 +285,18 @@ class Project:
 
             # Project Root
             if (needs & Project.Need.Root           and
-                self.root is None                   and
-                hasattr (module,  'get_project_root')   ) :
-                self.root = module.get_project_root (self)
+                self.root is None) :
+                if hasattr (module,  'get_project_root') :
+                   self.root = module.get_project_root (self)
+
+                # If have got a root, expand it
                 if  self.root :
                     self.root = os.path.expandvars (self.root)
 
+                # Else default to the root directory of the project files
+                else :
+                    self.root = os.path.split (
+                                os.path.split (self.prj_files[0])[0])[0]
 
             # Project Products
             if (needs & Project.Need.Products_Root  and

@@ -333,40 +333,43 @@ class Configuration :
         if not isinstance (includes, list) : includes = [includes]
 
         for inc in includes :
-            file = inc['file']
-            type = inc['type']
+            paths = inc['paths']
+            type  = inc['type']
 
-            file     = file.format_map (target_dict)
-            exp_path = os.path.expandvars (file)
+            if  not isinstance (paths, (list, tuple)) :
+                paths = [paths]
+            for path in paths :
+                path     = path.format_map (target_dict)
+                exp_path = os.path.expandvars (path)
 
-            if   type == 'abs_file' :
-                inc_path = exp_path
-                inc_dir  = '/' + file
-
-            elif type == 'rel_file' :
-
-                if os.path.isabs (exp_path) :
-                    inc_dir  = Configuration.make_relative (exp_path,
-                                                            rel_path,
-                                                            True)
-                    inc_path = os.path.join (rel_path, exp_path)
-                else :
+                if   type == 'abs_file' :
                     inc_path = exp_path
-                    inc_dir  = file
+                    inc_dir  = '/' + path
 
-            # -----------------------------
-            # Check the include path exists
-            # -----------------------------
-            exists = os.path.isdir (inc_path)
-            if not exists :
-                print (f"ERROR: inc_path = {inc_path} does not exist\n"
-                       f"     : exp_path = {exp_path}\n"
-                       f"     : rel_path = {rel_path}\n"
-                       f"     : src_file = {src_file}\n"
-                       f"     : type     = {type}", file = sys.stderr)
-                errs += 1
+                elif type == 'rel_file' :
 
-            incs += ' -I ' + inc_dir
+                    if os.path.isabs (exp_path) :
+                        inc_dir  = Configuration.make_relative (exp_path,
+                                                                rel_path,
+                                                                True)
+                        inc_path = os.path.join (rel_path, exp_path)
+                    else :
+                        inc_path = exp_path
+                        inc_dir  = path
+
+                # -----------------------------
+                # Check the include path exists
+                # -----------------------------
+                exists = os.path.isdir (inc_path)
+                if not exists :
+                    print (f"ERROR: inc_path = {inc_path} does not exist\n"
+                           f"     : exp_path = {exp_path}\n"
+                           f"     : rel_path = {rel_path}\n"
+                           f"     : src_file = {src_file}\n"
+                           f"     : type     = {type}", file = sys.stderr)
+                    errs += 1
+
+                incs += ' -I ' + inc_dir
 
         return errs, incs
     # --------------------------------------------------------------------------

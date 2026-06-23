@@ -14,13 +14,7 @@
 # This avoids polluting sys.path when not main
 # --------------------------------------------------
 if __name__  == '__main__' :
-    import os,sys,glob
-
-    sys.path.append (Directory.root)
-    from vitispy.dictionary import *
-    from vitispy.project    import Project
-    from vitispy.maps       import Maps
-
+    pass
 else :
     import   os,glob
     from .dictionary import Dictionary
@@ -278,10 +272,20 @@ class Maps () :
 
 
 # ------------------------------------------------------------------------------
-if __name__ == "__main__" :
+def doit () :
+
+    import os,sys,glob
+    sys.path.append (os.path.split (os.path.split (__file__)[0])[0])
+
+    from vitispy.directory  import Directory
+    sys.path.append (Directory.root)
+    from vitispy.project    import Project
+    from vitispy.product    import Product
+    from vitispy.maps       import Maps
+
 
     # Convience variables
-    build0 =     ('b0', { 'top'     : 'processStream',
+    build0 =     ('b0', {'top'     : 'processStream',
                          'tb'      : [ 'tbFiles'],
                          'syn'     : [ 'synFiles'],
                          'ldflags' : 'ldFlags etc',
@@ -295,15 +299,16 @@ if __name__ == "__main__" :
                          'csim'    : 'csim_arg0',
                          'cosim'   : 'cosim_arg0' } ]
 
-    files    = '${SNL_ROOT}/internal/tests/layers/*d_same/*.hh'
-    fpgas    = ( Project.Fpga ('xcku115-flvb2104-2-i', '6',  None, 'f0'),
-                 Project.Fpga ('xcku115-flvb2104-2-i', '5',  None, 'f1') )
+    files    = '${SNL_TESTS}/tests/layers/networks/*d_same/*.hh'
+    files    = os.path.expandvars (files)
+    fpgas    = ( Product.Fpga ('xcku115-flvb2104-2-i', '6',  None, 'f0'),
+                 Product.Fpga ('xcku115-flvb2104-2-i', '5',  None, 'f1') )
 
-    dictionaries = ( Dictionary_of_Builds   ('build',   [build0, build]),
-                     Dictionary_of_Files    ('network',           files),
-                     Dictionary_of_Fpgas    ('fpga'  ,            fpgas),
-                     Dictionary_of_Values   ('value',       [1, 2, 3]) )
-    template     = "xyz-{product_id}-{network_name}-{fpga_id}-{value}"
+    dictionaries = ( Product.Builds   ('build',    [build0, build1]),
+                     Product.Files    ('network',  files),
+                     Product.Fpgas    ('fpga',     fpgas),
+                     Product.Values   ('value',    [1, 2, 3]) )
+    template     = "xyz-{build_name}-{network_name}-{fpga_id}-{value}"
     maps         = Maps (dictionaries)
 
     idx = 0
@@ -312,5 +317,10 @@ if __name__ == "__main__" :
         print (f"{idx:3d}: {s}")
         idx += 1
 
-    sys.exit (0)
+    return 0
 # ------------------------------------------------------------------------------
+
+if __name__ == "__main__" :
+
+    status = doit ()
+    exit (status)
