@@ -19,7 +19,7 @@ then
    if [[ $status != "0" ]] ; then
        tag="None"
    fi
-    
+
    s+="{ \"Repo\"      : \"${repo}\",
          \"Dirty\"     : False,
          \"Branch\"    : \"${branch}\",
@@ -27,7 +27,7 @@ then
          \"HashShort\" : \"${hash_short}\",
          \"HashMsg\"   : \"${hash_long}\",
          \"Tag\"       : \"${tag}\" }"
-else 
+else
    s+="{ \"Repo\"      : \"${repo}\",
          \"Dirty\"     : True,
          \"Branch\"    : \"${branch}\",

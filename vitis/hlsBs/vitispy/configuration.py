@@ -330,11 +330,22 @@ class Configuration :
         incs        = ''
         errs        = 0
 
-        if not isinstance (includes, list) : includes = [includes]
+        if not isinstance (includes, (list,tuple)) :
+            includes = (includes,)
 
         for inc in includes :
             paths = inc['paths']
             type  = inc['type']
+
+            if type != 'rel_path' and type != 'abs_path' :
+                print ( "ERROR: Include path type invalid for file\n"
+                       f"    src_file  = {src_file}\n"
+                       f"        type  = \'{type}\' is not recognized\n"
+                       f"       valid  = \'rel_path\' and \'abs_path\'\n"
+                       f"       paths  = {paths}\n", file = sys.stderr)
+                errs += 1
+                continue
+
 
             if  not isinstance (paths, (list, tuple)) :
                 paths = [paths]
@@ -342,11 +353,11 @@ class Configuration :
                 path     = path.format_map (target_dict)
                 exp_path = os.path.expandvars (path)
 
-                if   type == 'abs_file' :
+                if   type == 'abs_path' :
                     inc_path = exp_path
                     inc_dir  = '/' + path
 
-                elif type == 'rel_file' :
+                elif type == 'rel_path' :
 
                     if os.path.isabs (exp_path) :
                         inc_dir  = Configuration.make_relative (exp_path,
@@ -356,6 +367,7 @@ class Configuration :
                     else :
                         inc_path = exp_path
                         inc_dir  = path
+
 
                 # -----------------------------
                 # Check the include path exists

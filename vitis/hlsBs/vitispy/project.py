@@ -182,9 +182,12 @@ class Project:
             pm3 = pad - len ('Git')
             printer.line (f"Git{' '*pm3}.repo", self.repo)
             printer.line (f"{' '*pad}.branch",  self.branch)
-            printer.line (f"{' '*pad}.dirty",        dirty_msg)
-            printer.line (f"{' '*pad}.hash",    self.hash_short)
-            printer.line (f"{' '*pad}.tag",     self.tag)
+
+            if not self.dirty :
+                printer.line (f"{' '*pad}.hash", self.hash_short)
+                printer.line (f"{' '*pad}.tag",  self.tag)
+            else :
+                printer.line (f"{' '*pad}.dirty", dirty_msg)
 
             return
     # --------------------------------------------------------------------------
