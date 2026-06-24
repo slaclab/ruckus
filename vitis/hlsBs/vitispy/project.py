@@ -270,8 +270,18 @@ class Project:
 
             self.modules = []
             for file in files :
-                self.prj_files.append (file)
-                self.import_module (file)
+                abs_file = os.path.abspath (file)
+                if abs_file != file :
+                    print (
+                        "\n"
+                        f"{'*'*78}\n"
+                        f"WARNING* The project file <{file}>\n"
+                         "       * is specified as a relative path.\n"
+                         "       * This is discouraged.\n"
+                         "       * It makes the command directory dependent leading to mysterious behavior.\n"
+                        f"{'*'*78}\n")
+                self.prj_files.append (abs_file)
+                self.import_module (abs_file)
 
                 for module in self.modules :
                     module.add ()
