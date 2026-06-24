@@ -300,7 +300,7 @@ class Run :
 
         elif slow_msk == (Run.Msk.Clean | Run.Msk.Make | Run.Msk.Run) :
             # Clean Make + Run
-            
+
             aux_cfg      = os.path.join (Directory.cfg, "csim_cleanMakeRun.cfg")
             self.announce (False, "Cleaning, Building & Running")
 
