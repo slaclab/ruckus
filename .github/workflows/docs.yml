@@ -12,9 +12,12 @@ permissions:
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, but do NOT cancel an in-progress run:
+# Pages deployments must be allowed to finish, otherwise an overlapping push/PR
+# run preempts the deploy and nothing gets published.
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
