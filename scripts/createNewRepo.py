@@ -323,6 +323,13 @@ def setupNewRepoStructure(repo):
         content = open(f'{baseDir}/.gitattributes').read(),
     )
 
+    # Add the .flake8
+    repo.create_file(
+        path    = '.flake8',
+        message = 'Adding .flake8',
+        content = open(f'{baseDir}/.flake8').read(),
+    )
+
     # Check if submodule path(s) exist
     if args.submodules is not None:
 

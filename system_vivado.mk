@@ -202,9 +202,18 @@ ifndef EMBED_PROC
 export EMBED_PROC = microblaze_0
 endif
 
+# True when VIVADO_VERSION >= 2026.1 (Vitis dropped the Eclipse GUI/XSCT for the Unified IDE)
+VIVADO_GE_2026_1 := $(shell printf '2026.1\n%s\n' "$(VIVADO_VERSION)" | sort -V 2>/dev/null | head -n1)
+
 ifneq (, $(shell which vitis 2>/dev/null))
    export EMBED_TYPE = Vitis
-   export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   ifeq ($(VIVADO_GE_2026_1),2026.1)
+      # Vitis 2026.1 (or newer): Unified IDE launch syntax
+      export EMBED_GUI  = vitis -w $(OUT_DIR)/$(VIVADO_PROJECT).vitis
+   else
+      # Vitis 2019.2 .. 2025.x: legacy Eclipse-based GUI
+      export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   endif
    export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/bit.tcl
 else
    export EMBED_TYPE = SDK

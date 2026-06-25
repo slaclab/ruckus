@@ -28,11 +28,19 @@ if { [file exists ${VIVADO_DIR}/vitis.tcl] == 1 } {
    # Generate the .XSA file
    write_hw_platform -fixed -force  -include_bit -file ${OUT_DIR}/${PROJECT}.xsa
 
-   # Create the Vitis project
-   set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl >@stdout } _RESULT]
+   # Build the .ELF
+   if { [VersionCompare 2026.1] >= 0 } {
+      # Vitis 2026.1 (or newer): XSCT was removed, use the Vitis Python API
+      set src_rc [catch {exec vitis -s ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/build.py >@stdout } _RESULT]
 
-   # Generate .ELF
-   set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl >@stdout } _RESULT]
+   } else {
+      # Vitis 2019.2 .. 2025.x: legacy XSCT flow
+      # Create the Vitis project
+      set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/prj.tcl >@stdout } _RESULT]
+
+      # Generate .ELF
+      set src_rc [catch {exec xsct -interactive ${RUCKUS_DIR}/MicroblazeBasicCore/vitis/elf.tcl >@stdout } _RESULT]
+   }
 
    # Add .ELF to the .bit file properties
    set add_rc [catch {
