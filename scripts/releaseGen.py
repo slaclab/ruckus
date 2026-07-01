@@ -43,6 +43,7 @@ oldTag = git.Git('.').describe('--abbrev=0','--tags',newTag + '^')
 
 # Get release notes
 md = releaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = remRepo, oldTag = oldTag, newTag = newTag)
+md += releaseNotes.getCompareUrl(remRepo, oldTag, newTag)
 
 def releaseType(ver):
     parts = str.split(ver.replace('v', ''), '.')
