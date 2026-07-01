@@ -158,6 +158,15 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
     return md
 
+
+def getCompareUrl(remRepo, oldTag, newTag):
+
+    # Only generate a compare link when there is an older tag to compare against
+    if not oldTag:
+        return ''
+
+    return f"\n**Full Changelog**: https://github.com/{remRepo.full_name}/compare/{oldTag}...{newTag}\n"
+
 if __name__ == "__main__":
     import os
 
@@ -201,5 +210,7 @@ if __name__ == "__main__":
         remRepo  = remRepo,
         oldTag   = oldTag,
         newTag   = newTag)
+
+    md += getCompareUrl(remRepo, oldTag, newTag)
 
     print(md)
