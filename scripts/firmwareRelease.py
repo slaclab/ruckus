@@ -675,6 +675,10 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
 
     md += "\n\nRelease generated with SLAC ruckus releaseGen script\n"
 
+    # Append the GitHub "Full Changelog" compare link as the final line (only when a previous tag was provided)
+    if prev != "":
+        md += releaseNotes.getCompareUrl(remRepo, relOld, relNew)
+
     remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 
     print("\nUploading attachments ...")

@@ -23,17 +23,22 @@ set_property STEPS.SYNTH_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/synth.tcl
 set_property STEPS.OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/opt.tcl  [get_runs impl_1]
 set_property STEPS.OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/opt.tcl [get_runs impl_1]
 
-# Setup scripts for POWER_OPT
-set_property STEPS.POWER_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/power_opt.tcl  [get_runs impl_1]
-set_property STEPS.POWER_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/power_opt.tcl [get_runs impl_1]
+# Setup scripts for POWER_OPT and POST_PLACE_POWER_OPT
+# Note: Versal in Vivado 2026.1+ removed these run steps from the impl_1 object
+if { [VersionCompare 2026.1] < 0 || [isVersal] != true } {
+   set_property STEPS.POWER_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/power_opt.tcl  [get_runs impl_1]
+   set_property STEPS.POWER_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/power_opt.tcl [get_runs impl_1]
+}
 
 # Setup scripts for PLACE
 set_property STEPS.PLACE_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/place.tcl  [get_runs impl_1]
 set_property STEPS.PLACE_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/place.tcl [get_runs impl_1]
 
 # Setup scripts for POST_PLACE_POWER_OPT
-set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/post_place_power_opt.tcl  [get_runs impl_1]
-set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/post_place_power_opt.tcl [get_runs impl_1]
+if { [VersionCompare 2026.1] < 0 || [isVersal] != true } {
+   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/post_place_power_opt.tcl  [get_runs impl_1]
+   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${RUCKUS_DIR}/vivado/run/post/post_place_power_opt.tcl [get_runs impl_1]
+}
 
 # Setup scripts for PHYS_OPT
 set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE  ${RUCKUS_DIR}/vivado/run/pre/phys_opt.tcl  [get_runs impl_1]
