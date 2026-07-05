@@ -51,8 +51,23 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
     steps:
+      # The GitHub Pages backend intermittently fails an otherwise-valid deploy
+      # with the opaque "Deployment failed, try again later." Treat the first
+      # attempt as best-effort so a single transient hiccup does not mark main
+      # red, then retry exactly once. Only one bounded retry: aggressive retries
+      # can worsen a wedged Pages backend rather than help it recover.
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Wait before retrying deploy
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 60
+
+      - name: Deploy to GitHub Pages (retry)
+        id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
