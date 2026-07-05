@@ -290,9 +290,13 @@ if { ${rogueSimPath} != "" } {
    puts  ${envScript} "export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:${simTbOutDir}"
    close ${envScript}
 
-   # Find the surf/axi/simlink/src directory
+   # Find the surf/axi/simlink directory (prefer vcs/, fall back to legacy src/)
    set simTbDirName [file dirname [lindex ${rogueSimPath} 0]]
-   set simLinkDir   ${simTbDirName}/../src/
+   if { [file exists ${simTbDirName}/../vcs/] } {
+      set simLinkDir ${simTbDirName}/../vcs/
+   } else {
+      set simLinkDir ${simTbDirName}/../src/
+   }
 
    # Move the working directory to the simlink directory
    cd ${simLinkDir}
