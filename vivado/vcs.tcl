@@ -255,26 +255,14 @@ export_simulation -force -absolute_path -simulator vcs -include ${include} -defi
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################
 
-set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueTcpStream.vhd RogueTcpMemory.vhd RogueSideBand.vhd}]
+set rogueSimPath [RogueSimSources vcs]
 if { ${rogueSimPath} != "" } {
 
    # Set the flag true
    set rogueSimEn true
 
    # Check the zeromq library exists and its version
-   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.1.0} --print-errors} libzmq]
-   if { ${libzmq} != "" } {
-      puts "\n\n\n\n\n********************************************************"
-      if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
-         puts "libzmq package was not found"
-         puts "Please make sure that you have libzmq installed"
-         puts "or have sourced the necessary rogue setup scripts"
-      } else {
-         puts ${libzmq}
-      }
-      puts "********************************************************\n\n\n\n\n"
-      exit -1
-   }
+   RogueCheckLibZmq
 
    # Create the setup environment script: C-SHELL
    set envScript [open ${simTbOutDir}/setup_env.csh  w]

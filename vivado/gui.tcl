@@ -18,6 +18,30 @@ source -quiet $::env(RUCKUS_DIR)/vivado/proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/properties.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/messages.tcl
 
+########################################################
+## Rogue co-sim GUI-path environment setup.
+## The interactive "Run Simulation" freezes the xsim subprocess environment
+## when launch_simulation starts -- which is earlier than the
+## xsim.compile.tcl.pre hook (vivado/run/pre/xsim.tcl) fires -- so setting
+## LD_PRELOAD from that hook is too late for the GUI. Set it here at GUI
+## startup, before the user launches a simulation, so the xsim subprocess
+## inherits it. Mirrors the batch simulate path in vivado/xsim.tcl and is
+## guarded on the Rogue xsim backend, so it is a no-op for non-Rogue projects.
+########################################################
+if { [RogueSimSources xsim] != "" } {
+   # GLIBCXX runtime fix: LD_PRELOAD a libstdc++ new enough for the co-sim's
+   # libzmq (see RoguePreloadLibStdCpp).
+   RoguePreloadLibStdCpp
+   # LD_LIBRARY_PATH parity so the interactively launched xsim subprocess
+   # finds RogueTcpDpi.so at runtime, mirroring vivado/xsim.tcl.
+   set simOutDir "${OUT_DIR}/${VIVADO_PROJECT}.sim/sim_1/behav/xsim"
+   if { [info exists ::env(LD_LIBRARY_PATH)] } {
+      set ::env(LD_LIBRARY_PATH) "${simOutDir}:$::env(LD_LIBRARY_PATH)"
+   } else {
+      set ::env(LD_LIBRARY_PATH) "${simOutDir}"
+   }
+}
+
 # Update the bitstream post script
 if { [isVersal] } {
    set_property STEPS.WRITE_DEVICE_IMAGE.TCL.POST ${RUCKUS_DIR}/vivado/run/post/gui_write.tcl [get_runs impl_1]

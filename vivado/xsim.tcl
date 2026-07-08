@@ -49,13 +49,50 @@ generate_target -quiet {simulation} [get_ips]
 export_ip_user_files -no_script
 
 ########################################################
+## Rogue co-sim batch-path env parity. The guard
+## + xsc build + -sv_lib injection live in run/pre/xsim.tcl
+## (registered by project.tcl); this is belt-and-suspenders
+## only for the batch xsim subprocess -- no duplicate build.
+########################################################
+set rogueSimPath [RogueSimSources xsim]
+if { ${rogueSimPath} != "" } {
+
+   # Version lock: the Rogue xsim DPI co-sim requires Vivado 2023.1+ (see
+   # vivado/run/pre/xsim.tcl). Fail fast on the "make xsim" batch path, before
+   # launch_simulation. Only reached when the co-sim is used, so a non-Rogue
+   # xsim project on an older Vivado is unaffected.
+   if { [VersionCheck 2023.1] < 0 } {
+      exit -1
+   }
+
+   # GLIBCXX runtime fix for the batch xsim subprocess: LD_PRELOAD a libstdc++
+   # new enough for the co-sim's libzmq (see RoguePreloadLibStdCpp). The GUI
+   # path applies the same fix from vivado/run/pre/xsim.tcl.
+   RoguePreloadLibStdCpp
+
+   # LD_LIBRARY_PATH parity so a script-launched xsim subprocess
+   # finds libRogueTcpStream.so at runtime, mirroring vcs.tcl's
+   # setup_env LD_LIBRARY_PATH prepend
+   set simOutDir "${OUT_DIR}/${VIVADO_PROJECT}.sim/sim_1/behav/xsim"
+   if { [info exists ::env(LD_LIBRARY_PATH)] } {
+      set ::env(LD_LIBRARY_PATH) "${simOutDir}:$::env(LD_LIBRARY_PATH)"
+   } else {
+      set ::env(LD_LIBRARY_PATH) "${simOutDir}"
+   }
+}
+
+########################################################
 ## Simulate Process
 ########################################################
 set sim_rc [catch {
 
    # Set sim properties
    set_property target_simulator XSim [current_project]
-   set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
+   # Only override the sim_1 top when VIVADO_PROJECT_SIM is explicitly defined;
+   # otherwise keep the top auto-picked-up from the target's ruckus.tcl
+   if { ${VIVADO_PROJECT_SIM} != "" } {
+      set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
+   }
    set_property top_lib xil_defaultlib [get_filesets sim_1]
 
    # Launch the xsim
