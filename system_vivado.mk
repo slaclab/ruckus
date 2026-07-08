@@ -407,14 +407,6 @@ yaml : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/cpsw.tcl
 
 ###############################################################
-#### Vivado WIS ###############################################
-###############################################################
-.PHONY : wis
-wis : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/wis.tcl
-
-###############################################################
 #### Rogue Co-Simulation Backend ##############################
 ###############################################################
 # Tell surf/axi/simlink/ruckus.tcl which Rogue co-sim backend the invoked

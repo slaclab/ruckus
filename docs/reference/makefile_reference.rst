@@ -46,8 +46,6 @@ Targets
      - Generate PyRogue tarball.
    * - ``yaml``
      - Generate CPSW YAML tarball.
-   * - ``wis``
-     - Generate ``init_wis.tcl`` for Windows Vivado initialisation.
    * - ``xsim``
      - Run Vivado XSIM simulation. Automatically detects and builds the Rogue TCP/SideBand co-simulation DPI library when present; see :doc:`../how-to/xsim_rogue_cosim`.
    * - ``vcs``
