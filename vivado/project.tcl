@@ -70,6 +70,13 @@ if { [VersionCompare 2014.2] <= 0 } {
    set_property xsim.unifast false        [get_filesets sim_1]
 
    set_property -name {xsim.compile.xvlog.more_options} -value {-d SIM_SPEED_UP} -objects [get_filesets sim_1]
+
+   # Register the DPI pre-compile hook unconditionally. The
+   # Rogue co-sim guard lives in the hook script itself, so this is a
+   # safe no-op for non-Rogue xsim projects. Registered here (not in
+   # xsim.tcl) because project.tcl is the only ruckus script sourced
+   # by both "make gui" and "make xsim" ahead of launch_simulation.
+   set_property -name {xsim.compile.tcl.pre} -value ${RUCKUS_DIR}/vivado/run/pre/xsim.tcl -objects [get_filesets sim_1]
 }
 
 # Enable general project multi-threading
