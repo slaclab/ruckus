@@ -542,7 +542,7 @@ if __name__ == "__main__" :
    # ----------------------------
    # Simple test/debugging method
    # ----------------------------
-   project_file = os.path.expandvars ("$HLS_PROJECT_PRJ")
+   project_file = os.path.expandvars ("$HLSBS_PROJECT")
    needs   = 0
    project = Project (needs,
                       project_file,

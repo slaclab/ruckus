@@ -43,7 +43,7 @@ function setup {
     fi
 
     local script_dir=`dirname $script_fn`
-    export HLS_BS_ROOT=`dirname $script_dir`
+    export HLSBS_ROOT=`dirname $script_dir`
 }
 
 setup
@@ -52,7 +52,7 @@ unset setup
 # ------------------------------------------------------------------------------
 function hlsCheck ()
 {
-    if [[ -z "${HLS_PROJECT_XILINX_VERSION}" ]] ; then
+    if [[ -z "${HLSBS_XILINX_VERSION}" ]] ; then
         echo -e \
           "\nERROR: HLS project has not been setup\n"\
              "      Try\n"\
@@ -93,17 +93,17 @@ function hlsVer ()
 
     local version=$1
 
-    if [[ -z "${HLS_PROJECT_XILINX_SETUP}" ]] ; then
+    if [[ -z "${HLSBS_XILINX_SETUP}" ]] ; then
         echo -e \
           '\n'\
-          'ERROR: HLS_PROJECT_XILINX_SETUP is not set\n'\
+          'ERROR: HLSBS_XILINX_SETUP is not set\n'\
           '       For example\n'\
-          '       $ export HLS_PROJECT_XILINX_SETUP=${XILINX_INSTALL_DIR}/{version}\n'
+          '       $ export HLSBS_XILINX_SETUP=${XILINX_INSTALL_DIR}/{version}\n'
 
         return -1
     fi
 
-    eval local ypath=\"${HLS_PROJECT_XILINX_SETUP}/Vitis\"
+    eval local ypath=\"${HLSBS_XILINX_SETUP}/Vitis\"
     local settings64=$(find $ypath -name settings64.sh -prune -print -quit 2>/dev/null)
 
     if [[ -z "${settings64}" ]] ; then
@@ -112,7 +112,7 @@ function hlsVer ()
     else
         echo   Setting Xilinx to version = ${version}
         source ${settings64}
-        export HLS_PROJECT_XILINX_VERSION=${version}
+        export HLSBS_XILINX_VERSION=${version}
         return 0
     fi
 }
@@ -123,22 +123,22 @@ function hlsPrj ()
 {
     local s=''
 
-    if [[ -n "${HLS_PROJECT_INI}"  ]] ; then
-        IFS=':' read -ra arr <<< "${HLS_PROJECT_INI}"
+    if [[ -n "${HLSBS_INI}"  ]] ; then
+        IFS=':' read -ra arr <<< "${HLSBS_INI}"
         local tarr=("${arr[@]/#/@}")
         s+=${tarr[@]}
     fi
 
-    if [[ -n "${HLS_PROJECT_PRJ}" ]]; then
-        s+=' --project='${HLS_PROJECT_PRJ}
+    if [[ -n "${HLSBS_PROJECT}" ]]; then
+        s+=' --project='${HLSBS_PROJECT}
     fi
 
-    if [[ -n "${HLS_PROJECT_WORKSPACE}" ]] ; then
-        s+=' --workspace='${HLS_PROJECT_WORKSPACE}
+    if [[ -n "${HLSBS_WORKSPACE}" ]] ; then
+        s+=' --workspace='${HLSBS_WORKSPACE}
     fi
 
-    if [[ -n "${HLS_PROJECT_PRODUCTS}" ]] ; then
-        s+=' --products-root='${HLS_PROJECT_PRODUCTS}
+    if [[ -n "${HLSBS_PRODUCTS}" ]] ; then
+        s+=' --products-root='${HLSBS_PRODUCTS}
     fi
 
     echo ${s}
@@ -154,34 +154,38 @@ function hlsCtx ()
         return
     fi
 
-    echo "HLS Project environment variables"
+    echo "HLSBS Project environment variables"
 
-    if [[ -n "${HLS_PROJECT_XILINX_SETUP}"   ]] ; then
-        echo   "HLS_PROJECT_XILINX_SETUP   = ${HLS_PROJECT_XILINX_SETUP}"
+    if [[ -n "${HLSBS_ROOT}"          ]] ; then
+        echo   "HLSBS_ROOT           = ${HLSBS_ROOT}"
     fi
 
-    if [[ -n "${HLS_PROJECT_XILINX_VERSION}" ]] ; then
-        echo   "HLS_PROJECT_XILINX_VERSION = ${HLS_PROJECT_XILINX_VERSION}"
+    if [[ -n "${HLSBS_XILINX_SETUP}"   ]] ; then
+        echo   "HLSBS_XILINX_SETUP   = ${HLSBS_XILINX_SETUP}"
     fi
 
-    if [[ -n "${HLS_PROJECT_INI}"            ]] ; then
-        echo   "HLS_PROJECT_INI            = ${HLS_PROJECT_INI}"
+    if [[ -n "${HLSBS_XILINX_VERSION}" ]] ; then
+        echo   "HLSBS_XILINX_VERSION = ${HLSBS_XILINX_VERSION}"
     fi
 
-    if [[ -n "${HLS_PROJECT_ROOT}"           ]] ; then
-        echo   "HLS_PROJECT_ROOT           = ${HLS_PROJECT_ROOT}"
+    if [[ -n "${HLSBS_INI}"            ]] ; then
+        echo   "HLSBS_INI            = ${HLSBS_INI}"
     fi
 
-    if [[ -n "${HLS_PROJECT_PRJ}"            ]]; then
-        echo   "HLS_PROJECT_PRJ            = ${HLS_PROJECT_PRJ}"
+    if [[ -n "${HLSBS_PROJECT_ROOT}"   ]] ; then
+        echo   "HLSBS_PROJECT_ROOT   = ${HLSBS_PROJECT_ROOT}"
     fi
 
-    if [[ -n "${HLS_PROJECT_PRODUCTS}"      ]] ; then
-        echo   "HLS_PROJECT_PRODUCTS       = ${HLS_PROJECT_PRODUCTS}"
+    if [[ -n "${HLSBS_PROJECT}"       ]]; then
+        echo   "HLSBS_PROJECT        = ${HLSBS_PROJECT}"
     fi
 
-    if [[ -n "${HLS_PROJECT_WORKSPACE}"     ]] ; then
-        echo   "HLS_PROJECT_WORKSPACE      = ${HLS_PROJECT_WORKSPACE}"
+    if [[ -n "${HLSBS_PRODUCTS}"      ]] ; then
+        echo   "HLSBS_PRODUCTS       = ${HLSBS_PRODUCTS}"
+    fi
+
+    if [[ -n "${HLSBS_WORKSPACE}"     ]] ; then
+        echo   "HLSBS_WORKSPACE      = ${HLSBS_WORKSPACE}"
     fi
 }
 # ------------------------------------------------------------------------------
@@ -196,8 +200,8 @@ function hlsWs ()
         return $? 2>/dev/null; exit
     fi
 
-    (export LD_LIBRARY_PATH=$HLS_PROJECT_LD_LIBRARY_PATH; set -f; \
-     $hlsPython ${HLS_BS_ROOT}/vitispy/hlsWs.py  $(hlsPrj) $@)
+    (export LD_LIBRARY_PATH=$HLSBS_LD_LIBRARY_PATH; set -f; \
+     $hlsPython ${HLSBS_ROOT}/vitispy/hlsWs.py  $(hlsPrj) $@)
 }
 # ------------------------------------------------------------------------------
 
@@ -211,8 +215,8 @@ function hlsGui ()
         return $? 2>/dev/null; exit
     fi
 
-    (export LD_LIBRARY_PATH=$HLS_PROJECT_LD_LIBRARY_PATH; set -f; \
-     $hlsPython ${HLS_BS_ROOT}/vitispy/hlsGui.py $(hlsPrj) $@)
+    (export LD_LIBRARY_PATH=$HLSBS_LD_LIBRARY_PATH; set -f; \
+     $hlsPython ${HLSBS_ROOT}/vitispy/hlsGui.py $(hlsPrj) $@)
 }
 # ------------------------------------------------------------------------------
 
@@ -228,8 +232,8 @@ function hlsCfg ()
         return $? 2>/dev/null; exit
     fi
 
-    (export LD_LIBRARY_PATH=$HLS_PROJECT_LD_LIBRARY_PATH; set -f; \
-     $hlsPython  ${HLS_BS_ROOT}/vitispy/hlsCfg.py $(hlsPrj) $@)
+    (export LD_LIBRARY_PATH=$HLSBS_LD_LIBRARY_PATH; set -f; \
+     $hlsPython  ${HLSBS_ROOT}/vitispy/hlsCfg.py $(hlsPrj) $@)
 }
 # ------------------------------------------------------------------------------
 
@@ -245,8 +249,8 @@ function hlsComp ()
         return $? 2>/dev/null; exit
     fi
 
-    (export LD_LIBRARY_PATH=$HLS_PROJECT_LD_LIBRARY_PATH; set -f; \
-     $hlsPython ${HLS_BS_ROOT}/vitispy/hlsComp.py $(hlsPrj) $@)
+    (export LD_LIBRARY_PATH=$HLSBS_LD_LIBRARY_PATH; set -f; \
+     $hlsPython ${HLSBS_ROOT}/vitispy/hlsComp.py $(hlsPrj) $@)
 }
 # ------------------------------------------------------------------------------
 
@@ -272,19 +276,19 @@ function hlsRun ()
     #
     # The more correct kludge (is there such a thing) is to set
     # this in run.py just before is spawns the subprocess.
-    # Technically HLS_PROJECT_LD_LIBRARY_PATH is only for the
+    # Technically HLSBS_LD_LIBRARY_PATH is only for the
     # python build code, not the run code.
     #
     # The trade-off is that this contains the kludge to this file.
     # ------------------------------------------------------------
-    if [[ $HLS_PROJECT_XILINX_VERSION == "2023.2" ]] ; then
-        lpath=${HLS_PROJECT_LD_LIBRARY_PATH}:${XILINX_HLS}/lnx64/tools/fpo_v7_1
+    if [[ $HLSBS_XILINX_VERSION == "2023.2" ]] ; then
+        lpath=${HLSBS_LD_LIBRARY_PATH}:${XILINX_HLS}/lnx64/tools/fpo_v7_1
     else
-        lpath=${HLS_PROJECT_LD_LIBRARY_PATH}
+        lpath=${HLSBS_LD_LIBRARY_PATH}
     fi
 
     (export LD_LIBRARY_PATH=${lpath}; set -f; \
-     $hlsPython ${HLS_BS_ROOT}/vitispy/hlsRun.py $(hlsPrj) $@)
+     $hlsPython ${HLSBS_ROOT}/vitispy/hlsRun.py $(hlsPrj) $@)
 }
 # ----------------------------------------------------------------------
 
@@ -306,17 +310,17 @@ function hlsExe ()
     # It looks like the Makefile correctly sets the rpath to this
     # but the image activator fails to find it.
     # -----------------------------------------------------------
-    if [[ $HLS_PROJECT_XILINX_VERSION == "2023.2" ]] ; then
+    if [[ $HLSBS_XILINX_VERSION == "2023.2" ]] ; then
         export LD_LIBRARY_PATH=${XILINX_HLS}/lnx64/tools/fpo_v7_1
     fi
 
-    csim_exe=$(${HLS_BS_ROOT}/vitispy/hlsExe.py $(hlsPrj) $@)
+    csim_exe=$(${HLSBS_ROOT}/vitispy/hlsExe.py $(hlsPrj) $@)
     status=$?
     if test $status -ne 0
     then
         if test $status -eq 1
         then
-            man ${HLS_BS_ROOT}/man1/hlsExe.1
+            man ${HLSBS_ROOT}/man1/hlsExe.1
         fi
         return ${status}
     else
@@ -338,13 +342,13 @@ function hlsGdb ()
         return $? 2>/dev/null; exit
     fi
 
-    csim_exe=$(${HLS_BS_ROOT}/vitispy/hlsGdb.py $(hlsPrj) $@)
+    csim_exe=$(${HLSBS_ROOT}/vitispy/hlsGdb.py $(hlsPrj) $@)
     status=$?
     if test $status -ne 0
     then
         if test $status -eq 1
         then
-            man ${HLS_BS_ROOT}/man1/hlsGdb.1
+            man ${HLSBS_ROOT}/man1/hlsGdb.1
         fi
         return ${status}
     else
@@ -355,7 +359,7 @@ function hlsGdb ()
         # It looks like the Makefile correctly sets the rpath to this
         # but the image activator fails to find it.
         # -----------------------------------------------------------
-        if [[ $HLS_PROJECT_XILINX_VERSION == "2023.2" ]] ; then
+        if [[ $HLSBS_XILINX_VERSION == "2023.2" ]] ; then
             export LD_LIBRARY_PATH=${XILINX_HLS}/lnx64/tools/fpo_v7_1
         fi
         gdb --args ${csim_exe} $@
@@ -367,7 +371,7 @@ function hlsGdb ()
 # ----------------------------------------------------------------------
 function hlsBs ()
 {
-    man ${HLS_BS_ROOT}/man1/hlsBs.1
+    man ${HLSBS_ROOT}/man1/hlsBs.1
 }
 # ----------------------------------------------------------------------
 
@@ -390,9 +394,9 @@ function hlsVersion ()
 
     # Else maybe already setup
     elif [[ -n ${XILINX_HLS} ]]; then
-        eval `python ${HLS_BS_ROOT}/vitispy/hlsSetVersion.py`
+        eval `python ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
         echo "Using existing Xilinx version = ${HLS_XILINX_VERSION}"
-        export HLS_PROJECT_XILINX_VERSION=${HLS_XILINX_VERSION}
+        export HLSBS_XILINX_VERSION=${HLS_XILINX_VERSION}
     fi
 
 
@@ -404,34 +408,32 @@ function hlsVersion ()
     fi
 
 
-    unset HLS_PROJECT_LD_LIBRARY_PATH
-    unset HLS_PROJECT_IMPORT_PYPATHS
-    unset HLS_PROJECT_PYPATHS
+    unset HLSBS_LD_LIBRARY_PATH
+    unset HLSBS_PROJECT_IMPORT_PYPATHS
+    unset HLSBS_PROJECT_PYPATHS
     unset XILINX_VCXX
 
-
-
-    eval `python ${HLS_BS_ROOT}/vitispy/hlsSetVersion.py`
+    eval `python ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
 
     # ---------------------------------
     # Only works for versions > v2023.2
     # ---------------------------------
-    if [[ "${HLS_PROJECT_XILINX_VERSION}" < "2023.2" ]]; then
-        echo "ERROR: HLS Version ${HLS_PROJECT_XILINX_VERSION} must >= 2023.2"
+    if [[ "${HLSBS_XILINX_VERSION}" < "2023.2" ]]; then
+        echo "ERROR: HLS Version ${HLSBS_XILINX_VERSION} must >= 2023.2"
         return -1
     fi
 
-    eval `python3 ${HLS_BS_ROOT}/vitispy/hlsPythonContext.py get`
+    eval `python3 ${HLSBS_ROOT}/vitispy/hlsPythonContext.py get`
 
-    if   [[ "${HLS_PROJECT_XILINX_VERSION}" == "2023.2" ]]; then
+    if   [[ "${HLSBS_XILINX_VERSION}" == "2023.2" ]]; then
         export XILINX_VCXX=$XILINX_HLS/vcxx
-    elif [[ "${HLS_PROJECT_XILINX_VERSION}" == "2024.1" ]]; then
+    elif [[ "${HLSBS_XILINX_VERSION}" == "2024.1" ]]; then
         export XILINX_VCXX=$XILINX_HLS/vcxx
-    elif [[ "${HLS_PROJECT_XILINX_VERSION}" == "2024.2" ]]; then
+    elif [[ "${HLSBS_XILINX_VERSION}" == "2024.2" ]]; then
         export XILINX_VCXX=$XILINX_HLS/vcxx
-    elif [[ "${HLS_PROJECT_XILINX_VERSION}" == "2025.1" ]]; then
+    elif [[ "${HLSBS_XILINX_VERSION}" == "2025.1" ]]; then
         export XILINX_VCXX=$XILINX_HLS/lnx64/tools/vcxx
-    elif [[ "${HLS_XILINX_VERSION}" == "2025.2" ]]; then
+    elif [[ "${HLSBS_XILINX_VERSION}" == "2025.2" ]]; then
         export XILINX_VCXX=$XILINX_HLS/lnx64/tools/vcxx
     else
         export XILINX_VCXX=$XILINX_HLS/lnx64/tools/vcxx
@@ -443,7 +445,7 @@ function hlsVersion ()
 # ----------------------------------------------------------------------
 function hlsAddManpath ()
 {
-    local man_path=${HLS_BS_ROOT}/
+    local man_path=${HLSBS_ROOT}/
 
     # Eliminate duplicates
     mod_path=$(echo "$MANPATH" | tr ':' '\n' | awk '!seen[$0]++' | paste -sd: -)

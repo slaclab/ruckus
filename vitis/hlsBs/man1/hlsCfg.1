@@ -23,7 +23,7 @@ Displays this message\
 \fB\-w, \-\-workspace = \fIWORKSPACE\fR
 The target workspace. Although typically specified in the project file, this
 overrides that defintion and is useful for one-of/throw-away experimentation.
-The environment variable \fBHLS_PROJECT_WORKSPACE\fR can also be used.
+The environment variable \fBHLSBS_WORKSPACE\fR can also be used.
 
 .TP
 \fB\-\-components=...
@@ -43,10 +43,10 @@ Enables more extensive output which is useful for diagnostics.  The default
 is 'False'.
 
 .TP
-\fB\-\-project = \fIHLS_PROJECT_FILE\fR
+\fB\-\-project = \fIPROJECT_FILE\fR
 A project file is the standard method used by all the \fBhls\fR build utilities
 of capturing the stable command line options in a file that can be saved in GIT.
-Default is the environment variable \fIHLS_PROJECT\fR.
+Default is the environment variable \fIHLSBS_PROJECT\fR.
 
 
 .SH ACTIONS
@@ -156,7 +156,7 @@ set of the actions.
 
 
 .SH Examples:
-In the following assumes an HLS_PROJECT file containing the details
+In the following assumes an HLSBS project file containing the details
 
   $ hlsCfg --create
   Creates all the missing configuration files and their associated components

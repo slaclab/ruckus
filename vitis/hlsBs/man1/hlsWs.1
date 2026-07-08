@@ -61,7 +61,7 @@ are.
 
 While the project file itself may be specified on the command line via the
 \fB--project=\fR options, more typically it is specified with the environment
-variable \fBHLS_PROJECT_PRJ\fR.
+variable \fBHLSBS_PROJECT\fR.
 
 For the \fBhlsWs\fR command, it is convenient to place the definition of the
 workspace in this file. This reduces commands to, \fIe.g.\fR
@@ -93,9 +93,6 @@ The workspace defaults to
       <PROJECT_ROOT>/products/ws/{vitis_version}  ..or..
       <PRODUCTS_ROOT/ws/{vitis_version}
 
-where PROJECT_ROOT/PRODUCTS are generally specified by the environment variables
-HLS_PROJECT_ROOT/HLS_PROJECT_PRODUCT.
-
 
 .SH Examples:
 In the following assume the Vitis version is v2024.1
@@ -106,13 +103,13 @@ In the following assume the Vitis version is v2024.1
 
   $ hlsWs --create --dry-run
 
-  This will use the definition of the workspace found in the HLS_PROJECT file
+  This will use the definition of the workspace found in the HLSBS project file
   to report what would have been created if --dry-run had not been specified.
 
   $ hlsWs  --status
-  This will use the definition of the workspace found in the HLS_PROJECT file
+  This will use the definition of the workspace found in the HLSBS project file
   to display the status of the workspace. This is useful if one has forgotten
-  the name of the workspace since it is buried in the HLS_PROJECT file.
+  the name of the workspace since it is buried in the HLSBS project file.
 
 .SH AUTHOR
 Written by JJRussell

@@ -23,10 +23,10 @@
 
       It returns a string of 2 bash shell semi-colon separate commands that
       sets 2 environment variables
-         hlsPython          : Used as python interpreter for the selected
-                              VITIS version
-         HLS_PROJECT_IMPORT_PYPATHS: Used internally by the python scripts
-                            to set the PYTHONPATH and LD_LIBRARY_PATH
+         hlsPython            : Used as python interpreter for the selected
+                                VITIS version
+         HLSBS_IMPORT_PYPATHS: Used internally by the python scripts
+                               to set the PYTHONPATH and LD_LIBRARY_PATH
 
      This string can then be used to set these environment variables in the
      calling bash shell:
@@ -86,10 +86,10 @@ elif sys.argv[1] == 'extract' :
     import_pypaths = os.path.realpath (os.path.join (vitis_root_vitispy, 'import_pypaths.py'))
 
     # Format the exported python intepreter and python paths
-    output = ("export hlsPython="                   + sys.executable  + '; '
-           +  "export HLS_PROJECT_LD_LIBRARY_PATH=" + ld_library_path + '; '
-           +  "export HLS_PROJECT_IMPORT_PYPATHS="  + import_pypaths  + '; '
-           +  "export HLS_PROJECT_PYPATHS="         + paths)
+    output = ("export hlsPython="             + sys.executable  + '; '
+           +  "export HLSBS_LD_LIBRARY_PATH=" + ld_library_path + '; '
+           +  "export HLSBS_IMPORT_PYPATHS="  + import_pypaths  + '; '
+           +  "export HLSBS_PYPATHS="         + paths)
 
     print (output)
 # -------------------------------------------------------------------------------

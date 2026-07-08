@@ -91,10 +91,10 @@ input data that is causing problems.
 
 .TP
 .B hlsCtx
-This displays all the 'hidden' HLS_PROJECT context, in particular its
+This displays all the 'hidden' HLSBS context, in particular its
 environment variables.  Since these environment variables are all of
-the form \fBHLS_PROJECT_\fR<what>, can also be seen by
-   $ printenv | grep \fBHLS_PROJECT_\fR
+the form \fBHLSBS_\fR<what>, can also be seen by
+   $ printenv | grep \fBHLSBS_\fR
 
 
 .SH GENERALITIES
@@ -151,7 +151,7 @@ following ways
       check the code out from the GIT repository and build and run it
       without detailed knowledge.
 
-      By default the project file is the environment variable HLS_PRODUCT_PRJ.
+      By default the project file is the environment variable HLSBS_PROJECT
       The default can be neutered by \fB\-\-no-product\fR, which is handy for
       one-of ad hoc experimentation.
 
@@ -165,8 +165,8 @@ following ways
    3. Directly on the command line as \fB\-\-workspace\fR=<\fIWORKSPACE\fR
       as \fB\-\-\PRODUCTS_ROOT\fR
 
-   4. By the environment variable \fBHLS_PROJECT_WORKSPACE\fR and
-      \fBHLS_PROJECT_PRODUCTS\fR. This is not recommended except in the
+   4. By the environment variable \fBHLSBS_WORKSPACE\fR and
+      \fBHBS_PRODUCTS\fR. This is not recommended except in the
       simplest projects, since it is very easy to lose track of what
       its value is. In practice, when used with other command line
       parameters, this can be used to easily create an ad-hoc
@@ -174,11 +174,11 @@ following ways
 
    5. Finally, if no workspace/products_root is specified, it defaults in
       the following order.
-        a) If HLS_PROJECT_PRODUCTS or --products_root is set then
+        a) If HLSBS_PRODUCTS or --products_root is set then
              ${products_root}/ws/{version}
 
-        b) If HLS_PROJECT_PRODUCTS and --products_root is not set, then
-           taken from HLS_PROJECT_ROOT or --project_root=
+        b) If HLSBS_PRODUCTS and --products_root is not set, then
+           taken from HLSBS_ROOT or --project_root=
              ${project_root}/products/ws/{version}
 
         c) If none set --> \fBERROR\fR

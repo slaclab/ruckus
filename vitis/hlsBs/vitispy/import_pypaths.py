@@ -10,7 +10,7 @@
 
 # ------------------------------------------------------------------------------
 '''
-    Adds the paths in HLS_PROJECT_PYPATHS to sys.path
+    Adds the paths in HLSBS_PYPATHS to sys.path
 
     This acts to make a consistent interface for the various AMD/XILINX VITIS
     HLS releases.  As a public service, non-existent path names are filtered
@@ -34,7 +34,7 @@ if name == 'add_paths' :
     # --------------------------------------------------------
     # Get the colon separated paths which is presented as list
     # --------------------------------------------------------
-    paths       = str (os.getenv ('HLS_PROJECT_PYPATHS'))
+    paths       = str (os.getenv ('HLSBS_PYPATHS'))
 
     # ---------------------------------------------------------------
     # Convert the string representation of the list to an actual list

@@ -16,7 +16,7 @@ import runpy
 # -------------------------------------------------------
 # Add the VITIS HLS python paths, remove nonexistent ones
 # ------------------------------------------
-runpy.run_path (os.getenv ('HLS_PROJECT_IMPORT_PYPATHS'),
+runpy.run_path (os.getenv ('HLSBS_IMPORT_PYPATHS'),
                 run_name = 'add_paths ' + str(sys.path))
 import vitis
 
@@ -89,7 +89,7 @@ def check_project_file (project_file) :
     # --------------------------------------------------------------------------
     if not project_file :
         print ("ERROR: No project file specified, either \n"
-               "       a) Define HLS_PROJECT or\n"
+               "       a) Define HLSBS_PROJECT or\n"
                "       b) --project=<project_file>\n")
         return False
 
