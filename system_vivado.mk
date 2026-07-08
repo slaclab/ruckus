@@ -106,11 +106,18 @@ export USE_SEGMENTED_CONFIG = 0
 endif
 
 # Vivado Simulation Variables
+# When left undefined, the sim_1 top is auto-picked-up from the project
+# (i.e. the "set_property top ... [get_filesets sim_1]" in the target's
+# ruckus.tcl). Define VIVADO_PROJECT_SIM only to override that top.
 ifndef VIVADO_PROJECT_SIM
-export VIVADO_PROJECT_SIM = $(PROJECT)
+export VIVADO_PROJECT_SIM =
 endif
+# Default sim run length. "all" runs until the testbench calls finish/stop or
+# is interrupted; a time value (e.g. "1000 ns") runs that long. Testbenches
+# without a finish/stop free-run under "all", so a batch "make xsim" there must
+# be stopped manually.
 ifndef VIVADO_PROJECT_SIM_TIME
-export VIVADO_PROJECT_SIM_TIME = 1000 ns
+export VIVADO_PROJECT_SIM_TIME = all
 endif
 
 # Synthesis Variables
@@ -400,12 +407,13 @@ yaml : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/cpsw.tcl
 
 ###############################################################
-#### Vivado WIS ###############################################
+#### Rogue Co-Simulation Backend ##############################
 ###############################################################
-.PHONY : wis
-wis : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/wis.tcl
+# Tell surf/axi/simlink/ruckus.tcl which Rogue co-sim backend the invoked
+# target wants. Target-specific + exported so it propagates to the shared
+# $(SOURCE_DEPEND) prerequisite recipe and into the vivado subprocess.
+xsim gui : export RUCKUS_SIM_BACKEND := xsim
+vcs      : export RUCKUS_SIM_BACKEND := vcs
 
 ###############################################################
 #### Vivado XSIM Simulation ###################################
