@@ -276,12 +276,15 @@ class Lister (DoAction) :
    The configuration list action method
 
    Arg:
-     cfg:        Instantiation of the configuration class
-     categories: The categories (existing, missing & cruft) of targets to list
-     cmp:        Include components in the action
+     project:    The project parameters
+     cmpList:    The target list of components
+     categories: The categories (exising & cruft) of targets to clean
+     cmp:        Include components in the cleaning
+     verbose:    Verbose output
+     opts:       The targdt categories
 '''
 # ------------------------------------------------------------------------------
-def listConfigurations (project, categories, cmp, verbose, opts) :
+def listConfigurations (project, cmpList, categories, cmp, verbose, opts) :
 
     printer = Printer (20, 78, 15)
     action  = Lister (printer, project, cmp, verbose, opts)
@@ -294,6 +297,7 @@ def listConfigurations (project, categories, cmp, verbose, opts) :
         printer.line ("Workspace", project.workspace)
 
     project.print_project (printer, verbose)
+    printer.line ("Components", cmpList)
 
     action.byCategories (categories)
     printer.footer ()
@@ -386,6 +390,7 @@ class Cleaner (DoAction) :
 
    Arg:
      project:    The project parameters
+     cmpList:    The target list of components
      categories: The categories (exising & cruft) of targets to clean
      cmp:        Include components in the cleaning
      dry_run:    Whether to do a dry_run
@@ -393,7 +398,13 @@ class Cleaner (DoAction) :
      opts:       The targdt categories
 '''
 # ------------------------------------------------------------------------------
-def cleanConfigurations (project, categories, cmp, dry_run, verbose, opts) :
+def cleanConfigurations (project,
+                         cmpList,
+                         categories,
+                         cmp,
+                         dry_run,
+                         verbose,
+                         opts) :
 
     printer = Printer (15, 78, 15)
     action  = Cleaner (printer, project, cmp, dry_run, verbose, opts)
@@ -407,6 +418,7 @@ def cleanConfigurations (project, categories, cmp, dry_run, verbose, opts) :
          printer.line ("Workspace", project.workspace)
 
     project.print_project (printer, verbose)
+    printer.line ("Components", cmpList)
 
     if  dry_run :
         if dry_run : printer.line   ('Dry Run', '<-- NOTE')
@@ -425,14 +437,30 @@ def cleanConfigurations (project, categories, cmp, dry_run, verbose, opts) :
 
    Args:
      cfg:        Instaniation of the configuration class
+     cmpList:    the target list of components
      categories: The categories (existing, missing to create the
                  configurations and, optionally the components
+     dry_run:    Whether to do a dry_run
+     verbose:    Verbose output
+     opts:       The targdt categories
+     replace:    Flag to replace rather than create
 '''
 # ------------------------------------------------------------------------------
-def createConfigurations (cfg, categories, dry_run, verbose, opts, replace) :
+def createConfigurations (cfg,
+                          cmpList,
+                          categories,
+                          dry_run,
+                          verbose,
+                          opts,
+                          replace) :
 
     printer = Printer (14, 78, 14)
     cfg.print_common (printer, verbose)
+    printer.line ("Components", cmpList)
+    if  dry_run :
+        if dry_run : printer.line   ('Dry Run', '<-- NOTE')
+
+
 
     if opts & Category.Existing :
         print ()
@@ -463,7 +491,7 @@ def createConfigurations (cfg, categories, dry_run, verbose, opts, replace) :
             for target in targets :
                 if idx != 1 and cfg.comp : print ()
                 status, message = cfg.execute (target)
-                cfg.print (printer, idx, target, status, [':', '*'], message, verbose)
+                cfg.print (printer, idx, target, status, [':', '-'], message, verbose)
                 idx += 1
 
 
@@ -551,7 +579,7 @@ def main () :
     "       postional args or --targets='*' must be specified, e.g.\n"
     "\n"
     "        $ hlsCfg '*' --clean             or\n"
-    "        $ hlsCfg --targets='*'\n",
+    "        $ hlsCfg --components='*'\n",
     file = sys.stderr))
 
 
@@ -596,7 +624,7 @@ def main () :
     # ---------------------------------------------------
     cmpList = merge (args.parameters, args.components)
     if not cmpList :
-        if args.clean and not len(args.clean) :
+        if args.clean is not None and not len(args.clean) :
             noCompleteClean ()
             sys.exit (-1)
         else :
@@ -647,6 +675,7 @@ def main () :
         # removing the component is non-sensical
         # --------------------------------------
         cleanConfigurations  (project,
+                              cmpList,
                               categories,
                               create_components,
                               args.dry_run,
@@ -663,6 +692,7 @@ def main () :
         opts       = Category.categorize (args.list, Category.All)
 
         listConfigurations (project,
+                            cmpList,
                             categories,
                             create_components,
                             args.verbose,
@@ -688,6 +718,7 @@ def main () :
                                             project,
                                             product)
             createConfigurations (cfg,
+                                  cmpList,
                                   categories,
                                   args.dry_run,
                                   args.verbose,

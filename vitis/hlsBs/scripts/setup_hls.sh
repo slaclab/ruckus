@@ -104,7 +104,7 @@ function hlsVer ()
     fi
 
     eval local ypath=\"${HLS_PROJECT_XILINX_SETUP}/Vitis\"
-    local settings64=$(find $ypath -name settings64.sh -prune -print 2>/dev/null)
+    local settings64=$(find $ypath -name settings64.sh -prune -print -quit 2>/dev/null)
 
     if [[ -z "${settings64}" ]] ; then
         "ERROR:  Unable to find settings64.sh in path ${ypath}"

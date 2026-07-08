@@ -161,7 +161,7 @@ class Dcp :
         self.jou_file = self.get_file (jou_file, dgn_dir,      None, '.jou')
 
         if not log_file :
-            jog_file = dcp_name
+            log_file = dcp_name
         else :
             log_file = log_file.format (cmp_name   = cmp_name,
                                         dcp_name   = dcp_name,
@@ -175,18 +175,46 @@ class Dcp :
         self.hls_dir  = os.path.join (cmp_dir, 'hls', 'impl')
         self.tcl_file = os.path.join (Directory.tcl, 'dcp_rename_ref.tcl')
 
+
+        # ------------------------------------------------------
+        # Check if both the hls directory and hls dcp file exist
+        # ------------------------------------------------------
+        self.hls_name   = 'bd_0_hls_inst_0.dcp'
+        self.hls_file   = None
+        self.hls_exists = os.path.isdir (self.hls_dir)
+        if self.hls_exists :
+            for path in Path(self.hls_dir).rglob(self.hls_name) :
+                self.hls_file = path
+                break;
         return
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
     def print (self, printer, verbose) :
         printer.itemPlain ("DCP.rename", self.dcp_rename)
+        printer.itemPlain ("   .hlsDir", self.hls_dir)
+        hls_file = "<hlsDir>/" + (os.path.relpath (self.hls_file, self.hls_dir)
+                    if self.hls_file else 'Not found')
+        printer.itemPlain ("   .hlsFile", hls_file)
         printer.itemPlain ("   .file",   self.dcp_file)
 
         if verbose :
-            printer.itemPlain ("   .jou", self.jou_file)
-            printer.itemPlain ("   .log", self.log_file)
+            printer.itemPlain ("     .jou", self.jou_file)
+            printer.itemPlain ("     .log", self.log_file)
 
+        if not self.hls_exists :
+            print ("\n"
+                   "ERROR: The hls directory was not found:\n"
+                  f"  ->   {self.hls_dir}\n"
+                   "  Perhaps --implementation has not been run")
+
+        elif not self.hls_file :
+
+            print ("\n"
+              "ERROR: The .dcp file was not found in the hls directory tree\n"
+             f"  ->   {self.hls_dir}\n"
+             f"       {self.hls_name}\n"
+              "  Either it was deleted or -implementation did not correctly run")
         return
     # --------------------------------------------------------------------------
 
@@ -203,25 +231,27 @@ class Dcp :
         if self.jou_file : cmd += ['-journal', self.jou_file]
         if self.log_file : cmd += ['-log'    , self.log_file]
 
-
         cmd += ['-tclargs',
                 self.hls_dir,
                 self.dcp_rename,
                 self.dcp_file,
                 level]
 
+
         with subprocess.Popen (cmd,
                                stdout  = subprocess.PIPE,
+                               stderr  = subprocess.PIPE,
                                text    = True,
                                bufsize = 1) as process :
-            for line in process.stdout :
-                if  verbose :
+            if  verbose :
+                for line in process.stdout :
                     if line[0] == '#' : continue
                     print (line, end = '')
-                else:
-                    pass
 
             status = process.wait ()
+            if True or status :
+                for line in process.stderr :
+                    print (line, end = '')
 
         return status
     # --------------------------------------------------------------------------

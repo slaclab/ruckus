@@ -626,7 +626,7 @@ class Run :
 
             dcp.print (self.printer, True)
 
-            if not self.options.dry_run :
+            if not self.options.dry_run and dcp.hls_file:
                 status = dcp.execute (self.printer, self.options.verbose)
             else :
                 status = 0

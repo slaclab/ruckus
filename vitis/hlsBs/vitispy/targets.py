@@ -67,7 +67,7 @@ class Target :
    def __init__ (self,
                  workspace,
                  map,
-                 tgt_template,
+                 tgt_key,
                  cfg_template,
                  cmp_template) :
       '''
@@ -77,8 +77,7 @@ class Target :
          workspace   :  The fully resolved path the VITIS/HLS  workspace
          map         :  The source of the unresolved definitions for this
                         target
-         tgt_template:  Used to create the fully resolved name of the
-                        originating target file
+         tgt_key:       Used to locate the fully resolved name of the
          cfg_template:  Used to create the fully resolved name of the HLS
                         configuration file
          cmp_template:  Used to create the fully resolved name of the HLS
@@ -108,10 +107,12 @@ class Target :
       self.cmp_path   = os.path.realpath (
                         os.path.join (workspace, self.cmp_name))
 
-      if tgt_template :
-         self.tgt_path = tgt_template.format_map (map)
+      if tgt_key :
+         self.tgt_key  = tgt_key
+         self.tgt_path = map[tgt_key]
          self.tgt_name = os.path.split (os.path.splitext (self.tgt_path)[0])[1]
       else :
+         self.tgt_key  = None
          self.tgt_path = None
          self.tgt_name = None
 
@@ -223,7 +224,13 @@ class Targets :
       self.targets   = []
       cmps           = []
       for product in products :
-         for prd_target in product.targets:
+
+         if isinstance (product.targets, (list, tuple)) :
+            prd_targets = product.targets
+         else :
+            prd_targets = (product.targets,)
+
+         for prd_target in prd_targets:
 
             # -------------------------------------
             # Retrieve the target member infomation
@@ -235,18 +242,17 @@ class Targets :
 
             cfg_template = os.path.expandvars (cfg_template)
 
-            if 'Source' in prd_target :
-               src_template = prd_target[       'Source']
-               src_template = os.path.expandvars (src_template)
+            if 'SourceFiles' in prd_target :
+               src_key = prd_target['SourceFiles']
             else :
-               src_template = None
+               src_key = None
 
             # Each map yields a target
             for map in maps.maps :
 
                target = Target (workspace,
                                 map,
-                                src_template,
+                                src_key,
                                 cfg_template,
                                 cmp_template)
 
@@ -442,7 +448,13 @@ class Targets :
       # ---------------------------------------
       for product in products:
          product.configurations = configurations
-         for prd_target in product.targets :
+
+         if isinstance (product.targets, (list, tuple)) :
+            prd_targets = product.targets
+         else :
+            prd_targets = (product.targets,)
+
+         for prd_target in prd_targets :
             # ---------------------------------------------------------------
             # Examine the contents of all the targets configuration
             # directories to see if there is an cruft in there. This is

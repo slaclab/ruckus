@@ -31,23 +31,28 @@ set   level        [lindex $argv 3]
 # ------------------------------------------------------------------------------
 # Look for the .dcp file within the hls_dcp_dir directory tree
 # ------------------------------------------------------------------------------
-set found_files [split [exec find $hls_dcp_dir -type f -name $hls_dcp_name] "\n"]
-if {[llength $found_files] > 0 && [string length [lindex $found_files 0]] > 0} {
-   set hls_dcp_file [lindex $found_files 0]
-
-    #puts "hls_dcp_name = $hls_dcp_name"
-    #puts "hls_dcp_file = $hls_dcp_file"
-
-    # Open the .DCP file
-    open_checkpoint $hls_dcp_file  ${level}
-
-    # Change the .DCP to match the project's name (not bd_0_hls_inst_0)
-    rename_ref ${level} -ref [get_property TOP [current_design]] -to $dcp_name
-
-    # Write the .DCP into the project's IP dir
-    write_checkpoint $dcp_path -force ${level}
-
+if {[catch {exec find $hls_dcp_dir -type f -name $hls_dcp_name} found]} {
+    exit 2
 } else {
-    puts "$dcp_name not detected $hls_dcp_dir"
+    if {[string length $found] > 0} {
+        set found_files [split $found "\n"]
+        set hls_dcp_file [lindex $found_files 0]
+
+        puts "hls_dcp_name = $hls_dcp_name"
+        puts "hls_dcp_file = $hls_dcp_file"
+
+        # Open the .DCP file
+        open_checkpoint $hls_dcp_file  ${level}
+
+        # Change the .DCP to match the project's name (not bd_0_hls_inst_0)
+        rename_ref ${level} -ref [get_property TOP [current_design]] -to $dcp_name
+
+        # Write the .DCP into the project's IP dir
+        write_checkpoint $dcp_path -force ${level}
+        exit 0
+    } else {
+        puts stderr "$dcp_name not detected $hls_dcp_dir"
+        exit 10
+    }
 }
 # ==============================================================================

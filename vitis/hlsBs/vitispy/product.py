@@ -49,8 +49,17 @@ class Product :
 
         # ----------------------------------------------------------------------
         def add (self, cfg_file) :
-            cfg_file.set_value (section = 'hls', key = 'vivado.flow',           value = self.flow)
-            cfg_file.set_value (section = 'hls', key = 'vivado.syn_dcp',        value = self.syn_dcp)
+
+            # -----------------------------
+            # Deprecated starting at 2026.1
+            # -----------------------------
+            cfg_file.set_value (section = 'hls',
+                                key     = 'vivado.flow',
+                                value   = self.flow)
+
+            cfg_file.set_value (section = 'hls',
+                                key     = 'vivado.syn_dcp',
+                                value   = self.syn_dcp)
             return
         # ----------------------------------------------------------------------
 
@@ -173,14 +182,36 @@ class Product :
         # ----------------------------------------------------------------------
         def add (self, cfg_file) :         # Package
 
-            cfg_file.set_value (section = 'hls', key = 'flow_target',           value = 'vivado')
+            # -----------------------------
+            # Deprecated starting at 2026.1
+            # -----------------------------
+            if Version.version < '2026.1' :
+                cfg_file.set_value (section = 'hls',
+                                    key     = 'flow_target',
+                                    value   = 'vivado')
 
-            cfg_file.set_value (section = 'hls', key = 'package.ip.name',       value = self.ip.name)
-            cfg_file.set_value (section = 'hls', key = 'package.ip.vendor',     value = self.ip.vendor)
-            cfg_file.set_value (section = 'hls', key = 'package.ip.library',    value = self.ip.library)
-            cfg_file.set_value (section = 'hls', key = 'package.ip.version',    value = self.ip.version)
-            cfg_file.set_value (section = 'hls', key = 'package.output.format', value = self.output.format)
-            cfg_file.set_value (section = 'hls', key = 'package.output.syn',    value = self.output.syn)
+            cfg_file.set_value (section = 'hls',
+                                key     = 'package.ip.name',
+                                value   = self.ip.name)
+
+            cfg_file.set_value (section = 'hls',
+                                key     = 'package.ip.vendor',
+                                value   = self.ip.vendor)
+            cfg_file.set_value (section = 'hls',
+                                key     = 'package.ip.library',
+                                value   = self.ip.library)
+
+            cfg_file.set_value (section = 'hls',
+                                key     = 'package.ip.version',
+                                value   = self.ip.version)
+
+            cfg_file.set_value (section = 'hls',
+                                key     = 'package.output.format',
+                                value   = self.output.format)
+
+            cfg_file.set_value (section = 'hls',
+                                key     = 'package.output.syn',
+                                value   = self.output.syn)
 
             return
         # ----------------------------------------------------------------------

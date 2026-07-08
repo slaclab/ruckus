@@ -72,47 +72,55 @@ class Maps () :
         for k,v in srcs.items () : map_cnt *= len (v)
         self.maps = [ {} for _ in range(map_cnt) ]
 
-        left  = len (srcs)
+        # ------------------------------------------------------------
+        #  Need to form the every permutation of the maps
+        #  Each src has some number of maps. For example, 3 maps
+        #     Map 0   2
+        #     Map 1   3
+        #     Map 2   2
+        # For a total of 12 maps of every permutation.  Consider a 3
+        # digit number where the radix is its length.
+        #
+        #  M  M0   M1  M2
+        #  0   0    0   0
+        #  1   0    0   1
+        #  2   0    1   0
+        #  3   0    1   1
+        #  4   0    2   0
+        #  5   0    2   1
+        #  6   1    0   0
+        #  7   1    0   1
+        #  8   1    1   0
+        #  9   1    1   1
+        # 10   1    2   0
+        # 11   1    2   1
+        #
+        #        Length Cumulative   #Maps/Cumulative = Repeated
+        #    M0       2          2      12/(2)                 6
+        #    M1       3        2*3      12/(2*3)               2
+        #    M2       2      2*3*2      12/(2*3*2)             1
+        # -------------------------------------------------------
+        n  = 1
         for key, values in srcs.items () :
-            n     = len (values)
-            den   = map_cnt // n
-            left -= 1
-            for map_idx in range (0, map_cnt) :
+            l     = len (values)
+            n     = n * l
+            rep   = map_cnt // n
+            map_idx = 0
+            for idx in range (0, n) :
 
-                # `----------------------------------------------
-                # Repeat on all but the last, then alternate
-                # eg. if have 2 srcs of lens 3 and 2 (total of 6)
-                #    Ordering is
-                #         0 0
-                #         0 1
-                #         1 0
-                #         1 1
-                #         2 0
-                #         2 1
-                # if hav 3 lens 2, 3, 2 (total 12)
-                #   0.      0   0  0
-                #   1.      0   0  1
-                #   2.      1   0  0
-                #   3.      1   1  1
-                #   4.      0   1  0
-                #   5.      0   1  1
-                #   6.      1   2  0
-                #   7.      1   2  1
-                #   8.      0   2  0
-                #   9.      0   3  1
-                #  10.      1   3  0
-                #  11.      1   3  1
-                # `---------------------------------------------
-                val_idx = (map_idx // den) if left else (map_idx % n)
-                v       = values[val_idx]
+                val_idx  = idx % l
+                for idy in range (0, rep) :
 
-                # Add primary key and value
-                self.maps[map_idx][key]      = v[0]
+                    v  = values[val_idx]
 
-                # Add derived keys and values
-                if v[1] :
-                    for dv in v[1] :
-                        self.maps[map_idx][dv[0]] = dv[1]
+                    # Add primary key and value
+                    self.maps[map_idx][key]      = v[0]
+
+                    # Add derived keys and values
+                    if v[1] :
+                        for dv in v[1] :
+                            self.maps[map_idx][dv[0]] = dv[1]
+                    map_idx += 1
 
         if False :
             print ("Final map")
@@ -181,15 +189,15 @@ class Maps () :
                 srcs[primary_key].append ([primary_val, derived])
 
         return
-    # ------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
 
-    # ------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @staticmethod
     def compile (srcs, dictionary) :
         '''
-        Compiles each the entry in the dictionary into possibly an expanded set of
-        sources if the dictionary value contains wildcards or a list
+        Compiles each the entry in the dictionary into possibly an expanded
+        set of sources if the dictionary value contains wildcards or a list
 
         Args:
            srcs      : Expanded source information consisting of the primary
@@ -241,8 +249,10 @@ class Maps () :
                     name, ext    = os.path.splitext (namext)
 
                     # Derived key,values for files
-                    kvs = [ [ 'dir',  dir],
-                            ['name', name] ]
+                    kvs = [ ['path', path],
+                            [ 'dir',  dir],
+                            ['name', name],
+                            [ 'ext',  ext] ]
 
                     Maps.add_srcs (srcs, key, path, kvs, '_')
                 nfiles += len (files)
@@ -299,7 +309,7 @@ def doit () :
                          'csim'    : 'csim_arg0',
                          'cosim'   : 'cosim_arg0' } ]
 
-    files    = '${SNL_TESTS}/tests/layers/networks/*d_same/*.hh'
+    files    = '${SNL_TESTS}/tests/layers/networks/conv*_same/*.hh'
     files    = os.path.expandvars (files)
     fpgas    = ( Product.Fpga ('xcku115-flvb2104-2-i', '6',  None, 'f0'),
                  Product.Fpga ('xcku115-flvb2104-2-i', '5',  None, 'f1') )
@@ -307,8 +317,10 @@ def doit () :
     dictionaries = ( Product.Builds   ('build',    [build0, build1]),
                      Product.Files    ('network',  files),
                      Product.Fpgas    ('fpga',     fpgas),
-                     Product.Values   ('value',    [1, 2, 3]) )
-    template     = "xyz-{build_name}-{network_name}-{fpga_id}-{value}"
+                     Product.Values   ('ddefs',    (1, 2, 3)))
+    template     = "xyz-{build_id}-{network_name}-{fpga_id}-d{ddefs}"
+#    template     = "xyz-{build_id}-{network_name}-{fpga_id}"
+
     maps         = Maps (dictionaries)
 
     idx = 0

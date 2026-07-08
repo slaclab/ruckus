@@ -34,8 +34,8 @@ class Component :
 
         self.configurations = project.configurations
         self.workspace      = workspace if (workspace is not None) else Workspace.get (project.workspace)
-        self.replace        = args.replace
-        self.clean          = args.clean
+        self.replace        = args.replace is not None
+        self.clean          = args.clean   is not None
         self.dry_run        = DryRun (args.dry_run)
 
         return
