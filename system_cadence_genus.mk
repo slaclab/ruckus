@@ -55,6 +55,11 @@ export RUCKUS_GENUS_DIR  = $(RUCKUS_DIR)/cadence/genus
 export RUCKUS_PROC_TCL   = $(RUCKUS_GENUS_DIR)/proc.tcl
 export RUCKUS_QUIET_FLAG = -quiet
 
+# Rogue co-simulation backend for surf/axi/simlink/ruckus.tcl
+ifndef RUCKUS_SIM_BACKEND
+export RUCKUS_SIM_BACKEND = vcs
+endif
+
 # Project Build Directory
 export OUT_DIR     = $(abspath $(TOP_DIR)/build/$(PROJECT))
 export SYN_DIR     = $(OUT_DIR)/syn
