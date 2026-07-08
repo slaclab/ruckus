@@ -13,6 +13,7 @@ setting up a project for the first time, see
    vitis_hls
    vitis_aie
    ghdl_simulation
+   xsim_rogue_cosim
    cadence_genus
    synopsys_dc
    firmware_release
