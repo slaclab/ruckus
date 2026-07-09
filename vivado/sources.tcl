@@ -86,8 +86,9 @@ close ${out}
 set_property top ${PROJECT} [current_fileset]
 # set_property top "glbl"     [get_filesets sim_1]
 
-# If VIVADO_PROJECT_SIM variable exist, set as sim top
-if { [info exists ::env(VIVADO_PROJECT_SIM)] } {
+# If VIVADO_PROJECT_SIM is defined, use it to override the sim_1 top
+# (otherwise keep the top set by the target's ruckus.tcl)
+if { $::env(VIVADO_PROJECT_SIM) != "" } {
     set_property top ${VIVADO_PROJECT_SIM} [get_filesets sim_1]
 }
 
@@ -110,6 +111,28 @@ if { [get_files -of_objects [get_filesets {sim_1}]] != "" } {
 }
 if { [get_files -of_objects [get_filesets {constrs_1}]] != "" } {
    set_property PATH_MODE AbsoluteFirst [get_files -of_objects [get_filesets {constrs_1}]]
+}
+
+# Bind the Rogue TCP/SideBand DPI shared library for Vivado xsim co-simulation.
+# This MUST run at project-generation time: after the simulation backend
+# sources are loaded (so the guard resolves) and before launch_simulation
+# generates elaborate.sh. Setting xsim.elaborate.xelab.more_options from the
+# xsim.compile.tcl.pre hook is too late -- elaborate.sh is already generated.
+# Guarded on the xsim Rogue backends, so it is a no-op for non-Rogue
+# projects and for the GHDL/VCS simulation backends.
+set rogueXsimSrc ""
+foreach rogueFile [RogueSimSources xsim] {
+   if { [string match {*/xsim/RogueTcpStream.vhd} ${rogueFile}] ||
+        [string match {*/xsim/RogueTcpMemory.vhd} ${rogueFile}] ||
+        [string match {*/xsim/RogueSideBand.vhd}  ${rogueFile}] } {
+      set rogueXsimSrc ${rogueFile}
+   }
+}
+if { ${rogueXsimSrc} != "" } {
+   set xelabOpt [get_property {xsim.elaborate.xelab.more_options} [get_filesets sim_1]]
+   if { [string first {-sv_lib RogueTcpDpi} ${xelabOpt}] == -1 } {
+      set_property -name {xsim.elaborate.xelab.more_options} -value "${xelabOpt} -sv_lib RogueTcpDpi" -objects [get_filesets sim_1]
+   }
 }
 
 # Check if we can upgrade IP cores

@@ -29,7 +29,7 @@ Targets
    * - ``dcp``
      - Synthesis + DCP export (sets ``SYNTH_DCP=1``). Exports the post-synthesis checkpoint.
    * - ``gui``
-     - Open the Vivado project in GUI mode.
+     - Open the Vivado project in GUI mode. Automatically detects and builds the Rogue TCP/SideBand co-simulation DPI library when present; see :doc:`../how-to/xsim_rogue_cosim`.
    * - ``interactive``
      - Open Vivado in TCL interactive mode.
    * - ``sources``
@@ -46,10 +46,8 @@ Targets
      - Generate PyRogue tarball.
    * - ``yaml``
      - Generate CPSW YAML tarball.
-   * - ``wis``
-     - Generate ``init_wis.tcl`` for Windows Vivado initialisation.
    * - ``xsim``
-     - Run Vivado XSIM simulation.
+     - Run Vivado XSIM simulation. Automatically detects and builds the Rogue TCP/SideBand co-simulation DPI library when present; see :doc:`../how-to/xsim_rogue_cosim`.
    * - ``vcs``
      - Generate VCS simulation scripts.
    * - ``msim``
@@ -298,15 +296,22 @@ Simulation Variables
 
 .. envvar:: VIVADO_PROJECT_SIM
 
-   Top module name for Vivado simulation.
+   Top module name for Vivado simulation. For a batch Rogue co-sim, set this to
+   the demo testbench (e.g. ``RogueTcpStreamXsimDemoTb``); see
+   :doc:`../how-to/xsim_rogue_cosim`.
 
    :default: ``$(PROJECT)``
 
 .. envvar:: VIVADO_PROJECT_SIM_TIME
 
-   Default simulation run time.
+   Simulation run length. The default ``all`` free-runs until the testbench
+   calls ``$finish``/``$stop`` or is interrupted; a testbench with neither
+   (and a free-running clock) never self-terminates, so a batch ``make xsim``
+   must be stopped manually. Pass a time value (e.g. ``1000 ns``) to bound the
+   run. ``all`` is required for the Rogue co-sim so the external peer can drive
+   the testbench — see :doc:`../how-to/xsim_rogue_cosim`.
 
-   :default: ``1000 ns``
+   :default: ``all``
 
 .. envvar:: SIM_CARGS_VERILOG
 

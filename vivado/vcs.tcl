@@ -71,7 +71,7 @@ proc VcsVersionCheck { } {
    set retVar -1
 
    # List of supported VCS versions
-   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09 T-2022.06 V-2023.12 W-2024.09 X-2025.06"
+   set supported "M-2017.03 N-2017.12 O-2018.09 Q-2020.03 R-2020.12 S-2021.09 T-2022.06 V-2023.12 W-2024.09 X-2025.06 Y-2026.03"
 
    # Get Version Name
    set VersionNumber [GetVcsName]
@@ -255,26 +255,14 @@ export_simulation -force -absolute_path -simulator vcs -include ${include} -defi
 ## Build the simlink directory (required for softrware co-simulation)
 #####################################################################################################
 
-set rogueSimPath [get_files -compile_order sources -used_in simulation {RogueTcpStream.vhd RogueTcpMemory.vhd RogueSideBand.vhd}]
+set rogueSimPath [RogueSimSources vcs]
 if { ${rogueSimPath} != "" } {
 
    # Set the flag true
    set rogueSimEn true
 
    # Check the zeromq library exists and its version
-   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.1.0} --print-errors} libzmq]
-   if { ${libzmq} != "" } {
-      puts "\n\n\n\n\n********************************************************"
-      if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
-         puts "libzmq package was not found"
-         puts "Please make sure that you have libzmq installed"
-         puts "or have sourced the necessary rogue setup scripts"
-      } else {
-         puts ${libzmq}
-      }
-      puts "********************************************************\n\n\n\n\n"
-      exit -1
-   }
+   RogueCheckLibZmq
 
    # Create the setup environment script: C-SHELL
    set envScript [open ${simTbOutDir}/setup_env.csh  w]
@@ -290,9 +278,13 @@ if { ${rogueSimPath} != "" } {
    puts  ${envScript} "export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:${simTbOutDir}"
    close ${envScript}
 
-   # Find the surf/axi/simlink/src directory
+   # Find the surf/axi/simlink directory (prefer vcs/, fall back to legacy src/)
    set simTbDirName [file dirname [lindex ${rogueSimPath} 0]]
-   set simLinkDir   ${simTbDirName}/../src/
+   if { [file exists ${simTbDirName}/../vcs/] } {
+      set simLinkDir ${simTbDirName}/../vcs/
+   } else {
+      set simLinkDir ${simTbDirName}/../src/
+   }
 
    # Move the working directory to the simlink directory
    cd ${simLinkDir}
