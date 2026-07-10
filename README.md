@@ -11,12 +11,12 @@ management, hook script injection, and firmware release packaging.
 
 ## Documentation
 
-**Full documentation:** https://slaclab.github.io/ruckus/
+**Full documentation:** https://slaclab.github.io/ruckus/latest/
 
-- [Getting Started Tutorial](https://slaclab.github.io/ruckus/tutorial/first_vivado_build.html)
-- [TCL API Reference](https://slaclab.github.io/ruckus/reference/tcl_api.html)
-- [Makefile Reference](https://slaclab.github.io/ruckus/reference/makefile_reference.html)
-- [How-To Guides](https://slaclab.github.io/ruckus/how-to/index.html)
+- [Getting Started Tutorial](https://slaclab.github.io/ruckus/latest/tutorial/first_vivado_build.html)
+- [TCL API Reference](https://slaclab.github.io/ruckus/latest/reference/tcl_api.html)
+- [Makefile Reference](https://slaclab.github.io/ruckus/latest/reference/makefile_reference.html)
+- [How-To Guides](https://slaclab.github.io/ruckus/latest/how-to/index.html)
 
 ## Prerequisites
 
@@ -48,5 +48,5 @@ endif
 include $(TOP_DIR)/submodules/ruckus/system_vivado.mk
 ```
 
-See the [full documentation](https://slaclab.github.io/ruckus/) for complete setup
+See the [full documentation](https://slaclab.github.io/ruckus/latest/) for complete setup
 instructions, all supported tool backends, and the firmware release workflow.
