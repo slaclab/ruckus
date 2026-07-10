@@ -20,9 +20,10 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  push:
-    tags:
-      - "*"
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
   workflow_dispatch:
     inputs:
       target_ref:
@@ -47,6 +48,7 @@ jobs:
   publish_docs:
     name: Publish Release Docs
     runs-on: ubuntu-24.04
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     env:
       REPO_NAME: ${{ github.event.repository.name }}
     steps:

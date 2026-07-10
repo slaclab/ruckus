@@ -67,3 +67,19 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 # ----------------------------------------------------------------------------
+
+  docs_pre_release:
+    needs: [test_and_document]
+    uses: slaclab/ruckus/.github/workflows/docs_pre_release.yml@main
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+# ----------------------------------------------------------------------------
+
+  docs_release:
+    needs: [test_and_document]
+    uses: slaclab/ruckus/.github/workflows/docs_release.yml@main
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+# ----------------------------------------------------------------------------

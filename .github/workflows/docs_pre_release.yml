@@ -20,9 +20,10 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  push:
-    branches:
-      - pre-release
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
 
 permissions:
   contents: write
@@ -31,6 +32,7 @@ jobs:
   publish_docs:
     name: Publish Pre-release Docs
     runs-on: ubuntu-24.04
+    if: github.ref == 'refs/heads/pre-release'
     env:
       REPO_NAME: ${{ github.event.repository.name }}
       DOCS_SITE_ROOT: /${{ github.event.repository.name }}
