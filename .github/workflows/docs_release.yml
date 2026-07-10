@@ -1,0 +1,178 @@
+# ----------------------------------------------------------------------------
+# Title      : Ruckus Release Documentation Workflow
+# ----------------------------------------------------------------------------
+# This file is part of the 'Ruckus Package'. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the 'Ruckus Package', including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
+# The following environment variables are required for this process:
+# secrets.GH_TOKEN
+# ----------------------------------------------------------------------------
+
+name: Release Documentation
+
+concurrency:
+  group: gh-pages-publish
+  cancel-in-progress: false
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Git ref to build for staging validation"
+        required: false
+        type: string
+      version_label:
+        description: "Version label to publish inside the staging prefix"
+        required: false
+        default: "staged-release"
+        type: string
+      staging_prefix:
+        description: "Sandbox path on gh-pages for manual validation"
+        required: false
+        default: "staging-docs"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish_docs:
+    name: Publish Release Docs
+    runs-on: ubuntu-24.04
+    env:
+      REPO_NAME: ${{ github.event.repository.name }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.target_ref || github.ref }}
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Validate workflow inputs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          validate_segment() {
+            local name="$1"
+            local value="$2"
+            if [[ -z "$value" ]]; then
+              echo "Error: $name cannot be empty"
+              exit 1
+            fi
+            if [[ "$value" == "." || "$value" == ".." ]]; then
+              echo "Error: $name must be a single safe path segment"
+              exit 1
+            fi
+            if [[ "$value" == *"/"* || "$value" == *"\\"* || "$value" == *".."* ]]; then
+              echo "Error: $name must not contain path separators or '..'"
+              exit 1
+            fi
+            if [[ ! "$value" =~ ^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$ ]]; then
+              echo "Error: $name contains unsupported characters"
+              exit 1
+            fi
+          }
+
+          validate_segment "version_label" "${{ inputs.version_label }}"
+          validate_segment "staging_prefix" "${{ inputs.staging_prefix }}"
+
+      - name: Validate release tag
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: release tags must match X.Y.Z or vX.Y.Z"
+            exit 1
+          fi
+
+      - name: Set publish variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "DOCS_MODE=release" >> "$GITHUB_ENV"
+            echo "DOCS_VERSION=${{ inputs.version_label }}" >> "$GITHUB_ENV"
+            echo "DOCS_LATEST_TARGET_VERSION=${{ inputs.version_label }}" >> "$GITHUB_ENV"
+            echo "DOCS_OUTPUT_ROOT=.tmp/gh-pages/${{ inputs.staging_prefix }}" >> "$GITHUB_ENV"
+            echo "DOCS_SITE_ROOT=/${REPO_NAME}/${{ inputs.staging_prefix }}" >> "$GITHUB_ENV"
+            echo "DOCS_WRITE_ROOT_REDIRECT=0" >> "$GITHUB_ENV"
+          else
+            echo "DOCS_MODE=release" >> "$GITHUB_ENV"
+            echo "DOCS_VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+            echo "DOCS_OUTPUT_ROOT=.tmp/gh-pages" >> "$GITHUB_ENV"
+            echo "DOCS_SITE_ROOT=/${REPO_NAME}" >> "$GITHUB_ENV"
+            echo "DOCS_WRITE_ROOT_REDIRECT=1" >> "$GITHUB_ENV"
+          fi
+
+      - name: Determine latest release tag from main
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          git fetch origin main --tags
+          latest_tag="$(git tag --merged origin/main | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)"
+          if [ -z "$latest_tag" ]; then
+            echo "Error: unable to determine latest release tag reachable from origin/main"
+            exit 1
+          fi
+          echo "DOCS_LATEST_TARGET_VERSION=$latest_tag" >> "$GITHUB_ENV"
+
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "docs/requirements.txt"
+
+      - name: Install documentation dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: Build HTML documentation
+        run: sphinx-build -b html -W --keep-going docs/ docs/_build/html
+
+      - name: Prepare gh-pages worktree
+        run: |
+          rm -rf .tmp/gh-pages
+          mkdir -p .tmp
+          git fetch origin gh-pages || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git worktree add .tmp/gh-pages origin/gh-pages
+          else
+            git worktree add --detach .tmp/gh-pages
+            cd .tmp/gh-pages
+            git checkout --orphan gh-pages
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          touch .tmp/gh-pages/.nojekyll
+
+      - name: Update published docs tree
+        run: |
+          publish_args=(
+            python3 scripts/docs_publish.py
+            --site-dir docs/_build/html
+            --output-root "${DOCS_OUTPUT_ROOT}"
+            --site-root "${DOCS_SITE_ROOT}"
+            --mode "${DOCS_MODE}"
+            --version "${DOCS_VERSION}"
+            --latest-target-version "${DOCS_LATEST_TARGET_VERSION}"
+          )
+          if [ "${DOCS_WRITE_ROOT_REDIRECT}" = "1" ]; then
+            publish_args+=(--write-root-redirect)
+          fi
+          "${publish_args[@]}"
+
+      - name: Commit and push
+        run: |
+          cd .tmp/gh-pages
+          git add .
+          if git diff --cached --quiet; then
+            echo "No gh-pages changes to publish."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish docs for ${DOCS_VERSION}"
+          git push origin HEAD:gh-pages
