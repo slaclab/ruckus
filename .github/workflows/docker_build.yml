@@ -64,3 +64,9 @@ jobs:
           push: true
           tags: ghcr.io/slaclab/${{ inputs.docker_name }}:${{ steps.get_image_info.outputs.tag }}, ghcr.io/slaclab/${{ inputs.docker_name }}:latest
           build-args: branch=${{ steps.get_image_info.outputs.branch }}
+          # Expose the job's GH_TOKEN to the build as a BuildKit secret so that
+          # Dockerfiles for PRIVATE repositories can authenticate their in-image
+          # `git clone`. Public-repo Dockerfiles that never mount this secret are
+          # unaffected (this line is purely additive / backwards compatible).
+          secrets: |
+            github_token=${{ secrets.GH_TOKEN }}
