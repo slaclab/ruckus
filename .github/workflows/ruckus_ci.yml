@@ -52,8 +52,8 @@ jobs:
 
       - name: Python Syntax Check
         run: |
-          python -m compileall -f scripts/
-          flake8 --count scripts/
+          python -m compileall -f scripts/ vitis/hlsBs/vitispy/
+          flake8 --count scripts/ vitis/hlsBs/vitispy/
 
 
 # ----------------------------------------------------------------------------
