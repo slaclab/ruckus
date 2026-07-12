@@ -1,6 +1,6 @@
 .TH hlsWs 1 "May 2026" "v1.0" "HLS Command Manual"
 .SH NAME
-hlsWs \- creates,removes,lists, gives the status of an HLS workspaces
+hlsWs \- creates, removes, lists, and gives the status of an HLS workspace
 .SH SYNOPSIS
 .B hlsWs [OPTIONS]
 
@@ -69,7 +69,7 @@ workspace in this file. This reduces commands to, \fIe.g.\fR
 
 .SH Suggestions on Specifying the HLS Workspace:
 While the HLS workspace may be placed anywhere, it is typically placed near the
-top of the project's direct tree. Two suggestions
+top of the project's directory tree. Two suggestions
 
 1. Since the contents are not usually saved to the GIT repository, one should
 pick a name that will be ignored by the \fI.gitignore\fR file.
@@ -79,7 +79,7 @@ to include the VITIS version number in the name. This allows easy changing from
 one Vitis Version to another.
 
 To make this easy, the Vitis version number can be automatically included
-in the workspace name using the usual python variable substition pattern,
+in the workspace name using the usual Python variable substitution pattern,
 \fIe.g.\fR
 
    $ hlsWs --workspace=${[MY_PROJECT}/ws/{vitis-version}

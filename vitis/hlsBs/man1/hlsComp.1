@@ -1,6 +1,6 @@
 .TH hlsComp 1 "May 2026" "v1.0" "HLS Command Manual"
 .SH NAME
-hlsComp \- cleans, creates, removes, lists, components in the workspace from
+hlsComp \- cleans, creates, removes, and lists components in the workspace from
 configuration files
 
 .SH SYNOPSIS
@@ -10,7 +10,7 @@ configuration files
 .TP
 .B hlsComp
 This command manages the components in the workspace. It is mainly used
-to add components for configuration files not created with \fBhlsCfg\fR, .e.g.
+to add components for configuration files not created with \fBhlsCfg\fR, e.g.
 configuration files created through the IDE or that already exist.
 
 .SH COMPONENTS
@@ -31,12 +31,12 @@ is 'False'.
 \fB\-w, \-\-workspace = \fIWORKSPACE\fR
 The target workspace. Note that for existing projects, the workspace is almost
 all the information that is needed.  If there is no need to categorize
-components as \fBexisting\fR, \fBmissing\fR, etc no project file or a very
+components as \fBexisting\fR, \fBmissing\fR, etc, no project file or a very
 minimal one just specifying the workspace is needed.
 
 .TP
 \fB\-\-targets=...\fR
-A list of component names.  Functionally this acts the same as the postional
+A list of component names.  Functionally this acts the same as the positional
 \fBCOMPENENTS\fR arguments, but due to shell's lack of a formal binding syntax
 for lists and the shell's handling of wildcards for positional arguments this
 is more explicit and reliable.
@@ -70,14 +70,14 @@ environment variable \fIHLSBS_PROJECT\fR.
 This prevents the use of any existing project file which may or may not exist.
 Typically used when one wishes to specify all the relevant parameters (in this
 utility these are \fBworkspace\fR and \fBconfigurations\fR and, possibly
-\fBcomponents\fR if wish something other than the default. A common usage is
-in one-of experimentation.
+\fBcomponents\fR if one wishes something other than the default. A common usage is
+in one-off experimentation.
 
 .SH ACTIONS
 .TP
 \fB\-\-clean\fR = (existing, missing, cruft, kruft, Kruft, all)
 Cleans, i.e. removes a category of components. The default category is
-\fBexisting\fR.  Given the heuristic nature of files cateogorized as
+\fBexisting\fR.  Given the heuristic nature of files categorized as
 \fBcruft\fR it is recommended to first do either \fB--list\fR or \fB--dry-run\fR.
 
 .TP
@@ -116,35 +116,35 @@ no project file or a very minimal one is needed specifying
 
 .SH Component Selection
 Which components are selected for a given action is by the intersection of the
-positional component list (and its equivalent \fB--targets\fR and the components
-current state. The current state is one
+positional component list (and its equivalent \fB--targets\fR) and the component's
+current state. The current state is one of
     1. Existing, the component exists and is consistent with a configuration file
     2. Missing,  The configuration file does not have a corresponding component
     3. Cruft,    A component found in the workspace or its reference to its
                  parent configuration file is inconsistent with the
                  configuration file specification.
-Each action can specify the a category or categories to target. For \fB--list\fR
-all categories are possible, For others only certain categories make sense. For
+Each action can specify a category or categories to target. For \fB--list\fR
+all categories are possible. For others only certain categories make sense. For
 example, only \fBexisting\fR makes sense for \fB--replace\fR.  For the most part
-the utilites permit any combination and warn one of using inappropriate ones.
+the utilities permit any combination and warn one against using inappropriate ones.
 
 
 .SH Overriding with Command Line Options
 The \fBhls\fR utilities are constructed so parameters can be specified at 3
 levels depending on their permanency
     1. In the project file
-    2. Indirectly overriden on the command line
-    3. Directly overriden on the command line
+    2. Indirectly overridden on the command line
+    3. Directly overridden on the command line
 
 The \fBproject file\fR is the most permanent and \fBoverriding\fR directly on
-the command line the least. The disadvantegous of overriding directly on the
-command line is, except for command recall, they are lost to history and even
+the command line the least. The disadvantage of overriding directly on the
+command line is that, except for command recall, they are lost to history and even
 then, they may be seen as just a random collection of options.
 
-The third option is offers something in between, allowing one to capture
+The third option offers something in between, allowing one to capture
 command line options in a file.  This allows the options some degree of
 permanency and, since it is a file, it can be given a meaningful name. The
-disadvantage is, due the complexity in some utilites, not all options offered
+disadvantage is, due to the complexity in some utilities, not all options offered
 in the project file are available.
 
 The command line syntax is \fI@<MY_OPTIONS>\fR, i.e. the file name preceded by
@@ -172,7 +172,7 @@ See the example below.
             --configurations=my-{cfg_name}
 
     Similar to the previous command, but adds the \fImy-\fR prefix to the
-    component name.  Adding a prefix may be useful in one-of experimentation.
+    component name.  Adding a prefix may be useful in one-off experimentation.
 
   Example 4
   $ hlsComp --workspace=$MY_PROJECT/ws/{vitis_version}
@@ -188,9 +188,9 @@ See the example below.
        --workspace=$MY_PROJECT/ws/{vitis_version}
        --configurations=$MY_PROJECT/cfg/*.cfg
        --components=my-{cfg_name}
-  This duplicates tExample 3.  The ordering is somewhat important, but
-  only in the sense that the last instance supercedes previous ones.
-  This is handy for one-of experimentation.
+  This duplicates Example 3.  The ordering is somewhat important, but
+  only in the sense that the last instance supersedes previous ones.
+  This is handy for one-off experimentation.
 
 .SH AUTHOR
 Written by JJRussell
