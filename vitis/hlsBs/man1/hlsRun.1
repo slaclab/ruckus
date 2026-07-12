@@ -10,7 +10,7 @@ hlsRun \- Runs the \fBcsim\fR, \fBsynthesis\fR, \fBcosim\fR, \fBpackage\fR and
 .TP
 .B hlsRun
 This command, together with its more specialized and simpler variations,
-\fBhlsExe\fR and \fGhlsGdb\fR will be the most often used commands. Other
+\fBhlsExe\fR and \fRhlsGdb\fR will be the most often used commands. Other
 \fBhls\fR commands (\fBhlsWs\fR, \fBhlsCfg\fR and \fBhlsComp\fR) are seldom
 used after creating and managing the configurations and their corresponding
 components.
@@ -43,7 +43,7 @@ The target workspace.
 .TP
 \fB\-\-components=...\fR
 A list of component names.  Functionally this acts the same as the positional
-\fBCOMPENENTS\fR arguments, but due to shell's lack of a formal binding syntax
+\fBCOMPONENTS\fR arguments, but due to shell's lack of a formal binding syntax
 for lists and the shell's handling of wildcards for positional arguments this
 is more explicit and reliable.  The names are synonyms.
 
@@ -90,13 +90,13 @@ makes sense. There is no  \fB--fast\fR option for the cosim stage.
 Executes the packaging stage.
 
 .TP
-\fB\-\-\implementation\fR
+\fB\-\-implementation\fR
 Executes the implementation stage.
 
 .TP
 \fB\-\-ip\fR
 Run the ip stage. If not using a project file to capture the \fBip\fR options,
-see the following list of \fB\ip\fR options.
+see the following list of \fBip\fR options.
 
 \fB\-\-ip-file\fR=\fIFILE_PATH_NAME\fR
 
@@ -122,7 +122,7 @@ The list of Xilinx FPGAs families that are compatible with this product.
 .TP
 \fB\-\-dcp\fR
 Run the dcp renaming stage. If not using a project file to capture the
-\fBip\fR options, see the following list of \fB\dcp\fR options.
+\fBip\fR options, see the following list of \fBdcp\fR options.
 
 \fB\-\-dcp-file\fR=\fIFILE_PATH_NAME\fR
 
@@ -172,11 +172,11 @@ no project file or a very minimal one is needed specifying
 Selected components are ones that exist in the workspace and match the component
 parameters. This is different from the previous commands which categorized the
 components as
-\fBexisting\fR, \fBmissing\fR or \fBcruft\fB. Since only existing components can
-be targeted, the only ambiguity is those in the \fBcruft\fB category, i.e.
+\fBexisting\fR, \fBmissing\fR or \fBcruft\fR. Since only existing components can
+be targeted, the only ambiguity is those in the \fBcruft\fR category, i.e.
 rogue components, which by entropy,  have somehow snuck their way into the
 workspace. To keep this command simple, the burden falls on the user to use
-either \fBhlsCfg\fR or \fBhlsCmp\fR to eliminate them or the selection criteria
+either \fBhlsCfg\fR or \fBhlsComp\fR to eliminate them or the selection criteria
 to avoid them.
 
 .SH Overriding with Command Line Options

@@ -14,7 +14,7 @@ using them interactively.
 
 The output files of the \fBhlsBs\fR utilities are compatible with the
 HLS GUI, meaning the various products, in particular the configuration
-and components, can be created and used by either the \BhlsBs\fR utilities
+and components, can be created and used by either the \fBhlsBs\fR utilities
 or the standard issue XILINX development environment.  This necessitated
 compromises since the HLS GUI imposes certain restrictions on the
 modularity of the commands.
@@ -53,14 +53,14 @@ Starts the Vitis IDE/GUI in the specified workspace or no workspace.
 .TP
 .B hlsCfg
 Manages the configuration files by \fBcreating\fR, \fBcleaning\fR,
-\fBreplacing and \fBlisting\fR and optionally (by default) creating its
+\fBreplacing\fR and \fBlisting\fR and optionally (by default) creating its
 corresponding HLS component during configuration file creation.
    $ hlsCfg <COMPONENTS> [OPTIONS]
 
 .TP
 .B hlsComp
 Manages the HLS components \fBcreating\fR, \fBcleaning\fR,
-\fBreplacing and \fBlisting\fR. This is generally used for creating
+\fBreplacing\fR and \fBlisting\fR. This is generally used for creating
 the components from existing/legacy configuration files. \fBhlsCfg\fR is the
 usual way of creating the HLS component.
    $ hlsComp <COMPONENTS> [OPTIONS]
@@ -194,7 +194,7 @@ etc), just one option per line. For example
      --workspace=MyWorkspace
      --ntests=40
 
-.TP Caveats
+.SS Caveats
 Also note that while there is no \fBinclude\fR capability in the file, one
 can specify multiple indirect files, allowing a semblance of modularity.
 

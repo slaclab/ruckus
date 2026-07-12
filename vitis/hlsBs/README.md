@@ -137,7 +137,7 @@ There are a number of setup steps. If  **hlsBs** defaults are acceptable or the 
 > `$ hlsVersion <vitis_version>`
 
 -	- If the Vitis version is specified, the Vitis setup script for that version is sourced.
-		- This depends on the HLSBS_ILINX_SETUP environment variable being appropriately set.
+		- This depends on the HLSBS_XILINX_SETUP environment variable being appropriately set.
 		- This is very convenient for switching between Vitis versions.
 	- If the version has been previously established in some other way, **hlsVersion** will use the currently established version.
 	- Once the Xilinx/Vitis version has been established, internal **hlsBs** version dependent context is initialized.
@@ -216,7 +216,7 @@ While many values in the *Project file* can be overridden on the command line, n
 
 ``` bash
 $ hlsWs --create      # Create the workspace in the project file specified by the HLSBS_PROJECT
-$ hlsWs --create --workspace=/tmp/tmp_workpace  # Create an ad-hoc temporary workspace as a playpen
+$ hlsWs --create --workspace=/tmp/tmp_workspace  # Create an ad-hoc temporary workspace as a playpen
 ```
 
 As is true in many cases, the advantage of the first form is that this definition is hidden and need not be remembered and the disadvantage is that this definition is hidden and not remembered.  When in doubt about this hidden context, use **hlsCtx** to display the implicit **hlsBs** context information.
@@ -266,8 +266,8 @@ The **hlsBs** commands produce a variety of output products. The default layout 
 <pre>
 example/
         products/
-                 ws/{vitis_version} # The workspace for a particular Vitis versionn
-                cfg/{vitis_version} # Directory for the confifiguration files for a particular Vitis version
+                 ws/{vitis_version} # The workspace for a particular Vitis version
+                cfg/{vitis_version} # Directory for the configuration files for a particular Vitis version
                  ip/{vitis_version} # Directory for the modified .dcp and .zip file
 </pre>
 
