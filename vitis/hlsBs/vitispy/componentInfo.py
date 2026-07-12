@@ -98,7 +98,7 @@ class ComponentInfo :
                 print(f"Error: The file '{vitis_comp_path}' was not found.")
 
         except json.JSONDecodeError as e:
-            self.errs |= ComponentInfo.ErrJsonFile
+            self.errs |= ComponentInfo.ErrJsonDecode
             if not silence_error :
                 print(f"Error decoding JSON from '{vitis_comp_path}': {e}")
 

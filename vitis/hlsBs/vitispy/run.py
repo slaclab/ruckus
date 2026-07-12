@@ -287,12 +287,12 @@ class Run :
         elif slow_msk == Run.Msk.Run:
             # Run only, impossible
             self.announce (False, "ERROR: HLS demands a Make with a Run")
-            return
+            return -1
 
         elif slow_msk == (Run.Msk.Clean | Run.Msk.Run):
             # Clean & Run, impossible
             self.announce (False, "ERROR: Cannot Clean & Run without Make")
-            return
+            return -1
 
         elif slow_msk == (Run.Msk.Make  | Run.Msk.Run) :
             aux_cfg      = os.path.join (Directory.cfg, "csim_makeRun.cfg")
@@ -386,6 +386,12 @@ class Run :
             return status
         # -------------------------------------------------------
 
+        # ---------------------------------------------------------------
+        # No 'run' bit set (e.g. clean and/or make only): success is 0,
+        # not None, so the caller's stage sequence keeps going.
+        # ---------------------------------------------------------------
+        return 0
+
 
     # --------------------------------------------------------------------------
     def do_csim (self, info) :
@@ -416,10 +422,13 @@ class Run :
         # ------------------------------------------------------------------
         # csim fast not requested or was unable to fulfill because make file
         # did not exist
+        #
+        # NOTE: must RETURN the slow status. Returning None here makes the
+        # caller's `if status != 0` test (None != 0 is True) abort the stage
+        # sequence, silently skipping synthesis/cosim/package/impl/ip on the
+        # first (slow) csim of a freshly created component.
         # ------------------------------------------------------------------
-        self.do_csim_slow (info)
-
-        return
+        return self.do_csim_slow (info)
     # --------------------------------------------------------------------------
 
 
@@ -530,7 +539,7 @@ class Run :
                        '--work_dir', info.work_dir]
 
             status  = self.do_vitis_cmd (syn_cmd, self.report_vitis_syn)
-            if status != 0 : return
+            if status != 0 : return status
         # ----------------------------------------------------------------------
 
 

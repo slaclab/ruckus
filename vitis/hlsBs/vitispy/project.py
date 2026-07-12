@@ -346,7 +346,7 @@ class Project:
         if  needs & Project.Need.Workspace :
             if self.workspace == None :
                 if self.products_root is None :
-                    self.error = Project.Need.WorkSpace
+                    self.error = Project.Need.Workspace
                     return
 
                 self.workspace = os.path.join (self.products_root,

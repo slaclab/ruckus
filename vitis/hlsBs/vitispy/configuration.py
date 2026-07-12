@@ -305,7 +305,12 @@ class Configuration :
     @staticmethod
     def make_relative (file, rel_path, expand = True) :
         if expand : file = os.path.expandvars (file)
-        file = os.path.relpath (os.path.realpath (file), rel_path)
+        # realpath BOTH operands. Resolving the symlink on only one side (e.g. when
+        # the repo is reached through a symlinked path such as /sdf/home -> /sdf/group)
+        # made relpath climb to the common root and back down the real tree, producing
+        # a broken cross-tree path in the tb.file / -I / #include cflags.
+        file = os.path.relpath (os.path.realpath (file),
+                                os.path.realpath (rel_path))
         return file
     # --------------------------------------------------------------------------
 
@@ -486,7 +491,12 @@ class Configuration :
                         f"   ->: {abs_file}\n")
                     errs += 1
                     continue
-                defs += ' -D' + name + '=' + "'\"" + rel_file + "\"'"
+                # Emit the path BARE (no quotes). csim cflags pass through a
+                # shell but cosim re-tokenizes them without one, so any quoting
+                # here survives csim yet reaches the cosim compiler literally
+                # (breaking `#include MACRO`). A bare, shell-neutral value is
+                # identical in both; the testbench stringizes it for #include.
+                defs += ' -D' + name + '=' + rel_file
 
             # --------------------------
             # Error: Unknown define type

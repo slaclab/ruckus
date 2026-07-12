@@ -132,7 +132,7 @@ class Ip :
         if   family : self.family = family
         else        : self.family = (
                 "artix7,kintex7,virtex7,zynq,kintexu,virtexu,kintexuplus,"
-                "virtexuplus,virtexuplusHBM,zynqplus,zynquplusRFSOC,veral")
+                "virtexuplus,virtexuplusHBM,zynquplus,zynquplusRFSOC,versal")
 
         self.xil_family = self.get_xil_family (self.family)
         self.msg    = None
@@ -284,15 +284,21 @@ class Ip :
         not the case for the component.xml files, typically in the 100KBytes.
         """
 
-        # --------------------
-        # Read the entire file
-        # --------------------
+        # ---------------------------------------------
+        # Read the entire file as a list of lines. Note
+        # readlines() (not read()) is required so the
+        # loop below iterates lines, not characters.
+        # ---------------------------------------------
         with open (cmp_xml, 'r+') as file :
-            lines = file.read ()
+            lines = file.readlines ()
 
-            # -----------------------
-            # Clear the original file
-            # -----------------------
+            # ----------------------------------------------
+            # Clear the original file. seek(0) is required:
+            # read() leaves the offset at EOF, so truncate(0)
+            # alone would leave a hole of NUL bytes before
+            # the rewritten content, corrupting component.xml.
+            # ----------------------------------------------
+            file.seek     (0)
             file.truncate (0)
 
             # -------------------------
@@ -302,16 +308,17 @@ class Ip :
                 if 'xilinx:family' in line : file.write (self.xil_family)
                 else                       : file.write (line)
 
-            # --------------------------------------------------------
-            # Rezip the previously unzipped file, only this time with
-            # the augmented FPGA families.
-            # --------------------------------------------------------
-
-            status = self.rezip (self.prj_ip_zip,
-                                 unzip_dirname,
-                                 printer,
-                                 verbose)
-            return status
+        # ------------------------------------------------------------
+        # Rezip the previously unzipped directory, now with the
+        # augmented FPGA families. This MUST be OUTSIDE the 'with'
+        # above so the file is flushed and closed first; otherwise
+        # zip archives a partially-written (truncated) component.xml.
+        # ------------------------------------------------------------
+        status = self.rezip (self.prj_ip_zip,
+                             unzip_dirname,
+                             printer,
+                             verbose)
+        return status
     # --------------------------------------------------------------------------
 
 
@@ -379,6 +386,12 @@ class Ip :
                  verbose:  The verbose output
         """
         # -------------------------------------------------------
+        # Remove any stale output zip first: `zip -r` updates an existing archive
+        # in place and would leave old entries behind (build.py hit a "Zip file
+        # structure invalid" error on rebuild for exactly this reason).
+        if os.path.exists (zipped_file) :
+            os.remove (zipped_file)
+
         zip_cmd = ['zip', '-r',  zipped_file, '.']
         with subprocess.Popen (zip_cmd,
                                stdout  = subprocess.PIPE,

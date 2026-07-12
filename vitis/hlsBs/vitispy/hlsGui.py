@@ -9,9 +9,9 @@
 # ----------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-  '''
-    Starts the HLS Gui with at the specified workspace or no workspace
-  '''
+'''
+Starts the HLS Gui at the specified workspace, or with no workspace.
+'''
 # ------------------------------------------------------------------------------
 
 
@@ -110,6 +110,10 @@ def startGui () :
 
             if args.verbose : print (f"Starting GUI in {workspace}")
             cmd = [ 'vitis', '-w', workspace]
+        else :
+            print ("ERROR: Could not determine a workspace; use --no-workspace "
+                   "to start the HLS Gui/IDE without one", file = sys.stderr)
+            return -1
     # ----------------------------------------------------------------------
 
     # Execute the cmd command

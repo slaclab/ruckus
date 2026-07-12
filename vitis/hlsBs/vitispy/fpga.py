@@ -35,7 +35,7 @@ class Fpga :
         cfg_file.set_value (section = 'hls', key = 'clock', value = self.clock)
 
         if (self.uncertainity) :
-            cfg_file.set_value (section = 'hls', key = 'uncertainity',
+            cfg_file.set_value (section = 'hls', key = 'clock_uncertainty',
                                                value = self.uncertainity)
         return
     # --------------------------------------------------------------------------

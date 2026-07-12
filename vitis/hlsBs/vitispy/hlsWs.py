@@ -191,6 +191,7 @@ def doit () :
         print_ws ("Workspace - Status", ws, False, state_msg)
         if exists : status =  0
         else      : status = -1
+        return status
         # ----------------------------------------------------------------------
 
     elif args.list :
@@ -211,10 +212,10 @@ def doit () :
             wc   = os.path.join (ws, '*')
             cmps = glob.glob (wc)
             if len (cmps) == 0 :
-                print.item ("None", '')
+                printer.itemPlain ("None", '')
                 status = 0
                 printer.footer ()
-                return
+                return status
 
             # Make a list of the stuff found and the longest one
             cmp_names = []

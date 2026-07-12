@@ -107,7 +107,7 @@ function hlsVer ()
     local settings64=$(find $ypath -name settings64.sh -prune -print -quit 2>/dev/null)
 
     if [[ -z "${settings64}" ]] ; then
-        "ERROR:  Unable to find settings64.sh in path ${ypath}"
+        echo "ERROR:  Unable to find settings64.sh in path ${ypath}"
         return -1
     else
         echo   Setting Xilinx to version = ${version}
@@ -394,7 +394,7 @@ function hlsVersion ()
 
     # Else maybe already setup
     elif [[ -n ${XILINX_HLS} ]]; then
-        eval `python ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
+        eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
         echo "Using existing Xilinx version = ${HLS_XILINX_VERSION}"
         export HLSBS_XILINX_VERSION=${HLS_XILINX_VERSION}
     fi
@@ -413,13 +413,13 @@ function hlsVersion ()
     unset HLSBS_PROJECT_PYPATHS
     unset XILINX_VCXX
 
-    eval `python ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
+    eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
 
     # ---------------------------------
     # Only works for versions > v2023.2
     # ---------------------------------
-    if [[ "${HLSBS_XILINX_VERSION}" < "2023.2" ]]; then
-        echo "ERROR: HLS Version ${HLSBS_XILINX_VERSION} must >= 2023.2"
+    if [[ "$(printf '%s\n' "${HLSBS_XILINX_VERSION}" "2023.2" | sort -V | head -n1)" != "2023.2" ]]; then
+        echo "ERROR: HLS Version ${HLSBS_XILINX_VERSION} must be >= 2023.2"
         return -1
     fi
 

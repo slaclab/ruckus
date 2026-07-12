@@ -224,12 +224,12 @@ class Options :
             for item in exclude_list :
                 unique = item[0:2]
                 if (unique == 'cs') : self.stages &= ~Run.Stage.CSim
-                if (unique == 'sy') : self.stages &= ~Run.Stage.Synthesi
+                if (unique == 'sy') : self.stages &= ~Run.Stage.Synthesis
                 if (unique == 'co') : self.stages &= ~Run.Stage.CoSim
                 if (unique == 'pa') : self.stages &= ~Run.Stage.Package
                 if (unique == 'im') : self.stages &= ~Run.Stage.Implementation
-                if (unique == 'ip') : self.stages &= ~Run.Ip
-                if (unique == 'dc') : self.stages &= ~Run.Dcp
+                if (unique == 'ip') : self.stages &= ~Run.Stage.Ip_Zip
+                if (unique == 'dc') : self.stages &= ~Run.Stage.Ip_Dcp
 
         return
     # --------------------------------------------------------------------------
@@ -280,7 +280,7 @@ class Options :
         if ip_list is None : return msk
 
         if not isinstance (ip_list, list) :
-            if ip_list == '--no-value--' :
+            if ip_list == '--no_value--' :
                 msk = Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp
                 return msk
             else :
@@ -487,21 +487,25 @@ def doit () :
     cmps    = files.get_components (workspace, components)
     dry_run = args.dry_run
 
+    rc = 0
     if cmps :
         icmp = 1
         cmps = sorted (cmps)
         left = len    (cmps)
         for cmp_path in cmps :
             printer.item (icmp, "Component", cmp_path)
-            run.execute (cmp_path)
+            status = run.execute (cmp_path)
+            if status : rc = status   # keep last non-zero so a failed stage propagates
             left -= 1
             icmp += 1
             if left and args.verbose: print ()
     else :
         noComponentsFound (printer, workspace, components)
+        rc = -1
 
 
     printer.footer ()
+    return rc
 # ------------------------------------------------------------------------------
 
 

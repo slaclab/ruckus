@@ -39,13 +39,13 @@ class TargetMin :
       self.cmp_name = cmp_name
 
       cmp_info   = ComponentInfo (cmp_path, True)
-      self.errs = cmpInfo.errs
+      self.errs = cmp_info.errs
 
       if cmp_info.errs :
          self.cfg_path = None
          self.cfg_name = None
       else :
-         self.cfg_path = os.path.relpath (cmp_info.cfg_files[0])
+         self.cfg_path = os.path.relpath (cmp_info.cfg_files)
          self.cfg_name = os.path.split (self.cfg_path)[1]
       return
 # -----------------------------------------------------------------------------
@@ -256,10 +256,11 @@ class Targets :
                                 cfg_template,
                                 cmp_template)
 
-               if not target.cmp_name in self.targets :
+               if target.cmp_name not in cmps :
+                  cmps.append         (target.cmp_name)
                   self.targets.append (target)
                else :
-                  print (f"ERROR: duplicate component found {cmp}")
+                  print (f"ERROR: duplicate component found {target.cmp_name}")
 
       self.targets.sort (key = lambda x : x.cmp_name)
       return
