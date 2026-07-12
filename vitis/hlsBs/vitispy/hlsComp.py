@@ -20,16 +20,6 @@
 # ------------------------------------------------------------------------------
 
 
-from vitispy.category import Category
-from vitispy.targets import Targets
-from vitispy.project import Project
-from vitispy.dry_run import DryRun
-from vitispy.action import Action
-from vitispy.workspace import Workspace
-from vitispy.printer import Printer
-import vitispy.files as files
-from vitispy.manpage import display_manpage
-import vitis
 import os
 import sys
 import argparse
@@ -41,6 +31,17 @@ import runpy
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+from vitispy.category import Category  # noqa: E402
+from vitispy.targets import Targets  # noqa: E402
+from vitispy.project import Project  # noqa: E402
+from vitispy.dry_run import DryRun  # noqa: E402
+from vitispy.action import Action  # noqa: E402
+from vitispy.workspace import Workspace  # noqa: E402
+from vitispy.printer import Printer  # noqa: E402
+import vitispy.files as files  # noqa: E402
+from vitispy.manpage import display_manpage  # noqa: E402
+import vitis  # noqa: E402
 
 # ==============================================================================
 #
@@ -115,7 +116,7 @@ def get_opts(action, args):
 
     else:
         label = 'Creating'
-        args.create = ['nissing']
+        args.create = ['missing']
         opts = Category.categorize(args.create, Category.Missing)
 
     return label, opts
@@ -175,7 +176,7 @@ def noCompleteCleanWarning():
     print(
         '''
     WARNING: To avoid cleaning more than intended, hlsComp requires that
-             postional args or --targets='*' must be specified, e.g.
+             positional args or --targets='*' must be specified, e.g.
                $ hlsCfg '*' --clean             or
                $ hlsCfg --targets='*'
     ''',
@@ -186,7 +187,7 @@ def noCompleteCleanWarning():
 
 # ------------------------------------------------------------------------------
 def cmpExistsError(printer):
-    printer.itemPlain('', "ERROR: component alreay exists, use --replace", '*')
+    printer.itemPlain('', "ERROR: component already exists, use --replace", '*')
     return
 # ------------------------------------------------------------------------------
 

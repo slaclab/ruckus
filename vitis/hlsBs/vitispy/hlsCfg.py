@@ -8,17 +8,6 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-from vitispy.targets import Targets
-from vitispy.project import Project
-from vitispy.printer import Printer
-from vitispy.dry_run import DryRun
-import vitispy.ip as hlsIp
-import vitispy.configuration as hlsCfg
-from vitispy.category import Category
-from vitispy.action import Action
-from vitispy.workspace import Workspace
-from vitispy.manpage import display_manpage
-import vitis
 import argparse
 import os
 import sys
@@ -29,6 +18,18 @@ import runpy
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+from vitispy.targets import Targets  # noqa: E402
+from vitispy.project import Project  # noqa: E402
+from vitispy.printer import Printer  # noqa: E402
+from vitispy.dry_run import DryRun  # noqa: E402
+import vitispy.ip as hlsIp  # noqa: E402
+import vitispy.configuration as hlsCfg  # noqa: E402
+from vitispy.category import Category  # noqa: E402
+from vitispy.action import Action  # noqa: E402
+from vitispy.workspace import Workspace  # noqa: E402
+from vitispy.manpage import display_manpage  # noqa: E402
+import vitis  # noqa: E402
 
 
 # ==============================================================================
@@ -610,7 +611,7 @@ def main():
                        print(
                            "\n"
                            "ERROR: To avoid cleaning more than intended, hlsCfg requires that\n"
-                           "       postional args or --targets='*' must be specified, e.g.\n"
+                           "       positional args or --targets='*' must be specified, e.g.\n"
                            "\n"
                            "        $ hlsCfg '*' --clean             or\n"
                            "        $ hlsCfg --components='*'\n",

@@ -26,14 +26,11 @@
  '''
 # ------------------------------------------------------------------------------
 
-from vitispy.project import Project
-from vitispy.workspace import Workspace
-from vitispy.componentInfo import ComponentInfo
 import argparse
 import sys
 import os
-
 import runpy
+
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
 
@@ -42,6 +39,10 @@ runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
 # Augment the python path with the directory of this file
 dir = os.path.split(os.path.split(__file__)[0])[0]
 sys.path.append(dir)
+
+from vitispy.project import Project  # noqa: E402
+from vitispy.workspace import Workspace  # noqa: E402
+from vitispy.componentInfo import ComponentInfo  # noqa: E402
 
 # ------------------------------------------------------
 

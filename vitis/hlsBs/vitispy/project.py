@@ -364,19 +364,19 @@ class Project:
         if needs & Project.Need.Workspace:
             print(
                 "\nERROR: Could not determine workspace directory, one of\n"
-                "       --root, --products_root, --workspace must be specfied")
+                "       --root, --products_root, --workspace must be specified")
             return self.error
 
         elif needs & Project.Need.Products_Root:
             print(
                 "\nERROR: Could not determine products directory, one of\n"
-                "       --root, --products_root must be specfied")
+                "       --root, --products_root must be specified")
             return self.error
 
         elif needs & Project.Need.Root:
             print(
                 "\nERROR: Could not determine project root directory, one of\n"
-                "       --root must be specfied")
+                "       --root must be specified")
             return self.error
 
         return 0

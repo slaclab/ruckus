@@ -417,7 +417,7 @@ class Configuration:
             if 'type' in d:
                 type = d['type']
             else:
-                print(f"ERROR: define specfication '{name}' missing the required type, one of\n"
+                print(f"ERROR: define specification '{name}' missing the required type, one of\n"
                       f"     : [flag | string]\n"
                       f"   ->: {src_file}\n")
                 errs += 1

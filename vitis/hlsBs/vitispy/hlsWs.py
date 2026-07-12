@@ -35,13 +35,6 @@
 # ------------------------------------------------------------------------------
 
 
-from vitispy.project import Project
-from vitispy.workspace import Workspace
-from vitispy.printer import Printer
-from vitispy.dry_run import DryRun
-import vitis
-from vitispy.files import is_creatable
-from vitispy.manpage import display_manpage
 import argparse
 import sys
 import os
@@ -55,6 +48,14 @@ sys.path.append(os.path.split(os.path.split(__file__)[0])[0])
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+from vitispy.project import Project  # noqa: E402
+from vitispy.workspace import Workspace  # noqa: E402
+from vitispy.printer import Printer  # noqa: E402
+from vitispy.dry_run import DryRun  # noqa: E402
+import vitis  # noqa: E402
+from vitispy.files import is_creatable  # noqa: E402
+from vitispy.manpage import display_manpage  # noqa: E402
 
 
 # ------------------------------------------------------------------------------

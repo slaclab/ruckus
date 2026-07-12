@@ -121,7 +121,7 @@ class Ip:
             self.xil_family = None
             self.family = None
             self.msg = (
-                '''ERROR: The original HLS zip file not found, possibly have not run --syn and --package''')
+                '''ERROR: The original HLS zip file not found, possibly you have not run --syn and --package''')
 
             self.status = -1
             return
@@ -237,7 +237,7 @@ class Ip:
                 cmp_xml = os.path.join(unzip_dir.name, 'component.xml')
                 exists = os.path.isfile(cmp_xml)
                 if not exists:
-                    self.msg = "Non existent xml file"
+                    self.msg = "Nonexistent xml file"
                     return -1
 
                 # ------------------------------------------------
@@ -249,7 +249,7 @@ class Ip:
                                                printer,
                                                verbose)
                 else:
-                    self.augment_family_file(unzip_dir.name,
+                    self.augment_family_memory_file(unzip_dir.name,
                                              cmp_xml,
                                              printer,
                                              verbose)

@@ -74,7 +74,7 @@ args = get_args()
 network = configuration.network(args.net_file, args.net_name)
 
 # Fpga attributes
-fpga = configuration.fpga(args.fpga, args.clock, args.uncertainity)
+fpga = configuration.fpga(args.fpga, args.clock, args.uncertainty)
 
 # CSim and CoSim arguments
 exe_args = configuration.exe_args(configuration.file_and_type(args.ifile, args.itype),

@@ -12,10 +12,10 @@
 # FPGA
 # ------------------------------------------------------------------------------
 class Fpga:
-    def __init__(self, part, clock, uncertainity, id=None):
+    def __init__(self, part, clock, uncertainty, id=None):
         self.part = part
         self.clock = clock
-        self.uncertainity = uncertainity
+        self.uncertainty = uncertainty
         self.id = id
         return
 
@@ -25,7 +25,7 @@ class Fpga:
                             default='xcku115-flvb2104-2-i')
         parser.add_argument(
             '--clock',         help='fpga clock',      default=6)
-        parser.add_argument('--uncertainity',  help='fpga clock uncertainity')
+        parser.add_argument('--uncertainty',  help='fpga clock uncertainty')
         parser.add_argument(
             '--fid',           help='fpga identifier', default=None)
         return
@@ -37,9 +37,9 @@ class Fpga:
         cfg_file.set_value(key='part',  value=self.part)
         cfg_file.set_value(section='hls', key='clock', value=self.clock)
 
-        if (self.uncertainity):
+        if (self.uncertainty):
             cfg_file.set_value(section='hls', key='clock_uncertainty',
-                               value=self.uncertainity)
+                               value=self.uncertainty)
         return
     # --------------------------------------------------------------------------
 
@@ -47,12 +47,12 @@ class Fpga:
     # Print the FPGA specification
     # --------------------------------------------------------------------------
     def print(self, printer):  # Fpga
-        if (self.uncertainity):
-            uncertainity = self.uncertainity
+        if (self.uncertainty):
+            uncertainty = self.uncertainty
         else:
-            uncertainity = "Vitis Default"
+            uncertainty = "Vitis Default"
 
-        clock = self.clock + '+/-' + uncertainity
+        clock = self.clock + '+/-' + uncertainty
         print()
         printer.prefixed_line('Fpga', '.part', self.part)
         printer.prefixed_line('',    '.clock', clock)
@@ -62,7 +62,7 @@ class Fpga:
 
     # ------------------------------------------------------------------------------
     def __str__(self):
-        uncertainity = self.uncertainity if self.uncertainity else 'Vitis Default'
-        str = self.id + ' => ' + self.part + ' @ ' + self.clock + ' -/+ ' + uncertainity
+        uncertainty = self.uncertainty if self.uncertainty else 'Vitis Default'
+        str = self.id + ' => ' + self.part + ' @ ' + self.clock + ' -/+ ' + uncertainty
         return str
     # ------------------------------------------------------------------------------

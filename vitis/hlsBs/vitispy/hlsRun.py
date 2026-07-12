@@ -8,13 +8,6 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-import vitispy.files as files
-from vitispy.project import Project
-from vitispy.printer import Printer
-from vitispy.workspace import Workspace
-from vitispy.dry_run import DryRun
-from vitispy.run import Run
-from vitispy.manpage import display_manpage
 import argparse
 import sys
 import os
@@ -26,6 +19,14 @@ import runpy
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+import vitispy.files as files  # noqa: E402
+from vitispy.project import Project  # noqa: E402
+from vitispy.printer import Printer  # noqa: E402
+from vitispy.workspace import Workspace  # noqa: E402
+from vitispy.dry_run import DryRun  # noqa: E402
+from vitispy.run import Run  # noqa: E402
+from vitispy.manpage import display_manpage  # noqa: E402
 
 
 # ------------------------------------------------------------------------------
@@ -55,7 +56,7 @@ def add_arguments(parser):
                         default=None)
 
     parser.add_argument('--verbose',
-                        help='Minimum ouput',
+                        help='Minimum output',
                         action='store_true',
                         default=False)
 

@@ -15,9 +15,6 @@ Starts the HLS Gui at the specified workspace, or with no workspace.
 # ------------------------------------------------------------------------------
 
 
-from vitispy.manpage import display_manpage
-from vitispy.project import Project
-from vitispy.workspace import Workspace
 import argparse
 import sys
 import os
@@ -30,6 +27,10 @@ import runpy
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+from vitispy.manpage import display_manpage  # noqa: E402
+from vitispy.project import Project  # noqa: E402
+from vitispy.workspace import Workspace  # noqa: E402
 
 
 # ------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ def add_arguments(parser):
                         action='store_true')
 
     parser.add_argument('--no-workspace',
-                        help='Start the HLS Gui/IDE without a workspae',
+                        help='Start the HLS Gui/IDE without a workspace',
                         dest='no_workspace',
                         action='store_true')
 

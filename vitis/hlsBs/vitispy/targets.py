@@ -181,7 +181,7 @@ class Targets:
     def no_candidate_targets(targets, action, project):
         printer = Printer()
         printer.header(f"{action}")
-        printer.line("ERROR: No candidates where formed by the project file")
+        printer.line("ERROR: No candidates were formed by the project file")
         printer.line(
             "       This is likely due to a bad source file(s) product specifications")
         printer.line("       Check the following project file(s)")

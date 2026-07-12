@@ -62,7 +62,7 @@ class Maps ():
                               "       This may be\n"
                               "         a) A single dictionary\n"
                               "         b) A list or tuple of dictionaries\n"
-                              "         c) A lists or tuples of dictionaries\n")
+                              "         c) A list or tuple of dictionaries\n")
 
         # -------------------------------------------------------------
         # Calculate the number of permutations/combinations in all the
@@ -271,7 +271,7 @@ class Maps ():
                 kvs = [['id', fpga.id],
                        ['part', fpga.part],
                        ['clock', fpga.clock],
-                       ['uncertainity', fpga.uncertainity]]
+                       ['uncertainty', fpga.uncertainty]]
 
                 Maps.add_srcs(srcs, key, fpga, kvs, '_')
             return len(vs)

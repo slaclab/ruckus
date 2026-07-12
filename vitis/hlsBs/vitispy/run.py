@@ -495,7 +495,7 @@ class Run:
             if info.errs == ComponentInfo.ErrNoCfgFile:
                 self.announce(True, None)
                 self.printer.itemPlain('Warning',
-                                       'No configuration file found, consider removing this components', '?')
+                                       'No configuration file found, consider removing this component', '?')
 
                 return
 
