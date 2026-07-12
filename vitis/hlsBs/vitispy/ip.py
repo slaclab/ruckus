@@ -11,51 +11,49 @@
 # ------------------------------------------------------------------------------
 '''
   Creates either a copy or an augmented copy of the original zip file. This
-  this is moved from the workspace (which may or may not be saved to git,
-  and places it in a directory of the users choosing
+  is moved from the workspace (which may or may not be saved to git),
+  and placed in a directory of the user's choosing
 '''
 # ------------------------------------------------------------------------------
 
-import argparse
+from .version import Version
 import tempfile
 import shutil
 import subprocess
 import os
 import sys
 
-dir = os.path.split (__file__)[0] + '../'
-sys.path.append (dir)
-from .version       import Version
+dir = os.path.split(__file__)[0] + '../'
+sys.path.append(dir)
 
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-class Ip :
+class Ip:
     """
     Augments the usually single FPGA in the component.xml file with a family of
     FPGAs, creating a new .zip file
     """
     @staticmethod
-    def add_arguments (parser) :
+    def add_arguments(parser):
         """
-        Adds the arguments need to configure the IP creater
+        Adds the arguments needed to configure the IP creator
 
         Args:
              parser:  The parser to add the arguments to
         """
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
-    def __init__ (self, dir, name, family, cmp_dir, info) :
+    def __init__(self, dir, name, family, cmp_dir, info):
         """
         The IP creator's constructor
 
         Args:
              dir:              The output directory
              name:             The output zip file's name (optional)
-             family:           The family of permissable FPGAS
+             family:           The family of permissible FPGAs
              cmp_dir:          The component directory, i.e. where to look
                                for the original .zip file which contains
                                component.xml
@@ -67,91 +65,92 @@ class Ip :
         # These can be used to provide defaults for the output
         # ----------------------------------------------------
         # Keep track of the component directory and the component name
-        self.cmp_dir    = cmp_dir
-        self.cmp_name   = info.cmp_name
-        self.top_level  = info.hls_top_level
+        self.cmp_dir = cmp_dir
+        self.cmp_name = info.cmp_name
+        self.top_level = info.hls_top_level
 
         # Locate the component.xml and <top_level>.zip files
-        self.hls_cmp_dir  = os.path.realpath (os.path.join (self.cmp_dir,
-                                                            self.cmp_name))
-        self.hls_impl_dir = os.path.join (self.hls_cmp_dir,  'hls', 'impl')
-        self.hls_ip_dir   = os.path.join (self.hls_impl_dir, 'ip')
-        self.hls_zip      = os.path.join (self.hls_cmp_dir,
-                                          info.hls_top_level) + '.zip'
+        self.hls_cmp_dir = os.path.realpath(os.path.join(self.cmp_dir,
+                                                         self.cmp_name))
+        self.hls_impl_dir = os.path.join(self.hls_cmp_dir,  'hls', 'impl')
+        self.hls_ip_dir = os.path.join(self.hls_impl_dir, 'ip')
+        self.hls_zip = os.path.join(self.hls_cmp_dir,
+                                    info.hls_top_level) + '.zip'
 
         # -------------
         # Output pieces
         # -------------
 
-        if name :
-            namdir, namext   = os.path.split    (name)
-            nam,       ext   = os.path.splitext (namext)
-        else :
+        if name:
+            namdir, namext = os.path.split(name)
+            nam,       ext = os.path.splitext(namext)
+        else:
             nam = None
             ext = None
 
-        if not dir :
-            print (f"ERROR: Ip must specify an output directory")
+        if not dir:
+            print("ERROR: Ip must specify an output directory")
             return
-        else :
-            dir          = os.path.expandvars (dir)
+        else:
+            dir = os.path.expandvars(dir)
 
-        if not dir :
-            print ("ERROR:  No output directory provided in"
+        if not dir:
+            print("ERROR:  No output directory provided in"
                   f"        {dir}")
             self.status = -1
             return
 
-
-        if not nam  : nam = '{cmp_name}'
-        if not ext  : ext = '.zip'
+        if not nam:
+            nam = '{cmp_name}'
+        if not ext:
+            ext = '.zip'
 
         # Expand the symbolics. These are the Vitis Version and component name
-        dir = dir.format (vitis_version = Version.version,
-                          cmp_name      = info.cmp_name)
-        nam = nam.format (vitis_version = Version.version,
-                          cmp_name      = info.cmp_name)
-
+        dir = dir.format(vitis_version=Version.version,
+                         cmp_name=info.cmp_name)
+        nam = nam.format(vitis_version=Version.version,
+                         cmp_name=info.cmp_name)
 
         # The output project IP directory and file
-        self.prj_ip_dir      = os.path.realpath (os.path.expandvars (dir))
-        self.prj_ip_zip      = os.path.expandvars (
-                               os.path.join (self.prj_ip_dir, nam) + ext)
+        self.prj_ip_dir = os.path.realpath(os.path.expandvars(dir))
+        self.prj_ip_zip = os.path.expandvars(
+            os.path.join(self.prj_ip_dir, nam) + ext)
 
-        exists = os.path.isfile (self.hls_zip)
-        if not exists :
+        exists = os.path.isfile(self.hls_zip)
+        if not exists:
             self.xil_family = None
-            self.family     = None
-            self.msg        = (
-'''ERROR: The original HLS zip file not found, possibly have not run --syn and --package''')
+            self.family = None
+            self.msg = (
+                '''ERROR: The original HLS zip file not found, possibly have not run --syn and --package''')
 
-            self.status     = -1
+            self.status = -1
             return
 
-
-        if   family : self.family = family
-        else        : self.family = (
+        if family:
+            self.family = family
+        else:
+            self.family = (
                 "artix7,kintex7,virtex7,zynq,kintexu,virtexu,kintexuplus,"
                 "virtexuplus,virtexuplusHBM,zynquplus,zynquplusRFSOC,versal")
 
-        self.xil_family = self.get_xil_family (self.family)
-        self.msg    = None
+        self.xil_family = self.get_xil_family(self.family)
+        self.msg = None
         self.status = 0
         return
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
+
     @staticmethod
-    def get_xil_family (family) :
+    def get_xil_family(family):
 
         xil_family = ""
-        if family :
-            families = family.split (',')
-            for f in families :
+        if family:
+            families = family.split(',')
+            for f in families:
                 xil_family += '<xilinx:family xilinx:lifeCycle="Production">' + f + '</xilinx:family>\n'
-        else :
-            xil_family   = """
+        else:
+            xil_family = """
 <xilinx:family xilinx:lifeCycle="Production">artix7</xilinx:family>
 <xilinx:family xilinx:lifeCycle="Production">kintex7</xilinx:family>
 <xilinx:family xilinx:lifeCycle="Production">virtex7</xilinx:family>
@@ -169,107 +168,108 @@ class Ip :
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
-    def print (self, printer, verbose) :
-        printer.itemPlain ("Ip .zip", self.prj_ip_zip)
+    def print(self, printer, verbose):
+        printer.itemPlain("Ip .zip", self.prj_ip_zip)
 
-        if verbose or self.msg :
-            printer.itemPlain ("HLS.zip", self.hls_zip)
+        if verbose or self.msg:
+            printer.itemPlain("HLS.zip", self.hls_zip)
 
-        if verbose and self.family :
-            margin    = printer.m + printer.i
-            available = 80 - margin
-            beg       = 0
-            cnt       = len (self.family)
-            limit     = 80
-            caption   = "   .families"
-            while True :
+        if verbose and self.family:
+            beg = 0
+            cnt = len(self.family)
+            limit = 80
+            caption = "   .families"
+            while True:
                 end = beg + limit
-                if end < cnt :
-                    end = self.family[beg:end].rfind (',')
-                    if end == -1 : end = cnt
-                else :  end = cnt
-                printer.itemPlain (caption, self.family[beg:end+1])
+                if end < cnt:
+                    end = self.family[beg:end].rfind(',')
+                    if end == -1:
+                        end = cnt
+                else:
+                    end = cnt
+                printer.itemPlain(caption, self.family[beg:end+1])
 
-                if end >= cnt : break
+                if end >= cnt:
+                    break
                 caption = ''
                 beg = end+1
 
-
-        if self.msg :
-            printer.itemPlain ('', self.msg, '*')
+        if self.msg:
+            printer.itemPlain('', self.msg, '*')
 
         return
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
-    def execute (self, printer, verbose) :
 
-        if self.status : return self.status
+    def execute(self, printer, verbose):
+
+        if self.status:
+            return self.status
 
         # --------------------------------------
-        # Ensure the ip project direction exists
+        # Ensure the ip project directory exists
         # -------------------------------------------
-        if not os.path.exists (self.prj_ip_dir) :
-            os.system (f'mkdir -p {self.prj_ip_dir}')
+        if not os.path.exists(self.prj_ip_dir):
+            os.system(f'mkdir -p {self.prj_ip_dir}')
 
         # ---------------------------------------------------
-        # Check if wish to augment the xilinx family of FPGAs
+        # Check if we wish to augment the xilinx family of FPGAs
         # ---------------------------------------------------
-        if self.family :
+        if self.family:
 
             # Make a temporary directory to hold the unzip contents
-            unzip_dir = tempfile.TemporaryDirectory ()
+            unzip_dir = tempfile.TemporaryDirectory()
             unzip_cmd = ['unzip', self.hls_zip, '-d', unzip_dir.name]
-            with subprocess.Popen (unzip_cmd,
-                                   stdout  = subprocess.PIPE,
-                                   stderr  = subprocess.STDOUT,
-                                   text    = True,
-                                   bufsize = 1) as process :
-                if verbose :
-                    for line in process.stdout :
-                        print (line, end = '')
-                process.wait ()
+            with subprocess.Popen(unzip_cmd,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT,
+                                  text=True,
+                                  bufsize=1) as process:
+                if verbose:
+                    for line in process.stdout:
+                        print(line, end='')
+                process.wait()
 
                 # -------------------------------------------
                 # Generate the file path of the component.xml
                 # -------------------------------------------
-                cmp_xml = os.path.join (unzip_dir.name, 'component.xml')
-                exists  = os.path.isfile (cmp_xml)
-                if not exists :
+                cmp_xml = os.path.join(unzip_dir.name, 'component.xml')
+                exists = os.path.isfile(cmp_xml)
+                if not exists:
                     self.msg = "Non existent xml file"
                     return -1
 
                 # ------------------------------------------------
-                # Tried 2 methods, a memory and an auxilliary file
+                # Tried 2 methods, a memory and an auxiliary file
                 # ------------------------------------------------
-                if True :
-                    self.augment_family_memory (unzip_dir.name,
-                                                cmp_xml,
-                                                printer,
-                                                verbose)
-                else    :
-                    self.augment_family_file   (unzip_dir.name,
-                                                cmp_xml,
-                                                printer,
-                                                verbose)
-        else :
+                if True:
+                    self.augment_family_memory(unzip_dir.name,
+                                               cmp_xml,
+                                               printer,
+                                               verbose)
+                else:
+                    self.augment_family_file(unzip_dir.name,
+                                             cmp_xml,
+                                             printer,
+                                             verbose)
+        else:
             # -----------------------------------------------------------
             # Just a straight copy from the hls directory -> ip directory
             # -----------------------------------------------------------
-            shutil.copy (self.hls_zip, self.prj_ip_zip)
+            shutil.copy(self.hls_zip, self.prj_ip_zip)
 
         return 0
     # -------------------------------------------------------------------------
 
-
     # -------------------------------------------------------------------------
-    def augment_family_memory (self, unzip_dirname, cmp_xml, printer, verbose) :
+
+    def augment_family_memory(self, unzip_dirname, cmp_xml, printer, verbose):
         """
-        Augments the permissable XILINX FPGA family using an in memory technique
+        Augments the permissible XILINX FPGA family using an in memory technique
 
         Args:
-           unzip_dirname:  The direcctory containing the unzipped files
+           unzip_dirname:  The directory containing the unzipped files
            cmp_xml      :  The component.xml file to augment
            printer      :  Reports any output
            verbose      :  The verbose output
@@ -281,7 +281,7 @@ class Ip :
 
         The advantage of this method is its simplicity with the downside that
         the memory usage may be high if the file is large. This is generally
-        not the case for the component.xml files, typically in the 100KBytes.
+        not the case for the component.xml files, typically around 100KBytes.
         """
 
         # ---------------------------------------------
@@ -289,8 +289,8 @@ class Ip :
         # readlines() (not read()) is required so the
         # loop below iterates lines, not characters.
         # ---------------------------------------------
-        with open (cmp_xml, 'r+') as file :
-            lines = file.readlines ()
+        with open(cmp_xml, 'r+') as file:
+            lines = file.readlines()
 
             # ----------------------------------------------
             # Clear the original file. seek(0) is required:
@@ -298,15 +298,17 @@ class Ip :
             # alone would leave a hole of NUL bytes before
             # the rewritten content, corrupting component.xml.
             # ----------------------------------------------
-            file.seek     (0)
-            file.truncate (0)
+            file.seek(0)
+            file.truncate(0)
 
             # -------------------------
             # Add the new FPGA families
             # -------------------------
-            for line in lines :
-                if 'xilinx:family' in line : file.write (self.xil_family)
-                else                       : file.write (line)
+            for line in lines:
+                if 'xilinx:family' in line:
+                    file.write(self.xil_family)
+                else:
+                    file.write(line)
 
         # ------------------------------------------------------------
         # Rezip the previously unzipped directory, now with the
@@ -314,28 +316,28 @@ class Ip :
         # above so the file is flushed and closed first; otherwise
         # zip archives a partially-written (truncated) component.xml.
         # ------------------------------------------------------------
-        status = self.rezip (self.prj_ip_zip,
-                             unzip_dirname,
-                             printer,
-                             verbose)
+        status = self.rezip(self.prj_ip_zip,
+                            unzip_dirname,
+                            printer,
+                            verbose)
         return status
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
-    def augment_family_memory_file (self, unzip_dirname, printer, verbose) :
+
+    def augment_family_memory_file(self, unzip_dirname, cmp_xml, printer, verbose):
         """
-        Augments the permissable XILINX FPGA family using a temporary file
+        Augments the permissible XILINX FPGA family using a temporary file
 
         Args:
-             unzip_dirname:  The direcctory containing the unzipped files
+             unzip_dirname:  The directory containing the unzipped files
              cmp_xml      :  The component.xml file to augment
              printer      :  Prints any output
              verbose      :  The verbose output
 
         This method reads the original file line-by-line, augmenting the
-        relevant lines and writes them to a temporary file with then gets
-        moved into replace the original component.xml file.
+        relevant lines and writes them to a temporary file which then gets
+        moved to replace the original component.xml file.
 
         The advantage of this method is low memory usage, but at the expense
         of managing the temporary file.
@@ -344,43 +346,45 @@ class Ip :
         # -----------------------------------------------------------------
         # Open both the original xml file and the temporary file to receive
         # -----------------------------------------------------------------
-        with  open (cmp_xml, 'r')                                  as  infile, \
-              tempfile.NamedTemporaryFile (mode   = 'w',                       \
-                                           delete = False,                     \
-                                           dir    = unzip_dirname) as outfile :
+        with open(cmp_xml, 'r') as infile, \
+            tempfile.NamedTemporaryFile(mode='w',
+                                        delete=False,
+                                        dir=unzip_dirname) as outfile:
 
             # -------------------------
             # Add the new FPGA families
             # -------------------------
-            for line in infile :
-                if 'xilinx:family' in line : outfile.write (self.xil_family)
-                else                       : outfile.write (line)
+            for line in infile:
+                if 'xilinx:family' in line:
+                    outfile.write(self.xil_family)
+                else:
+                    outfile.write(line)
 
             # --------------------------------------------------------
             # Replace the original component.xml with the modified one
             # --------------------------------------------------------
-            shutil.move (outfile.name, cmp_xml)
+            shutil.move(outfile.name, cmp_xml)
 
             # --------------------------------------------------------
             # Rezip the previously unzipped file, only this time with
             # the augmented FPGA families.
             # --------------------------------------------------------
-            status = self.rezip (self.prj_ip_zip,
-                                 unzip_dirname,
-                                 printer,
-                                 verbose)
+            status = self.rezip(self.prj_ip_zip,
+                                unzip_dirname,
+                                printer,
+                                verbose)
             return status
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
+
     @staticmethod
-    def rezip (zipped_file, dirname, printer, verbose) :
+    def rezip(zipped_file, dirname, printer, verbose):
         """
         Rezip the contents of the previously unzipped directory
 
         Args:
-             zipped_file:  The name of output rezipped file
+             zipped_file:  The name of the output rezipped file
                  dirname:  The directory to zip
                  printer:  Class to print any output
                  verbose:  The verbose output
@@ -389,22 +393,22 @@ class Ip :
         # Remove any stale output zip first: `zip -r` updates an existing archive
         # in place and would leave old entries behind (build.py hit a "Zip file
         # structure invalid" error on rebuild for exactly this reason).
-        if os.path.exists (zipped_file) :
-            os.remove (zipped_file)
+        if os.path.exists(zipped_file):
+            os.remove(zipped_file)
 
         zip_cmd = ['zip', '-r',  zipped_file, '.']
-        with subprocess.Popen (zip_cmd,
-                               stdout  = subprocess.PIPE,
-                               stderr  = subprocess.STDOUT,
-                               cwd     = dirname,
-                               text    = True,
-                               bufsize = 1)  as process :
+        with subprocess.Popen(zip_cmd,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT,
+                              cwd=dirname,
+                              text=True,
+                              bufsize=1) as process:
 
-            if verbose :
-                for line in process.stdout :
-                    print (line, end = '')
+            if verbose:
+                for line in process.stdout:
+                    print(line, end='')
 
-            process.wait ()
+            process.wait()
 
             return process.returncode
     # --------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-class Dictionary :
+class Dictionary:
     '''
     Class following the pattern of a normal python dictionary except the value
     is a 2 element list consisting of 'type' and a 'value'. The value(s)
@@ -27,7 +27,8 @@ class Dictionary :
        e.g.     [ 'network' : [$NETWORKS/a.hh, $NETWORKS/b.hh,..] ]
     '''
     # --------------------------------------------------------------------------
-    def __init__ (self, key, tvs) :
+
+    def __init__(self, key, tvs):
         '''
         Constructs a class consisting of a 2 element list
 
@@ -40,46 +41,50 @@ class Dictionary :
         return
     # --------------------------------------------------------------------------
 
-
-    # --------------------------------------------------------------------------
-    def __str__ (self) :
-        return "key = {}\n, tvs = {}".format (self.key, self.tvs)
     # --------------------------------------------------------------------------
 
+    def __str__(self):
+        return "key = {}\n, tvs = {}".format(self.key, self.tvs)
+    # --------------------------------------------------------------------------
+
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-class Dictionary_of_Builds (Dictionary) :
-    def __init__ (self, key, builds) :
-        if not isinstance (builds[0], (list, tuple)) : builds = (builds,)
-        super().__init__ (key, [ 'Builds', builds])
+class Dictionary_of_Builds (Dictionary):
+    def __init__(self, key, builds):
+        if not isinstance(builds[0], (list, tuple)):
+            builds = (builds,)
+        super().__init__(key, ['Builds', builds])
         return
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-class Dictionary_of_Files (Dictionary) :
-    def __init__ (self, key, files) :
-        if not isinstance (files, (list, tuple)) : files = (files,)
-        super().__init__ (key, [ 'Files', files])
+class Dictionary_of_Files (Dictionary):
+    def __init__(self, key, files):
+        if not isinstance(files, (list, tuple)):
+            files = (files,)
+        super().__init__(key, ['Files', files])
         return
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-class Dictionary_of_Fpgas (Dictionary) :
-    def __init__ (self, key, fpgas) :
-        if not isinstance (fpgas, (list,tuple)) : fpgas = (fpgas,)
-        super().__init__ (key, [ 'Fpgas', fpgas])
+class Dictionary_of_Fpgas (Dictionary):
+    def __init__(self, key, fpgas):
+        if not isinstance(fpgas, (list, tuple)):
+            fpgas = (fpgas,)
+        super().__init__(key, ['Fpgas', fpgas])
         return
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-class Dictionary_of_Values (Dictionary) :
-    def __init__ (self, key, values) :
-        if not isinstance (values, (list, tuple)) : values = (values[0],)
-        super().__init__ (key, [ 'Values', values])
+class Dictionary_of_Values (Dictionary):
+    def __init__(self, key, values):
+        if not isinstance(values, (list, tuple)):
+            values = (values[0],)
+        super().__init__(key, ['Values', values])
         return
 # ------------------------------------------------------------------------------

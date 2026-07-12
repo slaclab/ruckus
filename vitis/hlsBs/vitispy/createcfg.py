@@ -18,47 +18,46 @@ import configuration
 # ==============================================================================
 # BEGIN: Local methods
 # ------------------------------------------------------------------------------
-def get_args () :
-    parser = argparse.ArgumentParser (
-    prog='create_configuration',
-    description='Create a configuration file',
-    epilog='')
+def get_args():
+    parser = argparse.ArgumentParser(
+        prog='create_configuration',
+        description='Create a configuration file',
+        epilog='')
 
+    configuration.add_arguments(parser, True)
+    component.add_arguments(parser, False)
 
-    configuration.add_arguments  (parser, True)
-    component.add_arguments      (parser, False)
-
-    args = parser.parse_args ()
+    args = parser.parse_args()
     return args
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-def compose_component_name (cmp_name, net_file) :
+def compose_component_name(cmp_name, net_file):
 
-    if (cmp_name is None) :
-        basename = os.path.basename (net_file)
-        cmp_name = os.path.splitext (basename)[0]
+    if (cmp_name is None):
+        basename = os.path.basename(net_file)
+        cmp_name = os.path.splitext(basename)[0]
 
     return cmp_name
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-def print_cfg (cfg, comp) :
+def print_cfg(cfg, comp):
 
     # Header
-    print (f"\n{'-'*78}\n"
-           f"Creating Configuration\n"
-           f"----------------------")
+    print(f"\n{'-'*78}\n"
+          f"Creating Configuration\n"
+          f"----------------------")
 
     # Values
-    comp.print ()
-    cfg.print  ()
+    comp.print()
+    cfg.print()
 
     # Footer
-    print (f"{'-'*78}\n")
-    return;
+    print(f"{'-'*78}\n")
+    return
 # ------------------------------------------------------------------------------
 # END  : Local methods
 # ==============================================================================
@@ -69,41 +68,44 @@ def print_cfg (cfg, comp) :
 # ------------------------------------------------------------------------------
 
 # Get the command line parameters
-args     = get_args ()
+args = get_args()
 
 # SNL network definition
-network  = configuration.network (args.net_file, args.net_name)
+network = configuration.network(args.net_file, args.net_name)
 
 # Fpga attributes
-fpga     = configuration.fpga     (args.fpga, args.clock, args.uncertainity)
+fpga = configuration.fpga(args.fpga, args.clock, args.uncertainity)
 
 # CSim and CoSim arguments
-exe_args = configuration.exe_args (configuration.file_and_type (args.ifile, args.itype),
-                                   configuration.file_and_type (args.cfile, args.ctype),
-                                   configuration.file_and_type (args.gfile, args.gtype),
-                                   args.ntests,
-                                   args.csim)
+exe_args = configuration.exe_args(configuration.file_and_type(args.ifile, args.itype),
+                                  configuration.file_and_type(
+                                      args.cfile, args.ctype),
+                                  configuration.file_and_type(
+                                      args.gfile, args.gtype),
+                                  args.ntests,
+                                  args.csim)
 
-client   = vitis.create_client ()
-client.set_workspace (args.workspace)
+client = vitis.create_client()
+client.set_workspace(args.workspace)
 
 # --------------------------------------------------------------------------
 # If not present, compose the component name from net_file
 # --------------------------------------------------------------------------
-cmp_name = compose_component_name (args.component, args.net_file)
+cmp_name = compose_component_name(args.component, args.net_file)
 
 
 # -----------------------------------------------------------------------------
-# If not present, componse full configuration file path from the component name
+# If not present, compose full configuration file path from the component name
 # -----------------------------------------------------------------------------
-cfg_path = configuration.compose_path  (args.workspace,  cmp_name, args.cfg_file)
+cfg_path = configuration.compose_path(args.workspace,  cmp_name, args.cfg_file)
 
 
 # --------------------------------------------------------------------------
 # Construct the configuration and component classes
 # --------------------------------------------------------------------------
-cfg      = configuration.configuration (client, cfg_path, args.snl_root, network,     fpga, exe_args)
-comp     = component.component         (client, args.workspace,   cmp_name, cfg_path)
+cfg = configuration.configuration(
+    client, cfg_path, args.snl_root, network,     fpga, exe_args)
+comp = component.component(client, args.workspace,   cmp_name, cfg_path)
 
 
 # --------------------------------------------------------------------------
@@ -111,10 +113,10 @@ comp     = component.component         (client, args.workspace,   cmp_name, cfg_
 # clean component directory.  This will not be the case if the configuration
 # file is placed in the component directory.
 # --------------------------------------------------------------------------
-comp.create ()
-cfg.create ()
+comp.create()
+cfg.create()
 
-print_cfg (cfg, comp)
+print_cfg(cfg, comp)
 
 # ------------------------------------------------------------------------------
 # END  : Main execution

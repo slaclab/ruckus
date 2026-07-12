@@ -23,52 +23,53 @@ import sys
 import os
 
 # ------------------------------------------------------------------------------
-idx     = __name__.find (' ')
-name    = __name__[0:idx]      # Name of function to perform
+idx = __name__.find(' ')
+name = __name__[0:idx]      # Name of function to perform
 
-if name == 'add_paths' :
+if name == 'add_paths':
 
-    spaths = __name__[idx+1:] # String representation of the paths
-    known  = eval (spaths)
+    spaths = __name__[idx+1:]  # String representation of the paths
+    known = eval(spaths)
 
     # --------------------------------------------------------
-    # Get the colon separated paths which is presented as list
+    # Get the colon separated paths which is presented as a list
     # --------------------------------------------------------
-    paths       = str (os.getenv ('HLSBS_PYPATHS'))
+    paths = str(os.getenv('HLSBS_PYPATHS'))
 
     # ---------------------------------------------------------------
     # Convert the string representation of the list to an actual list
     # ---------------------------------------------------------------
-    pythonpaths = eval (paths)
+    pythonpaths = eval(paths)
 
     # ------------------------------------------
-    # Change the colon seperated paths to a list
+    # Change the colon separated paths to a list
     # ------------------------------------------
-    pypaths   = pythonpaths[0][1].split (':')
+    pypaths = pythonpaths[0][1].split(':')
 
     # -------------------------
     # Filter non-existent paths
     # -------------------------
     sys_path = []
-    for pypath in sys.path :
-        if os.path.exists (pypath) :
-            sys_path.append (pypath)
-        else  :
+    for pypath in sys.path:
+        if os.path.exists(pypath):
+            sys_path.append(pypath)
+        else:
             pass
     sys.path = sys_path
 
     # --------------------
     # Add in any new paths
     # --------------------
-    for pypath in pypaths :
+    for pypath in pypaths:
 
         # Reject if non-existent
-        if not os.path.exists (pypath) : continue
+        if not os.path.exists(pypath):
+            continue
 
         # Add if not already there
-        if pypath not in sys.path :
+        if pypath not in sys.path:
             sys.path.append(pypath)
-        else :
+        else:
             pass
 
 # ------------------------------------------------------------------------------
