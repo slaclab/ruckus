@@ -131,6 +131,20 @@ missing, cruft) but will 'eat' the '*' positional parameter.  The
 safer option is to use --components='*'.  As a bonus by using the '=',
 the single quotes are unnecessary.
 
+.SS File-path defines
+A project-file \fBdefine\fR of type \fBrel_path\fR or \fBabs_file\fR names a
+file that the testbench pulls in with a plain \fB#include\fR of the macro.
+The generated cflags are read one way by \fBcsim\fR (through a shell, one
+round of quote removal) and another by \fBcosim\fR (re-tokenized verbatim, no
+quote removal), so no single quoted or bare \fB-D\fR value survives both.
+\fBhlsBs\fR therefore keeps the path off the command line: it writes
+\fB#define <name> "<path>"\fR into a generated header under \fBhlsBs_defs/\fR
+and adds \fB-include\fR/\fB-I\fR to the cflags, so both stages see identical,
+quote-free arguments.
+.PP
+Because \fBcosim\fR splits the cflags on whitespace, such a path -- and, in
+fact, any file or include path -- must not contain whitespace.
+
 
 .SH PRODUCTS and WORKSPACE Only Specification
 Many commands only need the \fBworkspace\fR or the \fBproducts\fR directory.

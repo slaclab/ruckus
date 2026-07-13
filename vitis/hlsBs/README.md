@@ -482,6 +482,28 @@ The build itself is specified as dictionary entries
 **CAVEAT:** While environment variables can be used in specifying the file paths, please see the section titled *A Word of Caution on Environment Variables*. <br>
 **NOTE:** Even though '*tb' and *'syn'* can accept a list or tuple, they are not specified as plurals on the (debatable) idea that the testbench and synthesis are singular entities that *may* be composed of more than one thing.  There are not multiple testbenches and hls syntheses.
 
+#### Defines
+In addition to *'includes'*, a *'tb'* or *'syn'* entry may carry a *'defines'* list.  Each define is a dictionary whose *'type'* selects how it is presented to the compiler:
+
+| type      | Meaning   |
+|:----------|:----------|
+| flag      | A bare `-D<name>` with no value. |
+| string    | `-D <name>=<value>`, the value substituted from the component's symbols. |
+| rel_path  | A file path, relative to *'rel_path'*, that the testbench pulls in with `#include <name>`. |
+| abs_file  | The same as *rel_path*, but an absolute file path (no *'rel_path'* key). |
+
+For the two file-path types (*rel_path* and *abs_file*), **hlsBs** does **not** place the path on the command line as `-D<name>="..."`.  Instead it writes
+``` c
+#define <name> "<path>"
+```
+into a small generated header under `hlsBs_defs/` alongside the configuration file and appends `-include hlsBs_defs/<file> -I hlsBs_defs` to that source's cflags.  This keeps the argument list free of quotes, which matters because the one cflags string is consumed two different ways: **csim** passes it through a shell (one round of quote removal) while **cosim** re-tokenizes it verbatim (no quote removal).  No single quoted or bare `-D` value can survive both, so the quotes are moved off the command line and into the header.  The testbench therefore uses a plain
+``` c
+#include <name>
+```
+with no stringizing macros.
+
+**CONSTRAINT:** Because **cosim** splits the cflags on whitespace, a file-path define value -- and, in fact, any file or include path -- must not contain whitespace.
+
 
 ##### FPGA Definition
 <pre>
