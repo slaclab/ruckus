@@ -48,6 +48,9 @@ set RECONFIG_CHECKPOINT $::env(RECONFIG_CHECKPOINT)
 set RECONFIG_ENDPOINT   $::env(RECONFIG_ENDPOINT)
 set RECONFIG_PBLOCK     $::env(RECONFIG_PBLOCK)
 
+# Versal Segmented Configuration Variables
+set USE_SEGMENTED_CONFIG $::env(USE_SEGMENTED_CONFIG)
+
 ########################################################
 ## Set Non-Environmental variables
 ########################################################

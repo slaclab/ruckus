@@ -1,3 +1,4 @@
 gitpython
 PyYAML
 pygithub
+vhdeps

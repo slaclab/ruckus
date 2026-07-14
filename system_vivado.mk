@@ -100,12 +100,24 @@ ifndef RECONFIG_PBLOCK
 export RECONFIG_PBLOCK = 0
 endif
 
-# Vivado Simulation Variables
-ifndef VIVADO_PROJECT_SIM
-export VIVADO_PROJECT_SIM = $(PROJECT)
+# Versal Segmented Configuration Variables
+ifndef USE_SEGMENTED_CONFIG
+export USE_SEGMENTED_CONFIG = 0
 endif
+
+# Vivado Simulation Variables
+# When left undefined, the sim_1 top is auto-picked-up from the project
+# (i.e. the "set_property top ... [get_filesets sim_1]" in the target's
+# ruckus.tcl). Define VIVADO_PROJECT_SIM only to override that top.
+ifndef VIVADO_PROJECT_SIM
+export VIVADO_PROJECT_SIM =
+endif
+# Default sim run length. "all" runs until the testbench calls finish/stop or
+# is interrupted; a time value (e.g. "1000 ns") runs that long. Testbenches
+# without a finish/stop free-run under "all", so a batch "make xsim" there must
+# be stopped manually.
 ifndef VIVADO_PROJECT_SIM_TIME
-export VIVADO_PROJECT_SIM_TIME = 1000 ns
+export VIVADO_PROJECT_SIM_TIME = all
 endif
 
 # Synthesis Variables
@@ -138,6 +150,10 @@ endif
 # https://adaptivesupport.amd.com/s/question/0D52E00006iHp31SAC/synthesis-errors-common-17354-could-not-open-c-for-writing-common-17356-failed-to-install-all-user-apps
 ifndef XILINX_LOCAL_USER_DATA
 export XILINX_LOCAL_USER_DATA = no
+endif
+
+ifndef VIVADO_GUI_JAVA_MEM
+export VIVADO_GUI_JAVA_MEM =
 endif
 
 ###############################################################
@@ -193,9 +209,18 @@ ifndef EMBED_PROC
 export EMBED_PROC = microblaze_0
 endif
 
+# True when VIVADO_VERSION >= 2026.1 (Vitis dropped the Eclipse GUI/XSCT for the Unified IDE)
+VIVADO_GE_2026_1 := $(shell printf '2026.1\n%s\n' "$(VIVADO_VERSION)" | sort -V 2>/dev/null | head -n1)
+
 ifneq (, $(shell which vitis 2>/dev/null))
    export EMBED_TYPE = Vitis
-   export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   ifeq ($(VIVADO_GE_2026_1),2026.1)
+      # Vitis 2026.1 (or newer): Unified IDE launch syntax
+      export EMBED_GUI  = vitis -w $(OUT_DIR)/$(VIVADO_PROJECT).vitis
+   else
+      # Vitis 2019.2 .. 2025.x: legacy Eclipse-based GUI
+      export EMBED_GUI  = vitis -workspace $(OUT_DIR)/$(VIVADO_PROJECT).vitis -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false
+   endif
    export EMBED_ELF  = vivado -mode batch -source $(RUCKUS_DIR)/MicroblazeBasicCore/vitis/bit.tcl
 else
    export EMBED_TYPE = SDK
@@ -227,7 +252,7 @@ else \
 fi
 endef
 
-include $(TOP_DIR)/submodules/ruckus/system_shared.mk
+include $(MODULES)/ruckus/system_shared.mk
 
 .PHONY : all
 all: target
@@ -251,6 +276,7 @@ test:
 	@echo VIVADO_PROJECT: $(VIVADO_PROJECT)
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
 	@echo VIVADO_INSTALL: $(VIVADO_INSTALL)
+	@echo VIVADO_GUI_JAVA_MEM: $(VIVADO_GUI_JAVA_MEM)
 	@echo XILINX_LOCAL_USER_DATA: $(XILINX_LOCAL_USER_DATA)
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
@@ -296,7 +322,7 @@ $(SOURCE_DEPEND) : dir
 .PHONY : gui
 gui : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vivado Project GUI Mode")
-	@cd $(OUT_DIR); vivado -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
+	@cd $(OUT_DIR); vivado $(VIVADO_GUI_JAVA_MEM) -source $(RUCKUS_DIR)/vivado/gui.tcl $(VIVADO_PROJECT).xpr
 
 ###############################################################
 #### Vivado Batch #############################################
@@ -381,12 +407,13 @@ yaml : $(SOURCE_DEPEND)
 	@cd $(OUT_DIR); tclsh $(RUCKUS_DIR)/vivado/cpsw.tcl
 
 ###############################################################
-#### Vivado WIS ###############################################
+#### Rogue Co-Simulation Backend ##############################
 ###############################################################
-.PHONY : wis
-wis : $(SOURCE_DEPEND)
-	$(call ACTION_HEADER,"Generating init_wis.tcl file for Windows OS")
-	@cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vivado/wis.tcl
+# Tell surf/axi/simlink/ruckus.tcl which Rogue co-sim backend the invoked
+# target wants. Target-specific + exported so it propagates to the shared
+# $(SOURCE_DEPEND) prerequisite recipe and into the vivado subprocess.
+xsim gui : export RUCKUS_SIM_BACKEND := xsim
+vcs      : export RUCKUS_SIM_BACKEND := vcs
 
 ###############################################################
 #### Vivado XSIM Simulation ###################################

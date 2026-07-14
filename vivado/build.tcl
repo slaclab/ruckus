@@ -191,8 +191,13 @@ if { ${RECONFIG_CHECKPOINT} != 0 } {
 ## Copy the FW image files
 ########################################################
 if { [isVersal] } {
-   # Create Versal Output files
-   CreateVersalOutputs
+   if { $::env(USE_SEGMENTED_CONFIG) != 0 } {
+      # Emit segmented (boot + PL) PDIs
+      ExportSegmentedPdi
+   } else {
+      # Standard single-PDI Versal output (today's path - unchanged)
+      CreateVersalOutputs
+   }
 } else {
    # Copy the .bit file (and create .mcs)
    CreateFpgaBit

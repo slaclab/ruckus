@@ -57,6 +57,20 @@ proc ::findFiles { baseDir pattern } {
    return $files
 }
 
+# Gets the real path if you are using a symbolic link
+proc GetRealPath {path} {
+   set p [file normalize $path]
+   while {[file type $p] eq "link"} {
+      set target [file readlink $p]
+      if {[file pathtype $target] eq "relative"} {
+         set p [file normalize [file join [file dirname $p] $target]]
+      } else {
+         set p [file normalize $target]
+      }
+   }
+   return $p
+}
+
 ## Build INFO
 proc BuildInfo { } {
    exec rm -f $::env(PROJ_DIR)/build.info

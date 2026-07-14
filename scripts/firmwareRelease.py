@@ -224,6 +224,11 @@ def selectBuildImages(cfg, relName, relData):
                     baseList.add(target+fileName.split('.')[0])
 
         sortList = sorted(baseList)
+        if not sortList:
+            raise Exception(
+                f"No builds found for target {target}. "
+                f"Image directory is empty or missing expected files."
+            )
         for idx,val in enumerate(sortList):
             print(f"    {idx}: {val}")
 
@@ -613,7 +618,12 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         else:
             print("Using github token from user's environment.")
 
-    gh = github.Github(token)
+    try:
+        # Try the new syntax (PyGithub >= 2.0)
+        gh = github.Github(auth=github.Auth.Token(token))
+    except AttributeError:
+        # Fallback for older PyGithub versions
+        gh = github.Github(token)
     remRepo = gh.get_repo(f'slaclab/{project}')
 
     # Check if old and new tag exist in local repo
@@ -664,6 +674,10 @@ def pushRelease(cfg, relName, relData, ver, tagAttach, prev):
         md = "No release notes"
 
     md += "\n\nRelease generated with SLAC ruckus releaseGen script\n"
+
+    # Append the GitHub "Full Changelog" compare link as the final line (only when a previous tag was provided)
+    if prev != "":
+        md += releaseNotes.getCompareUrl(remRepo, relOld, relNew)
 
     remRel = remRepo.create_git_release(tag=tag,name=msg, message=md, draft=False)
 

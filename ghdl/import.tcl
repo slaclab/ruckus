@@ -12,17 +12,37 @@
 # Load RUCKUS environment and library
 source $::env(RUCKUS_PROC_TCL)
 
-# Init the global variable
-set ::DIR_PATH ""
+if {[file exists "$::env(OUT_DIR)/SRC_VHDL"]} {
 
-# Remove the existing source directories
-exec rm -rf $::env(OUT_DIR)
+   set srcRoot [file normalize "$::env(OUT_DIR)/SRC_VHDL"]
 
-# Create a new directory
-exec mkdir $::env(OUT_DIR)
+   foreach vhdlLibDir [glob -type d "${srcRoot}/*"] {
 
-# Load ruckus library (ruckus.BuildInfoPkg.vhd only)
-GenBuildString $::env(OUT_DIR)
+      set vhdlLibName [file tail $vhdlLibDir]
+      set realLibDir  [GetRealPath $vhdlLibDir]
 
-# Load the top-level ruckus.tcl
-loadRuckusTcl $::env(PROJ_DIR)
+      set vhdlFiles [glob -nocomplain -types f -directory $realLibDir *.vhd]
+
+      set realFiles {}
+      foreach f $vhdlFiles {
+         lappend realFiles [GetRealPath $f]
+      }
+
+      exec $::env(GHDL_CMD) -i {*}$::env(GHDLFLAGS) --work=${vhdlLibName} {*}$realFiles
+   }
+}
+
+
+if {[file exist $::env(OUT_DIR)/SRC_VERILOG]} {
+
+   # SRC_VERILOG: Not Support in GHDL (yet)
+   set notSupported 1
+
+}
+
+if {[file exist $::env(OUT_DIR)/SRC_SVERILOG]} {
+
+   # SRC_SVERILOG: Not Support in GHDL (yet)
+   set notSupported 1
+
+}

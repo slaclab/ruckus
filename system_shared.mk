@@ -12,6 +12,10 @@ ifndef PRJ_VERSION
 export PRJ_VERSION = 0xFFFFFFFF
 endif
 
+ifndef PROJECT
+export PROJECT = $(notdir $(PWD))
+endif
+
 ifndef RECONFIG_CHECKPOINT
 export RECONFIG_CHECKPOINT = 0
 export RECONFIG_STATIC_HASH = 0
@@ -41,7 +45,9 @@ export BUILD_SYS_NAME := $(shell uname -n)
 export BUILD_USER := $(shell id -u -n)
 BUILD_SVR_TYPE := $(shell grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d \")
 BUILD_DATE := $(shell date)
-BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
+ifndef BUILD_TIME
+export BUILD_TIME := $(shell date +%Y%m%d%H%M%S)
+endif
 export BUILD_STRING = $(PROJECT): Vivado v${VIVADO_VERSION}, ${BUILD_SYS_NAME} (${BUILD_SVR_TYPE}), Built ${BUILD_DATE} by ${BUILD_USER}
 
 # Check the GIT status

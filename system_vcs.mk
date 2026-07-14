@@ -48,6 +48,11 @@ ifndef SIM_OUT_DIR
 export SIM_OUT_DIR = vcs_output
 endif
 
+# Rogue co-simulation backend for surf/axi/simlink/ruckus.tcl
+ifndef RUCKUS_SIM_BACKEND
+export RUCKUS_SIM_BACKEND = vcs
+endif
+
 # VCS elaborate options
 ifndef VCS_ELAB_OPTS
 export VCS_ELAB_OPTS = -full64 -debug_acc+pp+dmptf +warn=none -kdb -lca -debug_pp -t ps -licqueue -l $(SIM_OUT_DIR)/elaborate.log

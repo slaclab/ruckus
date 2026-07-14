@@ -1,3 +1,4 @@
+#!/usr/bin/tclsh
 ##############################################################################
 ## This file is part of 'SLAC Firmware Standard Library'.
 ## It is subject to the license terms in the LICENSE.txt file found in the
@@ -9,40 +10,19 @@
 ##############################################################################
 
 # Load RUCKUS environment and library
-source $::env(RUCKUS_FAB_DIR)/proc.tcl
-source $::env(RUCKUS_FAB_DIR)/env_var.tcl
+source $::env(RUCKUS_PROC_TCL)
 
-# Run the user configuration script
-SourceTclFile ${PROJ_DIR}/fabulous.tcl
+# Init the global variable
+set ::DIR_PATH ""
 
-# Copy User Tiles (if they exist)
-CopyUserTiles
+# Remove the existing source directories
+exec rm -rf $::env(OUT_DIR)
 
-# Load fabric
-load_fabric
+# Create a new directory
+exec mkdir $::env(OUT_DIR)
 
-# Build the fabric
-run_FABulous_fabric
+# Load ruckus library (ruckus.BuildInfoPkg.vhd only)
+GenBuildString $::env(OUT_DIR)
 
-# Check DUMP_HDL env var
-if { ${DUMP_HDL} != 1 } {
-
-   # Copy over the user design files
-   if { [CopyUserDesign] == 1 } {
-
-      # Generate the bitstream
-      run_FABulous_bitstream {npnr user_design/top.v}
-
-      # Copy the bitstream file to image directory
-      CopyBitstream
-   }
-
-
-} else {
-
-   # Copy the bitstream file to image directory
-   CopyFabricHdlFiles
-
-}
-
-exit
+# Load the top-level ruckus.tcl
+loadRuckusTcl $::env(PROJ_DIR)

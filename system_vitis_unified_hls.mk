@@ -8,16 +8,33 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-# Detect project name
+# Define project name
+ifndef PROJECT
 export PROJECT = $(notdir $(PWD))
+endif
 
-# Detect project path
+# Define project path
+ifndef PROJ_DIR
 export PROJ_DIR = $(abspath $(PWD))
+endif
 
 # Project Build Directory ("workspace")
+ifndef OUT_DIR
 export OUT_DIR  = $(PROJ_DIR)/build
+endif
+
+# Specifies if we are skipping the cosim
+ifndef SKIP_CSIM
+export SKIP_CSIM = 0
+endif
+
+# Specifies if we are skipping the cosim
+ifndef SKIP_COSIM
+export SKIP_COSIM = 0
+endif
 
 # Build System Variables
+# VIVADO_VERSION feeds BUILD_STRING in system_shared.mk ("Vivado v...").
 export VIVADO_VERSION := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cut -c2-)
 export RUCKUS_DIR     = $(TOP_DIR)/submodules/ruckus
 
@@ -42,6 +59,8 @@ test:
 	@echo TOP_DIR: $(TOP_DIR)
 	@echo OUT_DIR: $(OUT_DIR)
 	@echo RUCKUS_DIR: $(RUCKUS_DIR)
+	@echo SKIP_CSIM: $(SKIP_CSIM)
+	@echo SKIP_COSIM: $(SKIP_COSIM)
 	@echo BUILD_STRING: $${BUILD_STRING}
 	@echo GIT_HASH_LONG: $(GIT_HASH_LONG)
 	@echo GIT_HASH_SHORT: $(GIT_HASH_SHORT)
@@ -63,6 +82,10 @@ proj:
 build : proj
 	$(call ACTION_HEADER,"Vitis HLS Build")
 	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/hls/build.py
+	@if grep -q "vivado.syn_dcp=1" $(PROJ_DIR)/hls_config.cfg; then \
+		echo "vivado.syn_dcp=1 detected in hls.cfg"; \
+		cd $(OUT_DIR); vivado -mode batch -source $(RUCKUS_DIR)/vitis/hls/dcp_rename_ref.tcl; \
+	fi
 
 ###############################################################
 #### Vitis HLS CSIM Mode ######################################

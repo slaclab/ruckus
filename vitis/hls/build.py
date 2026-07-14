@@ -24,8 +24,16 @@ args = parser.parse_args()
 # Project variables
 workspace = os.getenv("OUT_DIR")
 comp_name = os.getenv("PROJECT")
-proj_zip  = f'{workspace}/{comp_name}/{comp_name}/{comp_name}.zip'
-build_zip = f'{os.getenv("PROJ_DIR")}/ip/{comp_name}.zip'
+syn_top   = os.getenv("SYNTOP")
+
+# Choose hls_config.syn.top if defined
+if not syn_top:
+    zip_name = comp_name
+else:
+    zip_name = syn_top
+
+proj_zip  = f'{workspace}/{comp_name}/{comp_name}/{zip_name}.zip'
+build_zip = f'{os.getenv("PROJ_DIR")}/ip/{zip_name}.zip'
 
 # Create a client object
 client = vitis.create_client()
@@ -36,8 +44,9 @@ client.set_workspace(workspace)
 # Set the component
 hls_test_comp = client.get_component(comp_name)
 
-# Run c-simulation on the component
-hls_test_comp.run('C_SIMULATION')
+# Run c-simulation on the component if not explicitly skipped
+if os.getenv('SKIP_CSIM', '0') == '0':
+   hls_test_comp.run('C_SIMULATION')
 
 if args.csim:
     vitis.dispose()
@@ -46,11 +55,18 @@ if args.csim:
 # Run synthesis on the component
 hls_test_comp.run('SYNTHESIS')
 
-# Run co-simulation on the component
-hls_test_comp.run('CO_SIMULATION')
+# Run co-simulation on the component if not explicitly skipped
+if os.getenv('SKIP_COSIM', '0') == '0':
+   hls_test_comp.run('CO_SIMULATION')
 
 # Run package on the component
 hls_test_comp.run('PACKAGE')
+
+# Run implementation on the component
+if 'vivado.syn_dcp=1' in open(f'{os.getenv("PROJ_DIR")}/hls_config.cfg').read():
+    hls_test_comp.run('IMPLEMENTATION')
+else:
+    print("vivado.syn_dcp=1 not detected in hls.cfg")
 
 # Close the client connection and terminate the vitis server
 vitis.dispose()
@@ -91,7 +107,11 @@ if int(os.getenv("ALL_XIL_FAMILY")) > 0:
     # Replace the original component.xml with the modified one
     shutil.move(temp_path, component_path)
 
-    # Compress the modify IP directory to the target's image directory
+    # Remove stale zip to prevent "Zip file structure invalid" error on rebuild
+    if os.path.exists(build_zip):
+        os.remove(build_zip)
+
+    # Compress the modified IP directory to the target's image directory
     os.system( f'bash -c "cd {ip_path}; zip -r {build_zip} *"' )
 
 else:

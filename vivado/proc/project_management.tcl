@@ -32,7 +32,7 @@ proc CheckVivadoVersion { } {
       return -code error
    }
    # Check if version is newer than what official been tested
-   if { [VersionCompare 2025.1.0] > 0 } {
+   if { [VersionCompare 2026.1.0] > 0 } {
       puts "\n\n\n\n\n********************************************************"
       puts "ruckus has NOT been regression tested with this Vivado $::env(VIVADO_VERSION) release yet"
       puts "https://confluence.slac.stanford.edu/x/n4-jCg"
@@ -157,6 +157,40 @@ proc VersionCheck { lockVersion {mustBeExact ""} } {
    }
 }
 
+## Check the Vivado version range to a user defined value
+proc VersionRangeCheck { lockMinVersion lockMaxVersion {mustBeExact ""} } {
+   # Get the Vivado version
+   set VersionNumber [version -short]
+   if { [info exists ::env(BYPASS_VERSION_CHECK)] != 1 || $::env(BYPASS_VERSION_CHECK) == 0 } {
+      # Generate error message
+      set errMsg "\n\n*********************************************************\n"
+      set errMsg "${errMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+      set errMsg "${errMsg}However, Vivado Version Range Lock = \[${lockMinVersion}, ${lockMaxVersion}\]\n"
+      set errMsg "${errMsg}You need to change your Vivado software to a Version between ${lockMinVersion} and ${lockMaxVersion}\n"
+      set errMsg "${errMsg}*********************************************************\n\n"
+      # Check for less than
+      if { ${VersionNumber} < ${lockMinVersion} } {
+         puts ${errMsg}
+         return -1
+      } elseif { ${VersionNumber} > ${lockMaxVersion} } {
+         puts ${errMsg}
+         return -1
+      # Else within the min/max range
+      } else {
+         return 0
+      }
+   } else {
+      # Generate warning message
+      set warnMsg "\n\n*********************************************************\n"
+      set warnMsg "${warnMsg}Your Vivado Version Vivado   = ${VersionNumber}\n"
+      set warnMsg "${warnMsg}The Vivado Version Range Lock = \[${lockMinVersion}, ${lockMaxVersion}\]\n"
+      set warnMsg "${warnMsg}However, BYPASS_VERSION_CHECK = 1\n"
+      set warnMsg "${warnMsg}*********************************************************\n\n"
+      puts ${warnMsg}
+      return 0
+   }
+}
+
 ## Compares currnet vivado version to a argument value
 proc VersionCompare { versionLock } {
 
@@ -207,17 +241,24 @@ proc VivadoRefresh { vivadoProject } {
 
 ## Achieve a Vivado Project
 proc ArchiveProject { } {
+   ## Versal in Vivado 2026.1+ removed the POWER_OPT run steps from the impl_1 object
+   set pwrOptSupported [expr { [VersionCompare 2026.1] < 0 || [isVersal] != "true" }]
+
    ## Make a copy of the TCL configurations
    set SYNTH_PRE     [get_property {STEPS.SYNTH_DESIGN.TCL.PRE}                 [get_runs synth_1]]
    set SYNTH_POST    [get_property {STEPS.SYNTH_DESIGN.TCL.POST}                [get_runs synth_1]]
    set OPT_PRE       [get_property {STEPS.OPT_DESIGN.TCL.PRE}                   [get_runs impl_1]]
    set OPT_POST      [get_property {STEPS.OPT_DESIGN.TCL.POST}                  [get_runs impl_1]]
-   set PWR_PRE       [get_property {STEPS.POWER_OPT_DESIGN.TCL.PRE}             [get_runs impl_1]]
-   set PWR_POST      [get_property {STEPS.POWER_OPT_DESIGN.TCL.POST}            [get_runs impl_1]]
+   if { $pwrOptSupported } {
+      set PWR_PRE       [get_property {STEPS.POWER_OPT_DESIGN.TCL.PRE}             [get_runs impl_1]]
+      set PWR_POST      [get_property {STEPS.POWER_OPT_DESIGN.TCL.POST}            [get_runs impl_1]]
+   }
    set PLACE_PRE     [get_property {STEPS.PLACE_DESIGN.TCL.PRE}                 [get_runs impl_1]]
    set PLACE_POST    [get_property {STEPS.PLACE_DESIGN.TCL.POST}                [get_runs impl_1]]
-   set PWR_OPT_PRE   [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE}  [get_runs impl_1]]
-   set PWR_OPT_POST  [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST} [get_runs impl_1]]
+   if { $pwrOptSupported } {
+      set PWR_OPT_PRE   [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE}  [get_runs impl_1]]
+      set PWR_OPT_POST  [get_property {STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST} [get_runs impl_1]]
+   }
    set PHYS_OPT_PRE  [get_property {STEPS.PHYS_OPT_DESIGN.TCL.PRE}              [get_runs impl_1]]
    set PHYS_OPT_POST [get_property {STEPS.PHYS_OPT_DESIGN.TCL.POST}             [get_runs impl_1]]
    set ROUTE_PRE     [get_property {STEPS.ROUTE_DESIGN.TCL.PRE}                 [get_runs impl_1]]
@@ -235,12 +276,16 @@ proc ArchiveProject { } {
    set_property STEPS.SYNTH_DESIGN.TCL.POST                "" [get_runs synth_1]
    set_property STEPS.OPT_DESIGN.TCL.PRE                   "" [get_runs impl_1]
    set_property STEPS.OPT_DESIGN.TCL.POST                  "" [get_runs impl_1]
-   set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             "" [get_runs impl_1]
-   set_property STEPS.POWER_OPT_DESIGN.TCL.POST            "" [get_runs impl_1]
+   if { $pwrOptSupported } {
+      set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             "" [get_runs impl_1]
+      set_property STEPS.POWER_OPT_DESIGN.TCL.POST            "" [get_runs impl_1]
+   }
    set_property STEPS.PLACE_DESIGN.TCL.PRE                 "" [get_runs impl_1]
    set_property STEPS.PLACE_DESIGN.TCL.POST                "" [get_runs impl_1]
-   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  "" [get_runs impl_1]
-   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST "" [get_runs impl_1]
+   if { $pwrOptSupported } {
+      set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  "" [get_runs impl_1]
+      set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST "" [get_runs impl_1]
+   }
    set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE              "" [get_runs impl_1]
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             "" [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 "" [get_runs impl_1]
@@ -261,12 +306,16 @@ proc ArchiveProject { } {
    set_property STEPS.SYNTH_DESIGN.TCL.POST                ${SYNTH_POST}    [get_runs synth_1]
    set_property STEPS.OPT_DESIGN.TCL.PRE                   ${OPT_PRE}       [get_runs impl_1]
    set_property STEPS.OPT_DESIGN.TCL.POST                  ${OPT_POST}      [get_runs impl_1]
-   set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             ${PWR_PRE}       [get_runs impl_1]
-   set_property STEPS.POWER_OPT_DESIGN.TCL.POST            ${PWR_POST}      [get_runs impl_1]
+   if { $pwrOptSupported } {
+      set_property STEPS.POWER_OPT_DESIGN.TCL.PRE             ${PWR_PRE}       [get_runs impl_1]
+      set_property STEPS.POWER_OPT_DESIGN.TCL.POST            ${PWR_POST}      [get_runs impl_1]
+   }
    set_property STEPS.PLACE_DESIGN.TCL.PRE                 ${PLACE_PRE}     [get_runs impl_1]
    set_property STEPS.PLACE_DESIGN.TCL.POST                ${PLACE_POST}    [get_runs impl_1]
-   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${PWR_OPT_PRE}   [get_runs impl_1]
-   set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${PWR_OPT_POST}  [get_runs impl_1]
+   if { $pwrOptSupported } {
+      set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.PRE  ${PWR_OPT_PRE}   [get_runs impl_1]
+      set_property STEPS.POST_PLACE_POWER_OPT_DESIGN.TCL.POST ${PWR_OPT_POST}  [get_runs impl_1]
+   }
    set_property STEPS.PHYS_OPT_DESIGN.TCL.PRE              ${PHYS_OPT_PRE}  [get_runs impl_1]
    set_property STEPS.PHYS_OPT_DESIGN.TCL.POST             ${PHYS_OPT_POST} [get_runs impl_1]
    set_property STEPS.ROUTE_DESIGN.TCL.PRE                 ${ROUTE_PRE}     [get_runs impl_1]

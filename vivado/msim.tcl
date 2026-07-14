@@ -209,9 +209,10 @@ set_property compxlib.[string tolower ${Simulator}]_compiled_library_dir ${simLi
 # Configure ModelSim/Questa settings
 set VIVADO_PROJECT_SIM_TIME "set_property -name {[string tolower ${Simulator}].simulate.runtime} -value {$::env(VIVADO_PROJECT_SIM_TIME)} -objects \[\get_filesets \sim_1\]"
 eval ${VIVADO_PROJECT_SIM_TIME}
-set_property -name {[string tolower ${Simulator}].compile.vcom.more_options}    -value ${vcomOpt}   -objects [get_filesets sim_1]
-set_property -name {[string tolower ${Simulator}].compile.vlog.more_options}    -value ${vlogOpt}   -objects [get_filesets sim_1]
-set_property -name {[string tolower ${Simulator}].elaborate.vopt.more_options}  -value ${elabOpt}   -objects [get_filesets sim_1]
+set_property -name "[string tolower $Simulator].compile.vcom.more_options" -value $vcomOpt -objects [get_filesets sim_1]
+set_property -name "[string tolower $Simulator].compile.vlog.more_options" -value $vlogOpt -objects [get_filesets sim_1]
+set_property -name "[string tolower $Simulator].elaborate.vopt.more_options" -value $elabOpt -objects [get_filesets sim_1]
+
 set_property nl.process_corner fast [get_filesets sim_1]
 set_property unifast true [get_filesets sim_1]
 

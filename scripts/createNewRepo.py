@@ -118,7 +118,7 @@ parser.add_argument(
     '--writeTeam',
     nargs    = '+',
     required = False,
-    default  = [ ['slaclab','tid-id-es'] ],
+    default  = [ ['slaclab','tid-id-es'], ['slaclab','tid-id-ecs'] ],
     help     = 'List of write teams [org,team_name]'
 )
 
@@ -126,7 +126,7 @@ parser.add_argument(
     '--readTeam',
     nargs    = '+',
     required = False,
-    default  = None,
+    default  = [ ['slaclab','tid-id'] ],
     help     = 'List of read teams'
 )
 
@@ -321,6 +321,13 @@ def setupNewRepoStructure(repo):
         path    = '.gitattributes',
         message = 'Adding .gitattributes',
         content = open(f'{baseDir}/.gitattributes').read(),
+    )
+
+    # Add the .flake8
+    repo.create_file(
+        path    = '.flake8',
+        message = 'Adding .flake8',
+        content = open(f'{baseDir}/.flake8').read(),
     )
 
     # Check if submodule path(s) exist

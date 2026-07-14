@@ -16,11 +16,7 @@ import shutil
 # Project variables
 workspace = os.getenv("OUT_DIR")
 comp_name = os.getenv("PROJECT")
-cfg_file  = f'{os.getenv("PROJ_DIR")}/hls_config.cfg'
-
-# Verify that the configuration file exists
-if not os.path.exists(cfg_file):
-    raise FileNotFoundError(f"The configuration file {cfg_file} does not exist.")
+cfg_file  = '../../hls_config.cfg'
 
 # Check if component directory does not exist yet
 if not (os.path.isdir( f'{workspace}/{comp_name}' )):
@@ -34,7 +30,7 @@ if not (os.path.isdir( f'{workspace}/{comp_name}' )):
     # Create hls component with existing cfg file
     hls_test_comp = client.create_hls_component(
         name     = comp_name,
-        cfg_file = cfg_file,
+        cfg_file = [cfg_file],
     )
 
     # Print component information

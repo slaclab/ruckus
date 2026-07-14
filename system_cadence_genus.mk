@@ -37,7 +37,7 @@ export PDK_PATH =
 endif
 
 ifndef OPERATING_CONDITION
-export OPERATING_CONDITION = tt0p9v25c
+export OPERATING_CONDITION =
 endif
 
 ifndef STD_CELL_LIB
@@ -54,6 +54,11 @@ endif
 export RUCKUS_GENUS_DIR  = $(RUCKUS_DIR)/cadence/genus
 export RUCKUS_PROC_TCL   = $(RUCKUS_GENUS_DIR)/proc.tcl
 export RUCKUS_QUIET_FLAG = -quiet
+
+# Rogue co-simulation backend for surf/axi/simlink/ruckus.tcl
+ifndef RUCKUS_SIM_BACKEND
+export RUCKUS_SIM_BACKEND = vcs
+endif
 
 # Project Build Directory
 export OUT_DIR     = $(abspath $(TOP_DIR)/build/$(PROJECT))
@@ -134,6 +139,16 @@ syn : dir
 	@rm -rf $(SYN_DIR); mkdir $(SYN_DIR);
 	@mkdir $(SYN_OUT_DIR); mkdir $(SYN_OUT_DIR)/reports; mkdir $(SYN_OUT_DIR)/svf
 	@cd $(SYN_DIR); genus -f $(RUCKUS_GENUS_DIR)/syn.tcl
+
+###############################################################
+#### Export a Behavioral Verilog file #########################
+###############################################################
+.PHONY : behavioral_verilog
+behavioral_verilog : dir
+	$(call ACTION_HEADER,"Cadence Genus: Behavioral Verilog file")
+	@rm -rf $(SYN_DIR); mkdir $(SYN_DIR);
+	@mkdir $(SYN_OUT_DIR); mkdir $(SYN_OUT_DIR)/reports; mkdir $(SYN_OUT_DIR)/svf
+	@cd $(SYN_DIR); genus -f $(RUCKUS_GENUS_DIR)/behavioral_verilog.tcl
 
 ###############################################################
 #### VCS Simulation ###########################################
