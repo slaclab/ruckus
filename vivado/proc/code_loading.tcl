@@ -236,10 +236,16 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
    set norm_path [file normalize $xci_path]
    set ip_name   [file rootname [file tail $xci_path]]
 
+   # Capture the file object(s) that import_ip/read_ip add to the project so the
+   # IP object can be resolved by mapping straight back from them below. This is
+   # more robust than an exact-path match: import_ip copies the .xci into the
+   # project, so its tracked path no longer equals $norm_path.
+   set ip_obj ""
+   set added_files {}
    if { $forceImport } {
       _removeIpIfPresent $norm_path
       puts "INFO: loadIpCore: Force importing: $norm_path"
-      import_ip -srcset sources_1 -force $norm_path
+      set added_files [import_ip -srcset sources_1 -force $norm_path]
    } else {
       # Idempotent: only import if the IP isn't already in the project
       set ip_obj [get_ips -quiet $ip_name]
@@ -248,18 +254,29 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
          if { [llength [get_files -quiet $norm_path]] > 0 } {
             # Already local; register it without copying
             puts "INFO: loadIpCore: XCI already local; registering with read_ip: $norm_path"
-            read_ip $norm_path
+            set added_files [read_ip $norm_path]
          } else {
             puts "INFO: loadIpCore: Importing: $norm_path"
-            import_ip -srcset sources_1 $norm_path
+            set added_files [import_ip -srcset sources_1 $norm_path]
          }
       } else {
          puts "INFO: loadIpCore: IP '$ip_obj' already exists; skipping import."
       }
    }
 
-   # Resolve the IP object (module name can differ from filename)
-   set ip_obj [get_ips -quiet $ip_name]
+   # Resolve the IP object (module name can differ from filename).
+   # 1) Map back from the file object(s) returned by import_ip/read_ip. This
+   #    survives import_ip copying the .xci into the project (its tracked path
+   #    no longer matches $norm_path), which is exactly the case an exact-path
+   #    match misses when the module name also differs from the filename.
+   if { $ip_obj eq "" && [llength $added_files] > 0 } {
+      set ip_obj [get_ips -quiet -of_objects $added_files]
+   }
+   # 2) Fall back to the module name (matches the filename in the common case).
+   if { $ip_obj eq "" } {
+      set ip_obj [get_ips -quiet $ip_name]
+   }
+   # 3) Last resort: match the project-tracked .xci/.xcix path.
    if { $ip_obj eq "" } {
       foreach c [get_ips -quiet *] {
          foreach f [get_files -quiet -of_objects $c] {
