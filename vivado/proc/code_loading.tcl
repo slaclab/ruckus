@@ -218,10 +218,11 @@ proc _removeIpIfPresent {xci_path} {
    }
 
    if { $ip_obj ne "" } {
-      # Remove the .xci file(s) backing this IP (this removes the IP from the project)
+      # Remove the .xci/.xcix file(s) backing this IP (this removes the IP from the project)
       set xci_files {}
       foreach f [get_files -quiet -of_objects $ip_obj] {
-         if {[string match *.xci [string tolower $f]]} { lappend xci_files $f }
+         set lf [string tolower $f]
+         if {[string match *.xci $lf] || [string match *.xcix $lf]} { lappend xci_files $f }
       }
       if {[llength $xci_files]} {
          puts "INFO: loadIpCore: Removing existing IP '$ip_obj' (and its XCI) before force import."
@@ -245,7 +246,7 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
       if { $ip_obj eq "" } {
          # Also check if the exact XCI path is already tracked
          if { [llength [get_files -quiet $norm_path]] > 0 } {
-            # Already local?register it without copying
+            # Already local; register it without copying
             puts "INFO: loadIpCore: XCI already local; registering with read_ip: $norm_path"
             read_ip $norm_path
          } else {
@@ -275,10 +276,11 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
       # Retarget/upgrade (ok if already current)
       upgrade_ip $ip_obj
 
-      # Set synth checkpoint on the XCI file (not the IP object)
+      # Set synth checkpoint on the XCI/XCIX file (not the IP object)
       set xci_only {}
       foreach f [get_files -quiet -of_objects $ip_obj] {
-         if {[string match *.xci [string tolower $f]]} { lappend xci_only $f }
+         set lf [string tolower $f]
+         if {[string match *.xci $lf] || [string match *.xcix $lf]} { lappend xci_only $f }
       }
       if { [llength $xci_only] > 0 } {
          set_property GENERATE_SYNTH_CHECKPOINT true $xci_only
@@ -291,6 +293,9 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
 
    # CLI-safe status
    report_ip_status
+
+   # Return the resolved IP object name (module name can differ from filename)
+   return $ip_obj
 }
 
 # Public API: load IP core(s)
@@ -323,12 +328,11 @@ proc loadIpCore args {
          error "loadIpCore: $params(path) must be .xci or .xcix"
       }
 
-      # Keep your globals
-      set strip [file rootname [file tail $params(path)]]
-      set ::IP_LIST  "$::IP_LIST ${strip}"
+      # Import first so the resolved IP object name (which can differ from the
+      # filename) is recorded in ::IP_LIST for the downstream get_ips lookups
+      set ipName [_importAndRefreshIp $params(path) $doUpgrade $forceImport]
+      set ::IP_LIST  "$::IP_LIST ${ipName}"
       set ::IP_FILES "$::IP_FILES $params(path)"
-
-      _importAndRefreshIp $params(path) $doUpgrade $forceImport
 
    } elseif {$has_dir} {
       if { [file exists $params(dir)] != 1 } {
@@ -339,10 +343,10 @@ proc loadIpCore args {
          error "loadIpCore: $params(dir) has no \[.xci,.xcix] files"
       }
       foreach pntr $list {
-         set strip [file rootname [file tail $pntr]]
-         set ::IP_LIST  "$::IP_LIST ${strip}"
+         # Record the resolved IP object name (can differ from the filename)
+         set ipName [_importAndRefreshIp $pntr $doUpgrade $forceImport]
+         set ::IP_LIST  "$::IP_LIST ${ipName}"
          set ::IP_FILES "$::IP_FILES ${pntr}"
-         _importAndRefreshIp $pntr $doUpgrade $forceImport
       }
    }
 }
