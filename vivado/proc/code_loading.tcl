@@ -199,87 +199,202 @@ proc loadSource args {
    }
 }
 
-## Function to load IP core files
+# Helper: remove an existing IP if present (by module name or XCI path)
+proc _removeIpIfPresent {xci_path} {
+   set norm_path [file normalize $xci_path]
+   set ip_name   [file rootname [file tail $xci_path]]
+
+   # Try by module name
+   set ip_obj [get_ips -quiet $ip_name]
+
+   # If not found, search by XCI path
+   if { $ip_obj eq "" } {
+      foreach c [get_ips -quiet *] {
+         foreach f [get_files -quiet -of_objects $c] {
+            if { [file normalize $f] eq $norm_path } { set ip_obj $c ; break }
+         }
+         if { $ip_obj ne "" } { break }
+      }
+   }
+
+   if { $ip_obj ne "" } {
+      # Remove the .xci/.xcix file(s) backing this IP (this removes the IP from the project)
+      set xci_files {}
+      foreach f [get_files -quiet -of_objects $ip_obj] {
+         set lf [string tolower $f]
+         if {[string match *.xci $lf] || [string match *.xcix $lf]} { lappend xci_files $f }
+      }
+      if {[llength $xci_files]} {
+         puts "INFO: loadIpCore: Removing existing IP '$ip_obj' (and its .xci/.xcix) before force import."
+         remove_files $xci_files
+      }
+   }
+}
+
+# Helper: (re)import an IP; optional upgrade/regenerate afterwards
+proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
+   set norm_path [file normalize $xci_path]
+   set ip_name   [file rootname [file tail $xci_path]]
+
+   # Capture the file object(s) that import_ip/read_ip add to the project so the
+   # IP object can be resolved by mapping straight back from them below. This is
+   # more robust than an exact-path match: import_ip copies the .xci into the
+   # project, so its tracked path no longer equals $norm_path.
+   set ip_obj ""
+   set added_files {}
+   if { $forceImport } {
+      _removeIpIfPresent $norm_path
+      puts "INFO: loadIpCore: Force importing: $norm_path"
+      set added_files [import_ip -srcset sources_1 -force $norm_path]
+   } else {
+      # Idempotent: only import if the IP isn't already in the project.
+      # (1) Match by object name (equals the filename in the common case).
+      set ip_obj [get_ips -quiet $ip_name]
+      # (2) Match by tracked .xci/.xcix file. This catches an already-imported
+      #     IP whose object name differs from the filename: import_ip copies the
+      #     .xci under sources_1/ip/..., so on a later incremental build neither
+      #     the object name nor $norm_path is guaranteed to match. Fall back to
+      #     the filename tail so the copied instance is still detected and we
+      #     don't re-import (which would create a duplicate).
+      if { $ip_obj eq "" } {
+         set xci_tail [file tail $norm_path]
+         foreach c [get_ips -quiet *] {
+            foreach f [get_files -quiet -of_objects $c] {
+               if { [file normalize $f] eq $norm_path || [file tail $f] eq $xci_tail } {
+                  set ip_obj $c ; break
+               }
+            }
+            if { $ip_obj ne "" } { break }
+         }
+      }
+      if { $ip_obj ne "" } {
+         puts "INFO: loadIpCore: IP '$ip_obj' already exists; skipping import."
+      } elseif { [llength [get_files -quiet $norm_path]] > 0 } {
+         # XCI tracked but not yet registered as an IP; register without copying.
+         puts "INFO: loadIpCore: XCI already local; registering with read_ip: $norm_path"
+         set added_files [read_ip $norm_path]
+      } else {
+         puts "INFO: loadIpCore: Importing: $norm_path"
+         set added_files [import_ip -srcset sources_1 $norm_path]
+      }
+   }
+
+   # Resolve the IP object (module name can differ from filename).
+   # 1) Map back from the file object(s) returned by import_ip/read_ip. This
+   #    survives import_ip copying the .xci into the project (its tracked path
+   #    no longer matches $norm_path), which is exactly the case an exact-path
+   #    match misses when the module name also differs from the filename.
+   if { $ip_obj eq "" && [llength $added_files] > 0 } {
+      set ip_obj [get_ips -quiet -of_objects $added_files]
+   }
+   # 2) Fall back to the module name (matches the filename in the common case).
+   if { $ip_obj eq "" } {
+      set ip_obj [get_ips -quiet $ip_name]
+   }
+   # 3) Last resort: match the project-tracked .xci/.xcix path.
+   if { $ip_obj eq "" } {
+      foreach c [get_ips -quiet *] {
+         foreach f [get_files -quiet -of_objects $c] {
+            if { [file normalize $f] eq $norm_path } { set ip_obj $c ; break }
+         }
+         if { $ip_obj ne "" } { break }
+      }
+   }
+   if { $ip_obj eq "" } {
+      error "loadIpCore: Could not resolve IP object after import for $xci_path"
+   }
+
+   if { $doUpgrade } {
+      # Retarget/upgrade (ok if already current)
+      upgrade_ip $ip_obj
+
+      # Set synth checkpoint on the XCI/XCIX file (not the IP object)
+      set xci_only {}
+      foreach f [get_files -quiet -of_objects $ip_obj] {
+         set lf [string tolower $f]
+         if {[string match *.xci $lf] || [string match *.xcix $lf]} { lappend xci_only $f }
+      }
+      if { [llength $xci_only] > 0 } {
+         set_property GENERATE_SYNTH_CHECKPOINT true $xci_only
+      }
+
+      reset_target all $ip_obj
+      generate_target all $ip_obj
+      export_ip_user_files -of_objects $ip_obj -no_script -sync -force -quiet
+   }
+
+   # Return the resolved IP object name (module name can differ from filename)
+   return $ip_obj
+}
+
+# Public API: load IP core(s)
+# Flags:
+#   -doUpgrade   : retarget/regenerate after import (optional)
+#   -forceImport : always remove any existing instance and import_ip -force
 proc loadIpCore args {
    set options {
       {path.arg "" "path to a single file"}
       {dir.arg  "" "path to a directory of files"}
+      {doUpgrade "upgrade/regenerate IP for current part"}
+      {forceImport "remove existing instance and force re-import"}
    }
    set usage ": loadIpCore \[options] ...\noptions:"
    array set params [::cmdline::getoptions args $options $usage]
-   set has_path [expr {[string length $params(path)] > 0}]
-   set has_dir  [expr {[string length $params(dir)] > 0}]
-   # Check for error state
+   set has_path     [expr {[string length $params(path)] > 0}]
+   set has_dir      [expr {[string length $params(dir)] > 0}]
+   set doUpgrade    [expr {$params(doUpgrade)}]
+   set forceImport  [expr {$params(forceImport)}]
+
    if {${has_path} && ${has_dir}} {
-      puts "\n\n\n\n\n********************************************************"
-      puts "loadIpCore: Cannot specify both -path and -dir"
-      puts "********************************************************\n\n\n\n\n"
-      exit -1
-   # Load a single file
+      error "loadIpCore: Cannot specify both -path and -dir"
+
    } elseif {$has_path} {
-      # Check if file doesn't exist
       if { [file exists $params(path)] != 1 } {
-         puts "\n\n\n\n\n********************************************************"
-         puts "loadIpCore: $params(path) doesn't exist"
-         puts "********************************************************\n\n\n\n\n"
-         exit -1
-      } else {
-         # Check the file extension
-         set fileExt [file extension $params(path)]
-         if { ${fileExt} eq {.xci} ||
-              ${fileExt} eq {.xcix} } {
-            # Update the global list
-            set strip [file rootname [file tail $params(path)]]
-            set ::IP_LIST "$::IP_LIST ${strip}"
-            set ::IP_FILES "$::IP_FILES $params(path)"
-            # Check if file doesn't exist in project
-            if { [get_ips ${strip}] eq ""  } {
-               # Add the IP core file
-               import_ip -srcset sources_1 $params(path)
-            }
-         } else {
-            puts "\n\n\n\n\n********************************************************"
-            puts "loadIpCore: $params(path) does not have a \[.xci,.xcix\] file extension"
-            puts "********************************************************\n\n\n\n\n"
-            exit -1
-         }
+         error "loadIpCore: $params(path) doesn't exist"
       }
-   # Load all files from a directory
+      if { [file isfile $params(path)] != 1 } {
+         error "loadIpCore: $params(path) is not a file (use -dir for a directory)"
+      }
+      set ext [string tolower [file extension $params(path)]]
+      if { $ext ni {.xci .xcix} } {
+         error "loadIpCore: $params(path) must be .xci or .xcix"
+      }
+
+      # Import first so the resolved IP object name (which can differ from the
+      # filename) is recorded in ::IP_LIST for the downstream get_ips lookups
+      set ipName [_importAndRefreshIp $params(path) $doUpgrade $forceImport]
+      set ::IP_LIST  "$::IP_LIST ${ipName}"
+      set ::IP_FILES "$::IP_FILES $params(path)"
+
+      # Project-wide IP status: reported once per loadIpCore call. report_ip_status
+      # has no per-IP filter, so calling it inside _importAndRefreshIp just repeats
+      # the full-project report on every import.
+      report_ip_status
+
    } elseif {$has_dir} {
-      # Check if directory doesn't exist
       if { [file exists $params(dir)] != 1 } {
-         puts "\n\n\n\n\n********************************************************"
-         puts "loadIpCore: $params(dir) doesn't exist"
-         puts "********************************************************\n\n\n\n\n"
-         exit -1
-      } else {
-         # Get a list of all IP core files
-         set list ""
-         set list_rc [catch {
-            set list [glob -directory $params(dir) *.xci *.xcix]
-         } _RESULT]
-         # Load all the IP core files
-         if { ${list} != "" } {
-            foreach pntr ${list} {
-               # Update the global list
-               set strip [file rootname [file tail ${pntr}]]
-               set ::IP_LIST "$::IP_LIST ${strip}"
-               set ::IP_FILES "$::IP_FILES ${pntr}"
-               # Check if file doesn't exist in project
-               if { [get_ips ${strip}] eq ""  } {
-                  # Add the IP core file
-                  import_ip -srcset sources_1 ${pntr}
-               }
-            }
-         } else {
-            puts "\n\n\n\n\n********************************************************"
-            puts "loadIpCore: $params(dir) directory does not have any \[.xci,.xcix\] files"
-            puts "********************************************************\n\n\n\n\n"
-            exit -1
-         }
+         error "loadIpCore: $params(dir) doesn't exist"
       }
+      if { [file isdirectory $params(dir)] != 1 } {
+         error "loadIpCore: $params(dir) is not a directory (use -path for a single file)"
+      }
+      set list [glob -nocomplain -directory $params(dir) *.xci *.xcix]
+      if { $list eq "" } {
+         error "loadIpCore: $params(dir) has no \[.xci,.xcix] files"
+      }
+      foreach pntr $list {
+         # Record the resolved IP object name (can differ from the filename)
+         set ipName [_importAndRefreshIp $pntr $doUpgrade $forceImport]
+         set ::IP_LIST  "$::IP_LIST ${ipName}"
+         set ::IP_FILES "$::IP_FILES ${pntr}"
+      }
+      # Project-wide IP status: reported once after the loop, not once per
+      # import. report_ip_status has no per-IP filter, so calling it inside the
+      # loop would repeat the full-project report for every core in the directory.
+      report_ip_status
    }
 }
+
 
 ## Function to load block design files
 proc loadBlockDesign args {

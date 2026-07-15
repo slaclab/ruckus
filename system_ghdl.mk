@@ -36,6 +36,11 @@ endif
 export RUCKUS_GHDL_DIR = $(RUCKUS_DIR)/ghdl
 export RUCKUS_PROC_TCL = $(RUCKUS_GHDL_DIR)/proc.tcl
 
+# Rogue co-simulation backend for surf/axi/simlink/ruckus.tcl
+ifndef RUCKUS_SIM_BACKEND
+export RUCKUS_SIM_BACKEND = ghdl
+endif
+
 # Project Build Directory
 ifndef OUT_DIR
 export OUT_DIR = $(abspath $(TOP_DIR)/build/$(PROJECT))
