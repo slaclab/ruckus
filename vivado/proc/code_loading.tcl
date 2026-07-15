@@ -225,7 +225,7 @@ proc _removeIpIfPresent {xci_path} {
          if {[string match *.xci $lf] || [string match *.xcix $lf]} { lappend xci_files $f }
       }
       if {[llength $xci_files]} {
-         puts "INFO: loadIpCore: Removing existing IP '$ip_obj' (and its XCI) before force import."
+         puts "INFO: loadIpCore: Removing existing IP '$ip_obj' (and its .xci/.xcix) before force import."
          remove_files $xci_files
       }
    }
@@ -323,6 +323,9 @@ proc loadIpCore args {
       if { [file exists $params(path)] != 1 } {
          error "loadIpCore: $params(path) doesn't exist"
       }
+      if { [file isfile $params(path)] != 1 } {
+         error "loadIpCore: $params(path) is not a file (use -dir for a directory)"
+      }
       set ext [string tolower [file extension $params(path)]]
       if { $ext ni {.xci .xcix} } {
          error "loadIpCore: $params(path) must be .xci or .xcix"
@@ -337,6 +340,9 @@ proc loadIpCore args {
    } elseif {$has_dir} {
       if { [file exists $params(dir)] != 1 } {
          error "loadIpCore: $params(dir) doesn't exist"
+      }
+      if { [file isdirectory $params(dir)] != 1 } {
+         error "loadIpCore: $params(dir) is not a directory (use -path for a single file)"
       }
       set list [glob -nocomplain -directory $params(dir) *.xci *.xcix]
       if { $list eq "" } {
