@@ -247,20 +247,35 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
       puts "INFO: loadIpCore: Force importing: $norm_path"
       set added_files [import_ip -srcset sources_1 -force $norm_path]
    } else {
-      # Idempotent: only import if the IP isn't already in the project
+      # Idempotent: only import if the IP isn't already in the project.
+      # (1) Match by object name (equals the filename in the common case).
       set ip_obj [get_ips -quiet $ip_name]
+      # (2) Match by tracked .xci/.xcix file. This catches an already-imported
+      #     IP whose object name differs from the filename: import_ip copies the
+      #     .xci under sources_1/ip/..., so on a later incremental build neither
+      #     the object name nor $norm_path is guaranteed to match. Fall back to
+      #     the filename tail so the copied instance is still detected and we
+      #     don't re-import (which would create a duplicate).
       if { $ip_obj eq "" } {
-         # Also check if the exact XCI path is already tracked
-         if { [llength [get_files -quiet $norm_path]] > 0 } {
-            # Already local; register it without copying
-            puts "INFO: loadIpCore: XCI already local; registering with read_ip: $norm_path"
-            set added_files [read_ip $norm_path]
-         } else {
-            puts "INFO: loadIpCore: Importing: $norm_path"
-            set added_files [import_ip -srcset sources_1 $norm_path]
+         set xci_tail [file tail $norm_path]
+         foreach c [get_ips -quiet *] {
+            foreach f [get_files -quiet -of_objects $c] {
+               if { [file normalize $f] eq $norm_path || [file tail $f] eq $xci_tail } {
+                  set ip_obj $c ; break
+               }
+            }
+            if { $ip_obj ne "" } { break }
          }
-      } else {
+      }
+      if { $ip_obj ne "" } {
          puts "INFO: loadIpCore: IP '$ip_obj' already exists; skipping import."
+      } elseif { [llength [get_files -quiet $norm_path]] > 0 } {
+         # XCI tracked but not yet registered as an IP; register without copying.
+         puts "INFO: loadIpCore: XCI already local; registering with read_ip: $norm_path"
+         set added_files [read_ip $norm_path]
+      } else {
+         puts "INFO: loadIpCore: Importing: $norm_path"
+         set added_files [import_ip -srcset sources_1 $norm_path]
       }
    }
 
@@ -308,9 +323,6 @@ proc _importAndRefreshIp {xci_path doUpgrade forceImport} {
       export_ip_user_files -of_objects $ip_obj -no_script -sync -force -quiet
    }
 
-   # CLI-safe status
-   report_ip_status
-
    # Return the resolved IP object name (module name can differ from filename)
    return $ip_obj
 }
@@ -354,6 +366,11 @@ proc loadIpCore args {
       set ::IP_LIST  "$::IP_LIST ${ipName}"
       set ::IP_FILES "$::IP_FILES $params(path)"
 
+      # Project-wide IP status: reported once per loadIpCore call. report_ip_status
+      # has no per-IP filter, so calling it inside _importAndRefreshIp just repeats
+      # the full-project report on every import.
+      report_ip_status
+
    } elseif {$has_dir} {
       if { [file exists $params(dir)] != 1 } {
          error "loadIpCore: $params(dir) doesn't exist"
@@ -371,6 +388,10 @@ proc loadIpCore args {
          set ::IP_LIST  "$::IP_LIST ${ipName}"
          set ::IP_FILES "$::IP_FILES ${pntr}"
       }
+      # Project-wide IP status: reported once after the loop, not once per
+      # import. report_ip_status has no per-IP filter, so calling it inside the
+      # loop would repeat the full-project report for every core in the directory.
+      report_ip_status
    }
 }
 
