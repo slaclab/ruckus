@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 ##############################################################################
-## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the
-## top-level directory of this distribution and at:
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
-## No part of 'SLAC Firmware Standard Library', including this file,
-## may be copied, modified, propagated, or distributed except according to
-## the terms contained in the LICENSE.txt file.
+# This file is part of 'SLAC Firmware Standard Library'.
+# It is subject to the license terms in the LICENSE.txt file found in the
+# top-level directory of this distribution and at:
+# https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of 'SLAC Firmware Standard Library', including this file,
+# may be copied, modified, propagated, or distributed except according to
+# the terms contained in the LICENSE.txt file.
 ##############################################################################
 #
 # build.py — drives the AIE component build via the Vitis Unified Python API.
@@ -26,7 +26,7 @@ parser.add_argument("--x86sim", default=False, action="store_true",
                     help="Build for x86 simulator instead of hardware.")
 args = parser.parse_args()
 
-target    = "x86sim" if args.x86sim else "hw"
+target = "x86sim" if args.x86sim else "hw"
 workspace = os.getenv("OUT_DIR")
 comp_name = os.getenv("PROJECT")
 

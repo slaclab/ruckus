@@ -11,52 +11,58 @@
 # ------------------------------------------------------------------------------
 # FPGA
 # ------------------------------------------------------------------------------
-class Fpga :
-    def __init__ (self, part, clock, uncertainity, id = None) :
-        self.part         = part
-        self.clock        = clock
+class Fpga:
+    def __init__(self, part, clock, uncertainity, id=None):
+        self.part = part
+        self.clock = clock
         self.uncertainity = uncertainity
-        self.id           = id
+        self.id = id
         return
 
     @staticmethod
-    def add_arguments (parser) :  # Fpga
-        parser.add_argument ('--fpga',          help='fpga part',       default = 'xcku115-flvb2104-2-i')
-        parser.add_argument ('--clock',         help='fpga clock',      default=6)
-        parser.add_argument ('--uncertainity',  help='fpga clock uncertainity')
-        parser.add_argument ('--fid',           help='fpga identifier', default = None)
+    def add_arguments(parser):  # Fpga
+        parser.add_argument(
+            '--fpga',
+            help='fpga part',
+            default='xcku115-flvb2104-2-i')
+        parser.add_argument('--clock', help='fpga clock', default=6)
+        parser.add_argument('--uncertainity', help='fpga clock uncertainity')
+        parser.add_argument('--fid', help='fpga identifier', default=None)
         return
 
     # --------------------------------------------------------------------------
     # Add the fpga to the configuration file
     # --------------------------------------------------------------------------
-    def add (self, cfg_file) :    # Fpga
-        cfg_file.set_value (                 key = 'part',  value = self.part)
-        cfg_file.set_value (section = 'hls', key = 'clock', value = self.clock)
+    def add(self, cfg_file):    # Fpga
+        cfg_file.set_value(key='part', value=self.part)
+        cfg_file.set_value(section='hls', key='clock', value=self.clock)
 
-        if (self.uncertainity) :
-            cfg_file.set_value (section = 'hls', key = 'uncertainity',
-                                               value = self.uncertainity)
+        if (self.uncertainity):
+            cfg_file.set_value(section='hls', key='uncertainity',
+                               value=self.uncertainity)
         return
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
     # Print the FPGA specification
     # --------------------------------------------------------------------------
-    def print (self, printer)  :        #Fpga
-        if (self.uncertainity) : uncertainity = self.uncertainity
-        else                   : uncertainity = "Vitis Default"
+    def print(self, printer):  # Fpga
+        if (self.uncertainity):
+            uncertainity = self.uncertainity
+        else:
+            uncertainity = "Vitis Default"
 
-        clock = self.clock + '+/-' +  uncertainity
-        print ()
-        printer.prefixed_line ('Fpga', '.part', self.part)
-        printer.prefixed_line ('',    '.clock', clock)
-        if self.id : printer.prefixed_line ('', '.id', self.id)
+        clock = self.clock + '+/-' + uncertainity
+        print()
+        printer.prefixed_line('Fpga', '.part', self.part)
+        printer.prefixed_line('', '.clock', clock)
+        if self.id:
+            printer.prefixed_line('', '.id', self.id)
         return
 
     # ------------------------------------------------------------------------------
-    def __str__ (self) :
+    def __str__(self):
         uncertainity = self.uncertainity if self.uncertainity else 'Vitis Default'
-        str = self.id + ' => ' +  self.part +  ' @ ' +  self.clock + ' -/+ '  + uncertainity
+        str = self.id + ' => ' + self.part + ' @ ' + self.clock + ' -/+ ' + uncertainity
         return str
     # ------------------------------------------------------------------------------

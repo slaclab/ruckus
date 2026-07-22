@@ -50,83 +50,97 @@ class Category:
     vetted
     '''
 
-    Existing : int =  1
-    Missing  : int =  2
-    CruftLo  : int =  4
-    CruftHi  : int =  8
-    Cruft    : int = 12
-    All      : int = 15
+    Existing: int = 1
+    Missing: int = 2
+    CruftLo: int = 4
+    CruftHi: int = 8
+    Cruft: int = 12
+    All: int = 15
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def is_in (s, lst) :
-        n = len (s)
+    def is_in(s, lst):
+        n = len(s)
         for member in lst:
-            if s == member[0:n] : return True
+            if s == member[0:n]:
+                return True
         return False
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def categorize (olist, default_opt) :
-        if not olist : return default_opt
+    def categorize(olist, default_opt):
+        if not olist:
+            return default_opt
 
         msk = 0
-        if Category.is_in ('e', olist) : msk |= Category.Existing
-        if Category.is_in ('m', olist) : msk |= Category.Missing
-        if Category.is_in ('k', olist) : msk |= Category.CruftLo
-        if Category.is_in ('K', olist) : msk |= Category.CruftHi
-        if Category.is_in ('c', olist) : msk |= Category.Cruft
-        if Category.is_in ('a', olist) : msk |= Category.All
+        if Category.is_in('e', olist):
+            msk |= Category.Existing
+        if Category.is_in('m', olist):
+            msk |= Category.Missing
+        if Category.is_in('k', olist):
+            msk |= Category.CruftLo
+        if Category.is_in('K', olist):
+            msk |= Category.CruftHi
+        if Category.is_in('c', olist):
+            msk |= Category.Cruft
+        if Category.is_in('a', olist):
+            msk |= Category.All
 
-        if msk == 0 : msk = default_opt
+        if msk == 0:
+            msk = default_opt
         return msk
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def byComponents (targets) :
+    def byComponents(targets):
 
-        categories = Category ()
+        categories = Category()
 
-        for target in targets :
-            cfg_path   = target.cfg_path
-            cfg_exists = os.path.isfile (cfg_path) if cfg_path else False
-            cmp_path   = target.cmp_path
-            cmp_exists = os.path.isdir  (cmp_path) if cmp_path else False
-            if cfg_exists :
-                if cmp_exists : categories.existing.append (target)
-                else          : categories.missing .append (target)
-            else :
-                if cmp_exists : categories.cruft_hi.append (target)
-                else          : categories.cruft_lo.append (target)
+        for target in targets:
+            cfg_path = target.cfg_path
+            cfg_exists = os.path.isfile(cfg_path) if cfg_path else False
+            cmp_path = target.cmp_path
+            cmp_exists = os.path.isdir(cmp_path) if cmp_path else False
+            if cfg_exists:
+                if cmp_exists:
+                    categories.existing.append(target)
+                else:
+                    categories.missing .append(target)
+            else:
+                if cmp_exists:
+                    categories.cruft_hi.append(target)
+                else:
+                    categories.cruft_lo.append(target)
 
         return categories
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
+
     @staticmethod
-    def getCategories (workspace, configurations, components, cmpList) :
+    def getCategories(workspace, configurations, components, cmpList):
         import glob
         import fnmatch
-        from   .componentInfo import ComponentInfo
+        from .componentInfo import ComponentInfo
 
-        class Target :
-            def __init__ (self, cmp_name, cmp_path, cfg_path, cmp_err) :
+        class Target:
+            def __init__(self, cmp_name, cmp_path, cfg_path, cmp_err):
                 self.cmp_name = cmp_name
                 self.cmp_path = cmp_path
                 self.cfg_path = cfg_path
-                self.cmp_err  = cmp_err
+                self.cmp_err = cmp_err
                 return
 
-
-        if not isinstance (configurations, (list, tuple)) :
+        if not isinstance(configurations, (list, tuple)):
             configurations = [configurations]
 
-        if components == None : cmp_template = '{cfg_name}'
-        else :                  cmp_template = components
+        if components is None:
+            cmp_template = '{cfg_name}'
+        else:
+            cmp_template = components
 
-        categories  = Category ()
+        categories = Category()
 
         # ---------------------------------------------------------
         # Construct all the legitimate configuration and components
@@ -134,115 +148,120 @@ class Category:
 
         # Make a list the components in the workspace
         cmp_ignores = ['_ide', 'logs']
-        cmp_paths   = glob.glob (os.path.join (workspace, '*'))
-        cmp_names   = []
+        cmp_paths = glob.glob(os.path.join(workspace, '*'))
+        cmp_names = []
 
         cfg_paths = []
-        for cfg in configurations :
-            paths = glob.glob (cfg)
-            for cfg_path in paths :
+        for cfg in configurations:
+            paths = glob.glob(cfg)
+            for cfg_path in paths:
 
                 # Check if already seen
-                if cfg_path in cfg_paths : continue
+                if cfg_path in cfg_paths:
+                    continue
 
                 # Add to seen list
-                cfg_paths.append (cfg_path)
-                cfg_name = os.path.split (os.path.splitext (cfg_path)[0])[1]
-                cmp_name = cmp_template.format (cfg_name = cfg_name)
+                cfg_paths.append(cfg_path)
+                cfg_name = os.path.split(os.path.splitext(cfg_path)[0])[1]
+                cmp_name = cmp_template.format(cfg_name=cfg_name)
 
                 # Does this pattern match one of requested components
                 match = False
-                for cmp in cmpList :
-                    match = fnmatch.fnmatch (cmp_name, cmp)
-                    if match : break
+                for cmp in cmpList:
+                    match = fnmatch.fnmatch(cmp_name, cmp)
+                    if match:
+                        break
 
                 # If not a match, but in the list of actual components
                 # then remove from the cmp_paths to consider, otherwise
                 # would be called cruft when it simply is not of interest.
-                cmp_path = os.path.join (workspace, cmp_name)
-                if not match and  cmp_path in cmp_paths :
-                    cmp_paths.remove (cmp_path)
+                cmp_path = os.path.join(workspace, cmp_name)
+                if not match and cmp_path in cmp_paths:
+                    cmp_paths.remove(cmp_path)
                     continue
 
                 # Have a match with components of interest
 
-                exists = os.path.isdir (cmp_path)
-                target = Target (cmp_name, cmp_path, cfg_path, 0)
+                exists = os.path.isdir(cmp_path)
+                target = Target(cmp_name, cmp_path, cfg_path, 0)
 
                 # Categorize as existing or missing
-                if exists :
-                    cmp_info       = ComponentInfo (cmp_path, True)
+                if exists:
+                    cmp_info = ComponentInfo(cmp_path, True)
                     target.cmp_err = cmp_info.errs
 
                     # Check if the information in the component's
                     # json file is good. If so, it is considered 'good'
-                    if  target.cmp_err == 0 and cfg_path == cmp_info.cfg_files :
-                        categories.existing.append (target)
-                        cmp_paths.remove (cmp_path)
-                    else :
+                    if target.cmp_err == 0 and cfg_path == cmp_info.cfg_files:
+                        categories.existing.append(target)
+                        cmp_paths.remove(cmp_path)
+                    else:
                         # There is something wrong with it, probably
                         # need to invent a new category. It is put in
                         # dubious category
-                        cmp_name = os.path.split (cmp_path)[1]
-                        cmp_paths.remove (cmp_path)
-                        if cmp_name not in cmp_ignores :
-                            categories.cruft_lo.append (target)
+                        cmp_name = os.path.split(cmp_path)[1]
+                        cmp_paths.remove(cmp_path)
+                        if cmp_name not in cmp_ignores:
+                            categories.cruft_lo.append(target)
 
-                else      :
-                    categories.missing.append  (target)
-
+                else:
+                    categories.missing.append(target)
 
         # Any left over in the cmp_paths is deemed cruft
-        for cmp_path in cmp_paths :
-            cmp_name = os.path.split (cmp_path)[1]
-            if cmp_name not in cmp_ignores :
+        for cmp_path in cmp_paths:
+            cmp_name = os.path.split(cmp_path)[1]
+            if cmp_name not in cmp_ignores:
 
-                cmp_info = ComponentInfo (cmp_path, True)
+                cmp_info = ComponentInfo(cmp_path, True)
 
                 # Does this look like a component
-                if cmp_info.errs == 0 :
-                    categories.cruft_hi.append (Target (cmp_name,
-                                                        cmp_path,
-                                                        None,
-                                                        0))
+                if cmp_info.errs == 0:
+                    categories.cruft_hi.append(Target(cmp_name,
+                                                      cmp_path,
+                                                      None,
+                                                      0))
 
         return categories
     # --------------------------------------------------------------------------
 
-
     @staticmethod
-    def categorizeByComponent (workspace, cmpList) :
+    def categorizeByComponent(workspace, cmpList):
 
         import glob
         from .targets import TargetMin
 
-        categories  =  Category ()
-        cmp_names   = []
+        categories = Category()
+        cmp_names = []
         cmp_ignores = ['_ide', 'logs']
 
-        for cmp in cmpList :
-            wc    = os.path.join (workspace, cmp)
-            paths = glob.glob (wc)
+        for cmp in cmpList:
+            wc = os.path.join(workspace, cmp)
+            paths = glob.glob(wc)
 
-            for cmp_path in paths :
-                if not os.path.isdir (cmp_path) : continue
+            for cmp_path in paths:
+                if not os.path.isdir(cmp_path):
+                    continue
 
-                cmp_name = os.path.split (cmp_path)[1]
-                if cmp_name in cmp_names        : continue
-                if cmp_name in cmp_ignores      : continue
+                cmp_name = os.path.split(cmp_path)[1]
+                if cmp_name in cmp_names:
+                    continue
+                if cmp_name in cmp_ignores:
+                    continue
 
-                cmp_names.append   (cmp_name)
-                target = TargetMin (cmp_name, cmp_path)
-                if target.errs : categories.cruft_hi.append (target)
-                else           : categories.existing.append (target)
+                cmp_names.append(cmp_name)
+                target = TargetMin(cmp_name, cmp_path)
+                if target.errs:
+                    categories.cruft_hi.append(target)
+                else:
+                    categories.existing.append(target)
 
         return categories
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
-    def __init__ (self) :
+    def __init__(self):
         self.existing = []
-        self.missing  = []
+        self.missing = []
         self.cruft_hi = []
         self.cruft_lo = []
     # --------------------------------------------------------------------------

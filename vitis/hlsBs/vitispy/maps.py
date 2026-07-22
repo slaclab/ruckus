@@ -13,55 +13,57 @@
 # Cannot use relative paths when executing as a main
 # This avoids polluting sys.path when not main
 # --------------------------------------------------
-if __name__  == '__main__' :
+if __name__ == '__main__':
     pass
-else :
-    import   os,glob
+else:
+    import os
+    import glob
     from .dictionary import Dictionary
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-class Maps () :
+class Maps ():
 
-    def __init__ (self, dictionaries) :
+    def __init__(self, dictionaries):
 
         srcs = {}
 
-
         # Is this a single dictionary
-        if isinstance (dictionaries, Dictionary) :
+        if isinstance(dictionaries, Dictionary):
             # dictionaries is just one dictionary
-            self.compile (srcs, dictionaries)
+            self.compile(srcs, dictionaries)
 
-        else :
+        else:
             # Is this a list,tuple of dictionaries
-            is_list = all(issubclass (type(x), Dictionary) for x in dictionaries)
-            if is_list :
+            is_list = all(issubclass(type(x), Dictionary)
+                          for x in dictionaries)
+            if is_list:
 
-                for dictionary in dictionaries :
-                    n = self.compile (srcs, dictionary)
+                for dictionary in dictionaries:
+                    n = self.compile(srcs, dictionary)
 
             # Is this a lists or tuples of dictionaries
-            elif isinstance (dictionaries, (list, tuple)) :
+            elif isinstance(dictionaries, (list, tuple)):
 
-                for dictionaryList in dictionaries :
+                for dictionaryList in dictionaries:
 
                     # Is this a single dictionary
-                    if isinstance (dictionaryList, Dictionary) :
-                        self.compile (srcs, dictionaryList)
+                    if isinstance(dictionaryList, Dictionary):
+                        self.compile(srcs, dictionaryList)
 
                     # Is this a list,tuple of multiple dictionaries
-                    elif all(issubclass (type(x), Dictionary) for x in dictionaryList) :
+                    elif all(issubclass(type(x), Dictionary) for x in dictionaryList):
 
-                        for dictionary in dictionaryList :
-                            self.compile (srcs, dictionary)
-                    else :
-                        print ("ERROR: Unknown dictionaries specification\n"
-                               "       This may be\n"
-                               "         a) A single dictionary\n"
-                               "         b) A list or tuple of dictionaries\n"
-                               "         c) A lists or tuples of dictionaries\n")
+                        for dictionary in dictionaryList:
+                            self.compile(srcs, dictionary)
+                    else:
+                        print(
+                            "ERROR: Unknown dictionaries specification\n"
+                            "       This may be\n"
+                            "         a) A single dictionary\n"
+                            "         b) A list or tuple of dictionaries\n"
+                            "         c) A lists or tuples of dictionaries\n")
 
         # -------------------------------------------------------------
         # Calculate the number permutations/combinations in all the
@@ -69,8 +71,9 @@ class Maps () :
         # to accomodate them all
         # -------------------------------------------------------------
         map_cnt = 1
-        for k,v in srcs.items () : map_cnt *= len (v)
-        self.maps = [ {} for _ in range(map_cnt) ]
+        for k, v in srcs.items():
+            map_cnt *= len(v)
+        self.maps = [{} for _ in range(map_cnt)]
 
         # ------------------------------------------------------------
         #  Need to form the every permutation of the maps
@@ -100,47 +103,48 @@ class Maps () :
         #    M1       3        2*3      12/(2*3)               2
         #    M2       2      2*3*2      12/(2*3*2)             1
         # -------------------------------------------------------
-        n  = 1
-        for key, values in srcs.items () :
-            l     = len (values)
-            n     = n * l
-            rep   = map_cnt // n
+        n = 1
+        for key, values in srcs.items():
+            l = len(values)
+            n = n * l
+            rep = map_cnt // n
             map_idx = 0
-            for idx in range (0, n) :
+            for idx in range(0, n):
 
-                val_idx  = idx % l
-                for idy in range (0, rep) :
+                val_idx = idx % l
+                for idy in range(0, rep):
 
-                    v  = values[val_idx]
+                    v = values[val_idx]
 
                     # Add primary key and value
-                    self.maps[map_idx][key]      = v[0]
+                    self.maps[map_idx][key] = v[0]
 
                     # Add derived keys and values
-                    if v[1] :
-                        for dv in v[1] :
+                    if v[1]:
+                        for dv in v[1]:
                             self.maps[map_idx][dv[0]] = dv[1]
                     map_idx += 1
 
-        if False :
-            print ("Final map")
+        if False:
+            print("Final map")
             idx = 0
-            for dictionary in self.maps :
-                print (f"\nMap {idx}")
-                for k,v in dictionary.items() :
-                    print (f"{k} : {v}")
+            for dictionary in self.maps:
+                print(f"\nMap {idx}")
+                for k, v in dictionary.items():
+                    print(f"{k} : {v}")
                 idx += 1
         return
     # --------------------------------------------------------------------------
 
-
     # --------------------------------------------------------------------------
+
     @staticmethod
-    def add_derived (srcs, primary_key, kvs, sep) :
-        if kvs is None : return None
+    def add_derived(srcs, primary_key, kvs, sep):
+        if kvs is None:
+            return None
         derived = []
-        sep     = '_'
-        for k,v in kvs :
+        sep = '_'
+        for k, v in kvs:
 
             dkey = primary_key + sep + k
 
@@ -151,50 +155,51 @@ class Maps () :
             # There is perverse case where the user could define
             # a primary key with the same name, so should check
             # --------------------------------------------------
-            if  dkey in srcs :
-                print (f"WARNING: Ignoring duplicate secondary {dkey} entry of\n"
-                               f"         {v}")
+            if dkey in srcs:
+                print(
+                    f"WARNING: Ignoring duplicate secondary {dkey} entry of\n"
+                    f"         {v}")
                 return -1
 
-            derived.append ([dkey, v])
+            derived.append([dkey, v])
 
         return derived
 
     @staticmethod
-    def add_srcs (srcs, primary_key, primary_val, kvs, sep) :
+    def add_srcs(srcs, primary_key, primary_val, kvs, sep):
 
-        if not primary_key in srcs :
+        if primary_key not in srcs:
             # ----------------------------------------
             # First time this key has been encountered
             # Compose  derived key,values
             # ----------------------------------------
-            derived = Maps.add_derived (srcs, primary_key, kvs, sep)
+            derived = Maps.add_derived(srcs, primary_key, kvs, sep)
             srcs[primary_key] = [[primary_val, derived]]
             return
 
-        else :
+        else:
 
             # --------------------------------------------------
             # Not the first, so need to check this key is unique
             # before appending
             # --------------------------------------------------
-            if primary_val in srcs[primary_key] :
+            if primary_val in srcs[primary_key]:
 
-                print (f"WARNING: Ignoring duplicate {key} entry of\n"
-                       f"         {primary_val}")
+                print(f"WARNING: Ignoring duplicate {key} entry of\n"
+                      f"         {primary_val}")
                 return -1
 
-            else :
-                derived = Maps.add_derived (srcs, primary_key, kvs, sep)
-                srcs[primary_key].append ([primary_val, derived])
+            else:
+                derived = Maps.add_derived(srcs, primary_key, kvs, sep)
+                srcs[primary_key].append([primary_val, derived])
 
         return
     # --------------------------------------------------------------------------
 
-
     # -------------------------------------------------------------------------
+
     @staticmethod
-    def compile (srcs, dictionary) :
+    def compile(srcs, dictionary):
         '''
         Compiles each the entry in the dictionary into possibly an expanded
         set of sources if the dictionary value contains wildcards or a list
@@ -215,124 +220,127 @@ class Maps () :
            dictionary = Dictionary_of_Files('file', ['cfgs/*.cfg'])
         '''
 
-        key       = dictionary.key
+        key = dictionary.key
         dtype, vs = dictionary.tvs
 
-        if dtype == 'Builds' :
-            for build in vs :
-                kvs = [ [ 'id' , build[0] ]]
-                Maps.add_srcs (srcs, key, build[1], kvs, '_')
-            return len (vs)
+        if dtype == 'Builds':
+            for build in vs:
+                kvs = [['id', build[0]]]
+                Maps.add_srcs(srcs, key, build[1], kvs, '_')
+            return len(vs)
 
-        if dtype == 'Files' :
-            errs   = 0
+        if dtype == 'Files':
+            errs = 0
             nfiles = 0
-            for file_specs in vs :
-                files = glob.glob (os.path.expandvars (file_specs))
+            for file_specs in vs:
+                files = glob.glob(os.path.expandvars(file_specs))
 
                 # ---------------------------------
                 # Check that some files where found
                 # ---------------------------------
-                if  len (files) == 0 :
-                    errs  += 1
-                    print ( "\nERROR: No files found satisfying\n"
-                             f"       {file_specs}\n")
+                if len(files) == 0:
+                    errs += 1
+                    print("\nERROR: No files found satisfying\n"
+                          f"       {file_specs}\n")
                     continue
-                elif errs :
+                elif errs:
                     # No reason to expand after have errors
                     continue
 
-                for file in files :
-                    path = os.path.realpath (os.path.expandvars (file))
-                    dirs, namext = os.path.split (path)
-                    dir          = os.path.split (dirs)[1]
-                    name, ext    = os.path.splitext (namext)
+                for file in files:
+                    path = os.path.realpath(os.path.expandvars(file))
+                    dirs, namext = os.path.split(path)
+                    dir = os.path.split(dirs)[1]
+                    name, ext = os.path.splitext(namext)
 
                     # Derived key,values for files
-                    kvs = [ ['path', path],
-                            [ 'dir',  dir],
-                            ['name', name],
-                            [ 'ext',  ext] ]
+                    kvs = [['path', path],
+                           ['dir', dir],
+                           ['name', name],
+                           ['ext', ext]]
 
-                    Maps.add_srcs (srcs, key, path, kvs, '_')
-                nfiles += len (files)
+                    Maps.add_srcs(srcs, key, path, kvs, '_')
+                nfiles += len(files)
 
-            if errs : exit (-1)
+            if errs:
+                exit(-1)
             return nfiles
 
-        if dtype == 'Fpgas' :
+        if dtype == 'Fpgas':
 
-            for fpga in vs :
+            for fpga in vs:
                 # Derived key values for fpgas
-                kvs = [ [          'id', fpga.id          ],
-                        [        'part', fpga.part        ],
-                        [       'clock', fpga.clock       ],
-                        ['uncertainity', fpga.uncertainity] ]
+                kvs = [['id', fpga.id],
+                       ['part', fpga.part],
+                       ['clock', fpga.clock],
+                       ['uncertainity', fpga.uncertainity]]
 
-                Maps.add_srcs (srcs, key, fpga, kvs, '_')
-            return len (vs)
+                Maps.add_srcs(srcs, key, fpga, kvs, '_')
+            return len(vs)
 
-        if dtype == 'Values' :
-            for val in vs :
-                Maps.add_srcs (srcs, key, val, None, '_')
-            return len (vs)
+        if dtype == 'Values':
+            for val in vs:
+                Maps.add_srcs(srcs, key, val, None, '_')
+            return len(vs)
 
         return
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
-def doit () :
+def doit():
 
-    import os,sys,glob
-    sys.path.append (os.path.split (os.path.split (__file__)[0])[0])
+    import os
+    import sys
+    import glob
+    sys.path.append(os.path.split(os.path.split(__file__)[0])[0])
 
-    from vitispy.directory  import Directory
-    sys.path.append (Directory.root)
-    from vitispy.project    import Project
-    from vitispy.product    import Product
-    from vitispy.maps       import Maps
-
+    from vitispy.directory import Directory
+    sys.path.append(Directory.root)
+    from vitispy.project import Project
+    from vitispy.product import Product
+    from vitispy.maps import Maps
 
     # Convience variables
-    build0 =     ('b0', {'top'     : 'processStream',
-                         'tb'      : [ 'tbFiles'],
-                         'syn'     : [ 'synFiles'],
-                         'ldflags' : 'ldFlags etc',
-                         'csim'    : 'csim_arg0',
-                         'cosim'   : 'cosim_arg0' } )
+    build0 = ('b0', {'top': 'processStream',
+                     'tb': ['tbFiles'],
+                     'syn': ['synFiles'],
+                     'ldflags': 'ldFlags etc',
+                     'csim': 'csim_arg0',
+                     'cosim': 'cosim_arg0'})
 
-    build1 =    ['b1', { 'top'     : 'processStream',
-                         'tb'      : [ 'tbFiles'],
-                         'syn'     : [ 'synFiles'],
-                         'ldflags' : 'ldFlags etc',
-                         'csim'    : 'csim_arg0',
-                         'cosim'   : 'cosim_arg0' } ]
+    build1 = ['b1', {'top': 'processStream',
+                     'tb': ['tbFiles'],
+                     'syn': ['synFiles'],
+                     'ldflags': 'ldFlags etc',
+                     'csim': 'csim_arg0',
+                     'cosim': 'cosim_arg0'}]
 
-    files    = '${SNL_TESTS}/tests/layers/networks/conv*_same/*.hh'
-    files    = os.path.expandvars (files)
-    fpgas    = ( Product.Fpga ('xcku115-flvb2104-2-i', '6',  None, 'f0'),
-                 Product.Fpga ('xcku115-flvb2104-2-i', '5',  None, 'f1') )
+    files = '${SNL_TESTS}/tests/layers/networks/conv*_same/*.hh'
+    files = os.path.expandvars(files)
+    fpgas = (Product.Fpga('xcku115-flvb2104-2-i', '6', None, 'f0'),
+             Product.Fpga('xcku115-flvb2104-2-i', '5', None, 'f1'))
 
-    dictionaries = ( Product.Builds   ('build',    [build0, build1]),
-                     Product.Files    ('network',  files),
-                     Product.Fpgas    ('fpga',     fpgas),
-                     Product.Values   ('ddefs',    (1, 2, 3)))
-    template     = "xyz-{build_id}-{network_name}-{fpga_id}-d{ddefs}"
+    dictionaries = (Product.Builds('build', [build0, build1]),
+                    Product.Files('network', files),
+                    Product.Fpgas('fpga', fpgas),
+                    Product.Values('ddefs', (1, 2, 3)))
+    template = "xyz-{build_id}-{network_name}-{fpga_id}-d{ddefs}"
 #    template     = "xyz-{build_id}-{network_name}-{fpga_id}"
 
-    maps         = Maps (dictionaries)
+    maps = Maps(dictionaries)
 
     idx = 0
-    for map in maps.maps :
-        s = template.format_map (map)
-        print (f"{idx:3d}: {s}")
+    for map in maps.maps:
+        s = template.format_map(map)
+        print(f"{idx:3d}: {s}")
         idx += 1
 
     return 0
 # ------------------------------------------------------------------------------
 
-if __name__ == "__main__" :
 
-    status = doit ()
-    exit (status)
+if __name__ == "__main__":
+
+    status = doit()
+    exit(status)

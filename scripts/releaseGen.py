@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Title      : Release generation
 # ----------------------------------------------------------------------------
 # This file is part of the 'SLAC Firmware Standard Library'. It is subject to
@@ -16,7 +16,7 @@ import re
 import releaseNotes
 
 ghRepo = os.environ.get('TRAVIS_REPO_SLUG')
-token  = os.environ.get('GH_REPO_TOKEN')
+token = os.environ.get('GH_REPO_TOKEN')
 newTag = os.environ.get('TRAVIS_TAG')
 
 if ghRepo is None:
@@ -29,7 +29,7 @@ if newTag is None:
     exit("TRAVIS_TAG not in environment.")
 
 # Check tag to make sure it is a proper release: va.b.c
-vpat = re.compile('v?\d+\.\d+\.\d+')
+vpat = re.compile('v?\\d+\\.\\d+\\.\\d+')
 
 if vpat.match(newTag) is None:
     exit("Not a release version")
@@ -39,11 +39,16 @@ gh = Github(token)
 remRepo = gh.get_repo(ghRepo)
 
 # Find previous tag
-oldTag = git.Git('.').describe('--abbrev=0','--tags',newTag + '^')
+oldTag = git.Git('.').describe('--abbrev=0', '--tags', newTag + '^')
 
 # Get release notes
-md = releaseNotes.getReleaseNotes(locRepo = git.Git('.'), remRepo = remRepo, oldTag = oldTag, newTag = newTag)
+md = releaseNotes.getReleaseNotes(
+    locRepo=git.Git('.'),
+    remRepo=remRepo,
+    oldTag=oldTag,
+    newTag=newTag)
 md += releaseNotes.getCompareUrl(remRepo, oldTag, newTag)
+
 
 def releaseType(ver):
     parts = str.split(ver.replace('v', ''), '.')
@@ -53,14 +58,16 @@ def releaseType(ver):
         return 'Minor'
     return 'Major'
 
+
 newName = f'{releaseType(newTag)} Release {newTag}'
 
 # Check if tag already exists
 try:
     remRepo.get_release(newTag)
-except:
+except BaseException:
     # Create release using tag
-    remRel = remRepo.create_git_release(tag=newTag, name=newName, message=md, draft=False)
+    remRel = remRepo.create_git_release(
+        tag=newTag, name=newName, message=md, draft=False)
     print("Success!")
 else:
-    print( f'{newTag} release already exists' )
+    print(f'{newTag} release already exists')

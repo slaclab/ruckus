@@ -10,7 +10,8 @@
 
 import os
 
-class VitisVersion :
+
+class VitisVersion:
     '''
     DESCRIPTION
     Determines the Vitis versioning.
@@ -38,27 +39,27 @@ class VitisVersion :
     '''
     # --------------------------------------------------------------------------
     #
-    def __init__ (self) :
+
+    def __init__(self):
         import re
 
-        found   = False
+        found = False
 
         # ----------------------------------------------------------
         # FAST search -- find the version in the directory path
         # -----------------------------------------------------
         regexpr = r"20[0-9][0-9]\.[0-9]"
-        vdir    = os.getenv ('XILINX_HLS')
-        while vdir :
-            vdir,full = os.path.split (vdir)
-            version   = re.search (regexpr, full)
-            if version :
-                full         = version.group ()
+        vdir = os.getenv('XILINX_HLS')
+        while vdir:
+            vdir, full = os.path.split(vdir)
+            version = re.search(regexpr, full)
+            if version:
+                full = version.group()
                 self.version = full[0:6]
-                self.major   = full[0:4]
-                self.minor   = full[5:6]
+                self.major = full[0:4]
+                self.minor = full[5:6]
                 return
         # ----------------------------------------------------------
-
 
         # ----------------------------------------------------------
         # SLOW search -- find the version in the Vitis splash banner
@@ -66,23 +67,23 @@ class VitisVersion :
         import subprocess
 
         try:
-            result = subprocess.run (['vitis', '--version'],
-                                      capture_output=True, text=True)
+            result = subprocess.run(['vitis', '--version'],
+                                    capture_output=True, text=True)
 
         except FileNotFoundError:
-            print ("failure")
+            print("failure")
             return "Vitis not found in PATH"
 
-        else :
-            regexpr      = r"v20[0-9][0-9]\.[0-9]"
-            version      = re.search (regexpr, result.stdout)
-            full         = version.group ()
+        else:
+            regexpr = r"v20[0-9][0-9]\.[0-9]"
+            version = re.search(regexpr, result.stdout)
+            full = version.group()
             self.version = full[1:7]
-            self.major   = full[1:5]
-            self.minor   = full[6:7]
+            self.major = full[1:5]
+            self.minor = full[6:7]
 
         return
     # --------------------------------------------------------------------------
 
 
-Version = VitisVersion ()
+Version = VitisVersion()

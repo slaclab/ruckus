@@ -8,8 +8,8 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-class Printer :
-    def __init__ (self, n = 20, s = 78, i = 15, p = 7) :
+class Printer:
+    def __init__(self, n=20, s=78, i=15, p=7):
         self.s = s
         self.n = n
         self.i = i
@@ -17,52 +17,56 @@ class Printer :
         self.m = 3
         return
 
-    def separator (self, c, n = None) :
-        if not n: n = self.s
-        print (f"{c*n}")
+    def separator(self, c, n=None):
+        if not n:
+            n = self.s
+        print(f"{c*n}")
         return
 
-    def caption (self, string) :
-        slen = len (string)
-        print (f"{string}\n"
-               f"{'-'*slen}")
+    def caption(self, string):
+        slen = len(string)
+        print(f"{string}\n"
+              f"{'-'*slen}")
         return
 
-    def header  (self, string) :
-        self.separator ('=')
-        self.caption   (string)
+    def header(self, string):
+        self.separator('=')
+        self.caption(string)
         return
 
-    def prefixed_line (self, label, field, value, sep=':') :
-        self.line (f"{label:{self.p}s}{field}", value, sep)
+    def prefixed_line(self, label, field, value, sep=':'):
+        self.line(f"{label:{self.p}s}{field}", value, sep)
         return
 
-    def line (self, label, value = None, sep=':') :
-        if value :
-            print (f"{label:{self.n}s}{sep} {value}")
-        else :
-            print (label)
+    def line(self, label, value=None, sep=':'):
+        if value:
+            print(f"{label:{self.n}s}{sep} {value}")
+        else:
+            print(label)
         return
 
-    def item (self, idx, caption, itm, sep = ':') :
-        if idx is None :
-            self.itemPlain (caption, itm, sep)
+    def item(self, idx, caption, itm, sep=':'):
+        if idx is None:
+            self.itemPlain(caption, itm, sep)
             return
-        else :
-            if   itm : print (f"{idx:3d}. {caption:{self.i}s}{sep} {itm}")
-            else     : print (f"{idx:3d}. {caption:{self.i}s}")
-            return;
+        else:
+            if itm:
+                print(f"{idx:3d}. {caption:{self.i}s}{sep} {itm}")
+            else:
+                print(f"{idx:3d}. {caption:{self.i}s}")
+            return
 
-    def itemPlain (self, caption, itm, sep = ':') :
-        if   itm : print (f"{' ':3s}  {caption:{self.i}s}{sep} {itm}")
-        else     : print (f"{' ':3s}  {caption:{self.i}s}")
+    def itemPlain(self, caption, itm, sep=':'):
+        if itm:
+            print(f"{' ':3s}  {caption:{self.i}s}{sep} {itm}")
+        else:
+            print(f"{' ':3s}  {caption:{self.i}s}")
         return
 
-
-    def footer  (self) :
-        self.separator ('=')
+    def footer(self):
+        self.separator('=')
         return
 
-    n : int
-    s : int
+    n: int
+    s: int
 # ------------------------------------------------------------------------------

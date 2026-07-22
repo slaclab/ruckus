@@ -27,16 +27,16 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument(
     "--bin",
-    type     = str,
-    required = True,
-    help     = "path to .bin file",
+    type=str,
+    required=True,
+    help="path to .bin file",
 )
 
 parser.add_argument(
     "--txt",
-    type     = str,
-    required = True,
-    help     = "path to .txt file",
+    type=str,
+    required=True,
+    help="path to .txt file",
 )
 
 # Get the arguments
@@ -56,6 +56,6 @@ if __name__ == '__main__':
     for i in range(len(data)):
         byte = hex(data[i]).upper()[2:].zfill(2)
         ofd.write(byte)
-        if (i%8==7):
+        if (i % 8 == 7):
             ofd.write('\n')
     ofd.close()
