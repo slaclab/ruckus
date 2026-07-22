@@ -42,6 +42,11 @@ def add_arguments (parser) :
                          action='store_true',
                          help='Show custom help')
 
+    parser.add_argument ('--cfg-root',
+                         default = None,
+                         dest    = 'cfg_root',
+                         help    = 'Configuration files root directory')
+
     Workspace.add_arguments (parser)
     Action   .add_arguments (parser, 'Configuration')
     hlsIp.Ip .add_arguments (parser)
@@ -582,7 +587,6 @@ def main () :
     "        $ hlsCfg --components='*'\n",
     file = sys.stderr))
 
-
     # -------------------------------
     # Get the command line parameters
     # -------------------------------
@@ -594,19 +598,24 @@ def main () :
         display_manpage (__file__)
         exit (0)
 
-
     # ----------------------------------------
     # Extract the project specific information
     # ----------------------------------------
     if not check_project_file (args.project) : sys.exit (-1)
-    needs   = (Project.Need.Root      |
-               Project.Need.Workspace |
-               Project.Need.Products)
+    needs   = (Project.Need.Root          |
+               Project.Need.Workspace     |
+               Project.Need.Products_Root |
+               Project.Need.Build_Root    |
+               Project.Need.Cfg_Root  )
     project =  Project (needs,
                         args.project,
                         args.root,
                         args.products_root,
-                        args.workspace)
+                        args.build_root,
+                        args.workspace,
+                        args.cfg_root,
+                        None)
+
     if project.error :
         status = project.report (needs)
         return status

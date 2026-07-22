@@ -50,6 +50,7 @@ def add_arguments (parser) :
 
     Workspace.add_arguments (parser)
 
+
     parser.add_argument ('parameters',
                          help    = "The list of components",
                          nargs   = '*',
@@ -403,14 +404,18 @@ def doit () :
     components    =  merge (args.parameters, args.components)
     printer       =  Printer (18, 78, 20)
     needs         =  Project.Need.Workspace
-    if args.ip is not None : needs |= Project.Need.Products_Root
+    if args.ip is not None :
+        needs |= (Project.Need.Products_Root
+              |   Project.Need.Ip_Root)
 
     project       =  Project (needs,
                               args.project,
                               args.root,
                               args.products_root,
-                              args.workspace)
-
+                              None,                # build_root not needed
+                              args.workspace,
+                              None,                # cfg_root   not needed
+                              args.ip_dir)
 
     workspace    = project.workspace
     if not workspace :
@@ -434,11 +439,14 @@ def doit () :
     # ----------------------------
     # Setup IP family augmentation
     # ----------------------------
+    ip = None
     if options.stages & (Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp) :
         if project.has_project_file :
             ip = project.get_ip ()
-            ip.replace (args)
-        else :
+            if  ip :
+                ip.replace (args)
+
+        if not ip :
             ip = Project.Ip (dir      = args.ip_dir,
                              zip_file = args.ip_zip_file,
                              dcp_file = args.ip_dcp_file,
@@ -447,10 +455,11 @@ def doit () :
                              jou_file = args.ip_dcp_jou_file,
                              log_file = args.ip_dcp_log_file)
 
-        ip.set_dir (project.products_root)
+        if not ip.dir :
+            ip.dir     = os.path.join (project.products_root,   'ip', '{vitis_version}')
 
-    else :
-        ip = None
+        if not ip.dgn_dir :
+            ip.dgn_dir = os.path.join (project.build_root,'ip','dgn','{vitis_version}')
 
     if args.list :
         if components is None or (len (components) == 0) : components = ['*']

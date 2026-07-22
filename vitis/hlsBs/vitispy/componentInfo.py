@@ -34,13 +34,13 @@ class ComponentInfo :
                 # Starting at 2025.1,
                 # the cfg directory is relative to the component path
                 # so check if the cfg is relative and add the component path
-                if (os.path.isabs (cfg) == False) :
+                if (not os.path.isabs (cfg)) :
                     cfg = os.path.join (component_path, cfg)
 
                 self.cfg_files = os.path.realpath (cfg)
 
                 work_dir = data['configuration']['work_dir']
-                if (os.path.isabs (work_dir) == False) :
+                if (not os.path.isabs (work_dir)):
                     work_dir = os.path.join (component_path, work_dir)
 
                 self.work_dir = os.path.realpath (work_dir)
@@ -59,7 +59,7 @@ class ComponentInfo :
                         self.sim_argv  = ''
                         self.syn_dcp   = False
 
-                        look : int = 15
+                        look: int = 15
                         for line in file :
 
                             if    (look & 1) and (line[0:9] == "csim.argv") :
@@ -74,13 +74,13 @@ class ComponentInfo :
                                 look &= ~2
                                 if look == 0 : break
 
-                            elif (look & 4) and (line[0:7] == 'syn.top') :
+                            elif  (look & 4) and (line[0:7] == 'syn.top') :
                                 idx = line[7:].find ('=')
                                 self.hls_top_level = line[idx+7+1:].strip ()
                                 look &= ~4
                                 if look == 0: break
 
-                            elif (look&8) and (line[0:16]=='vivado.syn_dcp=1'):
+                            elif  (look&8) and (line[0:16]=='vivado.syn_dcp=1'):
                                 look        &= ~8
                                 self.syn_dcp = True
                                 if look == 0: break
@@ -98,7 +98,7 @@ class ComponentInfo :
                 print(f"Error: The file '{vitis_comp_path}' was not found.")
 
         except json.JSONDecodeError as e:
-            self.errs |= ComponentInfo.ErrJsonFile
+            self.errs |= ComponentInfo.ErrJsonDecode
             if not silence_error :
                 print(f"Error decoding JSON from '{vitis_comp_path}': {e}")
 

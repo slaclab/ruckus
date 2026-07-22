@@ -10,7 +10,8 @@
 
 import os
 
-class Category :
+
+class Category:
     '''
     Categorize a list of options to be acted by an action as
             Command option  Target       Applies to
@@ -18,9 +19,9 @@ class Category :
          2.      'missing'  Missing      Missing  targets
          3.        'kruft'  CruftLo      Low confidence cruft
          4.        'Kruft'  CruftHi      High confidence cruft
-         5.        'cruft'  CruftLo & Hi Bot low and high confidence cruft
+         5.        'cruft'  CruftLo & Hi Both low and high confidence cruft
 
-    Existing and missing are fairly self-explanatory, e.g. list=existing of
+    Existing and missing are fairly self-explanatory, e.g. list=existing or
     list=missing.
 
     Cruft is more nuanced. Cruft refers to targets that are unknown to the
@@ -28,23 +29,23 @@ class Category :
     convention changes. The original file still exists, but is not among the
     new project's configuration files.
 
-    Continuing with this example, if component associated with this leftover
+    Continuing with this example, if a component associated with this leftover
     configuration file exists in the workspace, that component contains a
     reference to its configuration file. One can be highly confident that this
     is a leftover configuration file as opposed to some random file.
 
     Contrast this with the case where the component does not exist. All one has
     to go on from the project definition is that there is a list of directories
-    that contain the configuratin files. Given there could be other files in
+    that contain the configuration files. Given there could be other files in
     these directories also, there is no hard way to distinguish what is or is
-    not a configuration file, so some heurestic has been chosen.  In the case
-    of configurations file, this heurestic is whether the file extension matches
+    not a configuration file, so some heuristic has been chosen.  In the case
+    of configuration files, this heuristic is whether the file extension matches
     that used by the directory defined in the list of projects. Normally this
-    would be '.cfg', but that is simple a convention.  This method has slightly
-    more generality. One could try to read the files contents, but this is error
+    would be '.cfg', but that is simply a convention.  This method has slightly
+    more generality. One could try to read the file's contents, but this is error
     prone.  What's to say this is just not some file that looks like a
     configuration file.  Maybe it is a file used to document a configuration
-    file containing an example.  Bottom line, cateogrizes such target as cruft
+    file containing an example.  Bottom line, cateogrizing such target as cruft
     is deemed low confidence.  Any destructive action on it should be carefully
     vetted
     '''
@@ -58,9 +59,9 @@ class Category :
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def is_in (s, l) :
+    def is_in (s, lst) :
         n = len (s)
-        for member in l:
+        for member in lst:
             if s == member[0:n] : return True
         return False
     # --------------------------------------------------------------------------
@@ -165,8 +166,8 @@ class Category :
 
                 # Have a match with components of interest
 
-                exists   = os.path.isdir (cmp_path)
-                target   = Target (cmp_name, cmp_path, cfg_path, 0)
+                exists = os.path.isdir (cmp_path)
+                target = Target (cmp_name, cmp_path, cfg_path, 0)
 
                 # Categorize as existing or missing
                 if exists :

@@ -104,7 +104,7 @@ class Configuration :
     def print_argv (printer, label, argv) :
 
         sep    = ':'
-        prefix = '-'
+        prefix = ''
         opts   = argv.split (' -')
 
         for opt in opts :
@@ -180,10 +180,10 @@ class Configuration :
         # -----------------------------------
         # Resolve the target dependent values
         # -----------------------------------
-        self.top = build['top']
+        self.top = build.top
 
-        if 'ldflags' in build :
-            self.ldflags = build['ldflags']
+        if  hasattr (build, 'ldflags') :
+            self.ldflags = build.ldflags
         else :
             self.ldflags = None
 
@@ -191,22 +191,22 @@ class Configuration :
         # ------------------------------------
         # Programmatically set desired options
         # ------------------------------------
-        if 'sim_argv' in build :
-            sim_argv  = build['sim_argv']
+        if  hasattr (build, 'sim') :
+            sim_argv  = build.sim_argv
             if   sim_argv : self.sim_argv = sim_argv.format_map (target.map)
             else          : self.sim_argv = None
         else :
             self.sim_argv = None
 
-        if 'csim_argv' in build :
-            csim_argv = build['csim_argv']
+        if  build.csim_argv :
+            csim_argv = build.csim_argv
             if   csim_argv : self.csim_argv = csim_argv.format_map  (target.map)
             else           : self.csim_argv = None
         else :
             self.csim_argv = None
 
-        if 'cosim_argv' in build :
-            cosim_argv = build['cosim_argv']
+        if  build.cosim_argv :
+            cosim_argv = build.cosim_argv
             if cosim_argv : self.cosim_argv = cosim_argv.format_map (target.map)
             else          : self.cosim_argv = None
         else :
@@ -238,6 +238,21 @@ class Configuration :
         self.fpga = target.fpga
         if not self.dry_run :
 
+            inc_dir     = os.path.join (self.project.products_root, 'include')
+            if not os.path.isdir (inc_dir) :
+                if not os.path.exists (inc_dir) :
+                    os.mkdir (inc_dir)
+
+            import_file = os.path.join (inc_dir, 'import_file.hh')
+            if os.path.exists (import_file) :
+                os.remove (import_file)
+
+            with open (import_file, 'w') as file :
+                file.write ("#define HLSBS_QUOTE_IT(_x) #_x\n"
+                            "#define IMPORT_FILE(_x) HLSBS_QUOTE_IT(_x)")
+            self.import_file = import_file
+
+
             cfg_file = self.client.get_config_file(path = cfg_path)
 
             # --------------------------------
@@ -250,15 +265,16 @@ class Configuration :
             # ---------------------
             self.project.add (cfg_file)
 
-            # -------------------------------------------
-            # Add the specific configuration to this file
-            # -------------------------------------------
-            self.add_files (build,
-                            cfg_file,
-                            cfg_name,
-                            cmp_name,
-                            self.workspace,
-                            map)
+            # ------------------------------------------------
+            # Add the specific configuration the build sources
+            # ------------------------------------------------
+            self.add_sources (build,
+                              cfg_file,
+                              cfg_name,
+                              cmp_name,
+                              self.workspace,
+                              map,
+                              self.import_file)
 
 
         # -------------------------------------
@@ -328,19 +344,8 @@ class Configuration :
             includes = (includes,)
 
         for inc in includes :
-            paths = inc['paths']
-            type  = inc['type']
-
-            if type != 'rel_path' and type != 'abs_path' :
-                print ( "ERROR: Include path type invalid for file\n"
-                       f"    src_file  = {src_file}\n"
-                       f"    cmp_name  = {cmp_name}\n"
-                       f"        type  = \'{type}\' is not recognized\n"
-                       f"       valid  = \'rel_path\' and \'abs_path\'\n"
-                       f"       paths  = {paths}\n", file = sys.stderr)
-                errs += 1
-                continue
-
+            paths = inc.paths
+            dtype = inc.type
 
             if  not isinstance (paths, (list, tuple)) :
                 paths = [paths]
@@ -348,11 +353,11 @@ class Configuration :
                 path     = path.format_map (map)
                 exp_path = os.path.expandvars (path)
 
-                if   type == 'abs_path' :
+                if  dtype == 'abs_path' :
                     inc_path = exp_path
                     inc_dir  = '/' + path
 
-                elif type == 'rel_path' :
+                elif dtype == 'rel_path' :
 
                     if os.path.isabs (exp_path) :
                         inc_dir  = Configuration.make_relative (exp_path,
@@ -374,7 +379,7 @@ class Configuration :
                            f"     : rel_path = {rel_path}\n"
                            f"     : src_file = {src_file}\n"
                            f"     : cmp_name = {cmp_name}\n"
-                           f"     : type     = {type}", file = sys.stderr)
+                           f"     : type     = {dtype}", file = sys.stderr)
                     errs += 1
 
                 incs += ' -I ' + inc_dir
@@ -385,10 +390,24 @@ class Configuration :
 
     # --------------------------------------------------------------------------
     @staticmethod
+    def include_add (need_import, import_file, rel_path, dname, file) :
+        defs = ''
+        if need_import :
+            import_file = os.path.relpath (os.path.realpath (import_file), rel_path)
+            defs += " -include " + import_file
+
+        defs += " -D" + dname + "=" + file
+        return defs
+    # --------------------------------------------------------------------------
+
+
+    # --------------------------------------------------------------------------
+    @staticmethod
     def expand_defs (defines,
                      cmp_name,
                      src_file,
-                     map) :
+                     map,
+                     import_file) :
 
         # ------------------------------------------------------------
         # !!! KLUDGE !!!
@@ -397,43 +416,34 @@ class Configuration :
         src_dir     = os.path.split (src_file)[0]
         defs        = ''
         errs        = 0
-
-        if not isinstance (defines, list) : defines = [defines]
+        need_quote  = True
 
         for d in defines :
-            name  = d[ 'name']
-            if 'type' in d : type  = d[ 'type']
-            else :
-                print (f"ERROR: define specfication '{name}' missing the required type, one of\n"
-                       f"     : [flag | string]\n"
-                       f"   ->: {src_file}\n")
-                errs += 1
-                continue
-
-
+            dname  = d.name
+            dtype  = d.type
 
             # ---------------------------
             # Define is just a flag value
             # ---------------------------
-            if   type == 'flag' :
-                defs += ' -D' + name
+            if  dtype == 'flag' :
+                defs += ' -D' + dname
                 continue
 
-            value = d['value'] if 'value' in d else None
+            value = d.value
 
             # -----------------------------------
             # All remaining types require a value
             # -----------------------------------
             if not value :
-                print (f"ERROR: {name} define of type {type} missing the required value\n"
+                print (f"ERROR: {dname} define of type {dtype} missing the required value\n"
                        f"   ->: {src_file}")
                 errs += 1
 
             # ---------------------------
             # Define -> -D <Name>=<Value>
             # ---------------------------
-            if type == 'string' :
-                define = ' -D ' + name
+            if dtype == 'string' :
+                define = ' -D ' + dname
                 define += '=' + value.format_map (map)
                 defs += define
                 continue
@@ -441,31 +451,35 @@ class Configuration :
             # ---------------------------------------
             # Define is an including an absolute file
             # ---------------------------------------
-            elif type == 'abs_file' :
+            elif dtype == 'abs_file' :
                 # If value begins with '{' treat as substition value, else use as is
                 file     = value.format_map (map) if value[0] == '{' else value
                 abs_file = os.path.expandvars (file)
-                file     = '\"' + file + '\"'
+#                file     = '\"' + file + '\"'
                 exists   = os.path.isfile (abs_file)
                 if not exists :
                     print
-                    (f"ERROR: {name} define type {type} file does not exist\n"
+                    (f"ERROR: {dname} define type {dtype} file does not exist\n"
                      f"     : {abs_filefile}\n"
                      f"   ->: {src_file}\n")
                     errs += 1
                     continue
 
-                defs += ' -D' + name + '=' + file
+                if need_quote :
+                    defs      += "' -DHLSBS_QUOTE\(_x\)=#_x'"
+                    need_quote = False
+
+                defs += ' -D' + dname + '=HLSBS_QUOTE\(' + file + '\)'
 
             # -------------------------------------------------
             # Define is including a file relative to the source
             # -------------------------------------------------
-            elif type == 'rel_path' :
+            elif dtype == 'rel_file' :
                 # If value begins with '{' treat as substition value, else use as is
                 file     = value.format_map (map) if value[0] == '{' else value
                 exp_file = os.path.expandvars (file)
                 rel_path = os.path.expandvars (
-                           d['rel_path']).format_map (map)
+                           d.rel_path.format_map (map))
 
                 if os.path.isabs (exp_file):
                     abs_file = exp_file
@@ -475,26 +489,33 @@ class Configuration :
                     abs_file = os.path.realpath (os.path.join (rel_path,
                                                                exp_file))
 
+
                 exists   = os.path.isfile (abs_file)
                 print
                 if not exists :
                     print (
-                        f"ERROR: {name} define type {type} file does not exist\n"
+                        f"ERROR: {dname} define type {dtype} file does not exist\n"
                         f"     : {file}\n"
                         f"     : {rel_path}\n"
                         f"     : {rel_file}\n"
                         f"   ->: {abs_file}\n")
                     errs += 1
                     continue
-                defs += ' -D' + name + '=' + "'\"" + rel_file + "\"'"
+
+                defs += Configuration.include_add (need_quote,
+                                                   import_file,
+                                                   rel_path,
+                                                   dname,
+                                                   rel_file)
+                need_quote = False
 
             # --------------------------
             # Error: Unknown define type
             # --------------------------
             else :
                 print (
-                    f"ERROR: Type  = {type} is not a recognized define type\n"
-                    f"     :  Name  = {name}\n"
+                    f"ERROR:  Type  = {dtype} is not a recognized define type\n"
+                    f"     :  Name  = {dname}\n"
                     f"     : Value = {value}\n"
                     f"    -> {src_file}", file = sys.stderr)
                 errs += 1
@@ -505,106 +526,113 @@ class Configuration :
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def _add_files (cfg_file,
-                    cfg_name,
-                    cmp_name,
-                    workspace,
-                    map,
-                    cfg_path,
-                    files,
-                    label) :
+    def _add_sources (cfg_file,
+                      cfg_name,
+                      cmp_name,
+                      workspace,
+                      map,
+                      cfg_path,
+                      sources,
+                      label,
+                      import_file) :
 
         errors      = 0
         first       = True
         key_file    = label + '.file'
         key_cflags  = label + '.file_cflags'
 
-        for file in files :
+        for source in sources :
 
-            file_path = os.path.expandvars (file['files'])
-            exists    = os.path.isfile (file_path)
-            if not exists :
-                print (f"ERROR: {file['files']} does not exist\n"
-                       f"   ->  {file_path}\n",
-                       file = sys.stderr)
-                errors += 1
-                continue
+            for file in source.files :
+                file_path = os.path.expandvars (file)
+                exists    = os.path.isfile (file_path)
+                errs      = 0
+                incs      = None
+                defs      = None
 
-            cc_file    = Configuration.make_relative (file_path,
-                                                      cfg_path,
-                                                      False)
+                if not exists :
+                    print (f"ERROR: In {label} files, file does not exist\n"
+                           f"   ->  {file_path}\n",
+                           file = sys.stderr)
+                    errs    = 1
+                    errors += 1
+                    continue
 
-            # -------------------------------
-            # Add the include paths, -I <path>
-            # -------------------------------
-            if 'includes' in file :
-                errs, incs = Configuration.expand_incs (file['includes'],
-                                                        cmp_name,
-                                                        cfg_path,
-                                                        file_path)
-                errors    += errs
+                cc_file    = Configuration.make_relative (file_path,
+                                                          cfg_path,
+                                                          False)
+                # -------------------------------
+                # Add the include paths, -I <path>
+                # -------------------------------
+                if source.includes :
+                    inc_errs, incs = Configuration.expand_incs (source.includes,
+                                                                cmp_name,
+                                                                cfg_path,
+                                                                file_path)
+                    errors += inc_errs
+                    errs   += inc_errs
 
-            # ------------------------------------------------
-            # Add the defines, i.e. -D <Name>, -D <Name=Value>
-            # ------------------------------------------------
-            if 'defines' in file :
-                errs, defs = Configuration.expand_defs (file['defines'],
-                                                        cfg_name,
-                                                        file_path,
-                                                        map)
-                errors    += errs
-            else :
-                errs = 0
-                defs = None
+                # ------------------------------------------------
+                # Add the defines, i.e. -D <Name>, -D <Name=Value>
+                # ------------------------------------------------
+                if  source.defines :
+                    def_errs, defs = Configuration.expand_defs (source.defines,
+                                                                cfg_name,
+                                                                file_path,
+                                                                map,
+                                                                import_file)
+                    errors += def_errs
+                    errs   += def_errs
 
-            # ------------------------------------------------------------
-            # Skip writing anything to the output file if there are errors
-            # ------------------------------------------------------------
-            if errs: continue
+                # ------------------------------------------------------------
+                # Skip writing anything to the output file if there are errors
+                # ------------------------------------------------------------
+                if errs: continue
 
-            # --------------------------------------------------------------
-            # Construct the cflags text strings for the includes and defines
-            # --------------------------------------------------------------
-            cflags = None
-            if incs or defs :
-                cflags   =  cc_file + ','
-                if incs : cflags += incs
-                if defs : cflags += defs
+                # --------------------------------------------------------------
+                # Construct the cflags text strings for the includes and defines
+                # --------------------------------------------------------------
+                cflags = None
+                if incs or defs :
+                    cflags   =  cc_file + ','
+                    if incs : cflags += incs
+                    if defs : cflags += defs
 
-            # -----------------------------------------
-            # Bizarrely must write the subsequent files
-            # with a different method than the first
-            # -----------------------------------------
-            if first :
-                cfg_file.set_value  (section = 'hls',
-                                     key     =  key_file,
-                                     value   =  cc_file)
-                if cflags :
+                # -----------------------------------------
+                # Bizarrely must write the subsequent files
+                # with a different method than the first
+                # -----------------------------------------
+                if first :
                     cfg_file.set_value  (section = 'hls',
-                                         key     =  key_cflags,
-                                         value   =  cflags)
-                first = False
-            else :
-                cfg_file.add_values (section = 'hls',
-                                     key     =  key_file,
-                                     values  = [cc_file])
-                if cflags:
+                                         key     =  key_file,
+                                         value   =  cc_file)
+                    if cflags :
+                        cfg_file.set_value  (section = 'hls',
+                                             key     =  key_cflags,
+                                             value   =  cflags)
+                    first = False
+                else :
                     cfg_file.add_values (section = 'hls',
-                                         key     =  key_cflags,
-                                         values  = [cflags])
+                                         key     =  key_file,
+                                         values  = [cc_file])
+                    if cflags:
+                        cfg_file.add_values (section = 'hls',
+                                             key     =  key_cflags,
+                                             values  = [cflags])
 
         return errors
     # --------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------
-    def add_files (self,
-                   build,
-                   cfg_file,
-                   cfg_name,
-                   cmp_name,
-                   workspace,
-                   map) :
+    def add_sources (self,
+                     build,
+                     cfg_file,
+                     cfg_name,
+                     cmp_name,
+                     workspace,
+                     map,
+                     import_file) :
 
         errs = 0
 
@@ -615,28 +643,30 @@ class Configuration :
         # --------------
         # Test Bed Files
         # --------------
-        tbs = build['tb']
-        errs += self._add_files (cfg_file,
-                                 cfg_name,
-                                 cmp_name,
-                                 workspace,
-                                 map,
-                                 cfg_path,
-                                 tbs,
-                                 'tb')
+        tbs = build.tb
+        errs += self._add_sources (cfg_file,
+                                   cfg_name,
+                                   cmp_name,
+                                   workspace,
+                                   map,
+                                   cfg_path,
+                                   tbs,
+                                   'tb',
+                                   import_file)
 
         # ---------------
         # Synthesis Files
         # ---------------
-        syns  = build['syn']
-        errs += self._add_files (cfg_file,
-                                 cfg_name,
-                                 cmp_name,
-                                 workspace,
-                                 map,
-                                 cfg_path,
-                                 syns,
-                                 'syn')
+        syns  = build.syn
+        errs += self._add_sources (cfg_file,
+                                   cfg_name,
+                                   cmp_name,
+                                   workspace,
+                                   map,
+                                   cfg_path,
+                                   syns,
+                                   'syn',
+                                   import_file)
 
         # -------------------
         # Abort if any errors

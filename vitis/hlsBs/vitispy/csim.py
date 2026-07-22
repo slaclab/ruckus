@@ -156,7 +156,10 @@ def get (org_file, command) :
                         args.project,
                         args.root,
                         args.products_root,
-                        args.workspace)
+                        None,                 # Build_Root not needed
+                        args.workspace,
+                        None,                 # Cfg_Root   not needed
+                        None)                 # Ip_Root    not needed
     if project.error :
         status = project.report (needs)
         return status

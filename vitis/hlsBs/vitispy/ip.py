@@ -176,16 +176,17 @@ class Ip :
             printer.itemPlain ("HLS.zip", self.hls_zip)
 
         if verbose and self.family :
+            breakpoint ()
             margin    = printer.m + printer.i
-            available = 80 - margin
+            available = printer.s - margin
             beg       = 0
             cnt       = len (self.family)
-            limit     = 80
             caption   = "   .families"
+            limit     = available
             while True :
                 end = beg + limit
                 if end < cnt :
-                    end = self.family[beg:end].rfind (',')
+                    end = beg + self.family[beg:end].rfind (',')
                     if end == -1 : end = cnt
                 else :  end = cnt
                 printer.itemPlain (caption, self.family[beg:end+1])
@@ -212,6 +213,9 @@ class Ip :
         # -------------------------------------------
         if not os.path.exists (self.prj_ip_dir) :
             os.system (f'mkdir -p {self.prj_ip_dir}')
+        elif os.path.exists (self.prj_ip_zip) :
+            # Remove the existing file
+            os.remove (self.prj_ip_zip)
 
         # ---------------------------------------------------
         # Check if wish to augment the xilinx family of FPGAs
@@ -288,7 +292,7 @@ class Ip :
         # Read the entire file
         # --------------------
         with open (cmp_xml, 'r+') as file :
-            lines = file.read ()
+            lines = file.readlines ()
 
             # -----------------------
             # Clear the original file
@@ -302,16 +306,15 @@ class Ip :
                 if 'xilinx:family' in line : file.write (self.xil_family)
                 else                       : file.write (line)
 
-            # --------------------------------------------------------
-            # Rezip the previously unzipped file, only this time with
-            # the augmented FPGA families.
-            # --------------------------------------------------------
-
-            status = self.rezip (self.prj_ip_zip,
-                                 unzip_dirname,
-                                 printer,
-                                 verbose)
-            return status
+        # --------------------------------------------------------
+        # Recursively zip the previously unzipped file, only this
+        # time with the augmented FPGA families.
+        # --------------------------------------------------------
+        status = self.rezip (self.prj_ip_zip,
+                             unzip_dirname,
+                             printer,
+                             verbose)
+        return status
     # --------------------------------------------------------------------------
 
 
@@ -354,15 +357,15 @@ class Ip :
             # --------------------------------------------------------
             shutil.move (outfile.name, cmp_xml)
 
-            # --------------------------------------------------------
-            # Rezip the previously unzipped file, only this time with
-            # the augmented FPGA families.
-            # --------------------------------------------------------
-            status = self.rezip (self.prj_ip_zip,
-                                 unzip_dirname,
-                                 printer,
-                                 verbose)
-            return status
+        # --------------------------------------------------------
+        # Rezip the previously unzipped file, only this time with
+        # the augmented FPGA families.
+        # --------------------------------------------------------
+        status = self.rezip (self.prj_ip_zip,
+                             unzip_dirname,
+                             printer,
+                             verbose)
+        return status
     # --------------------------------------------------------------------------
 
 
@@ -370,10 +373,10 @@ class Ip :
     @staticmethod
     def rezip (zipped_file, dirname, printer, verbose) :
         """
-        Rezip the contents of the previously unzipped directory
+        Recursively zip the contents of the previously unzipped directory
 
         Args:
-             zipped_file:  The name of output rezipped file
+             zipped_file:  The name of output zipped file
                  dirname:  The directory to zip
                  printer:  Class to print any output
                  verbose:  The verbose output
@@ -393,7 +396,7 @@ class Ip :
 
             process.wait ()
 
-            return process.returncode
+        return process.returncode
     # --------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------

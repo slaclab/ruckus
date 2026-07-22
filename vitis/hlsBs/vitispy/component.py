@@ -8,15 +8,12 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-import sys
-import  os
-from pathlib import Path
+import os
 
 import shutil
 
-from   .dry_run   import DryRun
-from   .workspace import Workspace
-from   .version   import Version
+from .dry_run   import DryRun
+from .workspace import Workspace
 
 # ------------------------------------------------------------------------------
 class Component :
@@ -33,7 +30,8 @@ class Component :
     def __init__ (self, project, args, workspace = None) :
 
         self.configurations = project.configurations
-        self.workspace      = workspace if (workspace is not None) else Workspace.get (project.workspace)
+        self.workspace      = workspace if
+            (workspace is not None) else Workspace.get (project.workspace)
         self.replace        = args.replace is not None
         self.clean          = args.clean   is not None
         self.dry_run        = DryRun (args.dry_run)
@@ -41,6 +39,8 @@ class Component :
         return
     # ------------------------------------------------------------------------------
 
+
+    # ------------------------------------------------------------------------------
     @staticmethod
     def printList (caption, string, printer) :
         if isinstance (string, list) : clist = string
@@ -51,6 +51,8 @@ class Component :
             printer.itemPlain (item, None)
             caption = ' '
         return
+    # ------------------------------------------------------------------------------
+
 
     # ------------------------------------------------------------------------------
     def print (self, printer, print_cfg_file) :

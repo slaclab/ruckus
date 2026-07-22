@@ -108,27 +108,28 @@ class Dcp :
         #    1) absolute and used as asis
         #    2) relative and used as a subdirectory of the dcp_dir
         #
-        # It defaults to 'dgn/'
+        # It defaults to 'ip/dgn/{vitis_version}'
         # ---------------------------------------------------------------
         if not dgn_dir :
-            dgn_dir = os.path.join (self.dcp_dir, 'dgn/')
+            dgn_dir = os.path.join (self.dcp_dir, 'ip', 'dgn', '{vitis_version}')
         else:
             dgn_dir = os.path.expandvars (dgn_dir)
-            dgn_dir = dgn_dir.format (vitis_version = Version.version,
-                                      cmp_name      = cmp_name)
 
-            # --------------------------------------------------------
-            # If dgn_dir is not absolute, make it a sub-dir of dcp_dir
-            # --------------------------------------------------------
-            if not os.path.isabs (dgn_dir) :
-                dgn_dir = os.path.join (self.dcp_dir, dgn_dir)
+        dgn_dir = dgn_dir.format (vitis_version = Version.version,
+                                  cmp_name      = cmp_name)
+
+        # --------------------------------------------------------
+        # If dgn_dir is not absolute, make it a sub-dir of dcp_dir
+        # --------------------------------------------------------
+        if not os.path.isabs (dgn_dir) :
+            dgn_dir = os.path.join (self.dcp_dir, dgn_dir)
 
         dgn_dir = os.path.realpath (dgn_dir)
         if not os.path.isdir (dgn_dir) :
             Path(dgn_dir).mkdir(parents=True, exist_ok=True)
 
 
-            # --------------------------------------------------------------
+        # --------------------------------------------------------------
         # Convention to make dcp and ip cores compatiable is to add '_0'
         # --------------------------------------------------------------
         dcp_rename      = dcp_rename.format (cmp_name = cmp_name)
@@ -159,6 +160,7 @@ class Dcp :
                                         dcp_name   = dcp_name,
                                         dcp_rename = dcp_rename)
         self.jou_file = self.get_file (jou_file, dgn_dir,      None, '.jou')
+
 
         if not log_file :
             log_file = dcp_name
@@ -231,12 +233,25 @@ class Dcp :
         if self.jou_file : cmd += ['-journal', self.jou_file]
         if self.log_file : cmd += ['-log'    , self.log_file]
 
+        # --------------------------------------------------------
+        # Remove old files, cannot safely remove the directory
+        # Don't know what else is in it or how many subdirectories
+        # to remove
+        # --------------------------------------------------------
+        if  os.path.exists (self.jou_file) :
+            os.remove (self.jou_file)
+
+        if  os.path.exists (self.log_file) :
+            os.remove (self.log_file)
+
+        if  os.path.exists (self.dcp_file) :
+            os.remove (self.dcp_file)
+
         cmd += ['-tclargs',
                 self.hls_dir,
                 self.dcp_rename,
                 self.dcp_file,
                 level]
-
 
         with subprocess.Popen (cmd,
                                stdout  = subprocess.PIPE,

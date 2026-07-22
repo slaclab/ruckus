@@ -69,5 +69,11 @@ class Workspace :
         parser.add_argument ('--workspace',
                              default = None,
                              help    ='Workspace directory')
+
+        parser.add_argument ('--build-root',
+                         default = None,
+                         dest    = 'build_root',
+                         help    = 'Build root directory')
+
         return
 # -------------------------------------------------------------------------------

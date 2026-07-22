@@ -15,6 +15,7 @@
     Args:
        -project       :  Gives the default workspace
        -w, --workspace:  Specify  the workspace, overriding the default
+       --build-root   :  Specify  the build directory
        --create       :  Creates  the workspace
        --list         :  List the contents of the workspace
        --replace      :  Replaces the workspace, effective --remove and --create
@@ -114,7 +115,11 @@ def doit () :
                             project_file,
                             args.root,
                             args.products_root,
-                            args.workspace)
+                            args.build_root,
+                            args.workspace,
+                            None,
+                            None)
+
     workspace     = project.workspace
 
 

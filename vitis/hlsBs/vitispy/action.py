@@ -62,9 +62,9 @@ class Action :
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def is_in (s, l) :
+    def is_in (s, lst) :
         n = len (s)
-        for member in l:
+        for member in lst:
             if s == member[0:n] : return True
         return False
     # --------------------------------------------------------------------------
@@ -85,19 +85,19 @@ class Action :
 
     @staticmethod
     def isList (action) :
-        return True if (action &     List) else False
+        return True if (action &  Action.List)    else False
 
     @staticmethod
     def isClean (action) :
-        return True if (action &    Clean) else False
+        return True if (action &  Action.Clean)   else False
 
     @staticmethod
     def isCreate (action) :
-        return True if (action &   Create) else False
+        return True if (action &  Action.Create)  else False
 
     @staticmethod
     def isReplace (action) :
-        return True if (action & Replace) else False
+        return True if (action &  Action.Replace) else False
     # --------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------

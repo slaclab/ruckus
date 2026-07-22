@@ -107,7 +107,7 @@ function hlsVer ()
     local settings64=$(find $ypath -name settings64.sh -prune -print -quit 2>/dev/null)
 
     if [[ -z "${settings64}" ]] ; then
-        "ERROR:  Unable to find settings64.sh in path ${ypath}"
+        echo "ERROR:  Unable to find settings64.sh in path ${ypath}"
         return -1
     else
         echo   Setting Xilinx to version = ${version}
@@ -133,12 +133,16 @@ function hlsPrj ()
         s+=' --project='${HLSBS_PROJECT}
     fi
 
-    if [[ -n "${HLSBS_WORKSPACE}" ]] ; then
-        s+=' --workspace='${HLSBS_WORKSPACE}
+    if [[ -n "${HLSBS_PRODUCTS}" ]]; then
+        s+=' --products-root='${HLSBS_PRODUCTS}
     fi
 
-    if [[ -n "${HLSBS_PRODUCTS}" ]] ; then
-        s+=' --products-root='${HLSBS_PRODUCTS}
+    if [[ -n "${HLSBS_BUILD}"   ]];  then
+        s+=' --build='${HLSBS_BUILD}
+    fi
+
+    if [[ -n "${HLSBS_WORKSPACE}" ]] ; then
+        s+=' --workspace='${HLSBS_WORKSPACE}
     fi
 
     echo ${s}
@@ -184,8 +188,20 @@ function hlsCtx ()
         echo   "HLSBS_PRODUCTS       = ${HLSBS_PRODUCTS}"
     fi
 
+    if [[ -n "${HLSBS_BUILD}"         ]] ; then
+        echo   "HLSBS_BUILD         = ${HLSBS_BUILD}"
+    fi
+
     if [[ -n "${HLSBS_WORKSPACE}"     ]] ; then
         echo   "HLSBS_WORKSPACE      = ${HLSBS_WORKSPACE}"
+    fi
+
+    if [[ -n "${HLSBS_CFG}"           ]] ; then
+        echo   "HLSBS_CFG            = ${HLSBS_CFG}"
+    fi
+
+    if [[ -n "${HLSBS_IP}"           ]] ; then
+        echo   "HLSBS_IP             = ${HLSBS_IP}"
     fi
 }
 # ------------------------------------------------------------------------------
@@ -232,8 +248,13 @@ function hlsCfg ()
         return $? 2>/dev/null; exit
     fi
 
+    s=''
+    if [[ -n "${HLSBS_CFG}" ]] ; then
+        s+=' --cfg-root='${HLSBS_CFG}
+    fi
+
     (export LD_LIBRARY_PATH=$HLSBS_LD_LIBRARY_PATH; set -f; \
-     $hlsPython  ${HLSBS_ROOT}/vitispy/hlsCfg.py $(hlsPrj) $@)
+     $hlsPython  ${HLSBS_ROOT}/vitispy/hlsCfg.py $(hlsPrj) ${s} $@)
 }
 # ------------------------------------------------------------------------------
 
@@ -268,7 +289,7 @@ function hlsRun ()
 
     # ---------------------------------------------------------------
     # !!! KLUDGE:
-    # This covers some problem that I couldn't fathom is 2023.2
+    # This covers some problem that I couldn't fathom in 2023.2
     # It looks like the Makefile correctly sets the rpath to this
     # but the image activator fails to find it.  Both Makefile.rules
     # and an readelf -d on the image shows the rpath correctly set.
@@ -287,8 +308,13 @@ function hlsRun ()
         lpath=${HLSBS_LD_LIBRARY_PATH}
     fi
 
+    s=''
+    if [[ -n "${HLSBS_IP}" ]] ; then
+        s+=' --ip-root='${HLSBS_IP}
+    fi
+
     (export LD_LIBRARY_PATH=${lpath}; set -f; \
-     $hlsPython ${HLSBS_ROOT}/vitispy/hlsRun.py $(hlsPrj) $@)
+     $hlsPython ${HLSBS_ROOT}/vitispy/hlsRun.py $(hlsPrj) ${s} $@)
 }
 # ----------------------------------------------------------------------
 
@@ -394,7 +420,7 @@ function hlsVersion ()
 
     # Else maybe already setup
     elif [[ -n ${XILINX_HLS} ]]; then
-        eval `python ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
+        eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
         echo "Using existing Xilinx version = ${HLS_XILINX_VERSION}"
         export HLSBS_XILINX_VERSION=${HLS_XILINX_VERSION}
     fi
@@ -413,13 +439,13 @@ function hlsVersion ()
     unset HLSBS_PROJECT_PYPATHS
     unset XILINX_VCXX
 
-    eval `python ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
+    eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
 
     # ---------------------------------
     # Only works for versions > v2023.2
     # ---------------------------------
     if [[ "${HLSBS_XILINX_VERSION}" < "2023.2" ]]; then
-        echo "ERROR: HLS Version ${HLSBS_XILINX_VERSION} must >= 2023.2"
+        echo "ERROR: HLS Version ${HLSBS_XILINX_VERSION} must be >= 2023.2"
         return -1
     fi
 

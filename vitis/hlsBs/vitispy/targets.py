@@ -235,17 +235,17 @@ class Targets :
             # -------------------------------------
             # Retrieve the target member infomation
             # -------------------------------------
-            cfg_template = prd_target['ConfigurationName']
-            cmp_template = prd_target[    'ComponentName']
-            components   = prd_target[       'Components']
-            maps         = Maps (components)
+            cfg_template = prd_target.cfg_template #['ConfigurationName']
+            cmp_template = prd_target.cmp_template #[    'ComponentName']
+            contributors = prd_target.contributors #[     'Contributors']
+            maps         = Maps (contributors)
 
             cfg_template = os.path.expandvars (cfg_template)
 
-            if 'SourceFiles' in prd_target :
-               src_key = prd_target['SourceFiles']
-            else :
-               src_key = None
+            ###if 'SourceFiles' in prd_target :
+            ###   src_key = prd_target['SourceFiles']
+            ### else :
+            src_key = None
 
             # Each map yields a target
             for map in maps.maps :
@@ -471,9 +471,8 @@ class Targets :
             # was the right thing to do.  Have decided to replace the name
             #   e.g.  dir/{build_id}-{fpga_id}.cfg  -> dir/*.cfg
             # ----------------------------------------------------------
-            cfg_tmpname     = prd_target['ConfigurationName']
+            cfg_tmpname     = prd_target.cfg_template # ['ConfigurationName']
             cfg_template    = os.path.expandvars (cfg_tmpname)
-            #cfg_template    = cfg_template.format_map (remove_locals)
             cfg_dir, namext = os.path.split (cfg_template)
             cfg_ext         = os.path.splitext (namext)[1]
             cfg_wc          = os.path.join (cfg_dir, '*') + cfg_ext

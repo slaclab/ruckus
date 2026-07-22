@@ -3,7 +3,7 @@
 hlsBs \- A quick reference for the hls commands
 
 .SH DESCRIPTION
-A quick reference guide for suite of hls commands along with a brief
+A quick reference guide for a suite of hls commands along with a brief
 synopsis of what they do.
 
 While command parameters and options can be specified on the command
@@ -14,7 +14,7 @@ using them interactively.
 
 The output files of the \fBhlsBs\fR utilities are compatible with the
 HLS GUI, meaning the various products, in particular the configuration
-and components, can be created and used by either the \BhlsBs\fR utilities
+and components, can be created and used by either the \fBhlsBs\fR utilities
 or the standard issue XILINX development environment.  This necessitated
 compromises since the HLS GUI imposes certain restrictions on the
 modularity of the commands.
@@ -22,8 +22,8 @@ modularity of the commands.
 
 .SH COMMANDS
 The following is synopsis of the commands, roughly in the order of
-chonological use.  The \fBhlsWs\fR and \fBhlsCfg\fR fall into the use
-(almost) once category, The \fBhlsRun\fR and the \fBhlsExe\fR and
+chronological use.  The \fBhlsWs\fR and \fBhlsCfg\fR fall into the use
+(almost) once category. The \fBhlsRun\fR and the \fBhlsExe\fR and
 \fBhlsGdb\fR development aid tools are commands that will be used
 almost exclusively once the workspace, configuration files and
 components are created.
@@ -60,7 +60,7 @@ corresponding HLS component during configuration file creation.
 .TP
 .B hlsComp
 Manages the HLS components \fBcreating\fR, \fBcleaning\fR,
-\fBreplacing and \fBlisting\fR. This is generally used for creating
+\fBreplacing\fR and \fBlisting\fR. This is generally used for creating
 the components from existing/legacy configuration files. \fBhlsCfg\fR is the
 usual way of creating the HLS component.
    $ hlsComp <COMPONENTS> [OPTIONS]
@@ -68,9 +68,9 @@ usual way of creating the HLS component.
 .TP
 .B hlsRun
 Run any single or combination of the various stages, \fBcsim\fR,
-\fBsynthesis\fRl \fBcosim\fR, \fBpackage\fR, \fBimplementation\fR and
+\fBsynthesis\fR \fBcosim\fR, \fBpackage\fR, \fBimplementation\fR and
 \fBip\fR on one or more HLS components.  Useful in scripts which act
-on a single components or a collection of HLS components.
+on a single component or a collection of HLS components.
    $ hlsRun <COMPONENTS> [OPTIONS]
 
 .TP
@@ -93,12 +93,12 @@ input data that is causing problems.
 .B hlsCtx
 This displays all the 'hidden' HLSBS context, in particular its
 environment variables.  Since these environment variables are all of
-the form \fBHLSBS_\fR<what>, can also be seen by
+the form \fBHLSBS_\fR<what>, they can also be seen by
    $ printenv | grep \fBHLSBS_\fR
 
 
 .SH GENERALITIES
-All commands, except \fBhlsWs\fR and \fBhlsGui\fR take the component name(s)
+All commands, except \fBhlsWs\fR and \fBhlsGui\fR, take the component name(s)
 as their positional parameters. The component name(s) may be
     a) A single explicit component name
     b) A single wildcarded component name
@@ -106,7 +106,7 @@ as their positional parameters. The component name(s) may be
 
 The components are the targets of the command's actions.
 
-NOTE: \fBhlsExe\fR and \fBhlsGdb\fR usage logically target only a single
+NOTE: \fBhlsExe\fR and \fBhlsGdb\fR usage logically targets only a single
 component.
 
 
@@ -120,13 +120,13 @@ It is recommended to
        to prevent the shell from trying to satisfy the wildcard
     b) Use the alternative --components=<COMPONENTS>
 
-Because it is very explicit, b) is the perferred method.  It also
+Because it is very explicit, b) is the preferred method.  It also
 avoids the danger inherent in the shell's handling of command line
-parameters of positional parameters that immediately following an option
+parameters of positional parameters that immediately follow an option
 expecting additional parameters. For example
    $ hlsCfg --clean '*'
 
-Here --clean can accept a list of target categoryies (existing,
+Here --clean can accept a list of target categories (existing,
 missing, cruft) but will 'eat' the '*' positional parameter.  The
 safer option is to use --components='*'.  As a bonus by using the '=',
 the single quotes are unnecessary.
@@ -153,17 +153,17 @@ following ways
 
       By default the project file is the environment variable HLSBS_PROJECT
       The default can be neutered by \fB\-\-no-product\fR, which is handy for
-      one-of ad hoc experimentation.
+      one-off ad hoc experimentation.
 
    2. In an indirect file.
       This is a file containing the \fB\-\-workspace\fR=<\fIWORKSPACE\fR or
-      --products_root=<\fIPRODUCTS>\fR a single line.  This file is
-      the invoked by specifying it on the command line as
+      --products_root=<\fIPRODUCTS>\fR on a single line.  This file is
+      invoked by specifying it on the command line as
       \fB@FILE\fR. Note any command line option can be placed in this
       file; it is not limited to just the workspace/products root
 
    3. Directly on the command line as \fB\-\-workspace\fR=<\fIWORKSPACE\fR
-      as \fB\-\-\PRODUCTS_ROOT\fR
+      or as \fB\-\-\PRODUCTS_ROOT\fR
 
    4. By the environment variable \fBHLSBS_WORKSPACE\fR and
       \fBHBS_PRODUCTS\fR. This is not recommended except in the
@@ -184,7 +184,7 @@ following ways
         c) If none set --> \fBERROR\fR
 
 .SH INDIRECT FILE
-An  indirect file may contain one of more command line options. It
+An indirect file may contain one or more command line options. It
 represents a middle ground between the high formality of a project file and the
 ad hoc nature of command line parameters. Giving it a meaningful name allows
 some self-documentation, particularly when doing command recall.
@@ -195,8 +195,8 @@ etc), just one option per line. For example
      --ntests=40
 
 .TP Caveats
-Also note, that while there is no \fBinclude\fR capability in the file, one
-can specify multiple indirecct files, allowing a semblance of modularity.
+Also note that while there is no \fBinclude\fR capability in the file, one
+can specify multiple indirect files, allowing a semblance of modularity.
 
 .SH PROJECT FILE
 While this is very formal, it offers the most control and accountability.
@@ -215,7 +215,7 @@ It is anticipated that many projects will fall into a couple of
 standard forms.  For example, a very simple one building one
 configuration/one component, or, projects building SNL networks.
 
-Identifying such patterns, allows much of the boilerplate to be
+Identifying such patterns allows much of the boilerplate to be
 captured in a common file and included in the user's project file.
 The users' project file contains only the specifics, becoming a
 fill-in-a-form exercise.
@@ -237,7 +237,7 @@ project file to including it and the following
 
 where you just specify
    1. networks     = The SNL network(s) (which may be wildcarded)
-   2. fpgas        = The list of FPGAs (part, clock, uncertainity)
+   2. fpgas        = The list of FPGAs (part, clock, uncertainty)
    3. cfg_template = how to form the configuration file name
    4. cmp_template = how to form the component name
    5. csim_argv    = The argv's for running csim
@@ -248,14 +248,14 @@ where you just specify
 
 
 .SH About Command Line Flexibility
-A goal of \fBhls\fR suite of commands was to provide flexibility in
+A goal of the \fBhls\fR suite of commands was to provide flexibility in
 specifying command line options, wishing to avoid editing the HLS
-configuration fil,e while at the same time encouraging experimentation.
+configuration file, while at the same time encouraging experimentation.
 The \fBhls\fR commands are structured to treat the HLS configuration
-file to be 'write-once'.
+file as 'write-once'.
 
 To do this, many of the options specified in the configuration file can be
-overriden when invoking the command by either directly typing the option or
+overridden when invoking the command by either directly typing the option or
 using an indirect file.
 
 An example of the direct usage might be to alter the number of tests run
@@ -275,5 +275,5 @@ with MyProblemChild containing
      --golden=golden-problem-child.dat
 
 Future plans are to extend this, \fIe.g.\fR so that changing the FPGA clock
-and uncertainity can be changed.  (These are intrinisically configuration
+and uncertainty can be changed.  (These are intrinsically configuration
 file parameters, so are more complicated to modify.)

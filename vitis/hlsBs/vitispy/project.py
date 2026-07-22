@@ -228,11 +228,18 @@ class Project:
                   project_files,
                   root,
                   products_root,
-                  workspace)     : # Project
+                  build_root,
+                  workspace,
+                  cfg_root,
+                  ip_root)     : # Project
 
         self.root          = root
-        self.workspace     = workspace
         self.products_root = products_root
+        self.build_root    = build_root
+        self.workspace     = workspace
+        self.cfg_root      = cfg_root
+        self.ip_root       = ip_root
+
         self.error         = 0
         self.fpgas         = []
         self.package       = None
@@ -252,13 +259,30 @@ class Project:
             needs    &= ~Project.Need.Root
             self.root = os.path.expandvars (self.root)
 
-        # If workspace root is None, need the Project root to complete it
-        if   self.workspace             : needs &= ~Project.Need.Workspace
-        elif self.products_root is None : needs |=  Project.Need.Products_Root
 
-        # If products root is None, need the Project root to complete it
-        if   self.products_root : needs  &= ~Project.Need.Products_Root
-        elif self.root is None  : needs  |=  Project.Need.Root
+        # If need the workspace
+        if   needs & Project.Need.Workspace :
+            if   self.workspace             : needs &= ~Project.Need.Workspace
+            elif self.build_root is None    : needs |=  Project.Need.Build_Root
+
+        # If need cfg root
+        if   needs & Project.Need.Cfg_Root:
+            if   self.cfg_root              : needs &= ~Project.Need.Cfg_Root
+            if   self.build_root is None    : needs |=  Project.Need.Build_Root
+
+        # If need ip root
+        if   needs & Project.Need.Ip_Root:
+            if   self.ip_root               : needs &= ~Project.Need.Ip_Root
+            if   self.products_root is None : needs |=  Project.Need.Products_Root
+
+        if   needs & Project.Need.Build_Root :
+            if   self.build_root            : needs &= ~Project.Need.Build_Root
+            elif self.products_root is None : needs |=  Project.Need.Products_Root
+
+        # If need the products root is
+        if  needs & Project.Need.Products_Root :
+            if   self.products_root         : needs &= ~Project.Need.Products_Root
+            elif self.root is None          : needs |=  Project.Need.Root
 
         self.has_project_file = False
 
@@ -297,8 +321,7 @@ class Project:
 
 
             # Project Root
-            if (needs & Project.Need.Root           and
-                self.root is None) :
+            if  needs & Project.Need.Root :
                 if hasattr (module,  'get_project_root') :
                    self.root = module.get_project_root (self)
 
@@ -312,21 +335,49 @@ class Project:
                                 os.path.split (self.prj_files[0])[0])[0]
 
             # Project Products
-            if (needs & Project.Need.Products_Root  and
-                self.products_root is None          and
-                hasattr (module, 'get_products_root')  ) :
-                self.products_root = module.get_products_root (self)
-                if   self.products_root :
-                     self.products_root = os.path.expandvars (self.products_root)
+            if  needs & Project.Need.Products_Root :
+                if  hasattr (module, 'get_products_root') :
+                    self.products_root = module.get_products_root (self)
+                    if  self.products_root :
+                        self.products_root = os.path.expandvars (self.products_root)
 
+                if  self.products_root is None :
+                    self.products_root = os.path.join (self.root, 'products')
+                    self.products_root = self.products_root.format (vitis_version =
+                                                                    Version.version)
+                    needs             &= ~Project.Need.Products_Root
+
+            # Project Build
+            if  needs & Project.Need.Build_Root :
+                if hasattr (module, 'get_build') :
+                    self.build = module.get_build (self)
+                    if  self.build_root :
+                        self.build_root = os.path.expandvars (self.build_root)
+
+                if  self.build_root is None:
+                    self.build_root = os.path.join (self.products_root, 'build')
+                    needs          &= ~Project.Need.Build_Root
+
+            # Project Cfg_Root
+            if   needs & Project.Need.Cfg_Root :
+                if  hasattr (module, 'get_cfg_root') :
+                    self.cfg_root = module.get_cfg_root (self)
+                    if  self.cfg_root :
+                        self.cfg_root = os.path.expandvars (self.cfg_root)
 
             # Project Workspace
-            if ( needs & Project.Need.Workspace      and
-                 self.workspace is None              and
-                 hasattr (module, 'get_workspace')      ) :
-                 self.workspace = module.get_workspace (self)
-                 if  self.workspace :
-                     self.workspace = os.path.expandvars (self.workspace)
+            if  needs & Project.Need.Workspace :
+                if  hasattr (module, 'get_workspace') :
+                    self.workspace = module.get_workspace (self)
+                if  self.workspace :
+                    self.workspace = os.path.expandvars (self.workspace)
+
+            # Project Ip_Root
+            if   needs & Project.Need.Ip_Root :
+                if   hasattr (module, 'get_ip_root') :
+                     self.cfg_root = module.get_ip_root (self)
+                if   self.ip_root :
+                     self.ip_root = os.path.expandvars (self.ip_root)
 
         # ----------------------------------------------------------------------
 
@@ -342,19 +393,44 @@ class Project:
                                                                 Version.version)
             self.products_root = os.path.expandvars (self.products_root)
 
+        if needs & Project.Need.Build_Root :
+            if self.build_root is None :
+                if  self.products_root is None :
+                    self.error = Project.Need.Build_Root
+                    return
+                self.build_root = os.path.join (self.products_root, 'build')
 
         if  needs & Project.Need.Workspace :
             if self.workspace == None :
-                if self.products_root is None :
-                    self.error = Project.Need.WorkSpace
+                if  self.build_root is None :
+                    self.error = Project.Need.Build_Root
                     return
 
-                self.workspace = os.path.join (self.products_root,
+                self.workspace = os.path.join (self.build_root,
                                                'ws',
                                                '{vitis_version}')
 
             self.workspace = Workspace.get (self.workspace)
 
+        if  needs & Project.Need.Cfg_Root :
+            if self.cfg_root == None :
+                if  self.build_root is None :
+                    self.error = Project.Need.Cfg_Root
+                    return
+
+                self.cfg_root = os.path.join (self.build_root,
+                                              'cfg',
+                                              '{vitis_version}')
+
+        if  needs & Project.Need.Ip_Root :
+            if self.ip_root == None :
+                if  self.build_root is None :
+                    self.error = Project.Need.Ip_Root
+                    return
+
+                self.iproot = os.path.join (self.build_root,
+                                            'ip',
+                                            '{vitis_version}')
         return
     # --------------------------------------------------------------------------
 
@@ -399,7 +475,12 @@ class Project:
 
     # --------------------------------------------------------------------------
     def get_ip (self) :
-        self.ip = self.modules[0].module.get_ip (self)
+
+        if hasattr (self.modules[0].module, 'get_ip') :
+            self.ip = self.modules[0].module.get_ip (self)
+        else :
+            self.ip = None
+
         return self.ip
     # --------------------------------------------------------------------------
 
@@ -495,10 +576,12 @@ class Project:
 
     @dataclass
     class Need :
-        Root          : int = 1
-        Products_Root : int = 2
-        Workspace     : int = 4
-        Products      : int = 8
+        Root          : int =  1    # root
+        Products_Root : int =  2    # root/products
+        Ip_Root       : int =  4    # root/products/ip
+        Build_Root    : int =  8    # root/products/build
+        Workspace     : int = 16    # root/products/build/ws
+        Cfg_Root      : int = 32    # root/products/build/cfg
     # --------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
