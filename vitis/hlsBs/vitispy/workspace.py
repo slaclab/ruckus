@@ -25,18 +25,17 @@ class Workspace:
             client.set_workspace(path=ws)
 
         except Exception as e:
-            print(
-                f"\n{'='*78}\n"
-                f"Error: In setting the workspace\n"
-                f"       {ws}\n\n"
-                f"       Almost invariably this is due to a bug in the Vitis Python code when\n"
-                f"       another server, commonly the IDE, is attached to the same workspace.\n\n"
-                f"Suggested Actions:\n"
-                f"       1. Kill the IDE or whatever is running the other server.\n"
-                f"       2. Set  the IDE to a different workspace.\n"
-                f"          -- Merely closing the workspace appears to be insufficient.\n"
-                f"       3. Wait till Xilinx/AMD fixes it (not recommended).\n"
-                f"{'='*78}\n")
+            print(f"\n{'='*78}\n"
+                  f"Error: In setting the workspace\n"
+                  f"       {ws}\n\n"
+                  f"       Almost invariably this is due to a bug in the Vitis Python code when\n"
+                  f"       another server, commonly the IDE, is attached to the same workspace.\n\n"
+                  f"Suggested Actions:\n"
+                  f"       1. Kill the IDE or whatever is running the other server.\n"
+                  f"       2. Set  the IDE to a different workspace.\n"
+                  f"          -- Merely closing the workspace appears to be insufficient.\n"
+                  f"       3. Wait till Xilinx/AMD fixes it (not recommended).\n"
+                  f"{'='*78}\n")
 
             sys.exit()
 

@@ -10,15 +10,10 @@
 
 # ------------------------------------------------------------------------------
 '''
-      Starts the HLS Gui with at the specified workspace or no workspace
-    '''
+Starts the HLS Gui with the specified workspace or no workspace
+'''
 # ------------------------------------------------------------------------------
 
-
-from vitispy.manpage import display_manpage
-from vitispy.project import Project
-from vitispy.workspace import Workspace
-import vitis
 import argparse
 import sys
 import os
@@ -31,6 +26,11 @@ import runpy
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+from vitispy.manpage import display_manpage
+from vitispy.project import Project
+from vitispy.workspace import Workspace
+import vitis
 
 
 # ------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ def add_arguments(parser):
                         action='store_true')
 
     parser.add_argument('--no-workspace',
-                        help='Start the HLS Gui/IDE without a workspae',
+                        help='Start the HLS Gui/IDE without a workspace',
                         dest='no_workspace',
                         action='store_true')
 
@@ -99,7 +99,10 @@ def startGui():
                           args.project,
                           args.root,
                           args.products_root,
-                          args.workspace)
+                          args.build_root,
+                          args.workspace,
+                          None,
+                          None)
         workspace = Workspace.get(project.workspace)
 
         # Check existence

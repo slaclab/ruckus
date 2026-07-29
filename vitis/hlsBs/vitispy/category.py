@@ -45,7 +45,7 @@ class Category:
     more generality. One could try to read the file's contents, but this is error
     prone.  What's to say this is just not some file that looks like a
     configuration file.  Maybe it is a file used to document a configuration
-    file containing an example.  Bottom line, cateogrizing such target as cruft
+    file containing an example.  Bottom line, categorizing such a target as cruft
     is deemed low confidence.  Any destructive action on it should be carefully
     vetted
     '''
@@ -149,7 +149,6 @@ class Category:
         # Make a list the components in the workspace
         cmp_ignores = ['_ide', 'logs']
         cmp_paths = glob.glob(os.path.join(workspace, '*'))
-        cmp_names = []
 
         cfg_paths = []
         for cfg in configurations:

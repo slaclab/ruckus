@@ -27,11 +27,10 @@ try:
     cfgs = data['configuration']['configFiles']
     cfg = cfgs[0]
 
-    # Starting at 2025.1, if directory is not included if the configuration file
-    # is in component path, so check if the cfg has a directory, if not paste
-    # one on.
+    # Starting at 2025.1, the directory is not included if the configuration file
+    # is in the component path, so check if the cfg has a directory, if not paste one on.
 
-    if (os.path.isabs(cfg) != True):
+    if (not os.path.isabs(cfg)):
         #    cfg_dir = os.path.dirname (cfg)
         #    if (len (cfg_dir) == 0) :
         cfg = os.path.join(component_path, cfg)

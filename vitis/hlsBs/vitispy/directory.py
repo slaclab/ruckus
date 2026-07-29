@@ -23,7 +23,7 @@ class HlsDirectory:
         self.root = os.path.split(os.path.split(file)[0])[0]
         self.cfg = os.path.join(self.root, 'cfg')
         self.tcl = os.path.join(self.root, 'tcl')
-        self.sh = os.path.join(self.root, 'sh')
+        self.sh = os.path.join(self.root,  'sh')
         return
 
     def __str__(self):

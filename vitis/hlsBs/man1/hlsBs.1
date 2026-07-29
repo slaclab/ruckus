@@ -53,7 +53,7 @@ Starts the Vitis IDE/GUI in the specified workspace or no workspace.
 .TP
 .B hlsCfg
 Manages the configuration files by \fBcreating\fR, \fBcleaning\fR,
-\fBreplacing and \fBlisting\fR and optionally (by default) creating its
+\fBreplacing\fR and \fBlisting\fR and optionally (by default) creating its
 corresponding HLS component during configuration file creation.
    $ hlsCfg <COMPONENTS> [OPTIONS]
 
@@ -68,7 +68,7 @@ usual way of creating the HLS component.
 .TP
 .B hlsRun
 Run any single or combination of the various stages, \fBcsim\fR,
-\fBsynthesis\fR \fBcosim\fR, \fBpackage\fR, \fBimplementation\fR and
+\fBsynthesis\fR, \fBcosim\fR, \fBpackage\fR, \fBimplementation\fR and
 \fBip\fR on one or more HLS components.  Useful in scripts which act
 on a single component or a collection of HLS components.
    $ hlsRun <COMPONENTS> [OPTIONS]
@@ -194,7 +194,7 @@ etc), just one option per line. For example
      --workspace=MyWorkspace
      --ntests=40
 
-.TP Caveats
+.SS Caveats
 Also note that while there is no \fBinclude\fR capability in the file, one
 can specify multiple indirect files, allowing a semblance of modularity.
 
@@ -266,7 +266,7 @@ or changing an input file
 
     $ hlsExe <component> input=new-input --golden=new-golden
 
-The second example might be better accomplish with an indirect file
+The second example might be better accomplished with an indirect file
 
     $ hlsExe <component> @MyProblemChild
 

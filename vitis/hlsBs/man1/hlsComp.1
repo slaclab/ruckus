@@ -1,6 +1,6 @@
 .TH hlsComp 1 "May 2026" "v1.0" "HLS Command Manual"
 .SH NAME
-hlsComp \- cleans, creates, removes and lists components in the workspace from
+hlsComp \- cleans, creates, removes, and lists components in the workspace from
 configuration files
 
 .SH SYNOPSIS
@@ -70,7 +70,7 @@ environment variable \fIHLSBS_PROJECT\fR.
 This prevents the use of any existing project file which may or may not exist.
 Typically used when one wishes to specify all the relevant parameters (in this
 utility these are \fBworkspace\fR and \fBconfigurations\fR and, possibly
-\fBcomponents\fR if one wishwa something other than the default. A common usage is
+\fBcomponents\fR if one wishes something other than the default. A common usage is
 in one-off experimentation.
 
 .SH ACTIONS
@@ -117,7 +117,7 @@ no project file or a very minimal one is needed specifying
 .SH Component Selection
 Which components are selected for a given action is by the intersection of the
 positional component list (and its equivalent \fB--targets\fR) and the component's
-current state. The current state is one
+current state. The current state is one of
     1. Existing, the component exists and is consistent with a configuration file
     2. Missing,  The configuration file does not have a corresponding component
     3. Cruft,    A component found in the workspace or its reference to its
@@ -126,7 +126,7 @@ current state. The current state is one
 Each action can specify a category or categories to target. For \fB--list\fR
 all categories are possible. For others only certain categories make sense. For
 example, only \fBexisting\fR makes sense for \fB--replace\fR.  For the most part
-the utilites permit any combination and warn one against using inappropriate ones.
+the utilities permit any combination and warn one against using inappropriate ones.
 
 
 .SH Overriding with Command Line Options
@@ -141,7 +141,7 @@ the command line the least. The disadvantage of overriding directly on the
 command line is that, except for command recall, they are lost to history and even
 then, they may be seen as just a random collection of options.
 
-The third option is offers something in between, allowing one to capture
+The third option offers something in between, allowing one to capture
 command line options in a file.  This allows the options some degree of
 permanency and, since it is a file, it can be given a meaningful name. The
 disadvantage is, due to the complexity in some utilities, not all options offered

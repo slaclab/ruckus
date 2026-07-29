@@ -20,11 +20,23 @@
 # ------------------------------------------------------------------------------
 
 
+import os
+import sys
+import argparse
+import shutil
+import runpy
+
+
+# -------------------------------------------------------
+# Add the VITIS HLS python paths, remove nonexistent ones
+# ------------------------------------------
+runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
+               run_name='add_paths ' + str(sys.path))
+
 from vitispy.componentInfo import ComponentInfo
 from vitispy.category import Category
 from vitispy.targets import Targets
 from vitispy.project import Project
-from vitispy.version import Version
 from vitispy.dry_run import DryRun
 from vitispy.action import Action
 from vitispy.workspace import Workspace
@@ -32,18 +44,6 @@ from vitispy.printer import Printer
 import vitispy.files as files
 from vitispy.manpage import display_manpage
 import vitis
-import os
-import sys
-import argparse
-import shutil
-import runpy
-import glob
-
-# -------------------------------------------------------
-# Add the VITIS HLS python paths, remove nonexistent ones
-# ------------------------------------------
-runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
-               run_name='add_paths ' + str(sys.path))
 
 # ==============================================================================
 #
@@ -65,6 +65,11 @@ def add_arguments(parser):
                         '--help',
                         action='store_true',
                         help='Show custom help')
+
+    parser.add_argument('--cfg-root',
+                        default=None,
+                        dest='cfg_root',
+                        help='Configuration files root directory')
 
     parser.add_argument('parameters',
                         help='List of targets/components',
@@ -118,7 +123,7 @@ def get_opts(action, args):
 
     else:
         label = 'Creating'
-        args.create = ['nissing']
+        args.create = ['missing']
         opts = Category.categorize(args.create, Category.Missing)
 
     return label, opts
@@ -167,10 +172,7 @@ def nonExistentWorkspace(workspace):
         "ERROR: Workspace does not exist\n"
         "       To avoid typos causing spurious creation, use hlsWs to create it\n"
         "\n"
-        "  -->  " +
-        workspace +
-        "\n",
-        file=sys.stderr)
+        "  -->  " + workspace + "\n", file=sys.stderr)
     return -1
 # ------------------------------------------------------------------------------
 
@@ -181,7 +183,7 @@ def noCompleteCleanWarning():
     print(
         '''
     WARNING: To avoid cleaning more than intended, hlsComp requires that
-             postional args or --targets='*' must be specified, e.g.
+             positional args or --targets='*' must be specified, e.g.
                $ hlsCfg '*' --clean             or
                $ hlsCfg --targets='*'
     ''',
@@ -192,14 +194,14 @@ def noCompleteCleanWarning():
 
 # ------------------------------------------------------------------------------
 def cmpExistsError(printer):
-    printer.itemPlain('', "ERROR: component alreay exists, use --replace", '*')
+    printer.itemPlain('', "ERROR: component already exists, use --replace", '*')
     return
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
 def noCfgError(printer):
-    printer.itemPlain('', 'ERROR: cannot replace component', sep='*')
+    printer.itemPlain('', 'ERROR: cannot replace component',          sep='*')
     printer.itemPlain('', '       configuration file does not exist', sep=' ')
     return
 # ------------------------------------------------------------------------------
@@ -264,7 +266,7 @@ class Executer:
         printer = self.printer
 
         # ------------------------------------------------------
-        # Only print dry run if it causes some 'write' activity'
+        # Only print dry run if it causes some 'write' activity
         # ------------------------------------------------------
         if self.dry_run is not None and self.dry_run:
             self.printer.line('Dry Run', '<-- NOTE')
@@ -387,13 +389,12 @@ class Executer:
 
 
 # ------------------------------------------------------------------------------
-'''
-   Merges x, y into a list, where x,y can either by a list or a comma separated
-   string
-'''
-
-
 def merge(xl, yl):
+    '''
+    Merges xl, yl into a list, where xl,yl can either be a list or a comma
+    separated string.
+    '''
+    # --------------------------------------------------------------------------
     lst = []
     if xl:
         # Check if XL is a list
@@ -451,14 +452,21 @@ def doit():
     printer = Printer(20, 78, 15)
     noCfgAction = False
     full = not args.configurations and args.project is not None
-    needs = Project.Need.Workspace
+    needs = (Project.Need.Root |
+             Project.Need.Workspace |
+             Project.Need.Products_Root |
+             Project.Need.Build_Root |
+             Project.Need.Cfg_Root)
     project_files = args.project if full else None
 
-    project = Project(Project.Need.Workspace,
+    project = Project(needs,
                       project_files,
                       args.root,
                       args.products_root,
-                      args.workspace)
+                      args.build_root,
+                      args.workspace,
+                      args.cfg_root,
+                      None)
 
     if project.error:
         status = project.report(needs)
@@ -517,8 +525,7 @@ def doit():
         # --------------------------------------
 
         project.get_products()
-        cmpTargets = project.products[0].targets
-        targets = Targets(workspace, cmpTargets).targets
+        targets = Targets(workspace, project.products).targets
         targets = Targets.filter(targets, cmpList).accepts
 
         if not targets:
@@ -545,7 +552,7 @@ def doit():
 
     if noCfgAction:
         printer.header(label + ' Components')
-        printer.line('Workspace', workspace)
+        printer.line('Workspace',      workspace)
         printer.line('Component Filter', cmpList)
 
     elif not full:
@@ -556,7 +563,7 @@ def doit():
         printer.line('Component Filter', cmpList)
     else:
         printer.header(label + ' Components')
-        printer.line('Workspace', workspace)
+        printer.line('Workspace',      workspace)
         printer.line('Component Filter', cmpList)
 
     if not categories:

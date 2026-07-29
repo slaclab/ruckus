@@ -11,7 +11,7 @@ hlsRun \- Runs the \fBcsim\fR, \fBsynthesis\fR, \fBcosim\fR, \fBpackage\fR and
 .B hlsRun
 This command, together with its more specialized and simpler variations,
 \fBhlsExe\fR and \fBhlsGdb\fR will be the most often used commands. Other
-\fBhls\fR commands (\fBhlsWs\fR, \fBhlsCfg\fR and \fBhlsComp\fR are seldom
+\fBhls\fR commands (\fBhlsWs\fR, \fBhlsCfg\fR and \fBhlsComp\fR) are seldom
 used after creating and managing the configurations and their corresponding
 components.
 
@@ -183,8 +183,8 @@ no project file or a very minimal one is needed specifying
 Selected components are ones that exist in the workspace and match the component
 parameters. This is different from the previous commands which categorized the
 components as
-\fBexisting\fR, \fBmissing\fR or \fBcruft\fB. Since only existing components can
-be targeted, the only ambugiuty is those in the \fBcruft\fR category, i.e.
+\fBexisting\fR, \fBmissing\fR or \fBcruft\fR. Since only existing components can
+be targeted, the only ambiguity is those in the \fBcruft\fR category, i.e.
 rogue components, which by entropy,  have somehow snuck their way into the
 workspace. To keep this command simple, the burden falls on the user to use
 either \fBhlsCfg\fR or \fBhlsComp\fR to eliminate them or the selection criteria
@@ -205,7 +205,7 @@ then, they may be seen as just a random collection of options.
 The third option offers something in between, capturing
 command line options in a file.  This allows the options some degree of
 permanency and, since it is a file, it can be given a meaningful name. The
-disadvantage is, due the complexity in some utilities, not all options offered
+disadvantage is, due to the complexity in some utilities, not all options offered
 in the project file are available.
 
 The command line syntax is \fI@<MY_OPTIONS>\fR, i.e. the file name preceded by

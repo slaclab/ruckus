@@ -22,6 +22,6 @@ def display_manpage(cmd_path):
 
     try:
         subprocess.run(['man', man_path])
-    except BaseException:
+    except Exception:
         pass
         # print (f"'man' command {cmd_nam} not found", file=sys.stderr)

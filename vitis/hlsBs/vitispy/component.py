@@ -34,8 +34,8 @@ class Component:
     def __init__(self, project, args, workspace=None):
 
         self.configurations = project.configurations
-        self.workspace = workspace if
-        (workspace is not None) else Workspace.get(project.workspace)
+        self.workspace = workspace if (
+            workspace is not None) else Workspace.get(project.workspace)
         self.replace = args.replace is not None
         self.clean = args.clean is not None
         self.dry_run = DryRun(args.dry_run)
@@ -44,7 +44,6 @@ class Component:
     # ------------------------------------------------------------------------------
 
     # ------------------------------------------------------------------------------
-
     @staticmethod
     def printList(caption, string, printer):
         if isinstance(string, list):
@@ -60,7 +59,6 @@ class Component:
     # ------------------------------------------------------------------------------
 
     # ------------------------------------------------------------------------------
-
     def print(self, printer, print_cfg_file):
         printer.line('Workspace', self.workspace)
 

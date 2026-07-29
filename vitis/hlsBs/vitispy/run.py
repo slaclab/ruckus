@@ -8,17 +8,14 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-import sys
 import os
 import subprocess
-import argparse
 import array
 from dataclasses import dataclass
 
 from .version import Version
 from .directory import Directory
 from .componentInfo import ComponentInfo
-from .dry_run import DryRun
 from .ip import Ip
 from .dcp import Dcp
 
@@ -33,7 +30,7 @@ class Run:
         both the fast and slow implementation of csim and cosim by using
         an array to map the requested actions to a valid one.
 
-        Clean & Run is clearly non-sensical and is remapped to Clean,Make & Run.
+        Clean & Run is clearly nonsensical and is remapped to Clean,Make & Run.
         For the slow version of csim (i.e. the implementation using the Vitis
         commands), the following combinations are not supported and remapped
                 Clean -> Clean & Make
@@ -63,7 +60,7 @@ class Run:
                                      Clean | Make | Run])  # clean, make, run
 
         # -------------------------------------------------
-        # Only non-sensical Clean | Run -> Clean, Make, Run
+        # Only nonsensical Clean | Run -> Clean, Make, Run
         # -------------------------------------------------
         CSimFastValid = array.array('i',
                                     [0,
@@ -103,7 +100,7 @@ class Run:
         Ip_Dcp: int = 64
         All: int = 127
 
-        def __init__(stages, csim, cosim, ip):
+        def __init__(self, stages, csim, cosim, ip):
             self.stages = stages
             self.csim = csim
             self.cosim = cosim
@@ -268,7 +265,7 @@ class Run:
 
         # -------------------------------------------------------------
         # Either explicitly requested the slow or csim.mk did not exist,
-        # so must run the slow version
+        # so we must run the slow version
         # --------------------------------------------------------------
         if slow_msk == Run.Msk.Clean:
             # Clean only, impossible
@@ -288,12 +285,12 @@ class Run:
         elif slow_msk == Run.Msk.Run:
             # Run only, impossible
             self.announce(False, "ERROR: HLS demands a Make with a Run")
-            return
+            return -1
 
         elif slow_msk == (Run.Msk.Clean | Run.Msk.Run):
             # Clean & Run, impossible
             self.announce(False, "ERROR: Cannot Clean & Run without Make")
-            return
+            return -1
 
         elif slow_msk == (Run.Msk.Make | Run.Msk.Run):
             aux_cfg = os.path.join(Directory.cfg, "csim_makeRun.cfg")
@@ -319,7 +316,7 @@ class Run:
                    "--work_dir", info.work_dir]
 
         # ----------------------------
-        # Self the output report style
+        # Set the output report style
         # ----------------------------
         if self.options.csim_slow_msk & Run.Msk.Run:
             report_vitis = Run.report_vitis_run
@@ -417,9 +414,8 @@ class Run:
         # csim fast not requested or was unable to fulfill because make file
         # did not exist
         # ------------------------------------------------------------------
-        self.do_csim_slow(info)
-
-        return
+        status = self.do_csim_slow(info)
+        return status
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
@@ -460,7 +456,7 @@ class Run:
                    "--work_dir", info.work_dir]
 
         # ----------------------------
-        # Self the output report style
+        # Set the output report style
         # ----------------------------
         if self.options.cosim_msk & Run.Msk.Run:
             report_vitis = Run.report_vitis_run
@@ -503,8 +499,8 @@ class Run:
         status = 0
         dry_run = self.options.dry_run
 
-        if (self.options.dry_run and not self.options.stages &
-                (Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp)):
+        if (self.options.dry_run and
+                not self.options.stages & (Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp)):
             status = 0
             return status
 
@@ -529,7 +525,7 @@ class Run:
 
             status = self.do_vitis_cmd(syn_cmd, self.report_vitis_syn)
             if status != 0:
-                return
+                return status
         # ----------------------------------------------------------------------
 
         # ----------------------------------------------------------------------

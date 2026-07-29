@@ -1,6 +1,6 @@
 .TH hlsCfg 1 "May 2026" "v1.0" "HLS Command Manual"
 .SH NAME
-hlsCfg \- cleans, creates, replaces and lists HLS configuration files.
+hlsCfg \- cleans, creates, replaces, and lists HLS configuration files.
 .SH SYNOPSIS
 .B hlsCfg [COMPONENTS] [OPTIONS]
 
@@ -22,7 +22,7 @@ Displays this message\
 .TP
 \fB\-w, \-\-workspace = \fIWORKSPACE\fR
 The target workspace. Although typically specified in the project file, this
-overrides that definition and is useful for one-of/throw-away experimentation.
+overrides that definition and is useful for one-off/throw-away experimentation.
 The environment variable \fBHLSBS_WORKSPACE\fR can also be used.
 
 .TP
@@ -119,8 +119,8 @@ Since, except in rare circumstances, all file specifications in the configuratio
 files are relative, the configuration files themselves can be saved to GIT.
 Whether one chooses to or not is personal preferences.
 
-While, in general, generated/derived files are not saved to GIT there are
-reasons to save them. The first is just convenience, relieving the next check-up
+While, in general, generated/derived files are not saved to GIT, there are
+reasons to save them. The first is just convenience, relieving the next check-out
 from regenerating the configuration files. A more substantive reason is, for
 example, because not all configuration parameters are available in this facility
 (there are many, many and they vary release to release), the configuration file
@@ -168,7 +168,7 @@ In the following assume an HLSBS project file containing the details
   Creates all the missing configuration files and their associated components
 
   $ hlsCfg 'avg*' --create
-  Creates all the missingconfiguration files that satisfy the wildcard
+  Creates all the missing configuration files that satisfy the wildcard
   specification.
 
   $ hlsCfg --create --dry-run
@@ -195,7 +195,7 @@ project file, the shell applies it to the files in the current directory.
 This can be particularly bewildering because of another shell quirk. If there
 are no files satisfying the translation in the current directory, the wildcard
 specification is passed as is and works as intended.  This can lead to the
-command successfully executing because no files satisfy the wildcard and
+command successfully executing because no files satisfy the wildcard, and
 having the same command (typically using command recall) fail because it is now
 executed in a different directory that does have files satisfying the criteria.
 

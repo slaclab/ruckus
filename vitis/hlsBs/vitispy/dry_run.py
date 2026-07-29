@@ -19,12 +19,11 @@ class DryRun:
 
     @staticmethod
     def add_arguments(parser):
-        parser.add_argument(
-            '--dry-run',
-            help='Just list the actions',
-            action='store_true',
-            default=False,
-            dest='dry_run')
+        parser.add_argument('--dry-run',
+                            help='Just list the actions',
+                            action='store_true',
+                            default=False,
+                            dest='dry_run')
         return
 
     def __bool__(self):

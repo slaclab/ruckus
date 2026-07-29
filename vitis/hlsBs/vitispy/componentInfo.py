@@ -46,7 +46,7 @@ class ComponentInfo:
 
                 self.work_dir = os.path.realpath(work_dir)
                 self.hls_dir = os.path.join(self.work_dir, 'hls')
-                self.csim_dir = os.path.join(self.hls_dir, 'csim')
+                self.csim_dir = os.path.join(self.hls_dir,  'csim')
                 self.csim_bld = os.path.join(self.csim_dir, 'build')
                 self.csim_exe = os.path.join(self.csim_bld, 'csim.exe')
                 self.cmp_name = data['name']
@@ -66,7 +66,7 @@ class ComponentInfo:
                             if (look & 1) and (line[0:9] == "csim.argv"):
                                 idx = line[9:].find('--')
                                 self.csim_argv = re.sub(
-                                    pattern, replace, line[idx + 9:])
+                                    pattern, replace, line[idx+9:])
                                 look &= ~1
                                 if look == 0:
                                     break
@@ -74,14 +74,14 @@ class ComponentInfo:
                             elif (look & 2) and (line[0:8] == "sim.argv"):
                                 idx = line[8:].find('--')
                                 self.sim_argv = re.sub(
-                                    pattern, replace, line[idx + 8:])
+                                    pattern, replace, line[idx+8:])
                                 look &= ~2
                                 if look == 0:
                                     break
 
                             elif (look & 4) and (line[0:7] == 'syn.top'):
                                 idx = line[7:].find('=')
-                                self.hls_top_level = line[idx + 7 + 1:].strip()
+                                self.hls_top_level = line[idx+7+1:].strip()
                                 look &= ~4
                                 if look == 0:
                                     break

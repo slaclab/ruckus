@@ -28,12 +28,12 @@ name = __name__[0:idx]      # Name of function to perform
 
 if name == 'add_paths':
 
-    spaths = __name__[idx + 1:]  # String representation of the paths
+    spaths = __name__[idx+1:]  # String representation of the paths
     known = eval(spaths)
 
-    # --------------------------------------------------------
-    # Get the colon separated paths which is presented as list
-    # --------------------------------------------------------
+    # ----------------------------------------------------------
+    # Get the colon separated paths which is presented as a list
+    # ----------------------------------------------------------
     paths = str(os.getenv('HLSBS_PYPATHS'))
 
     # ---------------------------------------------------------------
@@ -42,7 +42,7 @@ if name == 'add_paths':
     pythonpaths = eval(paths)
 
     # ------------------------------------------
-    # Change the colon seperated paths to a list
+    # Change the colon separated paths to a list
     # ------------------------------------------
     pypaths = pythonpaths[0][1].split(':')
 

@@ -9,14 +9,14 @@
 # ----------------------------------------------------------------------------
 
 import os
-import importlib.util
-import copy
 from datetime import datetime
 
 from dataclasses import dataclass
 from .workspace import Workspace
 from .importfile import ImportFile
 from .version import Version
+from .files import add_version
+
 
 
 # ------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ class Project:
             if not self.dir:
                 self.dir = os.path.join(products_root,
                                         'ip',
-                                        '{vitis_version}')
+                                        '{vitis.version}')
         # ----------------------------------------------------------------------
 
         # ----------------------------------------------------------------------
@@ -173,7 +173,7 @@ class Project:
                     self.hash_msg = info['HashMsg']
                     break
 
-                status = process.wait()
+                process.wait()
 
         def print(self, printer, pad: int, verbose):
             if self.repo is None:
@@ -354,8 +354,7 @@ class Project:
 
                 if self.products_root is None:
                     self.products_root = os.path.join(self.root, 'products')
-                    self.products_root = self.products_root.format(
-                        vitis_version=Version.version)
+                    self.products_root = add_version (self.products_root)
                     needs &= ~Project.Need.Products_Root
 
             # Project Build
@@ -399,8 +398,7 @@ class Project:
                     return
 
                 self.products_root = os.path.join(self.root, 'products')
-                self.products_root = self.products_root.format(
-                    vitis_version=Version.version)
+                self.products_root = add_version (self.products_root)
             self.products_root = os.path.expandvars(self.products_root)
 
         if needs & Project.Need.Build_Root:
@@ -418,7 +416,7 @@ class Project:
 
                 self.workspace = os.path.join(self.build_root,
                                               'ws',
-                                              '{vitis_version}')
+                                              '{vitis.version}')
 
             self.workspace = Workspace.get(self.workspace)
 
@@ -430,7 +428,7 @@ class Project:
 
                 self.cfg_root = os.path.join(self.build_root,
                                              'cfg',
-                                             '{vitis_version}')
+                                             '{vitis.version}')
 
         if needs & Project.Need.Ip_Root:
             if self.ip_root is None:
@@ -440,7 +438,7 @@ class Project:
 
                 self.iproot = os.path.join(self.build_root,
                                            'ip',
-                                           '{vitis_version}')
+                                           '{vitis.version}')
         return
     # --------------------------------------------------------------------------
 
@@ -450,19 +448,22 @@ class Project:
         if needs & Project.Need.Workspace:
             print(
                 "\nERROR: Could not determine workspace directory, one of\n"
-                "       --root, --products_root, --workspace must be specfied")
+                "       --root, --products_root, --workspace must be specified",
+                file = sys.stderr)
             return self.error
 
         elif needs & Project.Need.Products_Root:
             print(
                 "\nERROR: Could not determine products directory, one of\n"
-                "       --root, --products_root must be specfied")
+                "       --root, --products_root must be specified",
+                file = sys.stderr)
             return self.error
 
         elif needs & Project.Need.Root:
             print(
                 "\nERROR: Could not determine project root directory, one of\n"
-                "       --root must be specfied")
+                "       --root must be specified",
+                file = sys.stderr)
             return self.error
 
         return 0
@@ -506,7 +507,7 @@ class Project:
 
     def replace(self, args):
 
-        # Check if args overrides project settings
+        # Check if args override project settings
         if (hasattr(args, 'verbose') and
                 (args.verbose is not None)):
             self.verbose = args.verbose
@@ -588,12 +589,12 @@ class Project:
 
     @dataclass
     class Need:
-        Root: int = 1    # root
+        Root: int = 1             # root
         Products_Root: int = 2    # root/products
-        Ip_Root: int = 4    # root/products/ip
-        Build_Root: int = 8    # root/products/build
-        Workspace: int = 16    # root/products/build/ws
-        Cfg_Root: int = 32    # root/products/build/cfg
+        Ip_Root: int = 4          # root/products/ip
+        Build_Root: int = 8       # root/products/build
+        Workspace: int = 16       # root/products/build/ws
+        Cfg_Root: int = 32        # root/products/build/cfg
     # --------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------

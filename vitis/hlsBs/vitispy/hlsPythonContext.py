@@ -10,8 +10,8 @@
 
 # ------------------------------------------------------------------------------
 '''
-    Extracts the Vits HLS python run-time environment/context in an attempt
-    to make the scripts execute uniformily across all VITIS versions > 2024.1
+    Extracts the Vitis HLS python run-time environment/context in an attempt
+    to make the scripts execute uniformly across all VITIS versions >= 2023.2
 
     Args:
       action:  'get'
@@ -21,8 +21,8 @@
       This same script is then run within the VITIS HLS runtime environment where
       it extracts the VITIS HLS runtime context.
 
-      It returns a string of 2 bash shell semi-colon separate commands that
-      sets 2 environment variables
+      It returns a string of 2 bash shell semi-colon separated commands that
+      set 2 environment variables
          hlsPython            : Used as python interpreter for the selected
                                 VITIS version
          HLSBS_IMPORT_PYPATHS: Used internally by the python scripts
@@ -86,12 +86,10 @@ elif sys.argv[1] == 'extract':
         ld_library_path = "\'" + ld_library_path + "\'"
     paths = ("\"[ ['PYTHONPATH'," + pypaths + "]  ]\"")
 
-    import_pypaths = os.path.realpath(
-        os.path.join(
-            vitis_root_vitispy,
-            'import_pypaths.py'))
+    import_pypaths = os.path.realpath(os.path.join(
+        vitis_root_vitispy, 'import_pypaths.py'))
 
-    # Format the exported python intepreter and python paths
+    # Format the exported python interpreter and python paths
     output = ("export hlsPython=" + sys.executable + '; '
               + "export HLSBS_LD_LIBRARY_PATH=" + ld_library_path + '; '
               + "export HLSBS_IMPORT_PYPATHS=" + import_pypaths + '; '

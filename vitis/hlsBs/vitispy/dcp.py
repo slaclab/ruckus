@@ -93,32 +93,32 @@ class Dcp:
              log_file:         Log file name
 
         """
-        # ----------------------------------------------------
-        # Expand any envionment variables in the file name and
+        # -----------------------------------------------------
+        # Expand any environment variables in the file name and
         # the new dcp name
-        # ----------------------------------------------------
+        # -----------------------------------------------------
         dir = os.path.expandvars(dir)
         dir = dir.format(vitis_version=Version.version,
                          cmp_name=cmp_name)
         self.dcp_dir = Template(dir).substitute(os.environ)
         self.dcp_dir = dir
 
-        # ---------------------------------------------------------------
+        # ----------------------------------------------------------------
         # The dgn_dir is used to isolate the .jou and .log files
-        # way from the .dcp file, basically to get the cruft out of sight
+        # away from the .dcp file, basically to get the cruft out of sight
         #
         # The dgn_dir may either be
-        #    1) absolute and used as asis
+        #    1) absolute and used as-is
         #    2) relative and used as a subdirectory of the dcp_dir
         #
-        # It defaults to 'ip/dgn/{vitis_version}'
-        # ---------------------------------------------------------------
+        # There is no default
+        # -----------------------------------------------------------------
         if not dgn_dir:
-            dgn_dir = os.path.join(
-                self.dcp_dir, 'ip', 'dgn', '{vitis_version}')
-        else:
-            dgn_dir = os.path.expandvars(dgn_dir)
+            print ("ERROR: No dcp diagnostic directory (dgn_dir) specified.",
+                   file = sys.stderr)
+            exit (-1)
 
+        dgn_dir = os.path.expandvars(dgn_dir)
         dgn_dir = dgn_dir.format(vitis_version=Version.version,
                                  cmp_name=cmp_name)
 
@@ -133,7 +133,7 @@ class Dcp:
             Path(dgn_dir).mkdir(parents=True, exist_ok=True)
 
         # --------------------------------------------------------------
-        # Convention to make dcp and ip cores compatiable is to add '_0'
+        # Convention to make dcp and ip cores compatible is to add '_0'
         # --------------------------------------------------------------
         dcp_rename = dcp_rename.format(cmp_name=cmp_name)
         self.dcp_rename = dcp_rename + '_0'
@@ -153,7 +153,7 @@ class Dcp:
                                       '.dcp')
 
         # --------------------------------------------------------------------
-        # Get the dcp file's name as the journal and log file;s name if needed
+        # Get the dcp file's name as the journal and log file's name if needed
         # --------------------------------------------------------------------
         dcp_name = os.path.splitext(os.path.split(self.dcp_file)[1])[0]
         if not jou_file:
@@ -208,16 +208,17 @@ class Dcp:
             print("\n"
                   "ERROR: The hls directory was not found:\n"
                   f"  ->   {self.hls_dir}\n"
-                  "  Perhaps --implementation has not been run")
+                  "  Perhaps --implementation has not been run",
+                  file=sys.stderr)
 
         elif not self.hls_file:
 
-            print(
-                "\n"
-                "ERROR: The .dcp file was not found in the hls directory tree\n"
-                f"  ->   {self.hls_dir}\n"
-                f"       {self.hls_name}\n"
-                "  Either it was deleted or -implementation did not correctly run")
+            print("\n"
+                  "ERROR: The .dcp file was not found in the hls directory tree\n"
+                  f"  ->   {self.hls_dir}\n"
+                  f"       {self.hls_name}\n"
+                  "  Either it was deleted or -implementation did not correctly run",
+                  sys.stderr)
         return
     # --------------------------------------------------------------------------
 

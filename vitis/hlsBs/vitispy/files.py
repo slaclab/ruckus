@@ -11,12 +11,14 @@
 import os
 from pathlib import Path
 import glob
+from types import SimpleNamespace
 from vitispy.version import Version
 
 
 def add_version(string):
-    str = string.format(vitis_version=Version.version)
-    return str
+    d = { 'vitis' : SimpleNamespace (version = Version.version) }
+    fstr = string.format_map (d) #(vitis_version=Version.version)
+    return fstr
 
 
 def expand(string):
@@ -65,10 +67,7 @@ def sanitize(file, rel_path):
         return file
 
     elif rel_path:
-        return os.path.relpath(
-            os.path.realpath(
-                os.path.expandvars(file)),
-            rel_path)
+        return os.path.relpath(os.path.realpath(os.path.expandvars(file)), rel_path)
 
     else:
         return os.path.realpath(os.path.expandvars(file))
@@ -137,7 +136,7 @@ def get_files(string, template):
         if not string:
             return file_list
 
-    # Get all candidates files as realpaths
+    # Get all candidate files as realpaths
     candidates = [os.path.realpath(candidate)
                   for candidate in glob.glob(template)]
     for file in clist:
@@ -234,14 +233,14 @@ def get_components(workspace, components):
                 continue
 
             # -----------------------------------------------------------
-            # Ignore is the directory does not contain vitis-compile.json
+            # Ignore if the directory does not contain vitis-compile.json
             # -----------------------------------------------------------
             vitis_comp = Path(os.path.join(c, 'vitis-comp.json'))
             if (not vitis_comp.is_file()):
                 continue
 
             # --------------------------------------------------------------
-            # Ignore is the directory does not contain compile_commands.json
+            # Ignore if the directory does not contain compile_commands.json
             # --------------------------------------------------------------
             compile_commands = Path(os.path.join(c, 'compile_commands.json'))
             if (not compile_commands.is_file()):

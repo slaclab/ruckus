@@ -25,8 +25,8 @@ class ImportFile:
             os.path.split(self.file_path)[1])[0]
 
         # ------------------------------------------------------
-        # Manually create a custum loader for this specific file
-        # This allows arbitray file extensions
+        # Manually create a custom loader for this specific file
+        # This allows arbitrary file extensions
         # ------------------------------------------------------
         loader = SourceFileLoader(self.module_name, self.file_path)
 

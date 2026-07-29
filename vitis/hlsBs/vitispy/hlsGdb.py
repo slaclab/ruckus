@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 
 # ----------------------------------------------------------------------------
 # This file is part of the 'SLAC Firmware Standard Library'. It is subject to

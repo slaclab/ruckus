@@ -20,19 +20,19 @@ class VitisVersion:
       1. The slow method launches the vitis --version command
       2. The fast method looks for the version in the XILINX_HLS path
 
-   One might think the the slow method is the approved method to find
+   One might think the slow method is the approved method to find
    the version in a portable way. This would be true if the command
-   did what it said. What is does is return the standard Vitis splash
+   did what it said. What it does is return the standard Vitis splash
    banner which then must be parsed.  Since this is just random text
-   containing the version (for example, there is nothing like verion =
-   2024.1), so there is no guarantee that the text stays the same
-   version to version. Looking for version in the XILINX_HLS directory
+   containing the version (for example, there is nothing like version =
+   2024.1), there is no guarantee that the text stays the same
+   version to version. Looking for the version in the XILINX_HLS directory
    path seems no less hokey.
 
    God, they make it hard to do the right thing.
 
    RETURNS
-   The version is presented as global python variable (Version) and contains
+   The version is presented as a global python variable (Version) and contains
      - Full  version number  2024.2
      - Major version number  2024
      - Minor version number  .2
@@ -42,8 +42,6 @@ class VitisVersion:
 
     def __init__(self):
         import re
-
-        found = False
 
         # ----------------------------------------------------------
         # FAST search -- find the version in the directory path

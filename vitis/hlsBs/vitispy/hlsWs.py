@@ -18,7 +18,7 @@
        --build-root   :  Specify  the build directory
        --create       :  Creates  the workspace
        --list         :  List the contents of the workspace
-       --replace      :  Replaces the workspace, effective --remove and --create
+       --replace      :  Replaces the workspace, effectively --remove and --create
        --remove       :  Removes  the workspace
        --status       :  Status of the workspace
        --dry-run      :  Go through the motions but do not perform the action
@@ -36,13 +36,6 @@
 # ------------------------------------------------------------------------------
 
 
-from vitispy.project import Project
-from vitispy.workspace import Workspace
-from vitispy.printer import Printer
-from vitispy.dry_run import DryRun
-import vitis
-from vitispy.files import is_creatable
-from vitispy.manpage import display_manpage
 import argparse
 import sys
 import os
@@ -50,12 +43,20 @@ import runpy
 import glob
 
 sys.path.append(os.path.split(os.path.split(__file__)[0])[0])
-
 # -------------------------------------------------------
 # Add the VITIS HLS python paths, remove nonexistent ones
 # ------------------------------------------
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
+
+
+from vitispy.project import Project
+from vitispy.workspace import Workspace
+from vitispy.printer import Printer
+from vitispy.dry_run import DryRun
+import vitis
+from vitispy.files import is_creatable
+from vitispy.manpage import display_manpage
 
 
 # ------------------------------------------------------------------------------
@@ -92,11 +93,11 @@ def doit():
                         help='Show custom help')
 
     action = parser.add_mutually_exclusive_group()
-    action.add_argument('--create', action='store_true', default=False)
+    action.add_argument('--create',  action='store_true', default=False)
     action.add_argument('--replace', action='store_true', default=False)
-    action.add_argument('--remove', action='store_true', default=False)
-    action.add_argument('--list', action='store_true', default=False)
-    action.add_argument('--status', action='store_true', default=False)
+    action.add_argument('--remove',  action='store_true', default=False)
+    action.add_argument('--list',    action='store_true', default=False)
+    action.add_argument('--status',  action='store_true', default=False)
 
     parser.add_argument('--no-project',
                         dest='no_project',
@@ -220,10 +221,10 @@ def doit():
             wc = os.path.join(ws, '*')
             cmps = glob.glob(wc)
             if len(cmps) == 0:
-                print.item("None", '')
+                printer.itemPlain("None", '')
                 status = 0
                 printer.footer()
-                return
+                return status
 
             # Make a list of the stuff found and the longest one
             cmp_names = []
@@ -237,7 +238,7 @@ def doit():
             cmp_names.sort()
 
             # -------------------------------------------------------------
-            # Fill a line nuntil it can no longer completely hold a new entry
+            # Fill a line until it can no longer completely hold a new entry
             # --------------------------------------------------------------
             per_line = 80 // max
             left = per_line

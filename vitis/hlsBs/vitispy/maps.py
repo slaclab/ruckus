@@ -9,74 +9,81 @@
 # ----------------------------------------------------------------------------
 
 
+
 # ------------------------------------------------------------------------------
-# Cannot use relative paths when executing as a main
+# Cannot use relative paths when executing as main
 # This avoids polluting sys.path when not main
-# --------------------------------------------------
+# ------------------------------------------------
 if __name__ == '__main__':
     pass
 else:
     import os
     import glob
-    from .dictionary import Dictionary
+    import array
+    from types import SimpleNamespace
 # ------------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------------
 class Maps ():
 
-    def __init__(self, dictionaries):
-
+    def __init__(self, ctbs, ctb_type):
         srcs = {}
 
-        # Is this a single dictionary
-        if isinstance(dictionaries, Dictionary):
-            # dictionaries is just one dictionary
-            self.compile(srcs, dictionaries)
+        # Is this a single contributor
+        if isinstance(ctbs, ctb_type):
+            # ctbs is just one ctb
+            self.compile(srcs, ctbs)
 
         else:
-            # Is this a list,tuple of dictionaries
-            is_list = all(issubclass(type(x), Dictionary)
-                          for x in dictionaries)
+            # Is this a list or tuple of contributors
+            is_list = all(issubclass(type(ctb), ctb_type)
+                          for ctb in ctbs)
             if is_list:
 
-                for dictionary in dictionaries:
-                    n = self.compile(srcs, dictionary)
+                for ctb in ctbs:
+                    n = self.compile(srcs, ctb)
 
-            # Is this a lists or tuples of dictionaries
-            elif isinstance(dictionaries, (list, tuple)):
+            # Is this lists or tuples of contributors
+            elif isinstance(ctbs, (list, tuple)):
 
-                for dictionaryList in dictionaries:
+                for ctbList in ctbs:
 
-                    # Is this a single dictionary
-                    if isinstance(dictionaryList, Dictionary):
-                        self.compile(srcs, dictionaryList)
+                    # Is this a single contributor
+                    if isinstance(ctbList, ctb_type):
+                        self.compile(srcs, ctbList)
 
-                    # Is this a list,tuple of multiple dictionaries
-                    elif all(issubclass(type(x), Dictionary) for x in dictionaryList):
+                    # Is this a list,tuple of multiple contributors
+                    elif all(issubclass(type(ctb), ctb_type) for ctb in ctbList):
 
-                        for dictionary in dictionaryList:
-                            self.compile(srcs, dictionary)
+                        for ctb in ctbList:
+                            self.compile(srcs, ctb)
                     else:
-                        print(
-                            "ERROR: Unknown dictionaries specification\n"
-                            "       This may be\n"
-                            "         a) A single dictionary\n"
-                            "         b) A list or tuple of dictionaries\n"
-                            "         c) A lists or tuples of dictionaries\n")
+                        print("ERROR: Unknown contributors specification\n"
+                              "       This may be\n"
+                              "         a) A single contributor\n"
+                              "         b) A list or tuple of contributor\n"
+                              "         c) A lists or tuples of contributor\n",
+                              file = sys.stderr)
 
         # -------------------------------------------------------------
-        # Calculate the number permutations/combinations in all the
-        # compiled 'srcs' and make a list of dictionaries large enough
-        # to accomodate them all
+        # Calculate the number of permutations/combinations in all the
+        # compiled 'srcs' and make a list of contributor types large
+        # enough to accommodate them all.
         # -------------------------------------------------------------
         map_cnt = 1
+        self.ctb_types = array.array ('i', [-1,-1,-1,-1,-1])
+        idx = 0
         for k, v in srcs.items():
-            map_cnt *= len(v)
+            if    k == 'Builds' : self.ctb_types[0] = idx
+            elif  k == 'Fpgas'  : self.ctb_types[1] = idx
+            idx += 1
+            for vals in v.values():
+                map_cnt *= len(vals)
         self.maps = [{} for _ in range(map_cnt)]
 
         # ------------------------------------------------------------
-        #  Need to form the every permutation of the maps
+        #  Need to form every permutation of the maps
         #  Each src has some number of maps. For example, 3 maps
         #     Map 0   2
         #     Map 1   3
@@ -104,78 +111,48 @@ class Maps ():
         #    M2       2      2*3*2      12/(2*3*2)             1
         # -------------------------------------------------------
         n = 1
-        for key, values in srcs.items():
-            l = len(values)
-            n = n * l
-            rep = map_cnt // n
-            map_idx = 0
-            for idx in range(0, n):
+        for k, v in srcs.items():
+            for key, vals in v.items ():
+                l = len(vals)
+                n = n * l
+                rep = map_cnt // n
+                map_idx = 0
+                for idx in range(0, n):
 
-                val_idx = idx % l
-                for idy in range(0, rep):
+                    val_idx = idx % l
+                    for idy in range(0, rep):
 
-                    v = values[val_idx]
+                        v = vals[val_idx]
 
-                    # Add primary key and value
-                    self.maps[map_idx][key] = v[0]
+                        # Add primary key and value
+                        self.maps[map_idx][key] = v#[0]
 
-                    # Add derived keys and values
-                    if v[1]:
-                        for dv in v[1]:
-                            self.maps[map_idx][dv[0]] = dv[1]
-                    map_idx += 1
+                        map_idx += 1
 
         if False:
             print("Final map")
             idx = 0
-            for dictionary in self.maps:
-                print(f"\nMap {idx}")
-                for k, v in dictionary.items():
+            for ctb in self.maps:
+                print(f"\nContributor {idx}")
+                for k, v in ctb.items():
                     print(f"{k} : {v}")
                 idx += 1
         return
     # --------------------------------------------------------------------------
 
+
     # --------------------------------------------------------------------------
-
     @staticmethod
-    def add_derived(srcs, primary_key, kvs, sep):
-        if kvs is None:
-            return None
-        derived = []
-        sep = '_'
-        for k, v in kvs:
+    def add_srcs(srcs, src_type, primary_key, primary_val, kvs):
 
-            dkey = primary_key + sep + k
-
-            # -------------------------------------------------
-            # Note: there really can't be duplicates in
-            #       secondary keys since they are prefixed with
-            #       a unique primary key
-            # There is perverse case where the user could define
-            # a primary key with the same name, so should check
-            # --------------------------------------------------
-            if dkey in srcs:
-                print(
-                    f"WARNING: Ignoring duplicate secondary {dkey} entry of\n"
-                    f"         {v}")
-                return -1
-
-            derived.append([dkey, v])
-
-        return derived
-
-    @staticmethod
-    def add_srcs(srcs, primary_key, primary_val, kvs, sep):
-
-        if primary_key not in srcs:
+        if not src_type in srcs or primary_key not in srcs[src_type]  :
             # ----------------------------------------
             # First time this key has been encountered
-            # Compose  derived key,values
+            # Add the key values
             # ----------------------------------------
-            derived = Maps.add_derived(srcs, primary_key, kvs, sep)
-            srcs[primary_key] = [[primary_val, derived]]
-            return
+            srcs[src_type] = primary_key
+            srcs[src_type] = { primary_key : [kvs] }
+            return 0
 
         else:
 
@@ -183,50 +160,44 @@ class Maps ():
             # Not the first, so need to check this key is unique
             # before appending
             # --------------------------------------------------
-            if primary_val in srcs[primary_key]:
+            if False: #primary_key in srcs[src_type]:
 
-                print(f"WARNING: Ignoring duplicate {key} entry of\n"
+                print(f"WARNING: Ignoring duplicate {primary_key} entry of\n"
                       f"         {primary_val}")
                 return -1
 
             else:
-                derived = Maps.add_derived(srcs, primary_key, kvs, sep)
-                srcs[primary_key].append([primary_val, derived])
+                srcs[src_type][primary_key].append(kvs)
 
-        return
+        return 0
     # --------------------------------------------------------------------------
 
-    # -------------------------------------------------------------------------
 
+    # -------------------------------------------------------------------------
     @staticmethod
-    def compile(srcs, dictionary):
+    def compile(srcs, contributor):
         '''
-        Compiles each the entry in the dictionary into possibly an expanded
-        set of sources if the dictionary value contains wildcards or a list
+        Compiles each entry in the contributor into possibly an expanded
+        set of sources if the contributor value contains wildcards or a list
 
         Args:
-           srcs      : Expanded source information consisting of the primary
-                       key information and derived entries
-           dictionary: The user's dictionary definition
+           srcs        : Expanded source information consisting of the primary
+                         key information and derived entries
+           contributor: The user's contributor definition
 
-        Examples of dictionaries
+        Examples of contributors
 
-           dictionary = Dictionary('fpga', ['Fpgas', [fpga0, fpga1])
-           dictionary = Dictionary('file', ['Files', ['cfgs/*.cfg'])
-
-           or the preferred in user code since it hides implementation details
-
-           dictionary = Dictionary_of_Fpgas('fpga', [fpga0, fpga1])
-           dictionary = Dictionary_of_Files('file', ['cfgs/*.cfg'])
+           contributor = Product.CtbFgpas('fpga', ['Fpgas', [fpga0, fpga1])
+           contributor = Product.CtFpgas('file', ['Files', ['cfgs/*.cfg'])
         '''
 
-        key = dictionary.key
-        dtype, vs = dictionary.tvs
+        key = contributor.key
+        dtype, vs = contributor.tvs
 
         if dtype == 'Builds':
             for build in vs:
-                kvs = [['id', build[0]]]
-                Maps.add_srcs(srcs, key, build[1], kvs, '_')
+                kvs = SimpleNamespace(object = build[1], id = build[0])
+                Maps.add_srcs(srcs, 'Builds', key, build[1], kvs)
             return len(vs)
 
         if dtype == 'Files':
@@ -235,9 +206,9 @@ class Maps ():
             for file_specs in vs:
                 files = glob.glob(os.path.expandvars(file_specs))
 
-                # ---------------------------------
-                # Check that some files where found
-                # ---------------------------------
+                # --------------------------------
+                # Check that some files were found
+                # --------------------------------
                 if len(files) == 0:
                     errs += 1
                     print("\nERROR: No files found satisfying\n"
@@ -254,12 +225,13 @@ class Maps ():
                     name, ext = os.path.splitext(namext)
 
                     # Derived key,values for files
-                    kvs = [['path', path],
-                           ['dir', dir],
-                           ['name', name],
-                           ['ext', ext]]
+                    kvs = SimpleNamespace (object = file,
+                                           path   = path,
+                                           dir    = dir,
+                                           name   = name,
+                                           ext    = ext)
 
-                    Maps.add_srcs(srcs, key, path, kvs, '_')
+                    Maps.add_srcs(srcs, 'Files', key, file, kvs)
                 nfiles += len(files)
 
             if errs:
@@ -270,17 +242,19 @@ class Maps ():
 
             for fpga in vs:
                 # Derived key values for fpgas
-                kvs = [['id', fpga.id],
-                       ['part', fpga.part],
-                       ['clock', fpga.clock],
-                       ['uncertainity', fpga.uncertainity]]
-
-                Maps.add_srcs(srcs, key, fpga, kvs, '_')
+                kvs = SimpleNamespace (object     = fpga,
+                                       id         = fpga.id,
+                                      part        = fpga.part,
+                                      clock       = fpga.clock,
+                                      uncertainty = fpga.uncertainty)
+                Maps.add_srcs(srcs, 'Fpgas', key, fpga, kvs)
             return len(vs)
 
         if dtype == 'Values':
             for val in vs:
-                Maps.add_srcs(srcs, key, val, None, '_')
+                kvs = SimpleNamespace (object = val,
+                                       value  = val)
+                Maps.add_srcs(srcs, 'Values', key, val, kvs)
             return len(vs)
 
         return
@@ -292,43 +266,59 @@ def doit():
 
     import os
     import sys
-    import glob
     sys.path.append(os.path.split(os.path.split(__file__)[0])[0])
 
     from vitispy.directory import Directory
     sys.path.append(Directory.root)
-    from vitispy.project import Project
     from vitispy.product import Product
     from vitispy.maps import Maps
 
-    # Convience variables
-    build0 = ('b0', {'top': 'processStream',
-                     'tb': ['tbFiles'],
-                     'syn': ['synFiles'],
-                     'ldflags': 'ldFlags etc',
-                     'csim': 'csim_arg0',
-                     'cosim': 'cosim_arg0'})
+    # Convenience variables
+    include_path = os.path.join ('$SNL_ROOT', 'include')
+    includes     = Product.IncludePaths (root  = None,
+                                         paths = include_path)
 
-    build1 = ['b1', {'top': 'processStream',
-                     'tb': ['tbFiles'],
-                     'syn': ['synFiles'],
-                     'ldflags': 'ldFlags etc',
-                     'csim': 'csim_arg0',
-                     'cosim': 'cosim_arg0'}]
+    defines       = Product.IncludeFiles ('STREAM_SEED',
+                                         '{network}',
+                                         include_path)
+
+    tb = Product.Sources (root     = '$SNL_ROOT',
+                          files    = [ 'src/snl/SnlTest.cc'],
+                          includes = [            includes ],
+                          defines  = [             defines ])
+
+    syn = Product.Sources (root    =  '$SNL_ROOT',
+                          files    =  'src/snl/SnlNetwork.cc',
+                          includes =                 includes,
+                          defines  =                  defines)
+
+    build0 = ('b0', Product.Build(top        = 'processStream',
+                                  tb         =  (tb, tb),
+                                  syn        =  (syn,),
+                                  ldflags    = 'ldFlags',
+                                  csim_argv  = 'csim_arg0',
+                                  cosim_argv = 'cosim_arg0'))
+
+    build1 = ('b1', Product.Build(top        = 'processStream',
+                                  tb         =  tb,
+                                  syn        =  syn,
+                                  ldflags    = 'ldFlags',
+                                  csim_argv  = 'csim_arg0',
+                                  cosim_argv = 'cosim_arg0'))
 
     files = '${SNL_TESTS}/tests/layers/networks/conv*_same/*.hh'
     files = os.path.expandvars(files)
     fpgas = (Product.Fpga('xcku115-flvb2104-2-i', '6', None, 'f0'),
              Product.Fpga('xcku115-flvb2104-2-i', '5', None, 'f1'))
 
-    dictionaries = (Product.Builds('build', [build0, build1]),
-                    Product.Files('network', files),
-                    Product.Fpgas('fpga', fpgas),
-                    Product.Values('ddefs', (1, 2, 3)))
-    template = "xyz-{build_id}-{network_name}-{fpga_id}-d{ddefs}"
-#    template     = "xyz-{build_id}-{network_name}-{fpga_id}"
+    contributors = (Product.CtbBuilds('build', [build0, build1]),
+                    Product.CtbFiles('network', files),
+                    Product.CtbFpgas('fpga',    fpgas),
+                    Product.CtbValues('def', (1, 2, 3)))
+    template = "xyz-{build.id}-{network.name}-{fpga.id}-d{def.value}"
 
-    maps = Maps(dictionaries)
+
+    maps = Maps(contributors, Product._Ctb)
 
     idx = 0
     for map in maps.maps:

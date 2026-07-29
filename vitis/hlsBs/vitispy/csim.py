@@ -26,14 +26,11 @@
  '''
 # ------------------------------------------------------------------------------
 
-from vitispy.project import Project
-from vitispy.workspace import Workspace
-from vitispy.componentInfo import ComponentInfo
 import argparse
 import sys
 import os
-
 import runpy
+
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
 
@@ -42,6 +39,10 @@ runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
 # Augment the python path with the directory of this file
 dir = os.path.split(os.path.split(__file__)[0])[0]
 sys.path.append(dir)
+
+from vitispy.project import Project
+from vitispy.workspace import Workspace
+from vitispy.componentInfo import ComponentInfo
 
 # ------------------------------------------------------
 
@@ -80,7 +81,7 @@ def check_project_file(project_file):
 
    Args:
      workspace:  The workspace directory.
-     component:  The component, either its name or it full directory
+     component:  The component, either its name or its full directory
                  specification
 
   Returns
@@ -111,8 +112,7 @@ def get_component_path(workspace, component):
     exists = os.path.isdir(componentPath)
     if not exists:
         print(
-            f"ERROR: Component {componentPath} was not found",
-            file=sys.stderr)
+            f"ERROR: Component {componentPath} was not found", file=sys.stderr)
         sys.exit(-2)
     else:
         return componentPath

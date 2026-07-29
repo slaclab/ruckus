@@ -8,18 +8,6 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-from vitispy.files import get_files
-from vitispy.targets import Targets
-from vitispy.project import Project
-from vitispy.printer import Printer
-from vitispy.dry_run import DryRun
-import vitispy.ip as hlsIp
-import vitispy.configuration as hlsCfg
-from vitispy.category import Category
-from vitispy.action import Action
-from vitispy.workspace import Workspace
-from vitispy.manpage import display_manpage
-import vitis
 import argparse
 import os
 import sys
@@ -31,6 +19,17 @@ import runpy
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
 
+from vitispy.targets import Targets
+from vitispy.project import Project
+from vitispy.printer import Printer
+from vitispy.dry_run import DryRun
+import vitispy.ip as hlsIp
+import vitispy.configuration as hlsCfg
+from vitispy.category import Category
+from vitispy.action import Action
+from vitispy.workspace import Workspace
+from vitispy.manpage import display_manpage
+import vitis
 
 # ==============================================================================
 # BEGIN: Local methods
@@ -148,7 +147,7 @@ def check_for_lock(spath):
      project:      Instantiation of the project class
      cmp:          Instantiation of the component class
      labels:       Labels to be applied to the categories
-     print_target: Flag indicating whether to print the tarrget or just
+     print_target: Flag indicating whether to print the target or just
                    the cfg_path and cmp_path
 '''
 # ------------------------------------------------------------------------------
@@ -188,7 +187,7 @@ class DoAction:
 
                 self.exe(None, target.cfg_path, cmp_path, seps)
             else:
-                self.exe(idx, target.cfg_path, cmp_path, seps)
+                self.exe(idx,  target.cfg_path, cmp_path, seps)
 
             if cmp_path and left:
                 print()
@@ -203,7 +202,7 @@ class DoAction:
             self.byCategory(categories.existing, self.labels[0], [':', '*'])
 
         if self.opts & Category.Missing:
-            self.byCategory(categories.missing, self.labels[1], [':', '*'])
+            self.byCategory(categories.missing,  self.labels[1], [':', '*'])
 
         if self.opts & (Category.CruftLo | Category.CruftHi):
             print()
@@ -289,13 +288,13 @@ class Lister (DoAction):
 '''
    The configuration list action method
 
-   Arg:
+   Args:
      project:    The project parameters
      cmpList:    The target list of components
-     categories: The categories (exising & cruft) of targets to clean
+     categories: The categories (existing & cruft) of targets to clean
      cmp:        Include components in the cleaning
      verbose:    Verbose output
-     opts:       The targdt categories
+     opts:       The target categories
 '''
 # ------------------------------------------------------------------------------
 
@@ -328,10 +327,7 @@ def listConfigurations(project, cmpList, categories, cmp, verbose, opts):
    The cleaner's action class
 '''
 # ------------------------------------------------------------------------------
-
-
 class Cleaner (DoAction):
-
     # --------------------------------------------------------------------------
     def __init__(self, printer, project, cmp, dry_run, verbose, opts):
         labels = [" Cleaning Existing -> Missing",
@@ -345,8 +341,8 @@ class Cleaner (DoAction):
         return
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
     def clean(self, idx, cfg_path, cmp_path, seps):
 
         # Check existence of cfg
@@ -398,25 +394,12 @@ class Cleaner (DoAction):
                     except OSError as e:
                         print()
                         self.printer.itemPlain("ERROR", e.strerror)
-                        self.printer.itemPlain("", e.filename)
+                        self.printer.itemPlain("",      e.filename)
                         exit(-1)
         return
 # ------------------------------------------------------------------------------
 
 
-# ------------------------------------------------------------------------------
-'''
-   The configuration clean action method
-
-   Arg:
-     project:    The project parameters
-     cmpList:    The target list of components
-     categories: The categories (exising & cruft) of targets to clean
-     cmp:        Include components in the cleaning
-     dry_run:    Whether to do a dry_run
-     verbose:    Verbose output
-     opts:       The targdt categories
-'''
 # ------------------------------------------------------------------------------
 
 
@@ -427,7 +410,19 @@ def cleanConfigurations(project,
                         dry_run,
                         verbose,
                         opts):
+    '''
+    The configuration clean action method
 
+    Args:
+       project:    The project parameters
+       cmpList:    The target list of components
+       categories: The categories (existing & cruft) of targets to clean
+       cmp:        Include components in the cleaning
+       dry_run:    Whether to do a dry_run
+       verbose:    Verbose output
+       opts:       The target categories
+    '''
+    # --------------------------------------------------------------------------
     printer = Printer(15, 78, 15)
     action = Cleaner(printer, project, cmp, dry_run, verbose, opts)
 
@@ -455,23 +450,9 @@ def cleanConfigurations(project,
 
 
 # ------------------------------------------------------------------------------
-'''
-   Creates the HLS configuration files and optionally components for a list
-   of targets
 
-   Args:
-     cfg:        Instaniation of the configuration class
-     cmpList:    the target list of components
-     categories: The categories (existing, missing to create the
-                 configurations and, optionally the components
-     dry_run:    Whether to do a dry_run
-     verbose:    Verbose output
-     opts:       The targdt categories
-     replace:    Flag to replace rather than create
-'''
+
 # ------------------------------------------------------------------------------
-
-
 def createConfigurations(cfg,
                          cmpList,
                          categories,
@@ -479,7 +460,21 @@ def createConfigurations(cfg,
                          verbose,
                          opts,
                          replace):
+    '''
+    Creates the HLS configuration files and optionally components for a list
+    of targets
 
+    Args:
+       cfg:        Instantiation of the configuration class
+       cmpList:    the target list of components
+       categories: The categories (existing, missing to create the
+                   configurations and, optionally the components
+       dry_run:    Whether to do a dry_run
+       verbose:    Verbose output
+       opts:       The target categories
+       replace:    Flag to replace rather than create
+    '''
+    # --------------------------------------------------------------------------
     printer = Printer(14, 78, 14)
     cfg.print_common(printer, verbose)
     printer.line("Components", cmpList)
@@ -502,9 +497,8 @@ def createConfigurations(cfg,
             if idx != 1 and cfg.comp:
                 print()
             status, message = cfg.execute(target)
-            cfg.print(
-                printer, idx, target, status, [
-                    ':', '*'], message, verbose)
+            cfg.print(printer, idx, target, status,
+                      [':', '*'], message, verbose)
             idx += 1
 
     if opts & Category.Missing:
@@ -520,9 +514,8 @@ def createConfigurations(cfg,
                 if idx != 1 and cfg.comp:
                     print()
                 status, message = cfg.execute(target)
-                cfg.print(
-                    printer, idx, target, status, [
-                        ':', '-'], message, verbose)
+                cfg.print(printer, idx, target, status,
+                          [':', '-'], message, verbose)
                 idx += 1
 
     printer.footer()
@@ -533,28 +526,24 @@ def createConfigurations(cfg,
 
 
 # ------------------------------------------------------------------------------
-'''
-   Merges x, y list, where x,y can either by a list or a comma separated string
-   which is then split and returned as a list
-
-   Args:
-      xl:  The first  comma-separtate string to merge
-      yl:  The second comma-separtate string to merge
-
-   Returns
-     list: A list which is formed by splitting the merged comma separated list
-
-'''
-# ------------------------------------------------------------------------------
-
-
 def merge(xl, yl):
+    '''
+    Merges x, y list, where x,y can either be a list or a comma separated string
+    which is then split and returned as a list
 
+    Args:
+      xl:  The first  comma-separated string to merge
+      yl:  The second comma-separated string to merge
+
+    Returns
+     list: A list which is formed by splitting the merged comma separated list
+    '''
+    # --------------------------------------------------------------------------
     if not xl and not yl:
         return None
     xy = ''
     if xl:
-        # Insure xl is a list
+        # Ensure xl is a list
         if isinstance(xl, list):
             left = len(xl)
             for x in xl:
@@ -591,10 +580,7 @@ def nonExistentWorkspace(workspace):
         "ERROR: Workspace does not exist\n"
         "       To avoid typos causing spurious creation, use hlsWs to create it\n"
         "\n"
-        "  -->  " +
-        workspace +
-        "\n",
-        file=sys.stderr)
+        "  -->  " + workspace + "\n", file=sys.stderr)
     return -1
 # ------------------------------------------------------------------------------
 # END  : Local methods
@@ -604,28 +590,26 @@ def nonExistentWorkspace(workspace):
 # ==============================================================================
 # BEGIN: Main execution
 # ------------------------------------------------------------------------------
-'''
-   Reads the project files and with the command line parameters creates the
-   necessary data structures to optionally, list, clean or create the
-   configuration files and optionally the component files.
-'''
-# ------------------------------------------------------------------------------
-
-
 def main():
+    '''
+    Reads the project files and with the command line parameters creates the
+    necessary data structures to optionally, list, clean or create the
+    configuration files and optionally the component files.
+    '''
+    # --------------------------------------------------------------------------
 
     # -------------------------------------------------------------------
     # lambda to print an error when an implicit '*' is used when cleaning
     # -------------------------------------------------------------------
-    noCompleteClean = (
-        lambda: print(
-            "\n"
-            "ERROR: To avoid cleaning more than intended, hlsCfg requires that\n"
-            "       postional args or --targets='*' must be specified, e.g.\n"
-            "\n"
-            "        $ hlsCfg '*' --clean             or\n"
-            "        $ hlsCfg --components='*'\n",
-            file=sys.stderr))
+    noCompleteClean = (lambda:
+                       print(
+                           "\n"
+                           "ERROR: To avoid cleaning more than intended, hlsCfg requires that\n"
+                           "       positional args or --targets='*' must be specified, e.g.\n"
+                           "\n"
+                           "        $ hlsCfg '*' --clean             or\n"
+                           "        $ hlsCfg --components='*'\n",
+                           file=sys.stderr))
 
     # -------------------------------
     # Get the command line parameters
@@ -669,9 +653,9 @@ def main():
     project.get_products()
     project.replace(args)
 
-    # ---------------------------------------------------
-    # Merge the postional parameters and the --components
-    # ---------------------------------------------------
+    # ----------------------------------------------------
+    # Merge the positional parameters and the --components
+    # ----------------------------------------------------
     cmpList = merge(args.parameters, args.components)
     if not cmpList:
         if args.clean is not None and not len(args.clean):
@@ -725,7 +709,7 @@ def main():
                                    Category.Existing | Category.Cruft)
         # --------------------------------------
         # Removing the configuration without
-        # removing the component is non-sensical
+        # removing the component is nonsensical
         # --------------------------------------
         cleanConfigurations(project,
                             cmpList,
@@ -762,7 +746,7 @@ def main():
         else:
             if args.create is None:
                 args.create = []
-            opts = Category.categorize(args.create, Category.Missing)
+            opts = Category.categorize(args.create,  Category.Missing)
 
         for product in project.products:
             cfg = hlsCfg.Configuration(args,

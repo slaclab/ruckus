@@ -8,20 +8,10 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-import vitispy.files as files
-from vitispy.project import Project
-from vitispy.printer import Printer
-from vitispy.workspace import Workspace
-from vitispy.dry_run import DryRun
-from vitispy.run import ComponentInfo
-from vitispy.run import Run
-from vitispy.component import Component
-from vitispy.manpage import display_manpage
 import argparse
 import sys
 import os
 import runpy
-
 
 # -------------------------------------------------------
 # Add the VITIS HLS python paths, remove nonexistent ones
@@ -29,6 +19,13 @@ import runpy
 runpy.run_path(os.getenv('HLSBS_IMPORT_PYPATHS'),
                run_name='add_paths ' + str(sys.path))
 
+import vitispy.files as files
+from vitispy.project import Project
+from vitispy.printer import Printer
+from vitispy.workspace import Workspace
+from vitispy.dry_run import DryRun
+from vitispy.run import Run
+from vitispy.manpage import display_manpage
 
 # ------------------------------------------------------------------------------
 class SplitArgs(argparse.Action):
@@ -57,7 +54,7 @@ def add_arguments(parser):
                         default=None)
 
     parser.add_argument('--verbose',
-                        help='Minimum ouput',
+                        help='Minimum output',
                         action='store_true',
                         default=False)
 
@@ -151,15 +148,14 @@ def report(verbose, printer, project, workspace, components, run):
 
 
 # ------------------------------------------------------------------------------
-'''
-   Merges x, y into a list, where x,y can either by a list or a comma separated
-   string
-'''
-
-
 def merge(x, y):
+    '''
+   Merges x, y into a list, where x,y can either be a list or a comma separated
+   string
+    '''
+    # --------------------------------------------------------------------------
     if x:
-        # Insure X is a list
+        # Ensure X is a list
         if len(x) == 1:
             lst = x[0].split(',')
         else:
@@ -241,7 +237,7 @@ class Options:
                 if (unique == 'cs'):
                     self.stages &= ~Run.Stage.CSim
                 if (unique == 'sy'):
-                    self.stages &= ~Run.Stage.Synthesi
+                    self.stages &= ~Run.Stage.Synthesis
                 if (unique == 'co'):
                     self.stages &= ~Run.Stage.CoSim
                 if (unique == 'pa'):
@@ -249,9 +245,9 @@ class Options:
                 if (unique == 'im'):
                     self.stages &= ~Run.Stage.Implementation
                 if (unique == 'ip'):
-                    self.stages &= ~Run.Ip
+                    self.stages &= ~Run.Stage.Ip_Zip
                 if (unique == 'dc'):
-                    self.stages &= ~Run.Dcp
+                    self.stages &= ~Run.Stage.Ip_Dcp
 
         return
     # --------------------------------------------------------------------------
@@ -302,7 +298,7 @@ class Options:
             return msk
 
         if not isinstance(ip_list, list):
-            if ip_list == '--no-value--':
+            if ip_list == '--no_value--':
                 msk = Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp
                 return msk
             else:
@@ -432,7 +428,7 @@ def doit():
     needs = Project.Need.Workspace
     if args.ip is not None:
         needs |= (Project.Need.Products_Root
-                  | Project.Need.Ip_Root)
+              |   Project.Need.Ip_Root)
 
     project = Project(needs,
                       args.project,
@@ -488,6 +484,7 @@ def doit():
                 project.build_root, 'ip', 'dgn', '{vitis_version}')
 
     if args.list:
+        rc = 0
         if components is None or (len(components) == 0):
             components = ['*']
 
@@ -502,10 +499,10 @@ def doit():
                 idx += 1
         else:
             noComponentsFound(printer, workspace, components)
-
+            rc = -1
         printer.footer()
 
-        return 0
+        return rc
 
     if options.stages == 0:
         print("ERROR: No action was specify\n"
@@ -520,15 +517,17 @@ def doit():
     report(args.verbose, printer, project, workspace, components, run)
 
     cmps = files.get_components(workspace, components)
-    dry_run = args.dry_run
 
+    rc = 0
     if cmps:
         icmp = 1
         cmps = sorted(cmps)
         left = len(cmps)
         for cmp_path in cmps:
             printer.item(icmp, "Component", cmp_path)
-            run.execute(cmp_path)
+            status = run.execute(cmp_path)
+            if status:
+                rc = status   # keep last non-zero so a failed stage propagates
             left -= 1
             icmp += 1
             if left and args.verbose:
@@ -537,6 +536,7 @@ def doit():
         noComponentsFound(printer, workspace, components)
 
     printer.footer()
+    return rc
 # ------------------------------------------------------------------------------
 
 
