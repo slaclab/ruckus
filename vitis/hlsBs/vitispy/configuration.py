@@ -670,7 +670,6 @@ class Configuration:
         # Test Bed Files
         # --------------
         tbs = build.tb
-        breakpoint ()
         errs += self._add_sources(cfg_file,
                                   cfg_name,
                                   cmp_name,
