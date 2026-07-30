@@ -271,7 +271,7 @@ def doit():
             check = is_creatable(ws)
 
             if not check:
-                print_ws("Workspace - Create", ws, dry_run, check,
+                print_ws("Workspace - Create", ws, dry_run,
                          "Failed, the workspace is an invalid path", False)
                 if dry_run:
                     status = 2

@@ -354,8 +354,9 @@ class Project:
 
                 if self.products_root is None:
                     self.products_root = os.path.join(self.root, 'products')
-                    self.products_root = add_version (self.products_root)
-                    needs &= ~Project.Need.Products_Root
+
+                self.products_root = add_version (self.products_root)
+                needs &= ~Project.Need.Products_Root
 
             # Project Build
             if needs & Project.Need.Build_Root:
@@ -366,7 +367,8 @@ class Project:
 
                 if self.build_root is None:
                     self.build_root = os.path.join(self.products_root, 'build')
-                    needs &= ~Project.Need.Build_Root
+
+                needs &= ~Project.Need.Build_Root
 
             # Project Cfg_Root
             if needs & Project.Need.Cfg_Root:
