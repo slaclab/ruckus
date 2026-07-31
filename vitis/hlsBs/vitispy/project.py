@@ -43,12 +43,12 @@ class Project:
 
             self.dir = dir
             self.zip_file = zip_file
-            self.dcp_rename = dcp_rename if dcp_rename else '{cmp_name}'
+            self.dcp_rename = dcp_rename if dcp_rename else '{cmp.name}'
             self.dcp_file = dcp_file
             self.family = family
             self.dgn_dir = dgn_dir
-            self.jou_file = jou_file if jou_file else '{dcp_name}'
-            self.log_file = log_file if log_file else '{dcp_name}'
+            self.jou_file = jou_file if jou_file else '{dcp.name}'
+            self.log_file = log_file if log_file else '{dcp.name}'
             return
         # ----------------------------------------------------------------------
 

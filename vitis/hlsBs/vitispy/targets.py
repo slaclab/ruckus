@@ -408,11 +408,6 @@ class Targets:
         consistent file extension and while anything will do, the most natural
         extension is .cfg.
         '''
-
-        class RemoveLocals (dict):
-            def __missing__(self, key):
-                return '*'  # Returns '*'
-
         class Cruft:
             def __init__(self, cfg_path, cmp_path):
                 self.cfg_path = cfg_path
@@ -461,7 +456,6 @@ class Targets:
         #       but this could change -> need to formalize what the
         #       global symbols are.
         # -----------------------------------------------------------
-        remove_locals = RemoveLocals({'vitis_version': Version.version})
         ignore_paths = (os.path.join(workspace, '_ide'),
                         os.path.join(workspace, 'logs'))
 

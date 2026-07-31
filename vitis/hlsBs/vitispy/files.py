@@ -17,7 +17,7 @@ from vitispy.version import Version
 
 def add_version(string):
     d = { 'vitis' : SimpleNamespace (version = Version.version) }
-    fstr = string.format_map (d) #(vitis_version=Version.version)
+    fstr = string.format_map (d)
     return fstr
 
 

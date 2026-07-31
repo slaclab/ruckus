@@ -477,11 +477,13 @@ def doit():
 
         if not ip.dir:
             ip.dir = os.path.join(
-                project.products_root, 'ip', '{vitis_version}')
+                project.products_root, 'ip', '{vitis.version}')
 
         if not ip.dgn_dir:
             ip.dgn_dir = os.path.join(
-                project.build_root, 'ip', 'dgn', '{vitis_version}')
+                project.build_root, 'ip', 'dgn', '{vitis.version}')
+        elif not os.path.isabs (ip.dgn_dir):
+            ip.dgn_dir = os.path.join(project.build_root, ip.dgn_dir)
 
     if args.list:
         rc = 0

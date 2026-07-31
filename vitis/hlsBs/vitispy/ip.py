@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import os
 import sys
+from types import SimpleNamespace
 
 dir = os.path.split(__file__)[0] + '../'
 sys.path.append(dir)
@@ -84,10 +85,8 @@ class Ip:
 
         if name:
             namdir, namext = os.path.split(name)
-            nam,       ext = os.path.splitext(namext)
         else:
-            nam = None
-            ext = None
+            namext = None
 
         if not dir:
             print("ERROR: Ip must specify an output directory")
@@ -101,21 +100,27 @@ class Ip:
             self.status = -1
             return
 
-        if not nam:
-            nam = '{cmp_name}'
-        if not ext:
-            ext = '.zip'
+        if not namext:
+            # Default to the component name
+            namext = info.cmp_name
+        else:
 
-        # Expand the symbolics. These are the Vitis Version and component name
-        dir = dir.format(vitis_version=Version.version,
-                         cmp_name=info.cmp_name)
-        nam = nam.format(vitis_version=Version.version,
-                         cmp_name=info.cmp_name)
+            map = { 'vitis' : SimpleNamespace (version = Version.version),
+                    'cmp'   : SimpleNamespace (name    =   info.cmp_name) }
+            # Expand the symbolics. These are the Vitis Version and component name
+            dir = dir.format_map (map)
+            namext = namext.format_map (map)
 
         # The output project IP directory and file
         self.prj_ip_dir = os.path.realpath(os.path.expandvars(dir))
         self.prj_ip_zip = os.path.expandvars(
-            os.path.join(self.prj_ip_dir, nam) + ext)
+            os.path.join(self.prj_ip_dir, namext) )
+
+        ext = os.path.splitext (self.prj_ip_zip)[1]
+        # To do
+        if not ext:
+            self.prj_ip_zip += '.zip'
+
 
         exists = os.path.isfile(self.hls_zip)
         if not exists:

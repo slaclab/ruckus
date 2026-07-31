@@ -23,6 +23,7 @@ import os
 import sys
 from pathlib import Path
 from string import Template
+from types import SimpleNamespace
 
 dir = os.path.split(__file__)[0] + '../'
 sys.path.append(dir)
@@ -56,8 +57,6 @@ class Dcp:
             ext = def_ext
 
         file = os.path.expandvars(os.path.join(dir, nam) + ext)
-        file = file.format(vitis_version=Version.version,
-                           cmp_name=def_nam)
 
         # -------------------------------------------------------------
         # If have a relative path, tack on the def_dir to make absolute
@@ -93,13 +92,18 @@ class Dcp:
              log_file:         Log file name
 
         """
+        dcp_ns = SimpleNamespace (file = cmp_name)
+
+        map = { 'vitis' : SimpleNamespace (version = Version.version),
+                'cmp'   : SimpleNamespace (name    =        cmp_name),
+                'dcp'   : dcp_ns }
+
         # -----------------------------------------------------
         # Expand any environment variables in the file name and
         # the new dcp name
         # -----------------------------------------------------
         dir = os.path.expandvars(dir)
-        dir = dir.format(vitis_version=Version.version,
-                         cmp_name=cmp_name)
+        dir = dir.format_map (map)
         self.dcp_dir = Template(dir).substitute(os.environ)
         self.dcp_dir = dir
 
@@ -119,8 +123,7 @@ class Dcp:
             exit (-1)
 
         dgn_dir = os.path.expandvars(dgn_dir)
-        dgn_dir = dgn_dir.format(vitis_version=Version.version,
-                                 cmp_name=cmp_name)
+        dgn_dir = dgn_dir.format_map (map)
 
         # --------------------------------------------------------
         # If dgn_dir is not absolute, make it a sub-dir of dcp_dir
@@ -135,8 +138,9 @@ class Dcp:
         # --------------------------------------------------------------
         # Convention to make dcp and ip cores compatible is to add '_0'
         # --------------------------------------------------------------
-        dcp_rename = dcp_rename.format(cmp_name=cmp_name)
+        dcp_rename = dcp_rename.format_map (map)
         self.dcp_rename = dcp_rename + '_0'
+        dcp_ns.rename = self.dcp_rename
 
         # ---------------------------------------------------
         # Use the dcp_rename as the file name if not provided
@@ -144,8 +148,7 @@ class Dcp:
         if not dcp_file:
             dcp_file = dcp_rename
         else:
-            dcp_file = dcp_file.format(cmp_name=cmp_name,
-                                       dcp_rename=dcp_rename)
+            dcp_file = dcp_file.format_map (map)
 
         self.dcp_file = self.get_file(dcp_file,
                                       self.dcp_dir,
@@ -156,20 +159,18 @@ class Dcp:
         # Get the dcp file's name as the journal and log file's name if needed
         # --------------------------------------------------------------------
         dcp_name = os.path.splitext(os.path.split(self.dcp_file)[1])[0]
+        dcp_ns.name = dcp_name
+
         if not jou_file:
             jou_file = dcp_name
         else:
-            jou_file = jou_file.format(cmp_name=cmp_name,
-                                       dcp_name=dcp_name,
-                                       dcp_rename=dcp_rename)
+            jou_file = jou_file.format_map (map)
         self.jou_file = self.get_file(jou_file, dgn_dir, None, '.jou')
 
         if not log_file:
             log_file = dcp_name
         else:
-            log_file = log_file.format(cmp_name=cmp_name,
-                                       dcp_name=dcp_name,
-                                       dcp_rename=dcp_rename)
+            log_file = log_file.format_map (map)
         self.log_file = self.get_file(log_file, dgn_dir, None, '.log')
 
         # ---------------------------------------------------------------
