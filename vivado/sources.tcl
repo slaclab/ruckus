@@ -119,7 +119,10 @@ if { [get_files -of_objects [get_filesets {constrs_1}]] != "" } {
 # generates elaborate.sh. Setting xsim.elaborate.xelab.more_options from the
 # xsim.compile.tcl.pre hook is too late -- elaborate.sh is already generated.
 # Guarded on the xsim Rogue backends, so it is a no-op for non-Rogue
-# projects and for the GHDL/VCS simulation backends.
+# projects and for the GHDL/VCS simulation backends. The bound name must match
+# LIB in surf's simlink/xsim/Makefile minus the .so suffix (xelab appends .so
+# and adds no "lib" prefix), and the built library is staged into the xsim run
+# directory by vivado/run/pre/xsim.tcl.
 set rogueXsimSrc ""
 foreach rogueFile [RogueSimSources xsim] {
    if { [string match {*/xsim/RogueTcpStream.vhd} ${rogueFile}] ||
@@ -130,8 +133,8 @@ foreach rogueFile [RogueSimSources xsim] {
 }
 if { ${rogueXsimSrc} != "" } {
    set xelabOpt [get_property {xsim.elaborate.xelab.more_options} [get_filesets sim_1]]
-   if { [string first {-sv_lib RogueTcpDpi} ${xelabOpt}] == -1 } {
-      set_property -name {xsim.elaborate.xelab.more_options} -value "${xelabOpt} -sv_lib RogueTcpDpi" -objects [get_filesets sim_1]
+   if { [string first {-sv_lib libRogueSimLinkDpi} ${xelabOpt}] == -1 } {
+      set_property -name {xsim.elaborate.xelab.more_options} -value "${xelabOpt} -sv_lib libRogueSimLinkDpi" -objects [get_filesets sim_1]
    }
 }
 

@@ -33,7 +33,7 @@ if { [RogueSimSources xsim] != "" } {
    # libzmq (see RoguePreloadLibStdCpp).
    RoguePreloadLibStdCpp
    # LD_LIBRARY_PATH parity so the interactively launched xsim subprocess
-   # finds RogueTcpDpi.so at runtime, mirroring vivado/xsim.tcl.
+   # finds libRogueSimLinkDpi.so at runtime, mirroring vivado/xsim.tcl.
    set simOutDir "${OUT_DIR}/${VIVADO_PROJECT}.sim/sim_1/behav/xsim"
    if { [info exists ::env(LD_LIBRARY_PATH)] } {
       set ::env(LD_LIBRARY_PATH) "${simOutDir}:$::env(LD_LIBRARY_PATH)"
