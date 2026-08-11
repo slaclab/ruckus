@@ -31,7 +31,7 @@ if { ${rogueSimPath} == "" } {
 }
 
 ########################################################
-## Locate the surf axi/simlink/xsim/ build directory (../xsim/ sibling of the
+## Locate the surf simlink/xsim/ build directory (../xsim/ sibling of the
 ## detected RogueTcpStream.vhd, mirroring vcs.tcl's ../vcs/ resolution). Older
 ## surf predates the xsim DPI backend (legacy axi/simlink/sim + src VHPI
 ## layout) and has no xsim/ directory: the Vivado xsim Rogue co-sim cannot run
@@ -42,18 +42,18 @@ set simTbDirName [file dirname [lindex ${rogueSimPath} 0]]
 set simLinkDir ${simTbDirName}/../xsim/
 if { ![file exists ${simLinkDir}] } {
    puts "*********************************************************************"
-   puts "ERROR: this surf has no axi/simlink/xsim/ DPI co-simulation backend."
+   puts "ERROR: this surf has no simlink/xsim/ DPI co-simulation backend."
    puts "  Rogue co-sim source found: [file normalize [lindex ${rogueSimPath} 0]]"
    puts "  The Vivado xsim (DPI-C) Rogue co-simulation requires a surf version"
-   puts "  that provides axi/simlink/xsim/. Use 'make vcs' for VCS co-simulation"
-   puts "  with this (older) surf version."
+   puts "  that provides an xsim/ directory beside the Rogue co-sim sources."
+   puts "  Use 'make vcs' for VCS co-simulation with this (older) surf version."
    puts "*********************************************************************"
    exit -1
 }
 
 ########################################################
 ## Version lock: the Rogue xsim DPI co-sim requires Vivado 2023.1+ (older xsc
-## link drivers cannot resolve the host multiarch crt/libs for RogueTcpDpi.so).
+## link drivers cannot resolve the host multiarch crt/libs for the DPI library).
 ## Sourced/checked only inside this Rogue-only path, so a non-Rogue xsim
 ## project on an older Vivado is completely unaffected. Covers both
 ## "make gui" -> Run Simulation and "make xsim", since this hook fires for both.
@@ -75,7 +75,7 @@ RogueCheckLibZmq
 set simOutDir [pwd]
 
 ########################################################
-## Build RogueTcpDpi.so via xsc (axi/simlink/xsim/Makefile)
+## Build libRogueSimLinkDpi.so via xsc (surf simlink/xsim/Makefile)
 ########################################################
 cd ${simLinkDir}
 exec make
@@ -94,12 +94,12 @@ cd $::env(PROJ_DIR)
 RoguePreloadLibStdCpp
 
 ########################################################
-## The xelab "-sv_lib RogueTcpStream" binding is intentionally NOT set here.
+## The xelab "-sv_lib libRogueSimLinkDpi" binding is intentionally NOT set here.
 ## Vivado builds elaborate.sh from xsim.elaborate.xelab.more_options at
 ## launch_simulation start -- BEFORE this compile-stage (xsim.compile.tcl.pre)
 ## hook runs -- so a set_property here never reaches the xelab command line.
 ## The binding is registered at project-generation time in vivado/sources.tcl
 ## (guarded on the xsim RogueTcpStream backend) so it persists into the .xpr
 ## and is baked into the generated elaborate.sh. This hook only builds and
-## stages RogueTcpDpi.so, which must exist before elaboration.
+## stages libRogueSimLinkDpi.so, which must exist before elaboration.
 ########################################################

@@ -71,7 +71,7 @@ if { ${rogueSimPath} != "" } {
    RoguePreloadLibStdCpp
 
    # LD_LIBRARY_PATH parity so a script-launched xsim subprocess
-   # finds libRogueTcpStream.so at runtime, mirroring vcs.tcl's
+   # finds libRogueSimLinkDpi.so at runtime, mirroring vcs.tcl's
    # setup_env LD_LIBRARY_PATH prepend
    set simOutDir "${OUT_DIR}/${VIVADO_PROJECT}.sim/sim_1/behav/xsim"
    if { [info exists ::env(LD_LIBRARY_PATH)] } {
