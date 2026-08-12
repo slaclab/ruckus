@@ -70,7 +70,7 @@ class VitisVersion:
 
         except FileNotFoundError:
             print("failure")
-            return "Vitis not found in PATH"
+            return
 
         else:
             regexpr = r"v20[0-9][0-9]\.[0-9]"

@@ -8,6 +8,18 @@
 ## contained in the LICENSE.txt file.
 ## ----------------------------------------------------------------------------
 
+
+# -----------------------------------------------------------------------------
+# History
+#       Date  Who  What
+# ----------  ---  ------------------------------------------------------------
+# 2026.08.12  jjr  Correct error in hlsVer/hlsVersion when no Vitis version has
+#                  been provided either explicitly on the command line or by
+#                  the user directly sourcing the native Vitis settings64.sh
+#                  file.
+# 2026.08.12  jjr  Optimized the search for the settings64.sh file in hlsVer
+# -----------------------------------------------------------------------------
+
 function setup {
     ### --------------------------------
     ### Get the full path of this script
@@ -104,17 +116,34 @@ function hlsVer ()
     fi
 
     eval local ypath=\"${HLSBS_XILINX_SETUP}/Vitis\"
-    local settings64=$(find $ypath -name settings64.sh -prune -print -quit 2>/dev/null)
+    local settings64=''
 
-    if [[ -z "${settings64}" ]] ; then
-        echo "ERROR:  Unable to find settings64.sh in path ${ypath}"
-        return -1
+    # --------------------------------------------------------------------------
+    # Optimize the find based on the fact that the settings64.sh file is in the
+    # first or second level of the directory tree
+    # --------------------------------------------------------------------------
+    if [[ -f "${ypath}/settings64.sh" ]]; then
+        # Found in the top level
+        settings64=${ypath}/settings64.sh
     else
-        echo   Setting Xilinx to version = ${version}
-        source ${settings64}
-        export HLSBS_XILINX_VERSION=${version}
-        return 0
+        # Try the next level
+        settings64=$(find $ypath -name settings64.sh -mindepth 2 -maxdepth 2 -print -quit 2>/dev/null)
+        # Last attempt at finding it anywhere
+        if [[ -z  "${settings64}" ]] ; then
+            settings64=$(find $ypath -name settings64.sh  -mindepth 3 -print -quit 2>/dev/null)
+        fi
+
+        # Check if found
+        if [[ -z "${settings64}" ]] ; then
+            echo "ERROR:  Unable to find settings64.sh in path ${ypath}"
+            return -1
+        fi
     fi
+
+    echo   Setting Xilinx to version = ${version}
+    source ${settings64}
+    export HLSBS_XILINX_VERSION=${version}
+    return 0
 }
 # ------------------------------------------------------------------------------
 
@@ -410,6 +439,7 @@ function hlsVersion ()
         return 0
     fi
 
+    established=''
     # If passed a version, use it
     if [[ -n "$1" ]]; then
         hlsVer $1
@@ -419,10 +449,11 @@ function hlsVersion ()
         fi
 
     # Else maybe already setup
-    elif [[ -n ${XILINX_HLS} ]]; then
+    elif [[ -n "${XILINX_HLS}" ]]; then
         eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
-        echo "Using existing Xilinx version = ${HLS_XILINX_VERSION}"
         export HLSBS_XILINX_VERSION=${HLS_XILINX_VERSION}
+        echo "Using existing Xilinx version = ${HLS_XILINX_VERSION}"
+        established=True
     fi
 
 
@@ -439,7 +470,10 @@ function hlsVersion ()
     unset HLSBS_PROJECT_PYPATHS
     unset XILINX_VCXX
 
-    eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
+    # If version has not been established
+    if [[ -z "$established" ]]; then
+        eval `python3 ${HLSBS_ROOT}/vitispy/hlsSetVersion.py`
+    fi
 
     # ---------------------------------
     # Only works for versions > v2023.2

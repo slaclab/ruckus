@@ -8,7 +8,7 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 
-import os
+import os,sys
 from datetime import datetime
 
 from dataclasses import dataclass

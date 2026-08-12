@@ -103,13 +103,12 @@ class Ip:
         if not namext:
             # Default to the component name
             namext = info.cmp_name
-        else:
 
-            map = { 'vitis' : SimpleNamespace (version = Version.version),
-                    'cmp'   : SimpleNamespace (name    =   info.cmp_name) }
-            # Expand the symbolics. These are the Vitis Version and component name
-            dir = dir.format_map (map)
-            namext = namext.format_map (map)
+        map = { 'vitis' : SimpleNamespace (version = Version.version),
+                'cmp'   : SimpleNamespace (name    =   info.cmp_name) }
+        # Expand the symbolics. These are the Vitis Version and component name
+        dir = dir.format_map (map)
+        namext = namext.format_map (map)
 
         # The output project IP directory and file
         self.prj_ip_dir = os.path.realpath(os.path.expandvars(dir))
