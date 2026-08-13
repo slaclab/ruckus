@@ -82,12 +82,6 @@ class Target:
            cmp_template:  Used to create the fully resolved name of the HLS
                           component directory within the workspace
         '''
-        # ------------------------------------------------------------
-        # Add the vitis version for any possible usage
-        # Being a global it is not property of the target dictionaries
-        # ------------------------------------------------------------
-        map['vitis'] = SimpleNamespace (version = Version.version)
-
         self.map = map
         map_list   = list (map.values())
         self.build = map_list[ctb_types[0]].object
@@ -320,6 +314,14 @@ class Targets:
 
                 # Each map yields a target
                 for map in maps.maps:
+
+                    # --------------------------------------------------------
+                    # Add the vitis version and git for any possible usage
+                    # Being a global it is not property of the
+                    # target dictionaries
+                    # --------------------------------------------------------
+                    map['vitis'] = SimpleNamespace (version = Version.version)
+                    map['git'] = product.project.git.ns
 
                     target = Target(workspace,
                                     product.project.cfg_root,

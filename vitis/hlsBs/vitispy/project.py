@@ -9,6 +9,7 @@
 # ----------------------------------------------------------------------------
 
 import os,sys
+from types    import SimpleNamespace
 from datetime import datetime
 
 from dataclasses import dataclass
@@ -160,6 +161,7 @@ class Project:
                                   text=True,
                                   bufsize=1) as process:
 
+                breakpoint ()
                 for line in process.stdout:
                     line = line.strip()
                     info = eval(line)
@@ -174,6 +176,16 @@ class Project:
                     break
 
                 process.wait()
+
+                self.ns = SimpleNamespace (repo       = self.repo,
+                                           tag        = self.tag,
+                                           dirty      = self.dirty,
+                                           branch     = self.branch,
+                                           hash_long  = self.hash_long,
+                                           hash_short = self.hash_short,
+                                           hash_msg   = self.hash_msg
+                                           )
+                return
 
         def print(self, printer, pad: int, verbose):
             if self.repo is None:
