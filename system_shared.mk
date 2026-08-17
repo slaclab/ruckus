@@ -8,6 +8,19 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
+# Withhold ambient credentials from the build. See docs/reference/makefile_reference.rst
+RUCKUS_TOKEN_VARS := $(foreach v,$(.VARIABLES),$(if $(findstring TOKEN,$v),$(if $(filter environment%,$(origin $v)),$v)))
+
+# Stash the credential "release" needs before the sweep drops it (see system_vivado.mk)
+ifdef GITHUB_TOKEN
+RUCKUS_GITHUB_AUTH := $(GITHUB_TOKEN)
+endif
+
+# unexport clears the recipe environment; undefine also stops $(VAR) expanding.
+# undefine takes one name and errors on an empty one, hence $(eval) inside $(foreach).
+unexport $(RUCKUS_TOKEN_VARS)
+$(foreach v,$(RUCKUS_TOKEN_VARS),$(eval undefine $v))
+
 ifndef PRJ_VERSION
 export PRJ_VERSION = 0xFFFFFFFF
 endif

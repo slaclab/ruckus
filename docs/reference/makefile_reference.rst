@@ -39,9 +39,9 @@ Targets
    * - ``elf``
      - Build MicroBlaze ELF and embed in bitstream. Requires ``VITIS_SRC_PATH``.
    * - ``release``
-     - Run ``firmwareRelease.py`` and push a release tag. Requires a clean git tree.
+     - Run ``firmwareRelease.py`` and push a release tag. Requires a clean git tree and a GitHub token; see :ref:`credential-scoping`.
    * - ``release_files``
-     - Run ``firmwareRelease.py`` without pushing the tag. Useful for generating release archives locally.
+     - Run ``firmwareRelease.py`` without pushing the tag. Useful for generating release archives locally. Does not need a GitHub token.
    * - ``pyrogue``
      - Generate PyRogue tarball.
    * - ``yaml``
@@ -60,6 +60,105 @@ Targets
      - Create the build directory structure (``OUT_DIR``, ``SYN_DIR``, ``IMPL_DIR``, ``IMAGES_DIR``).
    * - ``clean``
      - Delete the entire ``OUT_DIR`` build tree.
+
+.. _credential-scoping:
+
+Credential Scoping
+------------------
+
+GNU Make copies every environment variable into the environment of every recipe it
+runs. A developer's shell typically carries several unrelated credentials, so without
+intervention all of them would be handed to Vivado, Vitis, GHDL, VCS, Genus, Design
+Compiler, and every project hook script.
+
+ruckus therefore sweeps them out. ``system_shared.mk`` removes **every environment
+variable whose name contains** ``TOKEN`` from make entirely:
+
+.. code-block:: make
+
+   RUCKUS_TOKEN_VARS := $(foreach v,$(.VARIABLES),$(if $(findstring TOKEN,$v),$(if $(filter environment%,$(origin $v)),$v)))
+   unexport $(RUCKUS_TOKEN_VARS)
+   $(foreach v,$(RUCKUS_TOKEN_VARS),$(eval undefine $v))
+
+Every backend that includes ``system_shared.mk`` inherits this, which covers the Vivado,
+GHDL, Genus, Design Compiler, and Vitis flows. ``system_vcs.mk`` includes no shared
+fragment, so the VCS flow is not covered.
+
+Both halves matter, because there are two separate ways a recipe can reach a variable:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - Access
+     - Reads
+     - Closed by
+   * - ``$${GITHUB_TOKEN}``
+     - the recipe's environment
+     - ``unexport``
+   * - ``$(GITHUB_TOKEN)``
+     - make's variable table
+     - ``undefine``
+
+``unexport`` alone would leave ``$(GITHUB_TOKEN)`` expanding to the live value, so a
+line such as ``@echo GITHUB_TOKEN: $(GITHUB_TOKEN)`` in a project's ``test`` target
+would print a working credential into the build log. With both directives applied,
+``$(GITHUB_TOKEN)`` expands to nothing and ``$(origin GITHUB_TOKEN)`` reports
+``undefined``.
+
+``undefine`` accepts only a single name and raises ``empty variable name`` if given
+none, so it is applied through ``$(eval)`` inside ``$(foreach)``, which simply does not
+iterate when nothing matches.
+
+Three deliberate limits apply:
+
+* Matching is case sensitive, so only upper-case ``TOKEN`` is swept. Environment
+  variable names are upper case by convention.
+* Only variables whose origin is the *environment* are swept. A variable a project
+  deliberately defines and exports in its own Makefile is left alone, which is the
+  supported way to opt out.
+* The credential needed by ``release`` is stashed in ``RUCKUS_GITHUB_AUTH``, which is
+  still readable at make level. The sweep prevents accidental exposure through the
+  conventional variable names; it is not a guarantee against a recipe that goes looking
+  for the stash.
+
+This requires GNU Make 3.82 or newer for ``undefine``.
+
+.. envvar:: GITHUB_TOKEN
+
+   GitHub personal access token used by ``firmwareRelease.py`` to create and push a
+   release. It is read from the environment, never from a ruckus file.
+
+   :default: unset
+   :required by: ``make release`` only
+
+   ``system_vivado.mk`` grants this one credential back to the ``release`` target alone,
+   reading it from the stash that ``system_shared.mk`` captured before the sweep:
+
+   .. code-block:: make
+
+      ifdef RUCKUS_GITHUB_AUTH
+      release : export GITHUB_TOKEN := $(RUCKUS_GITHUB_AUTH)
+      endif
+
+   When no token is set in the calling environment the ``ifdef`` guard does not fire, so
+   ``GITHUB_TOKEN`` stays unset in the recipe and ``firmwareRelease.py`` prompts for it
+   interactively, as before. Were the guard omitted, the variable would be exported as
+   an empty string and the script would attempt to authenticate with ``""`` instead of
+   prompting.
+
+   .. note::
+
+      ``make release_files`` generates the release archives without contacting GitHub,
+      so it needs no token.
+
+   .. warning::
+
+      A project that needs a token in a target of its own should re-export it the same
+      way. Prefer a target-specific ``export`` over an inline
+      ``GITHUB_TOKEN=... command`` prefix: the inline form places the secret in the
+      shell's argument list, where other users on a shared build server can read it
+      with ``ps``.
 
 Project Identity Variables
 --------------------------
