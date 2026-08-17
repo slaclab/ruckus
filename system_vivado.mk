@@ -378,6 +378,13 @@ elf :
 #### Release ##################################################
 ###############################################################
 .PHONY : release
+# Hand the credential back to this target only, from the stash system_shared.mk kept.
+# Target-specific export, not an inline GITHUB_TOKEN=... prefix, so the value stays out
+# of the shell's argv where "ps" would show it. Without the ifdef, an absent token would
+# export as "" and firmwareRelease.py would authenticate with it instead of prompting.
+ifdef RUCKUS_GITHUB_AUTH
+release : export GITHUB_TOKEN := $(RUCKUS_GITHUB_AUTH)
+endif
 release : dir
 	$(call ACTION_HEADER,"Generating Release")
 	@cd $(RELEASE_DIR); python3 $(RUCKUS_DIR)/scripts/firmwareRelease.py --project=$(TOP_DIR) --release=$(RELEASE) --push
