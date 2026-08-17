@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 ##############################################################################
-## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the
-## top-level directory of this distribution and at:
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
-## No part of 'SLAC Firmware Standard Library', including this file,
-## may be copied, modified, propagated, or distributed except according to
-## the terms contained in the LICENSE.txt file.
+# This file is part of 'SLAC Firmware Standard Library'.
+# It is subject to the license terms in the LICENSE.txt file found in the
+# top-level directory of this distribution and at:
+# https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of 'SLAC Firmware Standard Library', including this file,
+# may be copied, modified, propagated, or distributed except according to
+# the terms contained in the LICENSE.txt file.
 ##############################################################################
 
 import vitis
@@ -16,10 +16,10 @@ import shutil
 # Project variables
 workspace = os.getenv("OUT_DIR")
 comp_name = os.getenv("PROJECT")
-cfg_file  = '../../hls_config.cfg'
+cfg_file = '../../hls_config.cfg'
 
 # Check if component directory does not exist yet
-if not (os.path.isdir( f'{workspace}/{comp_name}' )):
+if not (os.path.isdir(f'{workspace}/{comp_name}')):
 
     # Create a client object
     client = vitis.create_client()
@@ -29,8 +29,8 @@ if not (os.path.isdir( f'{workspace}/{comp_name}' )):
 
     # Create hls component with existing cfg file
     hls_test_comp = client.create_hls_component(
-        name     = comp_name,
-        cfg_file = [cfg_file],
+        name=comp_name,
+        cfg_file=[cfg_file],
     )
 
     # Print component information
