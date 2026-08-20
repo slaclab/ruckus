@@ -55,6 +55,23 @@ proc loadRuckusTcl { filePath {flags ""} } {
    set ::DIR_LIST "$::DIR_LIST ${filePath}"
 }
 
+## Check whether a file is already in the project, comparing the resolved path
+## rather than the literal string. A project can be generated from one spelling
+## of a path and later re-generated from another (for example when the repository
+## is reached through a symlinked home directory), and a plain string test misses
+## that case, letting add_files insert a second entry for the same physical file.
+## In VHDL that surfaces later as a duplicate design unit. The query is scoped by
+## base name so it stays cheap: normally zero or one candidate.
+proc _fileInProject { path } {
+   set norm [file normalize ${path}]
+   foreach f [get_files -quiet [file tail ${path}]] {
+      if { [file normalize ${f}] eq ${norm} } {
+         return 1
+      }
+   }
+   return 0
+}
+
 ## Function to load RTL files
 proc loadSource args {
    set options {
@@ -104,7 +121,7 @@ proc loadSource args {
               ${fileExt} eq {.edif}||
               ${fileExt} eq {.dcp} } {
             # Check if file doesn't exist in project
-            if { [get_files -quiet $params(path)] == "" } {
+            if { ![_fileInProject $params(path)] } {
                # Add the RTL Files
                set src_rc [catch {add_files -fileset ${fileset} $params(path)} _RESULT]
                if {$src_rc} {
@@ -158,7 +175,7 @@ proc loadSource args {
          if { ${list} != "" } {
             foreach pntr ${list} {
                # Check if file doesn't exist in project
-               if { [get_files -quiet ${pntr}] == "" } {
+               if { ![_fileInProject ${pntr}] } {
                   # Add the RTL Files
                   set src_rc [catch {add_files -fileset ${fileset} ${pntr}} _RESULT]
                   if {$src_rc} {
@@ -521,7 +538,7 @@ proc loadConstraints args {
          if { ${fileExt} eq {.xdc} ||
               ${fileExt} eq {.tcl} } {
             # Check if file doesn't exist in project
-            if { [get_files -quiet $params(path)] == "" } {
+            if { ![_fileInProject $params(path)] } {
                # Add the constraint Files
                add_files -fileset constrs_1 $params(path)
             }
@@ -551,7 +568,7 @@ proc loadConstraints args {
             # Load all the constraint files
             foreach pntr ${list} {
                # Check if file doesn't exist in project
-               if { [get_files -quiet ${pntr}] == "" } {
+               if { ![_fileInProject ${pntr}] } {
                   # Add the RTL Files
                   add_files -fileset constrs_1 ${pntr}
                }
