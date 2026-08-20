@@ -136,6 +136,17 @@ if { ${rogueXsimSrc} != "" } {
    if { [string first {-sv_lib libRogueSimLinkDpi} ${xelabOpt}] == -1 } {
       set_property -name {xsim.elaborate.xelab.more_options} -value "${xelabOpt} -sv_lib libRogueSimLinkDpi" -objects [get_filesets sim_1]
    }
+} else {
+   # Drop a token left behind by an earlier generation of this project that did
+   # use the xsim backend. The project persists across make targets, so without
+   # this an xsim-then-vcs (or xsim-then-ghdl) switch leaves xelab asking for a
+   # DPI library that is no longer part of the build. -quiet because the property
+   # only exists on the Vivado versions that take the xsim.* naming.
+   set xelabOpt [get_property -quiet {xsim.elaborate.xelab.more_options} [get_filesets sim_1]]
+   if { [string first {-sv_lib libRogueSimLinkDpi} ${xelabOpt}] != -1 } {
+      regsub -all {\s+} [string map {{-sv_lib libRogueSimLinkDpi} {}} ${xelabOpt}] { } xelabOpt
+      set_property -name {xsim.elaborate.xelab.more_options} -value [string trim ${xelabOpt}] -objects [get_filesets sim_1]
+   }
 }
 
 # Check if we can upgrade IP cores

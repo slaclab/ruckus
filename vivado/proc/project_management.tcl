@@ -337,7 +337,16 @@ proc SetSynthOutOfContext { } {
 
 ## Remove unused code
 proc RemoveUnsuedCode { } {
-   update_compile_order -quiet -fileset sources_1
-   update_compile_order -quiet -fileset sim_1
-   remove_files [get_files -filter {IS_AUTO_DISABLED}]
+   # Work one fileset at a time. remove_files defaults to the current source
+   # fileset, so a single blanket call cannot delete an auto-disabled file that
+   # lives in sim_1, and without -quiet that mismatch aborts the build. Query
+   # inside the loop and take sources_1 first, so a file that sim_1 merely
+   # inherits is already gone by the time sim_1 is examined.
+   foreach fileset {sources_1 sim_1} {
+      update_compile_order -quiet -fileset ${fileset}
+      set unused [get_files -quiet -of_objects [get_filesets ${fileset}] -filter {IS_AUTO_DISABLED}]
+      if { [llength ${unused}] > 0 } {
+         remove_files -fileset ${fileset} ${unused}
+      }
+   }
 }
