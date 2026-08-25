@@ -390,6 +390,58 @@ on context; the safe approach is to leave the variable unset.
 
       ALLOW_MULTI_DRIVEN=1 make bit
 
+.. envvar:: ALLOW_CDC_VIOLATIONS
+
+   Controls how clock-domain-crossing (CDC) violations are handled during
+   implementation.
+
+   :default: unset (CDC report and CDC check are both skipped)
+   :valid values: ``0`` or ``false`` (a critical CDC violation aborts the build),
+      any other value (no report, no check, build continues)
+
+   .. note::
+
+      This variable has no ``ifndef`` default in any Makefile. It must be passed
+      explicitly as an environment variable. Unlike the timing overrides above,
+      it is not evaluated with ``[string is true -strict ...]``: only ``0`` and
+      ``false`` enable the check, and every other value bypasses it.
+
+      While the variable is unset, the post-``opt_design`` script skips
+      ``report_cdc`` and performs no CDC checking at all. This is intentionally
+      optional for now to give existing projects time to clean up their
+      crossings; a future release will make ``ALLOW_CDC_VIOLATIONS`` required and
+      always run the CDC check.
+
+      When set to ``0`` or ``false``, the post-``opt_design`` script runs
+      ``report_cdc``, writes ``<PROJECT>_cdc_impl.rpt`` into the ``impl_1`` run
+      directory, and aborts the build if any un-waived violation has a
+      ``Critical`` severity, dumping the report to the terminal for review. Any
+      other value (``1``, ``true``, or any non-zero string) skips both the report
+      and the check, and so behaves the same as leaving the variable unset.
+
+      Violations waived with ``create_waiver`` are always excluded, so a single
+      reviewed crossing can be accepted without disabling the whole check.
+
+      The check runs after ``opt_design`` rather than after synthesis because
+      out-of-context IP netlists and their XDC constraints are not linked into
+      the design until implementation. Clocks generated inside an IP (such as the
+      GT recovered and transmit clocks) do not exist at the end of synthesis, and
+      ``report_cdc`` only analyzes paths whose clocks are defined on both the
+      source and destination sides, so a synthesis-stage check reports nothing
+      for GT-based designs.
+
+      The check requires Vivado 2018.1 or later and is skipped on older
+      releases, which lack the ``report_cdc -all_checks_per_endpoint`` option
+      needed to keep the result deterministic.
+
+   .. code-block:: make
+
+      # Enable the CDC check (aborts on a critical violation)
+      ALLOW_CDC_VIOLATIONS=0 make bit
+
+      # Bypass the CDC check (same as leaving the variable unset)
+      ALLOW_CDC_VIOLATIONS=1 make bit
+
 Simulation Variables
 --------------------
 
