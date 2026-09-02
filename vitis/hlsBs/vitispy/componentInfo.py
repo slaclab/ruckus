@@ -11,7 +11,7 @@
 import os
 import json
 import re
-
+import sys
 
 class ComponentInfo:
 
@@ -64,17 +64,17 @@ class ComponentInfo:
                         for line in file:
 
                             if (look & 1) and (line[0:9] == "csim.argv"):
-                                idx = line[9:].find('--')
+                                idx = line[9:].find('=')
                                 self.csim_argv = re.sub(
-                                    pattern, replace, line[idx+9:])
+                                    pattern, replace, line[idx+1+9:])
                                 look &= ~1
                                 if look == 0:
                                     break
 
                             elif (look & 2) and (line[0:8] == "sim.argv"):
-                                idx = line[8:].find('--')
+                                idx = line[8:].find('=')
                                 self.sim_argv = re.sub(
-                                    pattern, replace, line[idx+8:])
+                                    pattern, replace, line[idx+1+8:])
                                 look &= ~2
                                 if look == 0:
                                     break

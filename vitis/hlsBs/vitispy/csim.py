@@ -190,7 +190,8 @@ def get(org_file, command):
               file=sys.stderr)
         sys.exit(-3)
 
-    cmd = info.csim_exe + ' ' + os.path.expandvars(info.csim_argv)
+    print (f"XXXcsim_argv = {info.csim_argv}", file = sys.stderr)
+    cmd = info.csim_exe + ' ' + info.csim_argv
     print(cmd)
     sys.exit(0)
 # ------------------------------------------------------------------------------

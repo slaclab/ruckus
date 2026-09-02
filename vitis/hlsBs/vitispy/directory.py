@@ -24,13 +24,15 @@ class HlsDirectory:
         self.cfg = os.path.join(self.root, 'cfg')
         self.tcl = os.path.join(self.root, 'tcl')
         self.sh = os.path.join(self.root,  'sh')
+        self.include = os.path.join (self.root, 'include')
         return
 
     def __str__(self):
-        return (f"Directory.root  = {self.root}\n" +
-                f"         .cfg   = {self.cfg}\n" +
-                f"         .tcl   = {self.tcl}\n" +
-                f"         .sh    = {self.sh}\n")
+        return (f"Directory.root    = {self.root}\n" +
+                f"         .cfg     = {self.cfg}\n" +
+                f"         .tcl     = {self.tcl}\n" +
+                f"         .sh      = {self.sh}\n"  +
+                f"         .include = {self.include}\n")
 # ------------------------------------------------------------------------------
 
 

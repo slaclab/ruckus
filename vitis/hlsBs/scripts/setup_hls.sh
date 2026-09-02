@@ -379,7 +379,11 @@ function hlsExe ()
         fi
         return ${status}
     else
-        ${csim_exe} $@
+        cmd=${csim_exe} ${@:2}
+
+        echo "cmd = ${cmd}"
+        # Force shell to translate any variables
+        eval "$cmd"
         return $?
     fi
 }
@@ -417,7 +421,12 @@ function hlsGdb ()
         if [[ $HLSBS_XILINX_VERSION == "2023.2" ]] ; then
             export LD_LIBRARY_PATH=${XILINX_HLS}/lnx64/tools/fpo_v7_1
         fi
-        gdb --args ${csim_exe} $@
+
+        cmd="gdb --args ${csim_exe} ${@:2}"
+        echo "cmd = ${cmd}"
+
+        # Force shell to translate any variables
+        eval $cmd
     fi
 }
 # ----------------------------------------------------------------------

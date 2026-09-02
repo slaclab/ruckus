@@ -10,13 +10,15 @@
 
 import os
 import sys
+import glob
 from pathlib import Path
 import vitis
+import shutil
 
 from .workspace import Workspace
 from .version import Version
 from .component import Component
-
+from .directory import Directory
 
 # ------------------------------------------------------------------------------
 # Class holding parameters common to all configurations
@@ -168,29 +170,54 @@ class Configuration:
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def write_inc (inc_dir, inc_file):
+    def copy_hlsHelpers (dst_dir):
+        '''
+        Copies the *.hh file in Directory.include into the dst_dir.
 
-        # Ensure the directory path exists
-        if not os.path.isdir(inc_dir):
-            if not os.path.exists(inc_dir):
-                os.makedirs (inc_dir)
+        Returns
+        The full directory path to ImportFile.hh, which is directly
+        included into the user's test bench file via -include option
+        of the compile command.
 
-        # Construct the full file name and remove any left-over file
-        import_file = os.path.join(inc_dir, inc_file)
-        if  os.path.exists(import_file):
-            os.remove(import_file)
+        Args:
+           dst_dir  The destination directory.  This is typically a
+                    subdirectory of the user's build directory. As
+                    such, it typically does not get committed to git.
+        '''
+        import_file = None
 
-        # Write the 2 stringifying macros
-        with open(import_file, 'w') as file:
-            file.write("#define HLSBS_QUOTE_IT(_x) #_x\n"
-                       "#define IMPORT_FILE(_x) HLSBS_QUOTE_IT(_x)")
+        # --------------------------------------------
+        # Ensure the destination directory path exists
+        # --------------------------------------------
+        os.makedirs (dst_dir, exist_ok=True)
+
+        # ------------------------------------------------------------
+        # Copy include files in the hlsBs include directory to inc_dir
+        # -------------------=----------------------------------------
+        src_files = glob.glob (os.path.join (Directory.include, '*.hh'))
+        for src_file in src_files:
+            filename = os.path.basename (src_file)
+            dst_file = os.path.join (dst_dir, filename)
+
+            # ------------------------------------------------
+            # ImportFile is treated specically since it is the
+            # target of a -include compile time directive.
+            # ------------------------------------------------
+            if filename == "ImportFile.hh":
+                import_file = dst_file
+
+            # -----------------------------------------------------------
+            # Copy if dst_file is non-existent of older than the src_file
+            # -----------------------------------------------------------
+            if (not os.path.isfile (dst_file) or
+                os.path.getmtime(dst_file) < os.path.getmtime(src_file)):
+                shutil.copy (src_file, dst_file)
 
         return import_file
     # --------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------
-
     def execute(self, target):
 
         map = target.map
@@ -264,12 +291,13 @@ class Configuration:
         self.fpga = target.fpga
         if not self.dry_run:
 
-            # ---------------------------------------------
-            # Write the common include stringification file
-            # ---------------------------------------------
-            if not self.import_file:
-                inc_dir = os.path.join(self.project.build_root, 'include')
-                self.import_file = self.write_inc (inc_dir, 'import_file.hh')
+            # ----------------------------------------------------------------
+            # Write the common stringification file to build/include directory
+            # ----------------------------------------------------------------
+            dst_root = os.path.join (self.project.build_root, 'include')
+            dst_dir = os.path.join(dst_root, 'hlsHelpers')
+            self.import_file = self.copy_hlsHelpers (dst_dir)
+
 
             cfg_file = self.client.get_config_file(path=cfg_path)
 
@@ -283,6 +311,7 @@ class Configuration:
             # ---------------------
             self.project.add(cfg_file)
 
+
             # ------------------------------------------------
             # Add the specific configuration the build sources
             # ------------------------------------------------
@@ -292,6 +321,7 @@ class Configuration:
                              cmp_name,
                              self.workspace,
                              map,
+                             dst_root,
                              self.import_file)
 
         # -------------------------------------
@@ -412,12 +442,13 @@ class Configuration:
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def include_add(need_import, import_file, rel_path, dname, file):
+    def include_add(import_needed, import_file, rel_path, dname, file):
         defs = ''
-        if need_import:
+        if import_needed:
             import_file = os.path.relpath(
-                os.path.realpath(import_file), rel_path)
-            defs += " -include " + import_file
+                os.path.realpath(import_file),
+                os.path.realpath(rel_path))
+            defs += " -include  " + import_file
 
         defs += " -D" + dname + "=" + file
         return defs
@@ -439,7 +470,7 @@ class Configuration:
         src_dir = os.path.split(src_file)[0]
         defs = ''
         errs = 0
-        need_quote = True
+        import_needed = True
 
         for d in defines:
             dname = d.name
@@ -487,12 +518,13 @@ class Configuration:
                     errs += 1
                     continue
 
-                defs += Configuration.include_add(need_quote,
+                rel_path = None
+                defs += Configuration.include_add(import_needed,
                                                   import_file,
                                                   rel_path,
                                                   dname,
                                                   abs_file)
-                need_quote = False
+                import_needed = False
 
 
             # -------------------------------------------------
@@ -525,12 +557,12 @@ class Configuration:
                     errs += 1
                     continue
 
-                defs += Configuration.include_add(need_quote,
+                defs += Configuration.include_add(import_needed,
                                                   import_file,
                                                   rel_path,
                                                   dname,
                                                   rel_file)
-                need_quote = False
+                import_needed = False
 
             # --------------------------
             # Error: Unknown define type
@@ -557,6 +589,7 @@ class Configuration:
                      cfg_path,
                      sources,
                      label,
+                     inc_root,
                      import_file):
 
         errors = 0
@@ -584,9 +617,11 @@ class Configuration:
                 cc_file = Configuration.make_relative(file_path,
                                                       cfg_path,
                                                       False)
-                # -------------------------------
-                # Add the include paths, -I <path>
-                # -------------------------------
+
+                # -------------------------------------
+                # Add the user include paths, -I <path>
+                # -------------------------------------
+                incs = ""
                 if source.includes:
                     inc_errs, incs = Configuration.expand_incs(source.includes,
                                                                cmp_name,
@@ -596,16 +631,44 @@ class Configuration:
                     errs += inc_errs
 
                 # ------------------------------------------------
-                # Add the defines, i.e. -D <Name>, -D <Name=Value>
+                # Add the internal build/include paths, -I <path>
+                # Only add to the first bench file.
                 # ------------------------------------------------
-                if source.defines:
-                    def_errs, defs = Configuration.expand_defs(source.defines,
+                if first and label == 'tb' :
+                    inc_bld_rel = Configuration.make_relative (inc_root,
+                                                               cfg_path,
+                                                               False)
+                    incs += " -I " + inc_bld_rel
+
+
+                # -------------------------------------------------
+                # Add the defines, i.e. -D <Name>, -D <Name=Value>
+                # Plus the hlsBs supplied compile-time includes
+                # to help with command line parsing and environment
+                # variable expansion
+                # -------------------------------------------------
+                defines = ()
+                if source.defines :
+
+                    # Convert defines to a tuple
+                    if isinstance (source.defines, list):
+                        defines = tuple (source.defines)
+                    elif isinstance (source.defines, tuple) :
+                        defines = source.defines
+                    else :
+                        defines = (source.defines,)
+
+
+                # -----------------------------------------------------
+                if defines :
+                    def_errs, defs = Configuration.expand_defs(defines,
                                                                cfg_name,
                                                                file_path,
                                                                map,
                                                                import_file)
                     errors += def_errs
                     errs += def_errs
+
 
                 # ------------------------------------------------------------
                 # Skip writing anything to the output file if there are errors
@@ -658,6 +721,7 @@ class Configuration:
                     cmp_name,
                     workspace,
                     map,
+                    inc_root,
                     import_file):
 
         errs = 0
@@ -678,6 +742,7 @@ class Configuration:
                                   cfg_path,
                                   tbs,
                                   'tb',
+                                  inc_root,
                                   import_file)
 
         # ---------------
@@ -692,6 +757,7 @@ class Configuration:
                                   cfg_path,
                                   syns,
                                   'syn',
+                                  inc_root,
                                   import_file)
 
         # -------------------

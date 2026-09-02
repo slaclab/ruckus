@@ -16,6 +16,46 @@ from .version import Version
 
 class Product:
 
+    # ------------------------------------------------------------------------------
+    class File:
+        '''
+        Processes a file name to either
+            - absolute: remove all environmental variables and make absolute path
+            - relative: make it relative to another path
+            - preserve: as is, but preserve the environment variable from translation
+        '''
+        @staticmethod
+        def absolute (file) :
+            return os.path.expandvars (file)
+
+        @staticmethod
+        def relative (file, to) :
+            return os.path.relpath (self.absolute(file), self.absolute(to))
+
+        @staticmethod
+        def preserve (file) :
+            search_pattern = r'\$\{?(\w+)\}?'
+            sub_pattern    = r'%\1%'
+            return re.sub(search_pattern, sub_pattern, file)
+    # ------------------------------------------------------------------------------
+
+
+    # ------------------------------------------------------------------------------
+    class EnvString:
+        '''
+        Prevents the translation of environmental variables by HLS in the
+        configuration file by transforming them from ${env_var} to %env_var%.
+        '''
+        @staticmethod
+        def preserveAll (in_string) :
+            search_pattern = r'\$\{?(\w+)\}?'
+            sub_pattern    = r'%\1%'
+            return re.sub(search_pattern, sub_pattern, in_string)
+
+        @staticmethod
+        def convert (in_string):
+            return '%' + in_string + '%'
+
     from .fpga import Fpga
 
     # ------------------------------------------------------------------------------
@@ -60,40 +100,72 @@ class Product:
 
     # --------------------------------------------------------------------------
     class CtbBuilds(_Ctb):
-        def __init__(self, key, builds):
+        def __init__(self, prefix, builds):
             if not isinstance(builds[0], (list, tuple)):
                 builds = (builds,)
-            super().__init__(key, ['Builds', builds])
+            super().__init__(prefix, ['Builds', builds])
             return
     # --------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------
     class CtbFpgas (_Ctb):
-        def __init__(self, key, fpgas):
+        def __init__(self, prefix, fpgas):
             if not isinstance(fpgas, (list, tuple)):
                 fpgas = (fpgas,)
-            super().__init__(key, ['Fpgas', fpgas])
+            super().__init__(prefix, ['Fpgas', fpgas])
             return
     # --------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------
     class CtbFiles (_Ctb):
-        def __init__(self, key, files):
+        def __init__(self, prefix, files):
             if not isinstance(files, (list, tuple)):
                 files = (files,)
-            super().__init__(key, ['Files', files])
+            super().__init__ (prefix, ['Files', files])
             return
     # --------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------
     class CtbValues (_Ctb):
-        def __init__(self, key, values):
-            if not isinstance(values, (list, tuple)):
-                values = (values[0],)
-            super().__init__(key, ['Values', values])
+        def __init__(self, prefix, values):
+
+            err = True
+
+            # ---------------------------------------------------------------
+            # Check that either have a single or list or tuple of (id, val)'s
+            # where id must either:
+            #    - A string
+            #    - An empty string
+            #    - None
+            # ---------------------------------------------------------------
+            if  isinstance (values, (list, tuple)) :
+
+                # Is this a list or tuple of the proper (id, val) pairs?
+                if (all (isinstance (i, (list, tuple)) and
+                   (len (i) == 2 and (isinstance (i[0], str) or (i[0] is None)))
+                    for i in values)) :
+                    err = False
+
+                # Is this a single (id, val) pair?
+                elif (isinstance (values[0], str)) or (values[0] is None) :
+                    values = (values, )
+                    err = False
+
+            if err :
+                frame = inspect.currentframe().f_back
+                print ("ERROR: In CtbValues\n"
+                      f"     : {values} must be either\n"
+                       "     : a single pair of (str, val) as a list or tuple, e.g. ('D10', 10)\n"
+                       "     : or\n"
+                       "     : a list of tuple of such pairs, e.g ( ('D10', 10), ('D20', 20) )\n"
+                      f"     : {frame.f_code.co_filename}\n"
+                      f"     : {frame.f_code.co_name}:{frame.f_lineno}", file=sys.stderr)
+                exit (-1)
+
+            super().__init__(prefix, ['Values', values])
             return
     # --------------------------------------------------------------------------
 
@@ -246,7 +318,6 @@ class Product:
         # ----------------------------------------------------------------------
         def __init__(self, name, paths, rel_path=None):
             self.name = name
-            # if isinstance (paths, (list,tuple)) else (paths,)
             self.value = paths
             self.rel_path = rel_path
             self.type = 'rel_file' if rel_path else 'abs_file'

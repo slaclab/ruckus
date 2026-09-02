@@ -161,18 +161,27 @@ class Project:
                                   text=True,
                                   bufsize=1) as process:
 
-                breakpoint ()
                 for line in process.stdout:
                     line = line.strip()
                     info = eval(line)
 
-                    self.repo = info['Repo']
-                    self.tag = info['Tag']
-                    self.dirty = info['Dirty']
-                    self.branch = info['Branch']
-                    self.hash_long = info['HashLong']
-                    self.hash_short = info['HashShort']
-                    self.hash_msg = info['HashMsg']
+                    repo = info['Repo']
+                    if repo:
+                        self.repo = info['Repo']
+                        self.tag = info['Tag']
+                        self.dirty = info['Dirty']
+                        self.branch = info['Branch']
+                        self.hash_long = info['HashLong']
+                        self.hash_short = info['HashShort']
+                        self.hash_msg = info['HashMsg']
+                    else:
+                        self.repo = "None"
+                        self.tag = "None"
+                        self.dirty = True
+                        self.branch = "None"
+                        self.hash_long = "None"
+                        self.hash_short = "None"
+                        self.hash_msg = "None"
                     break
 
                 process.wait()

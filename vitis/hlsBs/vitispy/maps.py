@@ -251,10 +251,16 @@ class Maps ():
             return len(vs)
 
         if dtype == 'Values':
-            for val in vs:
-                kvs = SimpleNamespace (object = val,
+            for id_val in vs:
+
+                val = id_val[1]
+                id  = id_val[0] if id_val[0] else val
+
+                kvs = SimpleNamespace (object = id_val,
+                                       id     = id,
                                        value  = val)
-                Maps.add_srcs(srcs, 'Values', key, val, kvs)
+
+                Maps.add_srcs(srcs, 'Values', key, id_val, kvs)
             return len(vs)
 
         return
