@@ -1,9 +1,9 @@
-# docs/conf.py
 import subprocess
 
-project = "ruckus"
+project = "hlsBs"
 author = "SLAC National Accelerator Laboratory"
 copyright = "2026, SLAC National Accelerator Laboratory"
+
 
 try:
     release = subprocess.check_output(
@@ -16,15 +16,20 @@ version = release
 
 extensions = [
     "myst_parser",
-    "sphinx_copybutton",
+#    "sphinx_copybutton",  CAN'T FIND
 ]
 
-html_theme = "sphinx_rtd_theme"
-html_theme_options = {"titles_only": False, "navigation_depth": -1}
-html_title = "ruckus"
-html_baseurl = "https://slaclab.github.io/ruckus/"
+
 
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
+
+myst_heading_anchors = 4
+
+exclude_patterns = ["build"]
+
+html_theme = "sphinx_rtd_theme"
+#html_theme_options = {"titles_only": True, "navigation_depth": -1}
+html_static_path = []
