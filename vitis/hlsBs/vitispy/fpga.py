@@ -12,7 +12,8 @@
 # FPGA
 # ------------------------------------------------------------------------------
 class Fpga:
-    def __init__(self, part, clock, uncertainty, id=None):
+    def __init__(self, id, part, clock, uncertainty):
+        self.id = id
         self.part = part
         self.clock = clock
         self.uncertainty = uncertainty

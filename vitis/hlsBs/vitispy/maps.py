@@ -196,8 +196,8 @@ class Maps ():
 
         if dtype == 'Builds':
             for build in vs:
-                kvs = SimpleNamespace(object = build[1], id = build[0])
-                Maps.add_srcs(srcs, 'Builds', key, build[1], kvs)
+                kvs = SimpleNamespace(object = build, id = build.id)
+                Maps.add_srcs(srcs, 'Builds', key, build, kvs)
             return len(vs)
 
         if dtype == 'Files':
@@ -253,8 +253,8 @@ class Maps ():
         if dtype == 'Values':
             for id_val in vs:
 
-                val = id_val[1]
-                id  = id_val[0] if id_val[0] else val
+                val = id_val.value
+                id  = id_val.id if id_val.id else val
 
                 kvs = SimpleNamespace (object = id_val,
                                        id     = id,

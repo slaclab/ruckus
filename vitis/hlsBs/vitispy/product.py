@@ -10,19 +10,41 @@
 
 import os
 import sys
+import re
 import inspect
 from .version import Version
 
 
 class Product:
 
-    # ------------------------------------------------------------------------------
+    from .fpga import Fpga
+
+    # --------------------------------------------------------------------------
+    class Value:
+        '''
+        Creates a named value, generally to be used with CtbValues
+
+        Args
+           id  The identifier to associate with the value
+        value  The value
+       '''
+        # ----------------------------------------------------------------------
+        def __init__ (self, id, value):
+            self.id = id
+            self.value = value
+            return
+        # ----------------------------------------------------------------------
+    # --------------------------------------------------------------------------
+
+    # --------------------------------------------------------------------------
     class File:
         '''
         Processes a file name to either
-            - absolute: remove all environmental variables and make absolute path
+            - absolute: remove all environmental variables and make absolute
+              path
             - relative: make it relative to another path
-            - preserve: as is, but preserve the environment variable from translation
+            - preserve: as is, but preserve the environment variable from
+              translation
         '''
         @staticmethod
         def absolute (file) :
@@ -37,10 +59,10 @@ class Product:
             search_pattern = r'\$\{?(\w+)\}?'
             sub_pattern    = r'%\1%'
             return re.sub(search_pattern, sub_pattern, file)
-    # ------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
 
-    # ------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     class EnvString:
         '''
         Prevents the translation of environmental variables by HLS in the
@@ -56,15 +78,18 @@ class Product:
         def convert (in_string):
             return '%' + in_string + '%'
 
-    from .fpga import Fpga
 
-    # ------------------------------------------------------------------------------
+
+
+
+    # --------------------------------------------------------------------------
     class _Ctb:
         '''
-        Internal class following the pattern of a normal python dictionary except
-        the value is a 2 element list consisting of 'type' and a 'value'. The value(s)
-        will be compiled into one or more 2 element lists, where the first element
-        is a type and the second a single value or a list of values of 'type'
+        Internal class following the pattern of a normal python dictionary
+        except the value is a 2 element list consisting of 'type' and a
+        'value'. The value(s) will be compiled into one or more 2 element
+        lists, where the first element is a type and the second a single value
+        or a list of values of 'type'
         e.g. 'Files', 'Fpgas', etc
 
         Example:
@@ -101,7 +126,7 @@ class Product:
     # --------------------------------------------------------------------------
     class CtbBuilds(_Ctb):
         def __init__(self, prefix, builds):
-            if not isinstance(builds[0], (list, tuple)):
+            if not isinstance(builds, (list, tuple)):
                 builds = (builds,)
             super().__init__(prefix, ['Builds', builds])
             return
@@ -133,36 +158,24 @@ class Product:
         def __init__(self, prefix, values):
 
             err = True
+            if isinstance (values, (list, tuple)):
+               if all(isinstance(item, Product.Value) for item in values):
+                   err = False
 
-            # ---------------------------------------------------------------
-            # Check that either have a single or list or tuple of (id, val)'s
-            # where id must either:
-            #    - A string
-            #    - An empty string
-            #    - None
-            # ---------------------------------------------------------------
-            if  isinstance (values, (list, tuple)) :
-
-                # Is this a list or tuple of the proper (id, val) pairs?
-                if (all (isinstance (i, (list, tuple)) and
-                   (len (i) == 2 and (isinstance (i[0], str) or (i[0] is None)))
-                    for i in values)) :
-                    err = False
-
-                # Is this a single (id, val) pair?
-                elif (isinstance (values[0], str)) or (values[0] is None) :
-                    values = (values, )
-                    err = False
+            elif isinstance (values, Product.Value):
+                err = False
+                values = (values,)
 
             if err :
                 frame = inspect.currentframe().f_back
                 print ("ERROR: In CtbValues\n"
                       f"     : {values} must be either\n"
-                       "     : a single pair of (str, val) as a list or tuple, e.g. ('D10', 10)\n"
+                       "     : a single Product.Value\n"
                        "     : or\n"
-                       "     : a list of tuple of such pairs, e.g ( ('D10', 10), ('D20', 20) )\n"
+                       "     : a list or tuple of ProductValue\n"
                       f"     : {frame.f_code.co_filename}\n"
-                      f"     : {frame.f_code.co_name}:{frame.f_lineno}", file=sys.stderr)
+                      f"     : {frame.f_code.co_name}:{frame.f_lineno}",
+                       file=sys.stderr)
                 exit (-1)
 
             super().__init__(prefix, ['Values', values])
@@ -386,6 +399,7 @@ class Product:
         Defines a single build product
 
         Args:
+           id:         Identifier of this build
            top:        Name of the top level HLS method
            tb:         A single, list or tuple of testbench Product.sources
            syn:        A single, list or tuple of synthesis/HLs Product.sources
@@ -395,8 +409,8 @@ class Product:
         '''
         # ----------------------------------------------------------------------
 
-        def __init__(self, top, tb, syn, csim_argv, cosim_argv, ldflags = None):
-
+        def __init__(self, id, top, tb, syn, csim_argv, cosim_argv, ldflags = None):
+            self.id = id
             self.top = top
             self.tb = tb if isinstance(tb, (list, tuple)) else (tb,)
             self.syn = syn if isinstance(syn, (list, tuple)) else (syn,)
