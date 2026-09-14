@@ -369,7 +369,7 @@ function hlsExe ()
         export LD_LIBRARY_PATH=${XILINX_HLS}/lnx64/tools/fpo_v7_1
     fi
 
-    csim_exe=$(${HLSBS_ROOT}/vitispy/hlsExe.py $(hlsPrj) $@)
+    csim_exe=$(${HLSBS_ROOT}/vitispy/hlsExe.py $(hlsPrj) $1)
     status=$?
     if test $status -ne 0
     then
@@ -379,9 +379,8 @@ function hlsExe ()
         fi
         return ${status}
     else
-        cmd=${csim_exe} ${@:2}
+        cmd="${csim_exe} ${@:2}"
 
-        echo "cmd = ${cmd}"
         # Force shell to translate any variables
         eval "$cmd"
         return $?
@@ -401,7 +400,7 @@ function hlsGdb ()
         return $? 2>/dev/null; exit
     fi
 
-    csim_exe=$(${HLSBS_ROOT}/vitispy/hlsGdb.py $(hlsPrj) $@)
+    csim_exe=$(${HLSBS_ROOT}/vitispy/hlsGdb.py $(hlsPrj) $1)
     status=$?
     if test $status -ne 0
     then
@@ -423,7 +422,6 @@ function hlsGdb ()
         fi
 
         cmd="gdb --args ${csim_exe} ${@:2}"
-        echo "cmd = ${cmd}"
 
         # Force shell to translate any variables
         eval $cmd

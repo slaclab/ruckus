@@ -70,9 +70,7 @@ namespace hlsHelpers {
 /* ---------------------------------------------------------------------- */
 inline std::string expand_envs (std::string text)
 {
-   std::cout << "text     " << text << std::endl;
    std::string expanded (text);
-   std::cout << "expanded " << expanded << std::endl;
    static const std::regex env_re{R"--(%([^}]+)%)--"};
    std::smatch match;
 
