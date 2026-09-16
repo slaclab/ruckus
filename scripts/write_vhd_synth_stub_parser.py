@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Description:
 #       This script is designed to parse the Vivado "write_vhdl -mode synth_stub"
 #       output file back into the user friendly record types.
@@ -33,7 +33,7 @@
 #
 # Note: I recommend running EMACS beatify afterwards.
 #
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # This file is part of 'SLAC Firmware Standard Library'.
 # It is subject to the license terms in the LICENSE.txt file found in the
 # top-level directory of this distribution and at:
@@ -41,7 +41,7 @@
 # No part of 'SLAC Firmware Standard Library', including this file,
 # may be copied, modified, propagated, or distributed except according to
 # the terms contained in the LICENSE.txt file.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 ##
 # @file write_vhd_synth_stub_parser.py
 # This script is designed to parse the Vivado "write_vhdl -mode synth_stub"
@@ -49,6 +49,7 @@
 
 import sys
 import re
+
 
 def proc(line):
     """Function that processes a line of the VHDL synth_stub file"""
@@ -59,26 +60,26 @@ def proc(line):
     if re.search(r'\\', line):
         retVar = (port + "=> ")
         # strip off the \ char
-        convt  = port.replace('\\','')
+        convt = port.replace('\\', '')
         # strip off the ] char
-        convt  = convt.replace(']','')
+        convt = convt.replace(']', '')
         # separate the delimiters
         convt = convt.split("[")
         # loop through the array
         for i in range(len(convt)):
             # strip off the space char
-            convt[i] = convt[i].replace(' ','')
+            convt[i] = convt[i].replace(' ', '')
             # Check for first element
-            if (i==0):
+            if (i == 0):
                 retVar += convt[0]
             else:
                 # Check if array index
                 if convt[i].isdigit():
-                    retVar += ('('+convt[i]+')')
+                    retVar += ('(' + convt[i] + ')')
                 else:
-                    retVar += ('.'+convt[i])
+                    retVar += ('.' + convt[i])
     else:
-        retVar = (port + "=> " + port.replace(' ','') )
+        retVar = (port + "=> " + port.replace(' ', ''))
 
     # Check if last port mapping
     if re.search(r';', line):
@@ -89,12 +90,13 @@ def proc(line):
     # Return the results
     return retVar
 
+
 def vho(arg):
     """Function that writes a .vho file from the VHDL synth_stub file"""
     # common define
-    entity  = ''
-    line    = ''
-    fname = arg.replace('.vhd','') + '.vho'
+    entity = ''
+    line = ''
+    fname = arg.replace('.vhd', '') + '.vho'
 
     # Open the input/output files
     ifd = open(arg)
@@ -104,18 +106,18 @@ def vho(arg):
     while (not re.search('Port', line)):
         line = ifd.readline()
         if re.search('entity', line):
-            entity = line.replace('entity','')
-            entity = entity.replace('is','')
-            entity = entity.replace(' ','')
-            entity = entity.replace('\n','')
+            entity = line.replace('entity', '')
+            entity = entity.replace('is', '')
+            entity = entity.replace(' ', '')
+            entity = entity.replace('\n', '')
 
     # Output file header
-    ofd.write('U_Core: entity work.'+entity+'\n')
+    ofd.write('U_Core: entity work.' + entity + '\n')
     ofd.write('  port map (\n')
 
     # Loop through the ports
     line = ifd.readline()
-    while (not re.match("  \);", line)):
+    while (not re.match("  \\);", line)):
         # Process the line and write to file
         ofd.write(proc(line))
         # Read the file
@@ -127,6 +129,7 @@ def vho(arg):
 
     # # Print the output files
     # os.system('cat ' + fname)
+
 
 if __name__ == '__main__':
     vho(sys.argv[1])

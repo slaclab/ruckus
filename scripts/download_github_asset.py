@@ -12,14 +12,24 @@
 
 import os
 import requests
-from github import Github # PyGithub
+from github import Github  # PyGithub
 import argparse
 
 # Set up argument parsing
-parser = argparse.ArgumentParser(description="Download assets from GitHub releases in private repositories.")
-parser.add_argument("--repo_name", type=str, required=True, help="Repository name, e.g., 'slaclab/epix-hr-m-320k'")
-parser.add_argument("--asset_name", type=str, required=True, help="Asset name to download, e.g., 'ePixHRM320k-0x01000400-20240323061941-dnajjar-ff123db.mcs'")
-parser.add_argument("--release_tag", type=str, required=True, help="Release tag, e.g., 'v1.1.4'")
+parser = argparse.ArgumentParser(
+    description="Download assets from GitHub releases in private repositories.")
+parser.add_argument("--repo_name", type=str, required=True,
+                    help="Repository name, e.g., 'slaclab/epix-hr-m-320k'")
+parser.add_argument(
+    "--asset_name",
+    type=str,
+    required=True,
+    help="Asset name to download, e.g., 'ePixHRM320k-0x01000400-20240323061941-dnajjar-ff123db.mcs'")
+parser.add_argument(
+    "--release_tag",
+    type=str,
+    required=True,
+    help="Release tag, e.g., 'v1.1.4'")
 
 args = parser.parse_args()
 
@@ -53,7 +63,9 @@ if asset_to_download is not None:
     # The API provides an authenticated URL for assets in private repositories
     asset_url = asset_to_download.url
 
-    headers = {'Authorization': f'token {GITHUB_TOKEN}', 'Accept': 'application/octet-stream'}
+    headers = {
+        'Authorization': f'token {GITHUB_TOKEN}',
+        'Accept': 'application/octet-stream'}
     response = requests.get(asset_url, headers=headers, stream=True)
 
     if response.status_code == 200:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 ##############################################################################
-## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the
-## top-level directory of this distribution and at:
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
-## No part of 'SLAC Firmware Standard Library', including this file,
-## may be copied, modified, propagated, or distributed except according to
-## the terms contained in the LICENSE.txt file.
+# This file is part of 'SLAC Firmware Standard Library'.
+# It is subject to the license terms in the LICENSE.txt file found in the
+# top-level directory of this distribution and at:
+# https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of 'SLAC Firmware Standard Library', including this file,
+# may be copied, modified, propagated, or distributed except according to
+# the terms contained in the LICENSE.txt file.
 ##############################################################################
 #
 # create_proj.py — idempotent Vitis Unified IDE workspace + AIE component
@@ -48,18 +48,18 @@ from collections import defaultdict
 
 SRC_EXTENSIONS = ('.cpp', '.cc', '.h', '.hpp')
 
-workspace          = os.getenv("OUT_DIR")
-comp_name          = os.getenv("PROJECT")
-aie_platform       = os.getenv("AIE_PLATFORM")
-aie_part           = os.getenv("AIE_PART")
-aie_sources        = os.getenv("AIE_SOURCES", "").split()
+workspace = os.getenv("OUT_DIR")
+comp_name = os.getenv("PROJECT")
+aie_platform = os.getenv("AIE_PLATFORM")
+aie_part = os.getenv("AIE_PART")
+aie_sources = os.getenv("AIE_SOURCES", "").split()
 aie_top_level_file = os.getenv("AIE_TOP_LEVEL_FILE")
 
 # PROJ_DIR is the parent of OUT_DIR (the script runs with cwd=OUT_DIR per
 # system_vitis_unified_aie.mk). User cfg lives at PROJ_DIR/aie_config.cfg
 # by convention, mirroring HLS's hls_config.cfg.
-proj_dir         = os.path.abspath(os.path.join(workspace, '..'))
-aie_config_user  = os.path.join(proj_dir, 'aie_config.cfg')
+proj_dir = os.path.abspath(os.path.join(workspace, '..'))
+aie_config_user = os.path.join(proj_dir, 'aie_config.cfg')
 
 # Generated cfg actually attached to the component. We synthesize this so
 # that include= directives derived from AIE_SOURCES dest_subdirs are
@@ -69,7 +69,7 @@ aie_config_user  = os.path.join(proj_dir, 'aie_config.cfg')
 # regenerable build artifact, not user-managed. include= paths are
 # relative to v++'s working directory (<comp>/build/<target>/), so
 # `../..` is the component root and `../../<subdir>` is <comp>/<subdir>/.
-aie_config_generated     = os.path.join(workspace, 'aie_config.generated.cfg')
+aie_config_generated = os.path.join(workspace, 'aie_config.generated.cfg')
 aie_config_generated_rel = '../aie_config.generated.cfg'
 
 if not aie_sources:
@@ -79,7 +79,8 @@ if not aie_sources:
 
 # Idempotent — skip if the component is already realized in the workspace.
 if os.path.isdir(f'{workspace}/{comp_name}'):
-    print(f'AIE component "{comp_name}" already exists at {workspace}/{comp_name} — skipping create_proj.')
+    print(
+        f'AIE component "{comp_name}" already exists at {workspace}/{comp_name} — skipping create_proj.')
     raise SystemExit(0)
 
 # Expand each AIE_SOURCES entry. Each entry is `path[:dest_subdir]` —
@@ -115,15 +116,15 @@ client.set_workspace(workspace)
 # (the Makefile guarantees exactly one is set).
 if aie_platform:
     aie_comp = client.create_aie_component(
-        name     = comp_name,
-        platform = aie_platform,
-        template = "empty",
+        name=comp_name,
+        platform=aie_platform,
+        template="empty",
     )
 else:
     aie_comp = client.create_aie_component(
-        name     = comp_name,
-        part     = aie_part,
-        template = "empty",
+        name=comp_name,
+        part=aie_part,
+        template="empty",
     )
 
 # Group expanded paths by (parent dir, dest_subdir) so we issue one

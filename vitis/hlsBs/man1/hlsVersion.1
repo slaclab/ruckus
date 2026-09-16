@@ -1,0 +1,34 @@
+.TH hlsVersion 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsVersion \- Sets the **hlsBs** framework to use the specified Xilinx/Vitis
+Version
+
+.SH SYNOPSIS
+.B hlsVersion VERSION [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsVersion
+If a version number has been specified, sets the Xilinx/Vitis Version by
+calling the appropriate settings64.sh script. If not specified, it uses
+the presumably already set Xilinx/Vitis version.
+
+Once a valid Xilinx/Vitis version has been established, the internal **hlsBs**
+context is set to use that version.
+
+See the examples.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.SH Examples:
+  $ hlsVersion 2024.1
+  Sets the XILINX version to 2024.1
+
+  $ hlsVersion
+  Uses the current XILINX/Vitis version
+
+.SH AUTHOR
+Written by JJRussell
