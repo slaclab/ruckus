@@ -46,6 +46,7 @@ bin*
 *.jou
 slprj*
 linux*
+.nfs*
 
 # Only .bit.gz and .mcs.gz should be committed to git
 *.bit
