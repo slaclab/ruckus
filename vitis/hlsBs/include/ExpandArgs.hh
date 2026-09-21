@@ -194,9 +194,9 @@ public:
       // Count the total number of command lines in all indirect files
       int xargc = count (ctx, idfCtx, nidf, argv);
 
-      // Allocate an array of indices marking which new argv's where found
+      // Allocate an array of pointers of the new argv's.
       // This is needed to free the memory associated with them.
-      m_free    = (char *)malloc ((xargc+1) * sizeof (char *));
+      m_free    = (char **)malloc ((xargc+1) * sizeof (char **));
 
       // The total number of arguments is
       //   - the new ones
@@ -311,11 +311,12 @@ private:
     *  \brief  Fills the expanded argv
     *  \return The filled expanded argv
     *
-    *  \param[in]   ctx The context of # args in a file an its file pointer
-    *  \param[in]   idf The indices of the indirect files arguments
-    *  \param[in] xargc The total number of expanded argv's
-    *  \param[in]  argc Original number of argv's
-    *  \param[in]  argv Original argv's
+    *  \param[in]    ctx The context of # args in a file an its file pointer
+    *  \param[in]    idf The indices of the indirect files arguments
+    *  \param[in]  xargc The total number of expanded argv's
+    *  \param[in]   argc Original number of argv's
+    *  \param[in]   argv Original argv's
+    *  \param[out] frees The allocated argv's that need to be freed
     *                                                                       */
    /* --------------------------------------------------------------------- */
    static char **fill (const Ctx        *ctx,
@@ -323,7 +324,7 @@ private:
                        int             xargc,
                        int              argc,
                        char           **argv,
-                       char           *frees)
+                       char          **frees)
    {
       int     iarg  = 0;
       int      cdx  = idfCtx->m_idx;
@@ -356,9 +357,9 @@ private:
                       line[nread - 1] = '\0';
                   }
 
-                  // Keep track of the indices or argv's that need to be freed
+                  // Keep track of the argv's that need to be freed
                   // Catalog the new argv
-                  *frees++       = iarg;
+                  *frees++       = line; // iarg;
                   xargv[iarg++]  = line;
                }
 
@@ -372,9 +373,9 @@ private:
          }
       }
 
-      // 0 terminate the list of indices of the argvs to be freed
+      // nul-terminate the list of argvs to be freed
       // nul-terminate the argv's
-      *frees      = 0;
+      *frees      = nullptr;
       xargv[iarg] = nullptr;
 
       return xargv;
@@ -386,7 +387,7 @@ private:
 public:
    ~ExpandArgs ()
     {
-       auto *ptrs = m_free;
+       auto **ptrs = m_free;
 
        // --------------------------
        // Check if no indirect files
@@ -395,7 +396,7 @@ public:
 
        while (1)
        {
-          char *ptr = ptrs++;
+          char *ptr = *ptrs++;
           if (ptr)
           {
              free ((void *)ptr);
@@ -415,7 +416,7 @@ public:
    char **m_argv;
 
 private:
-   char *m_free;
+   char **m_free;
 };
 /* ---------------------------------------------------------------------- */
 }

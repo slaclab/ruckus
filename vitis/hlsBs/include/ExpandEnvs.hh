@@ -74,13 +74,29 @@ inline std::string expand_envs (std::string text)
    static const std::regex env_re{R"--(%([^}]+)%)--"};
    std::smatch match;
 
+   int nerrs = 0;
    while (std::regex_search(expanded, match, env_re))
    {
       auto const  from     = match[0];
       auto const &var_str  = match[1].str();
       auto const *var_name = var_str.c_str ();
+      auto const *var_exp  = std::getenv (var_name);
 
-      expanded.replace(from.first, from.second, std::getenv(var_name));
+      if (var_exp == nullptr)
+      {
+         std::cerr << "ERROR: Environment variable <"
+                   << var_name << "> not set" << std::endl;
+
+         nerrs   +=   1;
+         var_exp  = "";
+      }
+
+      expanded.replace(from.first, from.second, var_exp);
+   }
+
+   if (nerrs)
+   {
+      exit (-1);
    }
 
    return expanded;

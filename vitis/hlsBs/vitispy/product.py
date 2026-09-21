@@ -75,11 +75,9 @@ class Product:
             return re.sub(search_pattern, sub_pattern, in_string)
 
         @staticmethod
-        def convert (in_string):
+        def preserve (in_string):
             return '%' + in_string + '%'
-
-
-
+    # --------------------------------------------------------------------------
 
 
     # --------------------------------------------------------------------------

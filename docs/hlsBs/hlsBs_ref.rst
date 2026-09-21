@@ -8,9 +8,9 @@ hlsBs -- A HLS Development and Build System
 Introduction
 ============
 Welcome to that indispensable thing called documentation. Demanded by
-many, written by one, destined to be read by few.
+many, written by one, destined to be read by few. Being honest,
+a build system is not high on anyone's interest list.
 
-Being honest, a build system is not high on anyone's interest list.
 This is a reference manual, *i.e.*, where only the truly lost and
 hopelessly confused desperately seeking answers come, the land of last
 resort. For those who enjoy reading the *magnifying glass required,
@@ -24,7 +24,8 @@ repository which is more of a *How-To* user's manual. For many, this
 is all that is needed. If the project is beyond the basics, then this
 more complete manual may be of interest.  The test suite for the SNL
 framework, which has 20+ components whose performance, resource usage
-and integrity must be tracked across multiple Vitis releases, is an example of such a project.
+and integrity must be tracked across multiple Vitis releases, is an
+example of such a project.
 
 How To Read
 -----------
@@ -57,7 +58,7 @@ to produce the best quality code. As such, there is no one *right* (read
 prescriptive) way. What **hlsBs** attempts to do is provide the tools
 and techniques to define a personalized and disciplined workflow and
 encourage an iterative, feedback-driven approach. This point will be made
-throughout this document. Ask, 'How does this feature help?'
+throughout this document. Ask, 'How does this feature help in code development?'
 
 Limitations
 -----------
@@ -73,7 +74,7 @@ Disclaimer
 ----------
 The author is decidedly not a UI expert. This design is the product of
 actually producing HLS code with all its frustrations and limitations.
-Whether **hlsBs** actually achieves making this simpler and more flexible
+Whether **hlsBs** achieves making this simpler and more flexible
 remains to be seen. What can be said is the effort was there.
 
 Goals
@@ -128,14 +129,14 @@ Primary Goals
   - One can freely mix and match, using whichever one is appropriate
     and comfortable for the task at hand.
 
-- Accommodate building the same project using multiple VITIS versions.
+- Accommodate building the same project using multiple VITIS versions/releases.
 
   - This encourages both moving forward with new versions and
     comparing their differences.
 
 - Handling the drudgery of creating the configuration files and components.
 
-  - This is reduced to almost a 'fill-in-the-blanks' exercise.
+  - This is reduced to almost a *fill-in-the-blanks* exercise.
   - Biggest advantage is when producing multiple, very similar
     components.
 
@@ -192,14 +193,14 @@ not there*".
   - Quasi-static information, such as experimenting with
     parameters that affect performance/resource trade-offs.
 
-    - These are kept in named files which can contain 1 or
-      more command line parameters.
+    - These are kept in named
+      :ref:`parameter files <parameter_files-label>`
+      which can contain 1 or more command line parameters.
     - They are referenced on the command line as **@FILE**;
       made possible by a nice feature of Python's *argparse* methods
-      which was found to be so useful, a C++
-      :ref:`equivalent <indirect_files-label>` was constructed.
+      which was found to be so useful, a C++ equivalent was constructed.
     - A usage might be to define alternate test sets in
-      a family of such files and selecting which one to target
+      a family of such files, then selecting which one to target
       at run-time.
 
   - Run time parameters, such as changing the input test data or the
@@ -207,12 +208,13 @@ not there*".
 
       A useful technique is to experiment on the command line
       and, if a particular set of parameters is interesting,
-      save them in an appropriately named quasi-
-      static file which can be referenced when needed.
+      save them in an appropriately named
+      :ref:`parameter file <parameter_files-label>` which can be referenced
+      when needed.
 
   - This is achieved by establishing a priority ordering with
-    run time parameters overriding quasi-static parameters and
-    quasi-static parameters overriding static parameters.
+    run time parameters overriding parameter files (depends on ordering) and
+    parameter files overriding static parameters (always).
 
   ..
 
@@ -246,6 +248,7 @@ not there*".
 
   - Given the power of these commands, without fail unknown
     *stuff* (in **hlsBs** parlance, this is known as **cruft**) creeps in.
+  - Query commands are a check on what is or will be there.
 
 - Similar command structure
 
@@ -264,7 +267,7 @@ not there*".
     example, the default targets for the configuration file and
     components management actions (via **hlsCfg**) are
 
-    .. list-table::
+    .. list-table:: Action Defaults
        :header-rows: 1
 
        * - Action
@@ -301,13 +304,13 @@ The setup itself has 3 distinct pieces. These establish
 
   - Makes the **hlsBs** commands available to the *bash* shell.
   - There is no dependency on the Vitis version or your specific project, so
-    it is a one-time login thing.
+    this can be a one-time login thing.
 
 2. The Vitis version to use
 
   - Once selected, viable until it is changed.
 
-3. Your project specific setup
+3. Your :ref:`project <project_file-label>` specific setup
 
 ..
 
@@ -317,15 +320,15 @@ The setup itself has 3 distinct pieces. These establish
       Except for the brief amount of time it takes, it is okay to execute it
       multiple times.
 
-.. _project_file-label:
+.. _project_brief_file-label:
 
 Project File - Brief
 --------------------
-The Project File is the source of the information needed to produce the
-**hlsBs** output files. This information includes
+The :ref:`Project File <project_file-label>` is the source of the information
+needed to produce the **hlsBs** output files. This information includes
 
-- The set, location and contents of the configuration files.
 - The location of the workspace containing the Vitis/HLS components.
+- The set, location and contents of the configuration files.
 - The location and contents of the :ref:`ip products <get_ip-label>`,
   *i.e.* the modified .zip and .dcp files.
 
@@ -333,7 +336,7 @@ Commands - Brief
 ----------------
 The commands
 
-- Use the project file to create and manage
+- Use the :ref:`project file <project_file-label>` to create and manage
 
   - The workspace
   - The configuration file and associated components
@@ -342,7 +345,7 @@ The commands
 
 - Produce the output products, *i.e.* **csim**, **synthesis**, **cosim** *etc*.
 
-  - The project file can be used, or
+  - The :ref:`project file <project_file-label>` can be used, or
   - Alternately, since no project file is needed once the workspace,
     configuration files and components have been created, it can be ignored.
 
@@ -390,12 +393,11 @@ two steps can be done in any order.
 
       $ export HLSBS_XILINX_SETUP='/sdf/group/faders/tools/xilinx/\$\{version\}'
 
-     where **version** will be filled in when a version (2024.1,2024.2,etc)
+     where **version** will be filled in when a version (2024.1, 2024.2, *etc.*)
      is selected.
 
-     .. note:: The escapes preserve the special characters and single quotes
-               to prevent the shell from translating **${version}** until
-               needed.
+     .. note:: The escapes prevent  the shell's special characters and
+               single quotes from translating **${version}** until needed.
 
      This can be placed in your login script, but, for good reasons,
      many like to keep their login scripts minimalist. However, typing that
@@ -493,7 +495,8 @@ two steps can be done in any order.
 
 ..
 
-4. Selecting the target project is covered in the **Project File** section.
+4. Selecting the target project is covered in the
+   :ref:`Project File - Overview <project_file-label>` section.
 
 
 The Commands
@@ -511,7 +514,7 @@ See the `hlsBs-examples <https://github.com/slaclab/hlsBs-examples>`_
 repository for more of a *How-To*.
 
 
-.. list-table::
+.. list-table:: hlsBs Commands
    :header-rows: 1
 
    * - Command
@@ -525,13 +528,15 @@ repository for more of a *How-To*.
    * - hlsCfg
      - Creates, replaces, cleans, lists the configuration files and components.
    * - hlsComp
-     - | Creates, replaces, cleans, lists the components.
+     - |
+       | Creates, replaces, cleans, lists the components.
        | Useful when you only have the configuration file. - **rarely used**.
        | Possible use: when the configuration files are saved to git but not the components.
    * - hlsRun
      - Runs all or any build stage (csim, synthesis, cosim, package, implementation, ip).
    * - hlsExe
-     - | Runs *csim.exe* for a specified component.
+     - |
+       | Runs *csim.exe* for a specified component.
        | Useful when changing the arguments, *e.g.* changing the test files or the number of tests.
    * - hlsGdb
      - Invokes the debugger on a specified component.
@@ -575,18 +580,18 @@ it seems particularly vulnerable.
    - Use the alternative optional argument syntax to specify the components,
      *e.g.* ``--components=a*``.
      The ``--components`` can be abbreviated to the minimum to be unique,
-     *e.g.* ``--com``.
+     *e.g.* ``--comp``.
 
 ..
 
-2. Do not place a positional argument immediately following an optional
-   argument that accepts a value or list of values.  Since the bash shell
-   enforces no formal binding or grouping, a positional argument juxtaposed
-   to such an optional argument will be *eaten* by that optional argument.
+2. Do not place a positional parameters immediately following an optional
+   parameter that accepts a value or list of values.  Since the bash shell
+   enforces no formal binding or grouping, a positional parameter juxtaposed
+   to such an optional parameter will be *eaten* by that optional parameter.
    To avoid this
 
-   - Make any positional argument the first argument.
-   - Use the optional argument, ``--component=a*``
+   - Make any positional parameter the first parameter.
+   - Use the optional parameter, ``--component=a*``
    - Example of what not to do:
 
        ``$ hlsCfg --list '*'``
@@ -597,18 +602,21 @@ it seems particularly vulnerable.
    .. admonition:: Recommendation
       :class: tip
 
-      Use positional arguments sparingly, favoring the optional
-      argument form ``--components=*``. While the ``=`` is optional, it
-      does bind the argument list and, as a bonus, prevents the shell
+      Use positional parameters sparingly, favoring the optional
+      parameter form ``--components=*``. While the ``=`` is optional, it
+      does bind the parameter list and, as a bonus, prevents the shell
       from expanding the wildcard even without the single quotes. It is
       the most fool-proof method and, along with using the full keyword name
-      of an optional argument, should be used when scripting these commands.
+      of an optional parameter, always should be used when scripting
+      these commands.
 
       Positional parameters are a trap waiting for a victim.
 
+.. _project_file-label:
+
 Project File - Overview
 =======================
-The *Project file* is the source of information that makes these commands easy to
+The *Project file* is the source of information that makes *hlsBs* commands easy to
 use at the terminal. It is Python code that gets invoked by the **hlsBs** commands.
 Python was chosen because
 
@@ -660,7 +668,7 @@ standard and non-standard usage might be
 
 As is true in many cases, the advantage of the first form is that this definition
 is hidden and need not be remembered and the disadvantage is that this definition
-is hidden and not remembered. When in doubt about this hidden context, use
+is hidden and is not remembered. When in doubt about this hidden context, use
 **hlsCtx** to display the implicit **hlsBs** context information.
 
 .. _environment_variables-label:
@@ -704,9 +712,9 @@ and **HLSBS_IP** environment variables are useful for one-off ad-hoc
 experimentation. Products produced during such experimentation can be
 redirected so as to not pollute the regular directories.
 
-**HLSBS_INI** is an :ref:`advanced feature <indirect_files-label>`
-allowing one to collect a number of indirect files used to modify
-command line parameters in a colon separated list of such files.
+**HLSBS_INI** is a :ref:`advanced feature <parameter_files-label>`
+allowing one to collect a number of :ref:`parameter files <parameter_files-label>`
+used to modify command line parameters in a colon separated list of such files.
 
    This is not ideal. It is unfortunate that *argparse* does not allow an
    include mechanism so that files with well-defined purposes can be mixed
@@ -725,15 +733,15 @@ changes, *e.g.* the names of the source files, where the includes are, the
 projects, for example projects with multiple components like the SNL Test suite
 (>25 components) can be accommodated.
 
-   .. admonition:: Editorial Comment
-      :class: tip
+.. admonition:: Editorial Comment
+   :class: tip
 
-      The standard Vitis method in the GUI/IDE works fine when creating a
-      single configuration/component, but creating many components is not
-      only tedious, but, once created, implementing a change common to all
-      is error prone. Python is much better suited in creating multiple
-      configuration files and components.  It is familiar to many users and
-      syntax errors are well handled by the Python interpreter.
+   The standard Vitis method in the GUI/IDE works fine when creating a
+   single configuration/component, but creating many components is not
+   only tedious, but, once created, implementing a change common to all
+   is error prone. Python is much better suited in creating multiple
+   configuration files and components.  It is familiar to many users and
+   syntax errors are well handled by the Python interpreter.
 
 With experience it is anticipated that a small collection of stock project
 template files will be accumulated.  For example, one for a simple project with
@@ -744,15 +752,36 @@ a single test bench and hls file, reducing it to a *fill-in-the-form* exercise.
     files. A universal file (SNL.py) provides the boilerplate contained in a single
     class initialized with the values from the project dependent project file.
 
-Environment Variables & Logical Symbols
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. warning::
+     
+   A downside of the Project File is only the basic settings are available.
+   Due to the sheer number and the fact that some change Vitis release to
+   release, it was practical to implement only the most basic. If experience
+   shows that these are needed, a method of adding these via a user provided
+   Python method can be added. 
+
+.. _product_parameter-label:
+
+Environment Variables & Product Parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Environment variables (both the
 :ref:`hlsBs defined ones <environment_variables-label>` and user defined project
-specific ones) and logical symbols (explained later, think of them as
-variables in a programming language) are used extensively in the project file. This
+specific ones) and product parameters- think of them as
+variables in a programming language - are used extensively in the project file. This
 is one of the primary advantages of **hlsBs** over the standard
 Xilinx/Vitis/HLS methods.  It allows for abstraction; instead of hard-coding,
-logical symbols, such as representing the configuration file name, can be used.
+environment variables and product parameters, such as product parameter representing
+the configuration file name, can be used.
+
+Product Parameters
+^^^^^^^^^^^^^^^^^^
+
+Many *Product* classes define product parameters.  These behave like a
+Python class, having a name (generally referred to in this document as the *prefix*)
+and a set of attributes. An example might be *fpga.part*.  These can be used within
+the project file as references to their actual values for the product being constructed.
+For example, in a project file defining products with different FPGAs, *fpga.part* is
+the FPGA part for each specific product. 
 
 Conventions: What to Name the Project File & Where to Put It
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -837,7 +866,7 @@ These methods locate the directories that receive the output products.
 .. admonition:: Recommendation
    :class: tip
 
-   These may all be omitted if the default directory layout is acceptable.
+   Omit or return *None* if the default directory layout is acceptable.
 
 
 get_project_root (project)
@@ -905,12 +934,12 @@ above is the default.
 
 Note the use of *project.root*.  This is deliberate because the
 project root can be overridden on the command line. If this is done,
-this *project.root* will be set to this value.  This is a
+*project.root* will be set to this value.  This is a
 recurring pattern.  Many of the values in the project file can be
 sourced either from within the project file itself or overridden at
 the command line.
 
-   The products root can be overridden from the command line either with
+   The products' root can be overridden from the command line either with
    an explicit command line parameter or the **HLSBS_PRODUCTS**
    environment variable.  This is useful for creating ad hoc,
    experimental versions of the products. A possible usage is to temporarily
@@ -968,10 +997,10 @@ or locate it relative to the build directory
 
 This is the default.
 
-Here *'{vitis.version}'* is the first encounter of a logical symbol.  This
-allows the workspace to be distinguished by the Vitis version which will be
-resolved to the current Vitis version, typically set by **hlsVersion**,
-when the workspace is referenced.
+Here *'{vitis.version}'* is the first encounter of a
+:ref:`product parameter <product_parameter-label>`.  This allows the workspace to be
+distinguished by the Vitis version which will be resolved to the current Vitis
+version, typically set by **hlsVersion**, when the workspace is referenced.
 
 .. admonition:: Recommendation
    :class: tip
@@ -1061,7 +1090,7 @@ This is the default.
 
 
 As in the *workspace* and *cfg*, the version allows the ip products file to
-be distinguished by the Vitis version and will be resolved when the ip root
+be distinguished by the Vitis version and will be resolved when the *ip root*
 directory is referenced.
 
    The ip directory can be overridden from the command line with the
@@ -1106,7 +1135,8 @@ intent clearer.  Whether that has been achieved is up for debate.
 
 In addition, the example specifies all the parameters by their keyword.
 The parameters have been listed in the call order so that as one becomes more
-familiar with the classes, the keywords can be omitted.
+familiar with the classes, the keywords can be omitted. Given that performance
+is not an issue, clarity suggests using the keywords.
 
 Both make the **Project File** more wordy than one in practice would be.
 
@@ -1115,11 +1145,11 @@ Both make the **Project File** more wordy than one in practice would be.
 
    The parameter names used in various **hlsBs** Python classes use the plural
    when said parameter can accept a single, list or tuple. This is sometimes
-   ambiguous when the parameter naturally references a single set of things.
+   ambiguous when the parameter naturally references a single *set* of things.
 
 A line-by-line annotation follows this listing.
 
-get-products - An example
+get_products - An example
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. _get_products_code-label:
@@ -1259,7 +1289,7 @@ get-products - An example
        #    but could also be cmp_name.  It does not have to be
        #    unique, so could be the build.id.
        #
-       # 2. The version can be from the git logical symbols, i.e.
+       # 2. The version can be from the git product parameters, i.e.
        #      '{git.tag}',
        #      '{git.branch}'
        #      '{git.hash_short}'
@@ -1305,7 +1335,7 @@ encouraged.
 
 *Product* is merely a shorthand used to access the inner classes defined in
 the Project class. It avoids having to do an explicit import which
-would require either modifying the PYTHONPATH or some other way of
+would require either modifying the **PYTHONPATH** or some other way of
 locating it. This keeps the project file free of unnecessary details.
 
 .. code-block:: python
@@ -1334,18 +1364,20 @@ IncludePaths
 
 This defines one or more include paths to search when resolving *#include "file.hh"*.
 
-.. list-table::
+.. list-table:: IncludePaths Parameters
    :header-rows: 1
 
    * - Parameter
      - Meaning
    * - root
-     - | The directory path for all *paths* that are not absolute file paths.
+     - |
+       | The directory path for all *paths* that are not absolute file paths.
        | May be specified as *None* if all the paths are absolute.
    * - paths
      - A single path or a list or tuple of paths.
    * - type
-     - | '*rel_path*': Makes the include path relative to the source file including it.
+     - |
+       | '*rel_path*': Makes the include path relative to the source file including it.
        | or
        | '*abs_path*': Uses the include path as is
 
@@ -1400,7 +1432,7 @@ in the source code. It is made available to the relevant source code
 files via the `defines =` parameter in the
 :ref:`Product.Sources <product_sources-label>`.
 
-.. list-table::
+.. list-table:: Define Value Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1415,8 +1447,8 @@ files via the `defines =` parameter in the
 
     The advanced topic section, see
     :ref:`Product.CtbValues <product_ctb_values-label>`, shows how
-    to use a per component logical symbol value, replacing the explicit
-    macro name, to leverage *Product.DefineValue* to generate multiple
+    to use a per component product parameters value, replacing the explicit
+    value, to leverage *Product.DefineValue* to generate multiple
     components each with a different value of the macro name.
 
 IncludeFile
@@ -1435,7 +1467,7 @@ file.
   file, but instead is represented by a macro name in the source file set
   by *Product.IncludeFile*.
 
-.. list-table::
+.. list-table:: IncludeFile Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1469,7 +1501,7 @@ explicitly including a file with a macro name.
 
    The advanced topic section, see
    :ref:`Product.CtbFiles <product_ctb_files-label>`, shows how to use a per
-   component logical symbol file instead of an explicit
+   component product parameter value instead of an explicit
    file name to leverage *Product.IncludeFile* to generate multiple components
    with different files.
 
@@ -1500,7 +1532,7 @@ Sources
 These define the test bench and **hls** synthesis files along with any necessary
 include paths and macro definitions.
 
-.. list-table::
+.. list-table:: Sources Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1513,7 +1545,8 @@ include paths and macro definitions.
    * - includes
      - The include paths to be used for all *files*
    * - defines
-     - | Introduce ``#define`` macro names and/or files that will be
+     - |
+       | Introduce ``#define`` macro names and/or files that will be
        | included at compile time. These values and/or included files
        | can be *hard-coded*, as in this example, but can come from a
        | list of values or a wild-carded file list, with each value or
@@ -1561,7 +1594,7 @@ Build
 This defines all the ingredients necessary to build the *csim*, *synthesis*, *cosim*,
 *etc.*
 
-.. list-table::
+.. list-table:: Build Parameters
    :header-rows: 1
 
    * - Key
@@ -1575,9 +1608,9 @@ This defines all the ingredients necessary to build the *csim*, *synthesis*, *co
    * - syn
      - The same structure as the *testbench* files, except for the HLS/synthesis files.
    * - csim_argv
-     - The command line arguments to pass to *csim.exe*
+     - The command line parameters to pass to *csim.exe*
    * - cosim_argv
-     - The command line arguments to pass to *cosim.exe*
+     - The command line parameters to pass to *cosim.exe*
 
 .. note::
 
@@ -1607,9 +1640,10 @@ Defines the target FPGA or FPGAs. Here the simplicity of defining just 1 FPGA
 has been abandoned to illustrate how easy it is to generate code targeting
 multiple FPGAs.
 
-The following attributes, used when composing logical symbols, are defined.
+The following attributes, used when composing the product parameters for an FPGA,
+are defined.
 
-.. list-table::
+.. list-table:: Fpga Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1633,7 +1667,7 @@ FPGA specifications, resulting in 2 components. The *id* is useful
 in uniquely naming the components.
 
    The *id* can, as can the *part*, *clock* and *fpga_uncertainty*, be
-   used as logical symbols to generate a unique component name.  Here the
+   used as product parameters to generate a unique component name.  Here the
    *clock* could serve the same purpose since it is different. The
    *id* serves as a convenient user chosen nickname for the FPGA specification.
 
@@ -1658,7 +1692,7 @@ much of the  information needed to generate and identify the *csim.exe*,
 *synthesis*, *cosim*, *etc.* products; essentially what goes into the
 *MakeFile*.
 
-.. list-table::
+.. list-table:: CtbBuilds
    :header-rows: 1
 
    * - Parameter
@@ -1682,7 +1716,7 @@ CtbFpgas
 
 Defines a single FPGA, list or tuple of FPGAs to target.
 
-.. list-table::
+.. list-table:: CtbFpgas Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1704,7 +1738,7 @@ Contributors
 This collects all the contributors to eventually be used in defining a
 *component*.
 
-.. list-table::
+.. list-table:: Contributors Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1717,36 +1751,32 @@ This collects all the contributors to eventually be used in defining a
 A component is composed of a number of contributors. The minimum component
 must include at least one *Product.CtbBuilds* and one *Product.CtbFpgas* contributor.
 
-   There are two other :ref:`contributors <additional_contributors-label>`,
-   not included in this simple example.  See the examples labeled *ex3*, *ex4*
-   and *ex5* in the
-   `hlsBs-examples <https://github.com/slaclab/hlsBs-examples>`_  repository.
-
-
 The first element must be an instance of *Product.CtbBuilds* and the second an
 instance of *Product.CtbFpgas*.
 
-   More contributors can be added as additional parameters after the 2 mandatory
+   More contributors can be added as additional parameters after mandatory
    *Product.CtbBuilds* and *Product.CtbFpgas*. These may include
-   :ref:`additional contributors <additional_contributors-label>`, as well as
-   *Product.CtbBuilds* or *Product.CtbFpgas*.
-
-
+   the more advanced :ref:`contributors <additional_contributors-label>`,
+   :ref:`Product.CtbValues <product_ctb_values-label>` and
+   :ref:`Product.CtbFiles <product_ctb_files-label>` as well as additional
+   *Product.CtbBuilds* and *Product.CtbFpgas*.  See the examples labeled
+   *ex3*, *ex4* and *ex5* in the
+   `hlsBs-examples <https://github.com/slaclab/hlsBs-examples>`_ repository.
 
 To aid in composing unique names for the configuration file paths and
 components, attributes of the build and FPGAs can be accessed using
 *build* and *fpga* prefix strings that appear in the above specification.
-Think of it as the *prefix* of an instantiated class in Python or C++ with
-the attributes as its field members.
+to form :ref:`product parameters <product_parameter-label>`. Think of the *prefix*
+as an instantiated class in Python or C++ with the attributes as its field members.
 
-In this example logical symbols with the following attributes are constructed.
+In this example, product parameters with the following attributes are constructed.
 
 .. list-table:: Builds
    :header-rows: 1
 
    * - Prefix
      - Attribute
-     - Logical Symbol
+     - Product Parameter
      - Value
    * - build
      - id
@@ -1758,7 +1788,7 @@ In this example logical symbols with the following attributes are constructed.
 
    * - Prefix
      - Attribute
-     - Logical Symbol
+     - Product Parameter
      - Fpga 0 Value
      - Fpga 1 Value
    * - fpga
@@ -1806,7 +1836,7 @@ CfgTemplate
 
 This defines a template of how to name the full path of the configuration file.
 
-.. list-table::
+.. list-table:: CfgTemplate Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1816,7 +1846,8 @@ This defines a template of how to name the full path of the configuration file.
    * - template
      - The configuration template
 
-Here the configuration file's name is composed of *build.id* and *fpga.id*.
+Here the configuration file's name is composed of the
+:ref:`product parameters <product_parameter-label>`, *build.id* and *fpga.id*.
 
 - If the template is not an absolute file path, the *product.cfg_root* is used
   as the directory.
@@ -1824,7 +1855,7 @@ Here the configuration file's name is composed of *build.id* and *fpga.id*.
 
 .. admonition:: Recommendation
 
-   Use logical symbols to generate the configuration file name, even in a simple
+   Use product parameters to generate the configuration file name, even in a simple
    HLS project consisting of a single component. This accommodates future changes.
 
    If needed:
@@ -1836,16 +1867,16 @@ Here the configuration file's name is composed of *build.id* and *fpga.id*.
      ``Bld_{build.id}-Fpga_{fpga.id}`` to add meaning or increase clarity.
 
 
-Configuration file attributes and their logical symbols are as follows.
+Configuration file attributes and their derive product parameters are as follows.
 These are useful in naming other products such as the component and the ip products.
 In this example ``<prefix> = cfg``
 
-.. list-table::
+.. list-table:: CfgTemplate Product Parameters
    :header-rows: 1
 
    * - Prefix
      - Attribute
-     - Logical Symbol
+     - Product Parameter
      - Meaning
    * - <prefix>
      - path
@@ -1879,7 +1910,7 @@ Things to note:
 
 ..
 
-- If the configuration file name is not unique, only a logical symbol for the
+- If the configuration file name is not unique, only a product parameter for the
   first subdirectory is provided
 
   - If this is insufficient to make the component name unique, some other method must
@@ -1897,7 +1928,7 @@ CmpTemplate
 
 This defines a template of how to name the component.
 
-.. list-table::
+.. list-table:: CmpTemplate Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1912,6 +1943,18 @@ In this example the component name is the configuration file's name, *i.e.* *cfg
 In general, naming the component after the configuration file name is
 the most straightforward naming.  As always, there may be instances
 where the freedom to name it otherwise is useful.
+
+.. list-table:: CmpTemplate Product Parameters
+   :header-rows: 1
+
+   * - Prefix
+     - Attribute
+     - Product Parameter
+     - Meaning
+   * - <prefix>
+     - name
+     - <prefix>.name
+     - Component's name
 
 A few differences from the configuration file template are to be noted here:
 
@@ -1946,7 +1989,7 @@ Components
 This defines a fully specified component. A *component* is the identifying
 unit of an HLS product.
 
-.. list-table::
+.. list-table:: Component Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1961,7 +2004,7 @@ unit of an HLS product.
 In this example, 2 configuration files along with their 2 components are
 generated:
 
-.. list-table::
+.. list-table:: Example Configuration & Component Names
    :header-rows: 1
 
    * - Configuration File
@@ -1984,7 +2027,7 @@ Package.Ip
 
 This is packaging identification.
 
-.. list-table::
+.. list-table::  Ip Parameters
    :header-rows: 1
 
    * - Parameter
@@ -1998,38 +2041,33 @@ This is packaging identification.
    * - library
      - Almost always 'hls'
 
-
 Two noteworthy things:
 
 - *name* has been chosen to be the configuration name.
 
    - It could have been the component name or any name composed of absolute
-     text and logical symbols. *{git.repo}* from the
-     :ref:`git <git_logical_symbols-label>` logical symbols would be another
+     text and product parameters or any from the
+     :ref:`git parameters <git_product_parameters-label>` would be another
      reasonable choice.
 
-..
+     - *git.repo*
+     - *git.tag*
+     - *git.branch*
+     - *git.hash_short*
+     - *git.hash_long*
+     - *git.hash_msg*
 
-- Another reasonable choice for the *version* would have been to use one of
-  the :ref:`git <git_logical_symbols-label>` logical symbols:
+     .. warning::
 
-  - *git.tag*
-  - *git.branch*
-  - *git.hash_short*
-  - *git.hash_long*
-  - *git.hash_msg*
+        Only the branch is guaranteed to be immediately available. The others,
+        *git.tag*, *git.hash_short* and *git.hash_long* and *git.hash_msg* are
+        only valid after a *git* commit. These will come up as *None* or *Dirty*
+        if the current code has not been committed.
 
-.. warning::
-
-   Only the branch is guaranteed to be immediately available. The others,
-   *git.tag*, *git.hash_short* and *git.hash_long* and *git.hash_msg* are
-   only valid after a *git* commit. These will come up as *None* or *Dirty*
-   if the current code has not been committed.
-
-   For testing, since one can know the *git tag* prior to formally defining it
-   to *git*, one option is to specify the version on the command line. Of
-   course this *pre-commit* option is not possible for the *git* hashes.
-
+        For testing, since one can know the *git tag* prior to formally defining it
+        to *git*, one option is to specify the version on the command line. Of
+        course this *pre-commit* option is not possible for the *git* hashes and
+        could be a bit dicey if the evventual actual git tag is not the same.
 
 Package.Output
 ~~~~~~~~~~~~~~
@@ -2042,7 +2080,7 @@ This is the standard output packaging.
 
 These are almost always the values shown, but are provided for completeness.
 
-.. list-table::
+.. list-table::  Output Parameters
    :header-rows: 1
 
    * - Parameter
@@ -2063,7 +2101,7 @@ Package
 Simply combines *Product.Package.Ip* and *Product.Package.Output* into a single
 class.
 
- .. list-table::
+ .. list-table::  Package Parameters
     :header-rows: 1
 
     * - Parameter
@@ -2083,7 +2121,7 @@ Vivado
 
 These are almost always the values shown, but are provided for completeness.
 
-.. list-table::
+.. list-table::  Vivado Parameters
    :header-rows: 1
 
    * - Parameter
@@ -2112,7 +2150,7 @@ products.
                        package    = package,
                        vivado     = vivado)
 
-.. list-table::
+.. list-table::  Product Parameters
    :header-rows: 1
 
    * - Parameter
@@ -2251,7 +2289,8 @@ of the *products/* directory.  As usual, these may be placed anywhere
 by suitably defining the appropriate file paths. Typically the various
 file path specifications are defined as only the file name, but these
 can be complete file paths or any subset of the directory path, the
-file name and the file extension. Any missing pieces will be filled in.
+file name and the file extension. Any missing pieces will be filled in
+from the defaults.
 
 All the values are sensibly defaulted, except for the *'family'*.
 While it does have a default value, it may not be what is wanted.
@@ -2270,34 +2309,35 @@ While it does have a default value, it may not be what is wanted.
    components if the defaults are not acceptable.
 
    These parameters may be provided directly on the command line. A better
-   approach is to include these in an indirect *@FILE*. This avoids typing an
-   involved command line and the inevitable typos.
+   approach is to include these in a
+   :ref:`parameter_file <parameter_files-label>` *@FILE*.
+   This avoids typing an involved command line and the inevitable typos.
 
    While the specification of the renaming can be sensibly defaulted, defaulting
    the list of FPGA families is problematic. A viable solution is being explored.
 
 
-Global Logical Symbols
-======================
-In addition to component specific logical symbols there are two global logical
-symbols.
+Global Product Parameters
+=========================
+In addition to configuration and component specific product parameters there are
+two global product parameters.
 
 - :ref:`Vitis Version <vitis_version-label>`
-- :ref:`Git <git_logical_symbols-label>`
+- :ref:`Git <git_product_parameters-label>`
 
 
 .. _vitis_version-label:
 
 Vitis Version
 -------------
-This logical symbol has already been encountered. It is referenced as
+This product parameter has already been encountered. It is referenced as
 
-.. list-table::
+.. list-table:: Vitis Version Product Parameters
    :header-rows: 1
 
    * - Prefix
      - Attribute
-     - Logical Symbol
+     - Product Parameter
      - Meaning
    * - vitis
      - version
@@ -2305,20 +2345,20 @@ This logical symbol has already been encountered. It is referenced as
      - The active Vitis version
 
 
-.. _git_logical_symbols-label:
+.. _git_product_parameters-label:
 
 Git
 ---
-This set of logical symbols gives information about the *git* repository. It
+This set of product parameters gives information about the *git* repository. It
 can be used anywhere, but its most common usage will likely be in setting
 project versions.
 
-.. list-table::
+.. list-table:: Git Product Parameters
    :header-rows: 1
 
    * - Prefix
      - Attribute
-     - Logical Symbol
+     - Product Parameter
      - Meaning
    * - git
      - repo
@@ -2351,6 +2391,8 @@ project versions.
        | If dirty, "Dirty"
 
 
+If there is no *git* repository, these return as *None*.
+       
 Advanced Usage
 ==============
 The above covers the basics, but with usage, common repeating patterns occur.
@@ -2364,6 +2406,12 @@ The patterns are
 
   - This is relevant only for run-time values such as file specifications
     in *csim_argv* and *cosim_argv*.
+
+  - Any environment variables in the project that would be used in composing the
+    configuration file must be translated by **hlsCfg**.  Environment variables are
+    not allowed by *Vitis HLS* in configuration files. The only exception as noted
+    are *csim_argv* and *cosim_argv* which **hlsCfg** takes special handling to
+    preserve until run-time if desired.
 
 In order to maintain full capability with the IDE/GUI, support within both the
 configuration file generation and the C++ runtime is needed, so these require
@@ -2425,7 +2473,7 @@ An obvious extension is to produce two components, one with
 *VERBOSE true*, the other with *VERBOSE false*.
 
 *Product.CtbValues* instantiates a single or list or tuple of bound
-*(id,value)* pairs as created by Product.Value*, each producing a
+*(id,value)* pairs as created by *Product.Value*, each producing a
 component.
 
 
@@ -2442,20 +2490,20 @@ This uses 2 Python classes
 
 - *Product.CtbValues*  - creates a contributor which will produce 1 component
   per supplied *Product.Value*
-                        
+
 
   .. code-block:: python
-             
+
      ctb_values = Product.CtbValues (prefix = '<PREFIX>',
                                      values =  <VALUES>)
 
 .. note::
-      
+
    The same result could have been achieved using multiple *Product.Build*\ s,
    perhaps using a loop, each with its own *#define value* and a unique
    *build id*. The usage here just makes this easier and more manageable.
 
-   
+
 .. _defvalues_example-label:
 
 Example:
@@ -2470,7 +2518,7 @@ Example:
 
     Where:
 
-    .. list-table:
+    .. list-table: Value Product Parameters
        :header-rows: 1
 
        * - Parameter
@@ -2488,7 +2536,6 @@ Example:
       which would be awkward if used as part of the configuration file or
       component path.  The *id* provides an alternative.
 
-
     The *id* must be one of
 
     - A string
@@ -2496,14 +2543,15 @@ Example:
     - *None*
 
     If an empty string or *None*, the *id* will be the *value*. This should only
-    be used in very simple cases.
-
+    be used in very simple cases, since the default of using the *value* maybe
+    awkward or fail to convey meaning when used to generate a configuration or
+    component name.s
 
 2.  Instantiate the value contributors using the previously
     created *Product.Value*'s
 
     .. code-block:: python
-                   
+
        values  = Product.CtbValues (prefix = 'verbosity',
                                     values =       level)
 
@@ -2521,12 +2569,12 @@ Example:
 
     For this example, the following are defined:
 
-    .. list-table::
+    .. list-table::  CtbValues Example Product Parameters
        :header-rows: 1
 
        * - Prefix
          - Attribute
-         - Logical Symbol
+         - Product Parameter
          - Value0
          - Value1
        * - verbosity
@@ -2551,14 +2599,15 @@ Example:
 
       verbose       = Product.DefineValue  (name  = 'VERBOSE',
                                             value = '{verbosity.value}')
-   
+
    - Modify the cfg_template
-     
-    .. code-block:: python                                  
+
+    .. code-block:: python
+
        cfg_template = Product.CfgTemplate (prefix   = 'cfg'
                                            template = '{build.id}-{verbosity.id}-{fpga.id}')
 
-   Note the only difference is the use of logical symbols
+   Note the only difference is the use of product parameters
 
    - ``{verbosity.value}`` instead of the explicit 'true' in *Product.DefineValue*
    - ``{verbosity.id}`` in *Product.CfgTemplate* to uniquely name the
@@ -2574,9 +2623,9 @@ Example:
    component will be generated with ``Verbose = true`` and another with
    ``Verbose = false``.
 
-      Here the list of *Product.Values* (ids, values) is  hard-coded into the
-      project file.  A useful technique may be to read these from a file. This
-      allows new values, and hence new components, to be added simply by
+      In this example, the list of *Product.Values* (ids, values) is hard-coded
+      into the project file.  A useful technique may be to read these from a file.
+      This allows new values, and hence new components, to be added simply by
       editing a file containing the list of *(id, value)* pairs.
 
 ..
@@ -2588,7 +2637,7 @@ Example:
       *e.g.* specifying a different numeric value for the *REUSE* pragma
       parameter.  This is in keeping with *#defines* limitations
 
-        - lack of name space protection, they are effectively globals
+        - lack of name space protection, they are effectively file globals
         - no type checking, completely against the concept of a statically
           typed language such as C++.
         - very fragile rules on using quotes and parentheses
@@ -2648,14 +2697,14 @@ generated by the following
                                  files  = os.path.join (code_root, 'opt', '*.hh')
 
 
-The following logical symbols are made available
+The following product parameters are made available:
 
-.. list-table::
+.. list-table:: CtbFiles Product Parameters
    :header-rows: 1
 
    * - Prefix
      - Attribute
-     - Logical Symbol
+     - Product Parameter
      - Meaning
    * - opt
      - path
@@ -2700,7 +2749,7 @@ The following logical symbols are made available
                                     rel_path = include_path) # Reference by a relative path
 
 Note that the only difference in *Product.IncludeFile* from the example project
-file is the logical symbol *{opt.path}* instead of an explicit file name.
+file is the product parameter *{opt.path}* instead of an explicit file name.
 
 4. Just as in the original *Product.Sources*, include this in the ``defines =``
    parameter list
@@ -2733,13 +2782,13 @@ Each file satisfying the wildcard generates a new component.
    The code is thus customized without touching the actual text of the code.
    One can add a new network simply by adding it to the network directory.
 
-.. _indirect_files-label:
+.. _parameter_files-label:
 
-Indirect Files
---------------
+Parameter Files
+---------------
 
 Python's *argparse* has a nice feature that any number of command line
-arguments can be included in a named file which is referenced as *@FILE* on
+parameters can be included in a named file which is referenced as *@FILE* on
 the command line. The format of this file is very simple, one command line
 option on each line. For example
 
@@ -2761,7 +2810,7 @@ While simple, it may be too simple
 .. admonition:: observation
    :class: tip
 
-   Indirect files offer a number of advantages over adding parameters
+   Parameter files offer a number of advantages over adding parameters
    directly on the **hlsExe/hlsGdb** commands.
 
    - Coherency
@@ -2778,9 +2827,9 @@ While simple, it may be too simple
 
    - Versatility
 
-     - including an indirect file specified as an environment
-       variable in *csim_argv* or *cosim_argv* allows parameters
-       to be modified when the command is executed:
+     - including an :ref:`parameter file<parameter_files-label>`
+       specified as an environment variable in *csim_argv* or *cosim_argv* allows
+       parameters to be modified when the command is executed:
 
      .. code-block:: shell
 
@@ -2809,7 +2858,7 @@ and
 
 .. code-block:: c++
 
-   // Create and use the expanded set of command line arguments
+   // Create and use the expanded set of command line parameter
    hlsHelpers::ExpandArgs cl (argc, argv);
    getopt (cl.m_argc, cl.m_argv);
 
@@ -2847,23 +2896,24 @@ reference, use an environment variable:
 Deferred Environment Variable Translation
 -----------------------------------------
 A common desire is to defer translation of environment variables until
-runtime. Practically speaking, this applies to the strings in the *csim_argv*
+runtime. Practically speaking, this applies only to the strings in the *csim_argv*
 and *cosim_argv* values.
 
-   For example, referring to various test data files either
-   by an environment variable or using an environment variable to specify just
+   For example, referring to various test data files either individually
+   by environment variables or using an environment variable to specify just
    the root directory.  Other usages may be to refer to the number of tests to
    run with an environment variable.
 
-However, using environment variables in the utilities that compose and use
-the configuration files is problematic at best. As a workaround **hlsBs**
+However, using environment variables directly specifying them as
+${ENV}, in *csim_argv* and *cosim_argv* is problematic at best - they are
+translated at different stages by *csim* and *cosim*. As a workaround **hlsBs**
 provides 2 classes to encode the environment variables, one for
-variables and one for files.
+variables and one for files so behavior in *csim* and *cosim* is the same.
 
 .. code-block:: python
 
    # Encode a bare string as an environment variable
-   var  = Product.EnvString.convert ("NTESTS")
+   var  = Product.EnvString.preserve ("NTESTS")
 
    # Encode a string containing traditional environment variables
    vstr = Product.EnvString.preserveAll ("${BUILD_NAME} - ${DATE}")
@@ -2893,12 +2943,12 @@ Suggestions
 
    - Relative file paths are equally dicey.  In their simplest form,
      the executable would have to be run from a particular directory. A
-     more modular approach would be to modify the directory when
+     more modular approach would be to modify/tack-on the directory when
      processing the file name in, say, getopts.
 
    - Preserving the environment variables offers the most flexibility.
      For example, all test files could be in various data directories
-     which could be located at runtime with *${DATA}*.
+     which could be located at runtime with *${DATA_DIR}*.
 
 
 Usage
@@ -2942,8 +2992,8 @@ a C++ utility has been provided.
 .. warning::
 
    This is generally available only if **hlsCfg** was used to create the
-   configuration file.  **hlsCfg** makes the include file as part of
-   creating the configuration file.
+   configuration file.  **hlsCfg** makes the include file, *ExpandEnvs.hh* as
+   part of creating the configuration file.
 
    If the configuration file is not created by **hlsCfg**, either
 
@@ -2951,8 +3001,8 @@ a C++ utility has been provided.
 
      - This is the recommended action
 
-   - Copy the include file into your project and add the -I include path to it
-     in the configuration file.
+   - Copy the include file from *ruckus* into your project and add the
+     *-I include path* to it in the configuration file.
 
      - The file is in *ruckus/vitis/hlsBs/include*
      - This is not recommended, too fragile.
@@ -2964,13 +3014,13 @@ A Word of Caution on Environment Variables
 ==========================================
 Values in the project file, *e.g.* file paths, may include environment
 variables, but because HLS configuration files do not allow environment
-variables, except *almost* in *csim_argv* and *cosim_argv* strings,
+variables, except *almost* as in *csim_argv* and *cosim_argv* strings,
 environment variables must be translated when the configuration file is
 created.
 
-Since the testbench, hls/synthesis and include file paths are
+Since the *testbench*, *hls/synthesis* and *include * file paths are
 generally reinterpreted as relative to the configuration file, this is
-not a problem. However, for 'csim_argv' and 'cosim_argv', the choice
+not a problem. However, for *csim_argv* and *cosim_argv*, the choice
 to defer the translation to runtime is desirable and that method has been
 described.  But there are dangers.
 
@@ -3048,8 +3098,8 @@ other unintended files could be committed to your GIT repository.
     - In this case, committing the configuration file is highly
       recommended to preserve these additions.
 
-- Commit the *ip* directory and its contents to git, due to the time involved
-  in creating the contents. These are large files, so use the *lfs* attribute.
+- Commit the *ip* directory and its contents to *git*, due to the extended time
+  involved in creating the contents. These are large files, so use the *lfs* attribute.
 
 
 Finally - Input/Feedback Wanted
