@@ -26,3 +26,9 @@ SLAC firmware build system standard library.
    :caption: How-To Guides
 
    how-to/index
+
+.. toctree::
+   :maxdepth: 4
+   :caption: hlsBs Reference Manual
+
+   hlsBs/index

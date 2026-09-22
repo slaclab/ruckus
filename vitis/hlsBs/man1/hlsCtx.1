@@ -1,0 +1,17 @@
+.TH hlsCtx 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsCtx \- Prints the values of HLS project environment variables
+.SH SYNOPSIS
+.B hlsCtx [-h | --help]
+
+.SH DESCRIPTION
+.TP
+Because environment variables are sometimes forgotten about by the user, but not the computer, they
+can sometimes result in their values being unintentionally used.
+
+\fBhlsCtx\fR will show which environment variables used by the \fBhls\fR are set and their values.
+The user can then determine their relevancy. This can be of particular help when moving between projects
+to ensure any leftover context has been removed.
+
+.SH AUTHOR
+Written by JJRussell

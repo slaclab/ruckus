@@ -1,0 +1,260 @@
+.TH hlsRun 1 "May 2026" "v1.0" "HLS Command Manual"
+.SH NAME
+hlsRun \- Runs the \fBcsim\fR, \fBsynthesis\fR, \fBcosim\fR, \fBpackage\fR and
+\fBip\fR on one or more of the components in the workspace
+
+.SH SYNOPSIS
+.B hlsRun [COMPONENTS] [OPTIONS]
+
+.SH DESCRIPTION
+.TP
+.B hlsRun
+This command, together with its more specialized and simpler variations,
+\fBhlsExe\fR and \fBhlsGdb\fR will be the most often used commands. Other
+\fBhls\fR commands (\fBhlsWs\fR, \fBhlsCfg\fR and \fBhlsComp\fR) are seldom
+used after creating and managing the configurations and their corresponding
+components.
+
+
+.SH COMPONENTS
+A list of the names of the components, either as fully specified or with
+wildcards. Due to the execution time and the amount of output, except for
+formalized scripting, for example with running a test-suite, a single, rather
+than multiple components is targeted.
+
+Similarly, while all the various stages, \fBcsim\fR, \fBsynthesis\fR, \fBcosim\fR,
+\fBpackage\fR and \fBip\fR can be run simultaneously, except for regeneration
+of a known working project, it is more practical to run them separately.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Displays this message\
+
+.TP
+\fB\-\-verbose
+Enables more extensive output which is useful for diagnostics.  The default
+is 'False'.
+
+.TP
+\fB\-w, \-\-workspace = \fIWORKSPACE\fR
+The target workspace. Although typically specified in the project file, this
+overrides that defintion and is useful for one-of/throw-away experimentation.
+The environment variable \fBHLSBS_WORKSPACE\fR can also be used.
+
+.TP
+\fB\-\-ip_root = \fIP_ROOT\fR
+The ip root directory. Although typically specified in the project file, this
+overrides that defintion and is useful for one-of/throw-away experimentation.
+The environment variable \fBHLSBS_IP_ROOT\fR can also be used.
+
+
+
+
+.TP
+\fB\-\-components=...\fR
+A list of component names.  Functionally this acts the same as the positional
+\fBCOMPONENTS\fR arguments, but due to shell's lack of a formal binding syntax
+for lists and the shell's handling of wildcards for positional arguments this
+is more explicit and reliable.  The names are synonyms.
+
+.TP
+\fB\-\-project = \fIPROJECT_FILE\fR
+A project file is the standard method used by all the \fBhls\fR build utilities
+of capturing the stable command line options in a file that can be saved in GIT.
+For existing projects, the formality of a project file is not necessary. There
+are simpler ways. Only for more complex projects is a project file needed. It is
+mainly for consistency with other \fBhls\fR build utilities. Default is the
+environment variable \fIHLSBS_PROJECT\fR.
+
+.TP
+\fB\-\-no-project
+This prevents the use of a project file which may or may not exist.
+Typically used when one wishes to specify all the relevant parameters (in this
+utility these are \fBworkspace\fR and \fBconfigurations\fR and, possibly
+\fBcomponents\fR if one wishes something other than the default. A common usage is
+in one-off experimentation.
+
+.SH ACTIONS
+.TP
+\fB\-\-list\fR
+Lists the viable components.  This is provided as a convenience when the
+exact names of components are inevitably forgotten.
+
+.TP
+\fB\-\-csim\fR = (make, clean, run)
+Executes any combination of  making, cleaning, or running the csim.exe that
+makes sense. See the \fB--fast\fR and \fB--slow\fR options which are relevant
+to this option.
+
+.TP
+\fB\-\-synthesis\fR
+Runs the synthesis stage
+
+.TP
+\fB\-\-cosim\fR = (clean, make, run)
+Executes any combination of  making, cleaning, running  the cosim stage that
+makes sense. There is no  \fB--fast\fR option for the cosim stage.
+
+.TP
+\fB\-\-package\fR
+Executes the packaging stage.
+
+.TP
+\fB\-\-implementation\fR
+Executes the implementation stage.
+
+.TP
+\fB\-\-ip\fR
+Run the ip stage. If not using a project file to capture the \fBip\fR options,
+see the following list of \fBip\fR options.
+
+\fB\-\-ip-file\fR=\fIFILE_PATH_NAME\fR
+
+An explicit or template to specify where the output of the \fB--ip\fR
+is written.  The symbolic's \fBvitis_version\fR and \fBcmp_name\fR can
+be used.
+
+This may be a full file path specification or just the
+directory. A missing file name and file extension will be first be
+taken from \fBip-name\fR.  If still missing, the file name defaults to
+\fB{cmp_name}\fR and the extension to \fB.zip\fR.
+
+\fB\-\-ip-name\fR=\fINAME\fR
+
+The file name holding the IP products. This can be used to provide or replace
+the file name and extension in \fBip-file\fR.
+
+\fB\-\-ip-family\fR=\fIFAMILY\fR
+
+The list of Xilinx FPGAs families that are compatible with this product.
+
+
+.TP
+\fB\-\-dcp\fR
+Run the dcp renaming stage. If not using a project file to capture the
+\fBip\fR options, see the following list of \fBdcp\fR options.
+
+\fB\-\-dcp-file\fR=\fIFILE_PATH_NAME\fR
+
+An explicit or template to specify where the output of the \fB--ip\fR
+is written.  The symbolic's \fBvitis_version\fR and \fBcmp_name\fR can
+be used.
+
+This may be a full file path specification or just the
+directory. Any missing file name and file extension will be first be
+taken from \fBip-name\fR.  If still missing, the file name defaults to
+\fB{cmp_name}\fR and the extension to \fB.dcp\fR.
+
+\fB\-\-dcp-name\fR=\fINAME\fR
+
+The file name holding the DCP products. This can be used to provide or replace
+the file name and extension in \fBdcp-file\fR.
+
+.TP
+\fB\-\-all\fR = (clean, make, run)
+Executes all stages except the packaging stage since the
+\fBpackaging\fR stage is subset of the \fBimplementation\fR stage. It
+can be explicitly included with the \fB\-\-package option\fR.  The
+option list, i.e. \fBclean\fR, \fBmake\fR, \fBrun\fR, selects these
+options for both the \fBcsim\fR and \fBcosim\fR.  An option's list
+provided with an explicit \fB\-\-csim\fR or \fB\-\-cosim\fR takes
+precedence.
+
+\fB\-\-exclude\fR=(csim, synthesis, cosim, package, implementation, ip)
+When used with \fB\-\-all\fR, removes that stage from the \fBall\fR list.
+
+.TP
+\fB\-\-dry-run\fR
+Only reports the actions the command would do, but does not run the command.
+
+
+.SH Project File
+A project file is used to capture values of various options that could be
+specified on the command line. This saves both typing and remembering what they
+are. Given that \fBhlsComp\fR is generally used in very simple existing projects,
+no project file or a very minimal one is needed specifying
+    1. The workspace
+    2. The configuration file(s)
+    3. The mapping of a configuration file name to a component
+
+
+.SH Component Selection
+Selected components are ones that exist in the workspace and match the component
+parameters. This is different from the previous commands which categorized the
+components as
+\fBexisting\fR, \fBmissing\fR or \fBcruft\fR. Since only existing components can
+be targeted, the only ambiguity is those in the \fBcruft\fR category, i.e.
+rogue components, which by entropy,  have somehow snuck their way into the
+workspace. To keep this command simple, the burden falls on the user to use
+either \fBhlsCfg\fR or \fBhlsComp\fR to eliminate them or the selection criteria
+to avoid them.
+
+.SH Overriding with Command Line Options
+The \fBhls\fR utilities are constructed so parameters can be specified at 3
+levels depending on their permanency
+    1. In the project file
+    2. Indirectly overridden on the command line
+    3. Directly overridden on the command line
+
+The \fBproject file\fR is the most permanent and \fBoverriding\fR directly on
+the command line the least. The disadvantage of overriding directly on the
+command line is that, except for command recall, they are lost to history and even
+then, they may be seen as just a random collection of options.
+
+The third option offers something in between, capturing
+command line options in a file.  This allows the options some degree of
+permanency and, since it is a file, it can be given a meaningful name. The
+disadvantage is, due to the complexity in some utilities, not all options offered
+in the project file are available.
+
+The command line syntax is \fI@<MY_OPTIONS>\fR, i.e. the file name preceded by
+an \fB@\fR. The file is trivially formatted, one option (no spaces) per line.
+
+Overriding options on the command line is useful for \fBhlsRun\fR.  For example,
+one could override the number of tests to run or change the test files at the
+command line. Using the indirect file specification, one could have a palette
+of this to test run a suite of test files either for validation or to examine
+some corner case.
+
+See the example below.
+
+.SH Examples:
+
+  All these have a --dry-run option added to see what would have been done.
+  These examples specify the target components using the quoted positional
+  arguments, but the recommendation is to use either
+      a) --targets=<components>  ..or..
+      b) --components=<components>
+
+  Example 1
+  $ hlsRun '*' --csim=m  ..or..
+  $ hlsRun --csim=m
+  Runs the make csim on all known components.
+
+  Example 2
+  $ hlsRun 'avg*' --csim   ..or..
+  $ hlsRun 'avg*' --csim=clean,make,run ..or..
+  $ hlsRun 'avg*  --csim=c,m,r
+  These are all equivalent, running a clean, make and run on any components
+  satisfying the wildcard 'avg*'
+
+  Example 3
+  $ hlsRun 'avg*,dense' --csim=r --syn --cosim
+  Runs the run, synthesis and cosim stages on all components satisfying the
+  wildcard 'avg*' and the explicit 'dense'.
+
+  Example 4
+  $ hlsRun 'avg*' --ip  --ip-file=/tmp/me/{vitis-version}/{cmp_name}
+  Runs the ip stage placing the output in the specified file. The ip-file
+  overrides any definition in the project file.  Handy for testing.
+
+  Example 5
+  $ hlsRun '*' --all
+  Runs all the stages on all the components.  This is recommended only when
+  doing batch processing. For interactive usage
+     1.  The amount of output can be overwhelming
+     2.  It could take a long time
+
+.SH AUTHOR
+Written by JJRussell

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 ##############################################################################
-## This file is part of 'SLAC Firmware Standard Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the
-## top-level directory of this distribution and at:
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
-## No part of 'SLAC Firmware Standard Library', including this file,
-## may be copied, modified, propagated, or distributed except according to
-## the terms contained in the LICENSE.txt file.
+# This file is part of 'SLAC Firmware Standard Library'.
+# It is subject to the license terms in the LICENSE.txt file found in the
+# top-level directory of this distribution and at:
+# https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of 'SLAC Firmware Standard Library', including this file,
+# may be copied, modified, propagated, or distributed except according to
+# the terms contained in the LICENSE.txt file.
 ##############################################################################
 
 import vitis
@@ -18,13 +18,13 @@ import argparse
 parser = argparse.ArgumentParser(
     prog="Vitis HLS build script"
 )
-parser.add_argument("-c", "--csim",default=False,action="store_true")
+parser.add_argument("-c", "--csim", default=False, action="store_true")
 args = parser.parse_args()
 
 # Project variables
 workspace = os.getenv("OUT_DIR")
 comp_name = os.getenv("PROJECT")
-syn_top   = os.getenv("SYNTOP")
+syn_top = os.getenv("SYNTOP")
 
 # Choose hls_config.syn.top if defined
 if not syn_top:
@@ -32,7 +32,7 @@ if not syn_top:
 else:
     zip_name = syn_top
 
-proj_zip  = f'{workspace}/{comp_name}/{comp_name}/{zip_name}.zip'
+proj_zip = f'{workspace}/{comp_name}/{comp_name}/{zip_name}.zip'
 build_zip = f'{os.getenv("PROJ_DIR")}/ip/{zip_name}.zip'
 
 # Create a client object
@@ -46,7 +46,7 @@ hls_test_comp = client.get_component(comp_name)
 
 # Run c-simulation on the component if not explicitly skipped
 if os.getenv('SKIP_CSIM', '0') == '0':
-   hls_test_comp.run('C_SIMULATION')
+    hls_test_comp.run('C_SIMULATION')
 
 if args.csim:
     vitis.dispose()
@@ -57,13 +57,14 @@ hls_test_comp.run('SYNTHESIS')
 
 # Run co-simulation on the component if not explicitly skipped
 if os.getenv('SKIP_COSIM', '0') == '0':
-   hls_test_comp.run('CO_SIMULATION')
+    hls_test_comp.run('CO_SIMULATION')
 
 # Run package on the component
 hls_test_comp.run('PACKAGE')
 
 # Run implementation on the component
-if 'vivado.syn_dcp=1' in open(f'{os.getenv("PROJ_DIR")}/hls_config.cfg').read():
+if 'vivado.syn_dcp=1' in open(
+        f'{os.getenv("PROJ_DIR")}/hls_config.cfg').read():
     hls_test_comp.run('IMPLEMENTATION')
 else:
     print("vivado.syn_dcp=1 not detected in hls.cfg")
@@ -76,9 +77,9 @@ if int(os.getenv("ALL_XIL_FAMILY")) > 0:
 
     # Over the .ZIP file and decompress it
     ip_path = f'{workspace}/ip'
-    os.system( f'rm -rf {ip_path}' )
-    os.system( f'mkdir {ip_path}' )
-    os.system( f'unzip {proj_zip} -d {ip_path}' )
+    os.system(f'rm -rf {ip_path}')
+    os.system(f'mkdir {ip_path}')
+    os.system(f'unzip {proj_zip} -d {ip_path}')
 
     # Read and modify component.xml
     component_path = f'{ip_path}/component.xml'
@@ -112,10 +113,10 @@ if int(os.getenv("ALL_XIL_FAMILY")) > 0:
         os.remove(build_zip)
 
     # Compress the modified IP directory to the target's image directory
-    os.system( f'bash -c "cd {ip_path}; zip -r {build_zip} *"' )
+    os.system(f'bash -c "cd {ip_path}; zip -r {build_zip} *"')
 
 else:
     # Copy the .ZIP file to the local ip/ directory
     shutil.copy(proj_zip, build_zip)
 
-print( f'\n\n\nHLS output file: {build_zip}' )
+print(f'\n\n\nHLS output file: {build_zip}')
