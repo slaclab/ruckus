@@ -15,13 +15,16 @@ import os
 import argparse
 import time
 
-import github # PyGithub
+import github  # PyGithub
 
-#############################################################################################
+##########################################################################
 
 # Convert str to bool
+
+
 def argBool(s):
     return s.lower() in ['true', 't', 'yes', '1']
+
 
 # Set the argument parser
 parser = argparse.ArgumentParser('Create New Project')
@@ -29,111 +32,112 @@ parser = argparse.ArgumentParser('Create New Project')
 # Add arguments
 parser.add_argument(
     '--name',
-    type     = str,
-    required = True,
-    help     = 'New Repo name for https://github.com/ (example: slaclab/my-new-project)',
+    type=str,
+    required=True,
+    help='New Repo name for https://github.com/ (example: slaclab/my-new-project)',
 )
 
 parser.add_argument(
     '--token',
-    type     = str,
-    required = False,
-    default  = None,
-    help     = 'Token for github'
+    type=str,
+    required=False,
+    default=None,
+    help='Token for github'
 )
 
 parser.add_argument(
     '--private',
-    type     = argBool,
-    required = False,
-    default  = True,
-    help     = 'Privacy Setting for new repo: Set true (default) if private repo.  Set false if public repo',
+    type=argBool,
+    required=False,
+    default=True,
+    help='Privacy Setting for new repo: Set true (default) if private repo.  Set false if public repo',
 )
 
 parser.add_argument(
     '--org',
-    type     = str,
-    required = False,
-    default  = 'slaclab',
-    help     = 'Name of Github organization repository (default: slaclab)',
+    type=str,
+    required=False,
+    default='slaclab',
+    help='Name of Github organization repository (default: slaclab)',
 )
 
 parser.add_argument(
     '--userRepo',
-    type     = argBool,
-    required = False,
-    default  = False,
-    help     = 'Set true if you want to make the repo in your user\'s workspace instead of an organization workspace',
+    type=argBool,
+    required=False,
+    default=False,
+    help='Set true if you want to make the repo in your user\'s workspace instead of an organization workspace',
 )
 
 parser.add_argument(
     '--submodules',
-    nargs    = '+',
-    required = False,
-    default  =  ['https://github.com/slaclab/ruckus.git',
-                 'https://github.com/slaclab/surf.git',],
-    help     = 'List of submodules'
+    nargs='+',
+    required=False,
+    default=['https://github.com/slaclab/ruckus.git',
+             'https://github.com/slaclab/surf.git',],
+    help='List of submodules'
 )
 
 ##########################
-## Adding User Permissions
+# Adding User Permissions
 ##########################
 parser.add_argument(
     '--adminUser',
-    nargs    = '+',
-    required = False,
-    default  = None,
-    help     = 'List of admin users'
+    nargs='+',
+    required=False,
+    default=None,
+    help='List of admin users'
 )
 
 parser.add_argument(
     '--writeUser',
-    nargs    = '+',
-    required = False,
-    default  = None,
-    help     = 'List of write users'
+    nargs='+',
+    required=False,
+    default=None,
+    help='List of write users'
 )
 
 parser.add_argument(
     '--readUser',
-    nargs    = '+',
-    required = False,
-    default  = None,
-    help     = 'List of read users'
+    nargs='+',
+    required=False,
+    default=None,
+    help='List of read users'
 )
 
 ##########################
-## Adding Team Permissions
+# Adding Team Permissions
 ##########################
 
 parser.add_argument(
     '--adminTeam',
-    nargs    = '+',
-    required = False,
-    default  = [ ['slaclab','tid-id-es-admin'] ],
-    help     = 'List of admin teams [org,team_name]'
+    nargs='+',
+    required=False,
+    default=[['slaclab', 'tid-id-es-admin']],
+    help='List of admin teams [org,team_name]'
 )
 
 parser.add_argument(
     '--writeTeam',
-    nargs    = '+',
-    required = False,
-    default  = [ ['slaclab','tid-id-es'], ['slaclab','tid-id-ecs'] ],
-    help     = 'List of write teams [org,team_name]'
+    nargs='+',
+    required=False,
+    default=[['slaclab', 'tid-id-es'], ['slaclab', 'tid-id-ecs']],
+    help='List of write teams [org,team_name]'
 )
 
 parser.add_argument(
     '--readTeam',
-    nargs    = '+',
-    required = False,
-    default  = [ ['slaclab','tid-id'] ],
-    help     = 'List of read teams'
+    nargs='+',
+    required=False,
+    default=[['slaclab', 'tid-id']],
+    help='List of read teams'
 )
 
 # Get the arguments
 args = parser.parse_args()
 
-#############################################################################################
+##########################################################################
+
 
 def githubLogin():
 
@@ -159,7 +163,8 @@ def githubLogin():
         if token is None:
 
             # Ask for the token from the command line prompt
-            print('Enter your github token. If you do no have one you can generate it here:')
+            print(
+                'Enter your github token. If you do no have one you can generate it here:')
             print('    https://github.com/settings/tokens')
             print('You may set it in your environment as GITHUB_TOKEN\n')
 
@@ -178,7 +183,8 @@ def githubLogin():
     # Return the github login object
     return gh
 
-#############################################################################################
+##########################################################################
+
 
 def createNewRepo(gh):
 
@@ -196,9 +202,9 @@ def createNewRepo(gh):
 
     # Create the repo in the workspace
     repo = workspace.create_repo(
-        name      = args.name,
-        private   = args.private,
-        auto_init = True,
+        name=args.name,
+        private=args.private,
+        auto_init=True,
     )
 
     # Inform the user that the repo was created
@@ -207,60 +213,61 @@ def createNewRepo(gh):
     # Return the Github repo object
     return repo
 
-#############################################################################################
+##########################################################################
 
-def setPermissions(gh,repo):
+
+def setPermissions(gh, repo):
 
     # Inform the user that you are logging in
     print('Setting Git repo permissions...')
 
     # Always set the current user who created the repo as admin
     currentUser = gh.get_user().login
-    print( f'Current User Admin Permission: {currentUser}' )
+    print(f'Current User Admin Permission: {currentUser}')
     repo.add_to_collaborators(
-        collaborator = currentUser,
-        permission   = 'admin',
+        collaborator=currentUser,
+        permission='admin',
     )
 
     ##########################
-    ## Adding User Permissions
+    # Adding User Permissions
     ##########################
 
     # Check for list of users with admin permissions
     if args.adminUser is not None:
         for user in args.adminUser:
-            print( f'User Admin Permission: {user}' )
+            print(f'User Admin Permission: {user}')
             repo.add_to_collaborators(
-                collaborator = user,
-                permission   = 'admin',
+                collaborator=user,
+                permission='admin',
             )
 
     # Check for list of users with write permissions
     if args.writeUser is not None:
         for user in args.writeUser:
-            print( f'User Write Permission: {user}' )
+            print(f'User Write Permission: {user}')
             repo.add_to_collaborators(
-                collaborator = user,
-                permission   = 'push',
+                collaborator=user,
+                permission='push',
             )
 
     # Check for list of users with read permissions
     if args.readUser is not None:
         for user in args.readUser:
-            print( f'User Read Permission: {user}' )
+            print(f'User Read Permission: {user}')
             repo.add_to_collaborators(
-                collaborator = user,
-                permission   = 'pull',
+                collaborator=user,
+                permission='pull',
             )
 
     ##########################
-    ## Adding Team Permissions
+    # Adding Team Permissions
     ##########################
 
     # Check for list of teams with admin permissions
     if args.adminTeam is not None:
         for [orgName, teamName] in args.adminTeam:
-            print( f'Team Admin Permission: {orgName}/{teamName}' )
+            print(f'Team Admin Permission: {orgName}/{teamName}')
             org = gh.get_organization(orgName)
             team = org.get_team_by_slug(teamName)
             updateTeamRepository(team, repo, 'admin')
@@ -268,7 +275,7 @@ def setPermissions(gh,repo):
     # Check for list of teams with write permissions
     if args.writeTeam is not None:
         for [orgName, teamName] in args.writeTeam:
-            print( f'Team Write Permission: {orgName}/{teamName}' )
+            print(f'Team Write Permission: {orgName}/{teamName}')
             org = gh.get_organization(orgName)
             team = org.get_team_by_slug(teamName)
             updateTeamRepository(team, repo, 'push')
@@ -276,23 +283,27 @@ def setPermissions(gh,repo):
     # Check for list of teams with read permissions
     if args.readTeam is not None:
         for [orgName, teamName] in args.readTeam:
-            print( f'Team Read Permission: {orgName}/{teamName}' )
+            print(f'Team Read Permission: {orgName}/{teamName}')
             org = gh.get_organization(orgName)
             team = org.get_team_by_slug(teamName)
             updateTeamRepository(team, repo, 'pull')
 
     print('\n')
 
-#############################################################################################
+##########################################################################
 
-# Team.set_repo_permission() is deprecated, use Team.update_team_repository() instead
+# Team.set_repo_permission() is deprecated, use
+# Team.update_team_repository() instead
+
+
 def updateTeamRepository(team, repo, permission):
     try:
         team.update_team_repository(repo, permission)
-    except:
+    except BaseException:
         team.set_repo_permission(repo, permission)
 
-#############################################################################################
+##########################################################################
+
 
 def setupNewRepoStructure(repo):
 
@@ -304,30 +315,30 @@ def setupNewRepoStructure(repo):
 
     # Add the LICENSE.txt
     repo.create_file(
-        path    = 'LICENSE.txt',
-        message = 'Adding License.txt',
-        content = open(f'{baseDir}/LICENSE.txt').read(),
+        path='LICENSE.txt',
+        message='Adding License.txt',
+        content=open(f'{baseDir}/LICENSE.txt').read(),
     )
 
     # Add the .gitignore
     repo.create_file(
-        path    = '.gitignore',
-        message = 'Adding .gitignore',
-        content = open(f'{baseDir}/.gitignore').read(),
+        path='.gitignore',
+        message='Adding .gitignore',
+        content=open(f'{baseDir}/.gitignore').read(),
     )
 
     # Add the .gitattributes
     repo.create_file(
-        path    = '.gitattributes',
-        message = 'Adding .gitattributes',
-        content = open(f'{baseDir}/.gitattributes').read(),
+        path='.gitattributes',
+        message='Adding .gitattributes',
+        content=open(f'{baseDir}/.gitattributes').read(),
     )
 
     # Add the .flake8
     repo.create_file(
-        path    = '.flake8',
-        message = 'Adding .flake8',
-        content = open(f'{baseDir}/.flake8').read(),
+        path='.flake8',
+        message='Adding .flake8',
+        content=open(f'{baseDir}/.flake8').read(),
     )
 
     # Check if submodule path(s) exist
@@ -340,15 +351,19 @@ def setupNewRepoStructure(repo):
         #####################################################
         time.sleep(10)
         os.system(f'git clone --recursive https://github.com/{repo.full_name}')
-        os.system(f'cd {args.name}; mkdir firmware; cd firmware; mkdir submodules; git pull')
+        os.system(
+            f'cd {args.name}; mkdir firmware; cd firmware; mkdir submodules; git pull')
         for submodule in args.submodules:
-            os.system(f'cd {args.name}/firmware/submodules; git submodule add {submodule}')
-        os.system(f'cd {args.name}; git commit -m \"adding submdoules\"; git push')
+            os.system(
+                f'cd {args.name}/firmware/submodules; git submodule add {submodule}')
+        os.system(
+            f'cd {args.name}; git commit -m \"adding submdoules\"; git push')
         os.system(f'rm -rf {args.name}')
 
     print('\n')
 
-#############################################################################################
+##########################################################################
+
 
 def setBranchProtection(repo):
     # Creating Setting Branch Protection for main
@@ -356,18 +371,19 @@ def setBranchProtection(repo):
     for idx in ['main']:
         repo.get_branch(idx).edit_protection()
 
-#############################################################################################
+##########################################################################
+
 
 if __name__ == '__main__':
 
     # Log into Github
-    gh   = githubLogin()
+    gh = githubLogin()
 
     # Create a new Github repo
     repo = createNewRepo(gh)
 
     # Set the User/Team permissions
-    setPermissions(gh,repo)
+    setPermissions(gh, repo)
 
     # Setup the new repo's structure
     setupNewRepoStructure(repo)
@@ -377,10 +393,10 @@ if __name__ == '__main__':
 
     # Create first initial release
     repo.create_git_release(
-        tag     = 'v0.0.0',
-        name    = 'Initial Release',
-        message = 'First Tagged Release',
-        draft   =False,
+        tag='v0.0.0',
+        name='Initial Release',
+        message='First Tagged Release',
+        draft=False,
     )
 
     print("Success!")

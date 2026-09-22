@@ -62,6 +62,14 @@ Step 2: Set the GitHub Token
 
 The token must have ``repo`` scope to create tags and publish GitHub releases.
 
+.. note::
+
+   ruckus passes ``GITHUB_TOKEN`` to the ``release`` target only. Every other target
+   runs with all ``TOKEN``-named environment variables removed from make, so exporting
+   the token in your shell exposes it neither to Vivado, simulators, and project hook
+   scripts, nor to a ``$(GITHUB_TOKEN)`` expansion in a recipe. See
+   :ref:`credential-scoping`.
+
 Step 3: Run the Release Workflow
 ---------------------------------
 

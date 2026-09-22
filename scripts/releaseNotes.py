@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Title      : Release notes generation
 # ----------------------------------------------------------------------------
 # This file is part of the 'SLAC Firmware Standard Library'. It is subject to
@@ -22,7 +22,10 @@ import re
 def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
     # Get logs
-    loginfo = locRepo.log(f"{oldTag}...{newTag}", '--grep', "Merge pull request")
+    loginfo = locRepo.log(
+        f"{oldTag}...{newTag}",
+        '--grep',
+        "Merge pull request")
 
     # Grouping of recors
     records = odict({'Bug': [],
@@ -53,7 +56,8 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             # Check for empty PR description
             if not req.body or req.body.strip() == "":
                 pr_url = f"https://github.com/{remRepo.full_name}/pull/{entry['PR'][1:]}"
-                raise ValueError(f"Pull request {entry['PR']} has an empty description. Please open your web browser, go to this PR, and fill in the description: {pr_url}")
+                raise ValueError(
+                    f"Pull request {entry['PR']} has an empty description. Please open your web browser, go to this PR, and fill in the description: {pr_url}")
 
             # Detect Release Candidate PRs
             if ('main' in req.base.label or 'master' in req.base.label) and 'pre-release' in req.head.label:
@@ -63,11 +67,13 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             entry['body'] = req.body
 
             entry['changes'] = req.additions + req.deletions
-            entry['Pull'] = entry['PR'] + f" ({req.additions} additions, {req.deletions} deletions, {req.changed_files} files changed)"
+            entry['Pull'] = entry['PR'] + \
+                f" ({req.additions} additions, {req.deletions} deletions, {req.changed_files} files changed)"
 
             # Detect JIRA entry
             if entry['Branch'].lower().startswith('slaclab/es'):
-                url = 'https://jira.slac.stanford.edu/issues/{}'.format(entry['Branch'].split('/')[1])
+                url = 'https://jira.slac.stanford.edu/issues/{}'.format(
+                    entry['Branch'].split('/')[1])
                 entry['Jira'] = url
             else:
                 entry['Jira'] = None
@@ -117,11 +123,19 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
     md = f'# Pull Requests Since {oldTag}\n'
 
     # Summary list is sectioned
-    for label in ['Interface-change', 'Bug', 'Enhancement', 'Documentation', 'Unlabeled']:
+    for label in [
+        'Interface-change',
+        'Bug',
+        'Enhancement',
+        'Documentation',
+            'Unlabeled']:
         subLab = ""
 
         # Sort by changes
-        entries = sorted(records[label], key=lambda v: v['changes'], reverse=True)
+        entries = sorted(
+            records[label],
+            key=lambda v: v['changes'],
+            reverse=True)
 
         for entry in entries:
             if 'IsRC' not in entry:
@@ -138,11 +152,18 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
     # Generate detailed PR notes
     for entry in details:
-        if 'IsRC' not in entry: # Don't generate output for Release Candidate PRs
+        if 'IsRC' not in entry:  # Don't generate output for Release Candidate PRs
             det += f"### {entry['Title']}"
             det += '\n|||\n|---:|:---|\n'
 
-            for i in ['Author', 'Date', 'Pull', 'Branch', 'Issues', 'Jira', 'Labels']:
+            for i in [
+                'Author',
+                'Date',
+                'Pull',
+                'Branch',
+                'Issues',
+                'Jira',
+                    'Labels']:
                 if entry[i] is not None:
                     det += f'|**{i}:**|{entry[i]}|\n'
 
@@ -152,7 +173,6 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
             det += '\n-------\n'
             det += '\n\n'
 
-
     # Include details
     md += det
 
@@ -161,32 +181,35 @@ def getReleaseNotes(locRepo, remRepo, oldTag, newTag):
 
 def getCompareUrl(remRepo, oldTag, newTag):
 
-    # Only generate a compare link when there is an older tag to compare against
+    # Only generate a compare link when there is an older tag to compare
+    # against
     if not oldTag:
         return ''
 
     return f"\n**Full Changelog**: https://github.com/{remRepo.full_name}/compare/{oldTag}...{newTag}\n"
 
+
 if __name__ == "__main__":
     import os
 
     import git   # https://gitpython.readthedocs.io/en/stable/tutorial.html
-    from github import Github # https://pygithub.readthedocs.io/en/latest/introduction.html
+    from github import Github  # https://pygithub.readthedocs.io/en/latest/introduction.html
 
     # Get most recent and previous tag
     newTag = git.Git('.').describe('--tags')
-    oldTag = git.Git('.').describe('--abbrev=0','--tags',newTag + '^')
+    oldTag = git.Git('.').describe('--abbrev=0', '--tags', newTag + '^')
 
     print(f"Using range: {oldTag}...{newTag}")
 
     # Local git clone
     locRepo = git.Git('.')
 
-    url = locRepo.remote('get-url','origin')
+    url = locRepo.remote('get-url', 'origin')
     if not url.endswith('.git'):
         url += '.git'
 
-    project = re.compile(r'slaclab/(?P<name>.*?).git').search(url).group('name')
+    project = re.compile(
+        r'slaclab/(?P<name>.*?).git').search(url).group('name')
 
     # Connect to the Git server
     token = os.environ.get('GITHUB_TOKEN')
@@ -206,10 +229,10 @@ if __name__ == "__main__":
     remRepo = github.get_repo(f'slaclab/{project}')
 
     md = getReleaseNotes(
-        locRepo  = locRepo,
-        remRepo  = remRepo,
-        oldTag   = oldTag,
-        newTag   = newTag)
+        locRepo=locRepo,
+        remRepo=remRepo,
+        oldTag=oldTag,
+        newTag=newTag)
 
     md += getCompareUrl(remRepo, oldTag, newTag)
 
