@@ -491,6 +491,55 @@ proc loadBlockDesign args {
    }
 }
 
+## Function to load a Versal NoC solution (.ncr) file into the impl_1 run
+#
+# Versal designs that use segmented configuration require the NoC compiler to
+# reuse a pre-computed, locked NoC solution so that the static portion of the
+# NoC (routing, QoS) stays byte-for-byte identical between the static and
+# dynamic partitions. This proc points the impl_1 run's NOC_SOLUTION_FILE
+# property at the supplied .ncr file.
+#
+# It is a no-op (with a warning) on non-Versal targets so that shared device
+# ruckus.tcl files can call it unconditionally.
+proc loadNoCSolution args {
+   set options {
+      {path.arg "" "path to a single .ncr file"}
+   }
+   set usage ": loadNoCSolution \[options] ...\noptions:"
+   array set params [::cmdline::getoptions args $options $usage]
+   set has_path [expr {[string length $params(path)] > 0}]
+   # Check for error state
+   if { !${has_path} } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadNoCSolution: Must specify -path to a .ncr file"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   # Defensive: NOC_SOLUTION_FILE only applies to Versal targets
+   if { ![isVersal] } {
+      puts "WARNING: loadNoCSolution ignored: target FPGA is not Versal"
+      return
+   }
+   # Check if file doesn't exist
+   if { [file exists $params(path)] != 1 } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadNoCSolution: $params(path) doesn't exist"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   # Check the file extension
+   set fileExt [file extension $params(path)]
+   if { ${fileExt} ne {.ncr} } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "loadNoCSolution: $params(path) does not have a \[.ncr] file extension"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   # Point the impl_1 run at the locked NoC solution file
+   set_property NOC_SOLUTION_FILE $params(path) [get_runs impl_1]
+   puts "loadNoCSolution: NOC_SOLUTION_FILE set to $params(path) on impl_1"
+}
+
 ## Function to load constraint files
 proc loadConstraints args {
    set options {
