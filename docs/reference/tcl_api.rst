@@ -153,6 +153,34 @@ block designs, and constraints.
       loadConstraints -path $::DIR_PATH/constraints/timing.xdc
       loadConstraints -dir  $::DIR_PATH/constraints/
 
+.. function:: loadNoCSolution
+
+   ``loadNoCSolution -path PATH``
+
+   Lock the ``impl_1`` run to a pre-computed Versal NoC solution (``.ncr``) file
+   by setting its ``NOC_SOLUTION_FILE`` property.
+
+   .. option:: -path <path>
+
+      Absolute path to a single ``.ncr`` file.
+
+   Used with Versal Segmented Configuration so that the NoC compiler reuses a
+   locked solution and the static portion of the NoC (routing, QoS) stays
+   identical between the static and dynamic partitions. No-op with a warning
+   when the target is not Versal, so a shared device ``ruckus.tcl`` can call it
+   unconditionally. Hard error if ``-path`` is missing, the file does not exist,
+   or the file lacks a ``.ncr`` extension.
+
+   Defined in ``vivado/proc/code_loading.tcl``.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      if { $::env(USE_SEGMENTED_CONFIG) != 0 } {
+         loadNoCSolution -path $::DIR_PATH/bd/XilinxVek280NoC.ncr
+      }
+
 .. function:: loadRuckusTcl {filePath {flags ""}}
 
    Recursively load a submodule's ``ruckus.tcl``. This is the primary mechanism for
