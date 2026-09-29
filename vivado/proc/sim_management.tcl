@@ -111,25 +111,6 @@ proc RogueSimSources {backend} {
    }
 }
 
-## Verify libzmq >= 4.1.0 is available via pkg-config for the Rogue co-sim,
-## printing a clear diagnostic and exiting on failure. Called by the VCS flow
-## (vivado/vcs.tcl) and the xsim pre-compile hook (vivado/run/pre/xsim.tcl).
-proc RogueCheckLibZmq {} {
-   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.1.0} --print-errors} libzmq]
-   if { ${libzmq} != "" } {
-      puts "\n\n\n\n\n********************************************************"
-      if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
-         puts "libzmq package was not found"
-         puts "Please make sure that you have libzmq installed"
-         puts "or have sourced the necessary rogue setup scripts"
-      } else {
-         puts ${libzmq}
-      }
-      puts "********************************************************\n\n\n\n\n"
-      exit -1
-   }
-}
-
 ## LD_PRELOAD a libstdc++.so.6 new enough for the Rogue xsim co-sim's libzmq.
 ## Vivado's loader wrapper prepends its bundled libstdc++ (e.g. GLIBCXX 3.4.25
 ## in 2025.2) to LD_LIBRARY_PATH, which is too old for a libzmq built against a
