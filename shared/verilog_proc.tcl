@@ -239,3 +239,60 @@ proc VerilogCheckVersion {tool versionArg pattern floor} {
    }
    puts "VerilogCheckVersion: ${tool} ${versionText} (${path})"
 }
+
+###############################################################
+#### Rogue SimLink Library Build ###############################
+###############################################################
+
+## Build the surf SimLink backend library in-tree, stage it in $OUT_DIR and
+## clean the surf tree, mirroring the VCS/xsim in-tree build/copy/clean
+## pattern. Skips entirely when no Rogue leaf is in the loaded filelist (D-03).
+proc VerilogSimLinkBuild {artifact} {
+   set rogueLeaves {RogueTcpStream.sv RogueTcpMemory.sv RogueSideBand.sv}
+   set backendDir ""
+   set fp [open "$::env(OUT_DIR)/$::env(PROJECT).f" r]
+   while { [gets ${fp} line] >= 0 } {
+      if { [string index ${line} 0] eq {+} } {
+         continue
+      }
+      if { [lsearch -exact ${rogueLeaves} [file tail ${line}]] != -1 } {
+         set backendDir [file dirname ${line}]
+         break
+      }
+   }
+   close ${fp}
+
+   if { ${backendDir} eq "" } {
+      puts "VerilogSimLinkBuild: no Rogue SimLink sources loaded, skipping the SimLink library build"
+      return
+   }
+
+   if { ![file exists ${backendDir}/Makefile] } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "VerilogSimLinkBuild: ${backendDir} has no Makefile"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+
+   VerilogCheckTool gcc
+   VerilogCheckTool pkg-config
+   RogueCheckLibZmq
+
+   cd ${backendDir}
+   set buildRc [catch {exec make >@stdout 2>@stderr} buildResult]
+   if { ${buildRc} } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "VerilogSimLinkBuild: make failed in ${backendDir}"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   if { ![file exists "${backendDir}/${artifact}"] } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "VerilogSimLinkBuild: ${backendDir}/${artifact} was not produced by make"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   file copy -force "${backendDir}/${artifact}" $::env(OUT_DIR)
+   exec make clean >@stdout 2>@stderr
+   cd $::env(PROJ_DIR)
+}

@@ -137,6 +137,7 @@ load_source_code : dir
 .PHONY : build
 build : load_source_code
 	$(call ACTION_HEADER,"Icarus Verilog: build (iverilog)")
+	@$(RUCKUS_IVERILOG_DIR)/simlink.tcl
 	@echo iverilog $(IVERILOG_FLAGS) $(IVERILOG_INC_DEF) -s $(SIM_TOP) -o $(SIM_TOP).vvp -c $(PROJECT).f
 	@cd $(OUT_DIR); iverilog $(IVERILOG_FLAGS) $(IVERILOG_INC_DEF) -s $(SIM_TOP) -o $(SIM_TOP).vvp -c $(PROJECT).f
 
@@ -146,8 +147,10 @@ build : load_source_code
 .PHONY : tb
 tb : build
 	$(call ACTION_HEADER,"Icarus Verilog: run (vvp)")
-	@echo vvp $(VVP_FLAGS) $(SIM_TOP).vvp $(VVP_WAVES) $(SIM_PLUSARGS)
-	@cd $(OUT_DIR); vvp $(VVP_FLAGS) $(SIM_TOP).vvp $(VVP_WAVES) $(SIM_PLUSARGS)
+	@cd $(OUT_DIR); \
+	if [ -f RogueSimLink.vpi ]; then set -- -M$(OUT_DIR) -mRogueSimLink; fi; \
+	echo vvp $(VVP_FLAGS) "$$@" $(SIM_TOP).vvp $(VVP_WAVES) $(SIM_PLUSARGS); \
+	vvp $(VVP_FLAGS) "$$@" $(SIM_TOP).vvp $(VVP_WAVES) $(SIM_PLUSARGS)
 
 ###############################################################
 #### gtkwave   ##################################################
