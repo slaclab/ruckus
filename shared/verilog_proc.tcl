@@ -169,7 +169,7 @@ proc loadSource args {
 }
 
 ## Write the ordered, deduplicated filelist consumed by iverilog -c / verilator -f.
-## Hard-errors on any loaded VHDL (D-08) or an empty source list.
+## Hard-errors on any loaded VHDL or an empty source list.
 proc VerilogWriteFilelist {filePath} {
    if { [llength $::VERILOG_VHDL_LIST] > 0 } {
       puts "\n\n\n\n\n********************************************************"
@@ -246,7 +246,7 @@ proc VerilogCheckVersion {tool versionArg pattern floor} {
 
 ## Build the surf SimLink backend library in-tree, stage it in $OUT_DIR and
 ## clean the surf tree, mirroring the VCS/xsim in-tree build/copy/clean
-## pattern. Skips entirely when no Rogue leaf is in the loaded filelist (D-03).
+## pattern. Skips entirely when no Rogue leaf is in the loaded filelist.
 proc VerilogSimLinkBuild {artifact} {
    set rogueLeaves {RogueTcpStream.sv RogueTcpMemory.sv RogueSideBand.sv}
    set backendDir ""
