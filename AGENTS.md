@@ -1,6 +1,6 @@
 # Agent Guidance For ruckus
 
-ruckus is a Makefile/TCL hybrid firmware build system for SLAC FPGA and ASIC projects. It is shared infrastructure that other repositories consume as a git submodule, not a single board project. It provides a standard library of TCL procedures, Makefile targets, and Python helper scripts that abstract Vivado, Vitis HLS, Vitis Unified (HLS/AIE), GHDL, VCS, Cadence Genus, and Synopsys DC into a consistent `make bit` / `make syn` / `make sim` interface, plus source loading, IP management, hook-script injection, and firmware release packaging.
+ruckus is a Makefile/TCL hybrid firmware build system for SLAC FPGA and ASIC projects. It is shared infrastructure that other repositories consume as a git submodule, not a single board project. It provides a standard library of TCL procedures, Makefile targets, and Python helper scripts that abstract Vivado, Vitis HLS, Vitis Unified (HLS/AIE), GHDL, VCS, Icarus Verilog, Verilator, Cadence Genus, and Synopsys DC into a consistent `make bit` / `make syn` / `make sim` interface, plus source loading, IP management, hook-script injection, and firmware release packaging.
 
 Treat ruckus as a public API. Downstream firmware repos depend on the exact names and behavior of its TCL procedures, Makefile targets, exported variables, and hook-script filenames. Keep changes narrow, preserve existing public interfaces, and avoid broad style cleanups unless the user asks for them.
 
@@ -11,10 +11,11 @@ Do not stage files or make git commits unless the user explicitly asks for stagi
 Start with [README.md](README.md) for user-facing links. Full documentation is published from `docs/` to https://slaclab.github.io/ruckus/. The most useful local orientation points are:
 
 - `system_shared.mk` — common Makefile logic (build dir, git hash, build string) included by every backend.
-- `system_vivado.mk`, `system_vcs.mk`, `system_ghdl.mk`, `system_synopsys_dc.mk`, `system_cadence_genus.mk`, `system_vitis_hls.mk`, `system_vitis_unified_hls.mk`, `system_vitis_unified_aie.mk` — per-backend Makefile entry points that projects `include`.
-- `shared/proc.tcl` — backend-agnostic TCL procedures (`SourceTclFile`, `SubmoduleCheck`, `GenBuildString`, version/tag checks).
+- `system_vivado.mk`, `system_vcs.mk`, `system_ghdl.mk`, `system_iverilog.mk`, `system_verilator.mk`, `system_synopsys_dc.mk`, `system_cadence_genus.mk`, `system_vitis_hls.mk`, `system_vitis_unified_hls.mk`, `system_vitis_unified_aie.mk` — per-backend Makefile entry points that projects `include`.
+- `shared/proc.tcl` — backend-agnostic TCL procedures (`SourceTclFile`, `SubmoduleCheck`, `GenBuildString`, version/tag checks, `RogueCheckLibZmq`).
+- `shared/verilog_proc.tcl` — the Vivado-free Verilog/SystemVerilog `loadSource`/`loadRuckusTcl` loader shared by the Icarus Verilog and Verilator flows.
 - `vivado/` — the Vivado flow. `vivado/proc.tcl` sources the per-topic procedure files under `vivado/proc/` (`code_loading.tcl`, `checking.tcl`, `ip_management.tcl`, `project_management.tcl`, `sim_management.tcl`, `debug_probes.tcl`, `output_files.tcl`, `Dynamic_Function_eXchange.tcl`, `SegmentedConfiguration.tcl`). Build-stage drivers (`sources.tcl`, `project.tcl`, `build.tcl`, `properties.tcl`, `env_var.tcl`, etc.) live directly under `vivado/`.
-- `ghdl/`, `cadence/genus/`, `synopsys/design_compiler/`, `vitis/` — TCL for the non-Vivado backends.
+- `ghdl/`, `iverilog/`, `verilator/`, `cadence/genus/`, `synopsys/design_compiler/`, `vitis/` — TCL for the non-Vivado backends.
 - `scripts/` — Python helpers (`firmwareRelease.py`, `releaseGen.py`, `releaseNotes.py`, `createNewRepo.py`, `download_github_asset.py`, and small parsers). This is the only directory linted and syntax-checked by CI.
 - `MicroblazeBasicCore/` — reference MicroBlaze SDK/Vitis sources.
 - `docs/` — the Sphinx documentation site (see Documentation below).
