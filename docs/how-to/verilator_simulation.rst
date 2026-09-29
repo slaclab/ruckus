@@ -1,8 +1,8 @@
-How to Simulate Verilog with Icarus Verilog
-============================================
+How to Simulate Verilog with Verilator
+========================================
 
 **Goal:** Load, compile, and simulate a Verilog/SystemVerilog design using the
-open-source Icarus Verilog simulator.
+open-source Verilator simulator.
 
 .. note::
 
@@ -15,13 +15,14 @@ Prerequisites
 
 Before running the simulation flow, ensure the following are in place:
 
-- Icarus Verilog 12.0 or newer, with ``iverilog``, ``iverilog-vpi``, and
-  ``vvp`` all on PATH. The version and tool checks run in
-  ``make load_source_code``, before any source is loaded.
+- Verilator 5.020 or newer, on PATH. The ``--binary``/``--timing`` flags this
+  flow relies on require timing support, which is not present in older
+  releases. The version check runs in ``make load_source_code``, before any
+  source is loaded.
 - ``gtkwave`` installed for waveform viewing.
 - For Rogue co-simulation designs only: ``gcc``, ``pkg-config``, ``libzmq``
-  4.1.0 or newer, and a surf version that provides ``simlink/iverilog/``.
-- Project ``Makefile`` includes ``system_iverilog.mk``.
+  4.1.0 or newer, and a surf version that provides ``simlink/verilator/``.
+- Project ``Makefile`` includes ``system_verilator.mk``.
 
 Makefile Setup
 --------------
@@ -30,7 +31,7 @@ Add the following to your project ``Makefile``:
 
 .. code-block:: makefile
 
-   include $(TOP_DIR)/submodules/ruckus/system_iverilog.mk
+   include $(TOP_DIR)/submodules/ruckus/system_verilator.mk
 
 Set any knobs **before** the include line, the same way ``GHDLFLAGS`` is set
 for the GHDL flow:
@@ -41,16 +42,18 @@ for the GHDL flow:
    export VERILOG_DEFINES = SIM_SPEED_UP
    export SIM_TOP = MyTb
 
-   include $(TOP_DIR)/submodules/ruckus/system_iverilog.mk
+   include $(TOP_DIR)/submodules/ruckus/system_verilator.mk
 
 Switching simulators means changing only this include line to
-``system_verilator.mk``; every other knob is shared between the two flows.
+``system_iverilog.mk`` (see :doc:`iverilog_simulation`); every other knob is
+shared between the two flows.
 
 Loading Sources
 ----------------
 
 A project's ``ruckus.tcl`` tree is loaded the same way as every other ruckus
-backend, through ``loadSource`` and ``loadRuckusTcl``:
+backend, through ``loadSource`` and ``loadRuckusTcl``, using the same shared
+loader as the Icarus Verilog flow:
 
 .. code-block:: tcl
 
@@ -69,7 +72,8 @@ The loader (``shared/verilog_proc.tcl``) applies the following rules:
 
 - ``.v`` and ``.sv`` files are compiled in **load order**: the order
   ``loadSource``/``loadRuckusTcl`` calls occur across the whole recursive
-  load, not alphabetical or directory order.
+  load, not alphabetical or directory order. Verilator tolerates either
+  package/user order (unlike Icarus, see :doc:`iverilog_simulation`).
 - ``loadSource -dir`` loads the directory's ``.v``/``.sv``/``.vh``/``.svh``
   files sorted by name, non-recursively.
 - Duplicate files (loaded twice through different paths) are dropped by real
@@ -86,11 +90,6 @@ The loader (``shared/verilog_proc.tcl``) applies the following rules:
 - No ``BuildInfoPkg.vhd``/``BUILD_INFO_C`` generic is generated — that
   mechanism is VHDL-only and would trip the rule above.
 
-Icarus needs a package compiled before the files that use it: load the
-package with ``-path`` **before** the ``-dir`` that references it. Loading
-them in the wrong order surfaces as a ``syntax error`` at the ``import`` line
-(see Troubleshooting). Verilator tolerates either order.
-
 Steps
 -----
 
@@ -100,9 +99,9 @@ Steps
 
       make load_source_code
 
-   Checks the Icarus version floor and the ``iverilog-vpi``/``vvp`` tools,
-   loads the project's ``ruckus.tcl`` tree, and writes the ordered,
-   deduplicated filelist to ``$(OUT_DIR)/$(PROJECT).f``.
+   Checks the Verilator version floor, loads the project's ``ruckus.tcl``
+   tree, and writes the ordered, deduplicated filelist to
+   ``$(OUT_DIR)/$(PROJECT).f``.
 
 2. **Build:**
 
@@ -110,7 +109,7 @@ Steps
 
       make build
 
-   Runs ``iverilog $(IVERILOG_FLAGS) -I<dir>... -D<def>... -s $(SIM_TOP) -o $(SIM_TOP).vvp -c $(PROJECT).f`` in ``$(OUT_DIR)``. When a Rogue SimLink leaf is in the filelist, this step also builds the SimLink VPI module first (see Rogue Co-Simulation below).
+   Runs ``verilator $(VERILATOR_FLAGS) [--trace-fst] +incdir+<dir>... +define+<def>... --top-module $(SIM_TOP) --Mdir $(OUT_DIR) -o V$(SIM_TOP) -f $(PROJECT).f [<OUT_DIR>/libRogueSimLinkDpi.so -LDFLAGS "-Wl,-rpath,$(OUT_DIR) <pkg-config libzmq libs>"]`` in ``$(OUT_DIR)``. When a Rogue SimLink leaf is in the filelist, this step also builds and links the SimLink DPI library first (see Rogue Co-Simulation below).
 
 3. **Run:**
 
@@ -118,7 +117,7 @@ Steps
 
       make tb
 
-   Runs ``vvp $(VVP_FLAGS) [-M$(OUT_DIR) -mRogueSimLink] $(SIM_TOP).vvp [-fst] $(SIM_PLUSARGS)`` in ``$(OUT_DIR)``. ``make tb`` depends on ``build``, which depends on ``load_source_code``, which depends on ``dir`` (which itself depends on ``clean``), so a bare ``make tb`` always runs the whole chain from a clean ``$(OUT_DIR)``, exactly like the GHDL flow.
+   Runs ``./V$(SIM_TOP) $(SIM_PLUSARGS)`` in ``$(OUT_DIR)``. ``make tb`` depends on ``build``, which depends on ``load_source_code``, which depends on ``dir`` (which itself depends on ``clean``), so a bare ``make tb`` always runs the whole chain from a clean ``$(OUT_DIR)``, exactly like the GHDL flow.
 
 4. **View a waveform:**
 
@@ -144,7 +143,7 @@ Steps
 Waveforms
 ---------
 
-The testbench owns waveform dumping — neither tool dumps anything on its
+The testbench owns waveform dumping — Verilator does not dump anything on its
 own:
 
 .. code-block:: verilog
@@ -154,10 +153,15 @@ own:
       $dumpvars;
    end
 
-``WAVES=1`` adds ``-fst`` to the ``vvp`` run, so the dump above is written in
-FST format. ``make gtkwave`` sets ``WAVES=1`` for you and opens the ``.fst``
-file. Without ``-fst``, ``vvp`` still honors ``$dumpfile``/``$dumpvars`` but
-writes plain VCD text under the ``.fst`` filename.
+``WAVES=1`` adds ``--trace-fst`` to the ``verilator`` build, so the dump above
+is written in FST format. ``make gtkwave`` sets ``WAVES=1`` for you and opens
+the ``.fst`` file.
+
+.. note::
+
+   Verilator's FST writer needs the ``lz4`` (and ``zlib``) development
+   headers installed. Without them, ``make build WAVES=1`` stops with
+   ``fatal error: lz4.h: No such file or directory`` (see Troubleshooting).
 
 Rogue Co-Simulation
 --------------------
@@ -173,12 +177,15 @@ repository) — gets Rogue co-simulation automatically:
   section is skipped entirely and no libzmq check runs.
 - When a leaf is detected, ``make build`` checks ``gcc``, ``pkg-config``, and
   ``libzmq`` >= 4.1.0, then runs ``make`` in-tree in surf's
-  ``simlink/iverilog/``, copies the resulting ``RogueSimLink.vpi`` into
+  ``simlink/verilator/``, copies the resulting ``libRogueSimLinkDpi.so`` into
   ``$(OUT_DIR)``, and runs ``make clean`` in the surf tree.
-- ``make tb`` adds ``-M$(OUT_DIR) -mRogueSimLink`` to the ``vvp`` command
-  line so the VPI module loads at run time.
+- Unlike the Icarus flow, which loads its VPI module at ``vvp`` run time, the
+  ``verilator`` build links ``libRogueSimLinkDpi.so`` directly, staged from
+  ``$(OUT_DIR)``, with ``-LDFLAGS "-Wl,-rpath,$(OUT_DIR) <pkg-config libzmq
+  libs>"`` so the resulting ``V$(SIM_TOP)`` binary finds the library and
+  libzmq at run time with no additional setup.
 - No environment setup (no ``setup_env.sh``, no ``LD_LIBRARY_PATH``) is
-  needed — the module is found through ``-M$(OUT_DIR)``.
+  needed — the rpath resolves the library.
 - A Rogue peer (a PyRogue client) connects to ports ``N`` and ``N + 1`` of
   each wrapper's ``PORT_NUM_G`` once the simulation is running.
 
@@ -194,31 +201,29 @@ Key Variables
      - Description
    * - :envvar:`SIM_TOP`
      - ``$(PROJECT)``
-     - Top module name simulated by ``vvp``.
-   * - :envvar:`IVERILOG_FLAGS`
-     - ``-g2012``
-     - Flags passed to ``iverilog``. Override before the include line to
-       change the Verilog/SystemVerilog standard.
-   * - :envvar:`VVP_FLAGS`
-     - ``-n``
-     - Flags passed to ``vvp``.
+     - Top module name simulated by ``V$(SIM_TOP)``.
+   * - :envvar:`VERILATOR_FLAGS`
+     - ``--binary --timing -j 0``
+     - Flags passed to ``verilator``. Override before the include line to
+       change build behavior.
    * - :envvar:`VERILOG_INCDIRS`
      - (empty)
      - Whitespace-separated list of extra include directories, each added as
-       ``-I<dir>``.
+       ``+incdir+<dir>``.
    * - :envvar:`VERILOG_DEFINES`
      - (empty)
      - Whitespace-separated list of ``NAME`` or ``NAME=VAL`` words, each
-       added as ``-D<def>``. Values containing spaces are not supported.
+       added as ``+define+<def>``. Values containing spaces are not
+       supported.
    * - :envvar:`SIM_PLUSARGS`
      - (empty)
-     - Plusargs appended verbatim after the ``.vvp`` file on the ``vvp``
-       command line.
+     - Plusargs appended verbatim after ``V$(SIM_TOP)`` on the run command
+       line.
    * - :envvar:`WAVES`
      - (empty)
-     - Set to ``1`` to add ``-fst`` to the ``vvp`` run.
+     - Set to ``1`` to add ``--trace-fst`` to the ``verilator`` build.
    * - :envvar:`RUCKUS_SIM_BACKEND`
-     - ``iverilog``
+     - ``verilator``
      - Backend selector read by ``surf/simlink/ruckus.tcl``.
    * - :envvar:`GIT_BYPASS`
      - ``1``
@@ -226,23 +231,20 @@ Key Variables
 
 .. note::
 
-   Parameter overrides go through the ``-P<top>.<name>=<value>`` escape
-   hatch in :envvar:`IVERILOG_FLAGS` rather than a dedicated variable:
+   Parameter overrides go through the ``-G<name>=<value>`` escape hatch in
+   :envvar:`VERILATOR_FLAGS` rather than a dedicated variable:
 
    .. code-block:: makefile
 
-      export IVERILOG_FLAGS = -g2012 -PMyTb.WIDTH_G=16
+      export VERILATOR_FLAGS = --binary --timing -j 0 -GWIDTH_G=16
 
 Troubleshooting
 ---------------
 
-**"VerilogCheckVersion: ruckus requires iverilog 12.0 or newer"**
-   The Icarus Verilog on PATH is older than the enforced floor. There is no
-   bypass variable; install Icarus Verilog 12.0 or newer.
-
-**"VerilogCheckTool: ... not found in PATH"**
-   One of ``iverilog``, ``iverilog-vpi``, or ``vvp`` is missing. Install
-   Icarus Verilog and confirm all three binaries are on PATH.
+**"VerilogCheckVersion: ruckus requires verilator 5.020 or newer"**
+   The Verilator on PATH is older than the enforced floor (the ``--binary``
+   and ``--timing`` flags this flow relies on require 5.020 or newer). There
+   is no bypass variable; install Verilator 5.020 or newer.
 
 **"libzmq package was not found"**
 
@@ -260,18 +262,17 @@ Troubleshooting
    if it came from surf, ``loadRuckusTcl $::env(MODULES)/surf/simlink``
    instead of loading all of surf.
 
-**"VerilogWriteFilelist: no .v or .sv sources were loaded"**
-   The loaded tree has no compilable sources — check that ``loadSource`` /
-   ``loadRuckusTcl`` calls actually resolve to a directory containing
-   ``.v``/``.sv`` files.
+**Fatal lint warnings stop the build**
+   Verilator's default lint warnings are fatal. Add ``-Wno-fatal`` to
+   ``VERILATOR_FLAGS`` to continue past them (fix the warnings when
+   practical instead of suppressing them permanently).
 
-**"syntax error" at an ``import`` line**
-   A SystemVerilog package was loaded after the file that imports it. Move
-   the package's ``loadSource -path`` call before the ``loadSource -dir``
-   call that references it (see Loading Sources above).
+**"%Warning-TIMESCALEMOD"**
+   Mixing timescaled and non-timescaled modules in the same design raises
+   this warning (fatal by default, see above). surf SimLink sources carry no
+   timescale. Add ``--timescale 1ns/1ps`` to ``VERILATOR_FLAGS``.
 
-**Waveform file is empty or missing**
-   Confirm the testbench calls ``$dumpfile``/``$dumpvars`` and that
-   ``WAVES=1`` was set (``make gtkwave`` sets it for you). ``make tb``
-   without ``WAVES=1`` still writes a file under the ``.fst`` name, but as
-   plain VCD text rather than FST.
+**"fatal error: lz4.h: No such file or directory"**
+   Verilator's FST waveform writer needs the ``lz4`` (and ``zlib``)
+   development headers. Install them, or avoid ``WAVES=1``/``make gtkwave``
+   if tracing is not needed.

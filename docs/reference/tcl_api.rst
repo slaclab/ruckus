@@ -413,7 +413,8 @@ Shared Utility Procedures
 -------------------------
 
 These procedures are defined in ``shared/proc.tcl`` and are available in all
-ruckus-supported tool backends (Vivado, Vitis HLS, Cadence Genus, Synopsys DC, GHDL).
+ruckus-supported tool backends (Vivado, Vitis HLS, Cadence Genus, Synopsys DC, GHDL,
+Icarus Verilog, Verilator).
 
 .. function:: GetCpuNumber
 
@@ -483,6 +484,25 @@ ruckus-supported tool backends (Vivado, Vitis HLS, Cadence Genus, Synopsys DC, G
 
       CheckGitVersion
 
+.. function:: RogueCheckLibZmq
+
+   Check that ``libzmq`` 4.1.0 or newer is discoverable through ``pkg-config``.
+
+   :returns: Nothing on success. Calls ``exit -1`` with the ``libzmq package
+             was not found`` banner when ``pkg-config --exists {libzmq >=
+             4.1.0}`` fails.
+
+   No arguments. Called by the VCS and xsim Rogue co-simulation hooks
+   (``vivado/vcs.tcl``, the xsim pre-compile hook) and by the Icarus Verilog
+   and Verilator SimLink library build (:func:`VerilogSimLinkBuild`) before
+   any of them build the surf SimLink backend library.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      RogueCheckLibZmq
+
 .. function:: GenBuildString {pkgDir}
 
    Generate the ``BuildInfoPkg.vhd`` VHDL package containing the build metadata string.
@@ -501,6 +521,150 @@ ruckus-supported tool backends (Vivado, Vitis HLS, Cadence Genus, Synopsys DC, G
    .. code-block:: tcl
 
       GenBuildString $::env(OUT_DIR)/GeneratedSource
+
+Icarus Verilog and Verilator Procedures
+----------------------------------------
+
+These procedures are defined in ``shared/verilog_proc.tcl`` and provide the
+Vivado-free :func:`loadSource` and :func:`loadRuckusTcl` used by
+``system_iverilog.mk`` and ``system_verilator.mk``; see
+:doc:`/how-to/iverilog_simulation` and :doc:`/how-to/verilator_simulation`.
+
+The Vivado-free ``loadSource``/``loadRuckusTcl`` differ from the Vivado forms
+documented above: only ``.v``, ``.sv``, ``.vh``, and ``.svh`` extensions are
+accepted (plus ``.vhd``/``.vhdl``, which are collected separately and turned
+into a hard error), ``-lib`` and ``-fileType`` are accepted but have no
+effect, ``-sim_only`` is accepted and stripped, and there is no Vivado
+fileset to add files to — sources accumulate in an ordered, deduplicated
+in-memory filelist instead, written to disk by :func:`VerilogWriteFilelist`.
+
+.. function:: VerilogInitSources
+
+   Reset the ordered source, include-dir, and VHDL-offender lists.
+
+   :returns: Nothing.
+
+   Called once at the start of ``load_source_code.tcl``, never at file scope:
+   every loaded ``ruckus.tcl`` (including ``surf/simlink/ruckus.tcl``)
+   re-sources ``$::env(RUCKUS_PROC_TCL)`` mid-load, and a file-scope reset
+   would silently discard everything loaded before that point.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      VerilogInitSources
+
+.. function:: VerilogAddFile {path}
+
+   Classify one file into the ordered source list, the include-dir list, or
+   the VHDL offender list, deduplicating each by real path.
+
+   :param path: Path to classify.
+   :returns: Nothing.
+
+   ``.v``/``.sv`` files are appended to the ordered source list;
+   ``.vh``/``.svh`` files contribute their directory to the include-dir list;
+   ``.vhd``/``.vhdl`` files are appended to the VHDL offender list consumed by
+   :func:`VerilogWriteFilelist`'s hard error. Called internally by
+   :func:`loadSource`.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      VerilogAddFile $::DIR_PATH/rtl/MyModule.sv
+
+.. function:: VerilogWriteFilelist {filePath}
+
+   Write the ordered, deduplicated filelist consumed by ``iverilog -c`` /
+   ``verilator -f``.
+
+   :param filePath: Output filelist path (``$(OUT_DIR)/$(PROJECT).f``).
+   :returns: Nothing on success. Calls ``exit -1`` if any ``.vhd``/``.vhdl``
+             file was loaded, or if no ``.v``/``.sv`` source was loaded.
+
+   Writes one ``+incdir+<dir>`` line per collected include directory,
+   followed by one line per ordered source path. Called at the end of
+   ``load_source_code.tcl``, after the project's ``ruckus.tcl`` tree has
+   been loaded.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      VerilogWriteFilelist "$::env(OUT_DIR)/$::env(PROJECT).f"
+
+.. function:: VerilogCheckTool {tool}
+
+   Resolve a tool on PATH or hard-error.
+
+   :param tool: Executable name to resolve (e.g. ``iverilog``).
+   :returns: The resolved binary path on success. Calls ``exit -1`` with the
+             ``VerilogCheckTool: ... not found in PATH`` banner if the tool
+             is not found.
+
+   Called by ``load_source_code.tcl`` for each required tool and internally
+   by :func:`VerilogCheckVersion` and :func:`VerilogSimLinkBuild`.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      VerilogCheckTool iverilog-vpi
+
+.. function:: VerilogCheckVersion {tool versionArg pattern floor}
+
+   Resolve a tool, run it to capture its version string, and hard-error below
+   a floor.
+
+   :param tool: Executable name to resolve and version-check.
+   :param versionArg: Argument that makes the tool print its version (e.g.
+                       ``-V`` for ``iverilog``, ``--version`` for
+                       ``verilator``).
+   :param pattern: Regular expression matching the version text, with one
+                    capture group.
+   :param floor: Minimum accepted ``major.minor`` version string.
+   :returns: Nothing on success. Calls ``exit -1`` with the ``VerilogCheckVersion:
+             ruckus requires <tool> <floor> or newer`` banner when the found
+             version is below the floor.
+
+   Compares the parsed ``major.minor`` via ``CompareTags`` rather than
+   ``expr``, avoiding an octal-parse error on a minor version such as
+   Verilator's ``020``. Called once at the start of each flow's
+   ``load_source_code.tcl``, before any source is loaded.
+
+   **Example:**
+
+   .. code-block:: text
+
+      VerilogCheckVersion iverilog -V {Icarus Verilog version (\d+\.\d+)} 12.0
+
+.. function:: VerilogSimLinkBuild {artifact}
+
+   Build the surf SimLink backend library in-tree, stage it in
+   ``$::env(OUT_DIR)``, and clean the surf tree.
+
+   :param artifact: Backend artifact filename to stage (``RogueSimLink.vpi``
+                     for Icarus Verilog, ``libRogueSimLinkDpi.so`` for
+                     Verilator).
+   :returns: Nothing. Skips entirely (with a message) if no Rogue SimLink
+             leaf is present in the written filelist. Calls ``exit -1`` if
+             the located backend directory has no ``Makefile``, ``make``
+             fails, or the expected artifact is not produced.
+
+   Locates the backend directory by scanning the written filelist for a
+   known Rogue leaf (``RogueTcpStream.sv``, ``RogueTcpMemory.sv``, or
+   ``RogueSideBand.sv``) and taking its directory, mirroring the VCS/xsim
+   in-tree build/copy/clean pattern. Calls :func:`RogueCheckLibZmq` before
+   building. Called from each flow's ``simlink.tcl`` at the start of
+   ``make build``.
+
+   **Example:**
+
+   .. code-block:: tcl
+
+      VerilogSimLinkBuild RogueSimLink.vpi
 
 .. seealso::
 
