@@ -76,14 +76,14 @@ The loader (``shared/verilog_proc.tcl``) applies the following rules:
   path.
 - ``.vh`` and ``.svh`` files are never compiled; each loaded header's
   directory is instead added as an include directory automatically.
-- ``-lib`` is accepted and ignored — Verilog has no libraries.
+- ``-lib`` is accepted and ignored, since Verilog has no libraries.
 - ``-sim_only`` is accepted and stripped; both flows compile everything in
   one filelist.
 - Any ``.vhd``/``.vhdl`` file anywhere in the loaded tree is a **hard error**:
   ``load_source_code`` lists every offending path and exits before writing a
   filelist. If the VHDL came from surf, ``loadRuckusTcl
   $::env(MODULES)/surf/simlink`` instead of loading all of surf.
-- No ``BuildInfoPkg.vhd``/``BUILD_INFO_C`` generic is generated — that
+- No ``BuildInfoPkg.vhd``/``BUILD_INFO_C`` generic is generated: that
   mechanism is VHDL-only and would trip the rule above.
 
 Icarus needs a package compiled before the files that use it: load the
@@ -144,7 +144,7 @@ Steps
 Waveforms
 ---------
 
-The testbench owns waveform dumping — neither tool dumps anything on its
+The testbench owns waveform dumping; neither tool dumps anything on its
 own:
 
 .. code-block:: verilog
@@ -162,11 +162,11 @@ writes plain VCD text under the ``.fst`` filename.
 Rogue Co-Simulation
 --------------------
 
-A design that instantiates surf's flat SimLink wrappers — ``RogueTcpStreamWrap``,
+A design that instantiates surf's flat SimLink wrappers, ``RogueTcpStreamWrap``,
 ``RogueTcpMemoryWrap``, ``RogueSideBandWrap`` (loaded via ``loadRuckusTcl
 $::env(MODULES)/surf/simlink``; port and parameter contract documented as
 plain text in surf's ``simlink/sv/README.md``, since it lives in another
-repository) — gets Rogue co-simulation automatically:
+repository), gets Rogue co-simulation automatically:
 
 - ``make build`` detects ``RogueTcpStream.sv``, ``RogueTcpMemory.sv``, or
   ``RogueSideBand.sv`` in the filelist. If none is present, the rest of this
@@ -178,7 +178,7 @@ repository) — gets Rogue co-simulation automatically:
 - ``make tb`` adds ``-M$(OUT_DIR) -mRogueSimLink`` to the ``vvp`` command
   line so the VPI module loads at run time.
 - No environment setup (no ``setup_env.sh``, no ``LD_LIBRARY_PATH``) is
-  needed — the module is found through ``-M$(OUT_DIR)``.
+  needed; the module is found through ``-M$(OUT_DIR)``.
 - A Rogue peer (a PyRogue client) connects to ports ``N`` and ``N + 1`` of
   each wrapper's ``PORT_NUM_G`` once the simulation is running.
 
@@ -261,7 +261,7 @@ Troubleshooting
    instead of loading all of surf.
 
 **"VerilogWriteFilelist: no .v or .sv sources were loaded"**
-   The loaded tree has no compilable sources — check that ``loadSource`` /
+   The loaded tree has no compilable sources; check that ``loadSource`` /
    ``loadRuckusTcl`` calls actually resolve to a directory containing
    ``.v``/``.sv`` files.
 

@@ -535,7 +535,7 @@ documented above: only ``.v``, ``.sv``, ``.vh``, and ``.svh`` extensions are
 accepted (plus ``.vhd``/``.vhdl``, which are collected separately and turned
 into a hard error), ``-lib`` and ``-fileType`` are accepted but have no
 effect, ``-sim_only`` is accepted and stripped, and there is no Vivado
-fileset to add files to — sources accumulate in an ordered, deduplicated
+fileset to add files to; sources accumulate in an ordered, deduplicated
 in-memory filelist instead, written to disk by :func:`VerilogWriteFilelist`.
 
 .. function:: VerilogInitSources
