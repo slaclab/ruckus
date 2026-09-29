@@ -132,8 +132,11 @@ load_source_code : dir
 .PHONY : build
 build : load_source_code
 	$(call ACTION_HEADER,"Verilator: build (verilator --binary)")
-	@echo verilator $(VERILATOR_FLAGS) $(VERILATOR_WAVES) $(VERILATOR_INC_DEF) --top-module $(SIM_TOP) --Mdir $(OUT_DIR) -o V$(SIM_TOP) -f $(PROJECT).f
-	@cd $(OUT_DIR); verilator $(VERILATOR_FLAGS) $(VERILATOR_WAVES) $(VERILATOR_INC_DEF) --top-module $(SIM_TOP) --Mdir $(OUT_DIR) -o V$(SIM_TOP) -f $(PROJECT).f
+	@$(RUCKUS_VERILATOR_DIR)/simlink.tcl
+	@cd $(OUT_DIR); \
+	if [ -f libRogueSimLinkDpi.so ]; then set -- $(OUT_DIR)/libRogueSimLinkDpi.so -LDFLAGS "-Wl,-rpath,$(OUT_DIR) $$(pkg-config --libs libzmq)"; fi; \
+	echo verilator $(VERILATOR_FLAGS) $(VERILATOR_WAVES) $(VERILATOR_INC_DEF) --top-module $(SIM_TOP) --Mdir $(OUT_DIR) -o V$(SIM_TOP) -f $(PROJECT).f "$$@"; \
+	verilator $(VERILATOR_FLAGS) $(VERILATOR_WAVES) $(VERILATOR_INC_DEF) --top-module $(SIM_TOP) --Mdir $(OUT_DIR) -o V$(SIM_TOP) -f $(PROJECT).f "$$@"
 
 ###############################################################
 #### Run     ###################################################
