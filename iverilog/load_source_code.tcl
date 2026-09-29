@@ -12,6 +12,11 @@
 # Load RUCKUS environment and library
 source $::env(RUCKUS_PROC_TCL)
 
+# Check the Icarus Verilog tools and version floor before touching any source
+VerilogCheckVersion iverilog -V {Icarus Verilog version (\d+\.\d+)} 12.0
+VerilogCheckTool iverilog-vpi
+VerilogCheckTool vvp
+
 # Init the global variable
 set ::DIR_PATH ""
 

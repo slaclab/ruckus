@@ -197,3 +197,45 @@ proc VerilogWriteFilelist {filePath} {
    close ${out}
    puts "VerilogWriteFilelist: wrote [llength $::VERILOG_SRC_LIST] source(s) and [llength $::VERILOG_INC_LIST] include dir(s) to ${filePath}"
 }
+
+###############################################################
+#### Tool And Version Checks ###################################
+###############################################################
+
+## Resolve a tool on PATH or hard-error. Returns the resolved binary path.
+proc VerilogCheckTool {tool} {
+   set path [auto_execok ${tool}]
+   if { ${path} eq "" } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "VerilogCheckTool: ${tool} not found in PATH"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   return [lindex ${path} 0]
+}
+
+## Resolve a tool, run it to check its version string against a floor, and
+## hard-error below the floor. There is no bypass variable. Never feeds the
+## captured text to expr (a Verilator "020" minor would be read as octal).
+proc VerilogCheckVersion {tool versionArg pattern floor} {
+   set path [VerilogCheckTool ${tool}]
+   catch {exec ${path} ${versionArg}} versionOutput
+   if { ![regexp ${pattern} ${versionOutput} fullMatch versionText] } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "VerilogCheckVersion: cannot parse the ${tool} version from '${path} ${versionArg}' output"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   scan ${versionText} "%d.%d" foundMajor foundMinor
+   scan ${floor} "%d.%d" floorMajor floorMinor
+   set foundTag "${foundMajor}.${foundMinor}.0"
+   set floorTag "${floorMajor}.${floorMinor}.0"
+   if { [CompareTags ${foundTag} ${floorTag}] == 0 } {
+      puts "\n\n\n\n\n********************************************************"
+      puts "VerilogCheckVersion: found ${tool} ${versionText} at ${path}"
+      puts "VerilogCheckVersion: ruckus requires ${tool} ${floor} or newer"
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+   puts "VerilogCheckVersion: ${tool} ${versionText} (${path})"
+}
