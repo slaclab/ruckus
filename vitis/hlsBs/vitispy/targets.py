@@ -303,12 +303,11 @@ class Targets:
                 # -------------------------------------
                 # Retrieve the target member information
                 # -------------------------------------
-                cfg_template = prd_target.cfg_template  # ['ConfigurationName']
-                cmp_template = prd_target.cmp_template  # [    'ComponentName']
-                contributors = prd_target.contributors  # [     'Contributors']
+                cfg_template = prd_target.cfg_template
+                cmp_template = prd_target.cmp_template
+                contributors = prd_target.contributors
 
-
-                maps = Maps(contributors, products[0]._Ctb)
+                maps = Maps (contributors, products[0]._Ctb)
 
                 tgt_key = None
 

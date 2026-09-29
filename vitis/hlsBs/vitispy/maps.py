@@ -28,59 +28,94 @@ else:
 class Maps ():
 
     def __init__(self, ctbs, ctb_type):
-        srcs = {}
 
-        # Is this a single contributor
+        # ---------------------------------------------------------
+        # Is this a single contributor?
+        # This is all but impossible since there must be at least 2
+        #  - A CtbBuids
+        #  - A CtbFpgas
+        # ---------------------------------------------------------
         if isinstance(ctbs, ctb_type):
+            srcs_list = [{} for _ in range(1)]
+
             # ctbs is just one ctb
-            self.compile(srcs, ctbs)
+            self.compile(srcs_list, ctbs)
 
         else:
-            # Is this a list or tuple of contributors
+            # Is this a list or tuple of contributors?
             is_list = all(issubclass(type(ctb), ctb_type)
                           for ctb in ctbs)
             if is_list:
+                srcs_list = [{} for _ in range(1)]
 
                 for ctb in ctbs:
-                    n = self.compile(srcs, ctb)
+                    n = self.compile(srcs_list[0], ctb)
 
-            # Is this lists or tuples of contributors
+            # Is this lists or tuples of contributors?
             elif isinstance(ctbs, (list, tuple)):
 
+                srcs_list = [{} for _ in range (len (ctbs)) ]
+
+                idx = 0
+                err = 0
                 for ctbList in ctbs:
 
-                    # Is this a single contributor
+                    # ------------------------------------
+                    # Is this a single contributor?
+                    # Almost impossible, see comment above
+                    # ------------------------------------
                     if isinstance(ctbList, ctb_type):
-                        self.compile(srcs, ctbList)
+                        self.compile(srcs_list[idx], ctbList)
 
                     # Is this a list,tuple of multiple contributors
-                    elif all(issubclass(type(ctb), ctb_type) for ctb in ctbList):
+                    else:
 
                         for ctb in ctbList:
-                            self.compile(srcs, ctb)
-                    else:
+                            if issubclass(type(ctb), ctb_type):
+                                self.compile(srcs_list[idx], ctb)
+
+                            elif isinstance (ctb, (list, tuple)):
+                                for c in ctb:
+                                    if  issubclass(type(c), ctb_type):
+                                        self.compile (srcs_list[idx], c)
+                                    else:
+                                        err += 1
+                            else:
+                                err += 1
+
+                    if err:
                         print("ERROR: Unknown contributors specification\n"
                               "       This may be\n"
                               "         a) A single contributor\n"
                               "         b) A list or tuple of contributor\n"
                               "         c) A lists or tuples of contributor\n",
                               file = sys.stderr)
+                    idx += 1
 
         # -------------------------------------------------------------
         # Calculate the number of permutations/combinations in all the
         # compiled 'srcs' and make a list of contributor types large
         # enough to accommodate them all.
         # -------------------------------------------------------------
-        map_cnt = 1
+        map_tot = 0
+        map_cnts = []
         self.ctb_types = array.array ('i', [-1,-1,-1,-1,-1])
-        idx = 0
-        for k, v in srcs.items():
-            if    k == 'Builds' : self.ctb_types[0] = idx
-            elif  k == 'Fpgas'  : self.ctb_types[1] = idx
-            idx += 1
-            for vals in v.values():
-                map_cnt *= len(vals)
-        self.maps = [{} for _ in range(map_cnt)]
+        for srcs in srcs_list:
+
+            map_cnt = 1
+            idx = 0
+            for k, v in srcs.items():
+                if    k == 'Builds' : self.ctb_types[0] = idx
+                elif  k == 'Fpgas'  : self.ctb_types[1] = idx
+                idx += 1
+                for vals in v.values():
+                    map_cnt *= len(vals)
+
+            # Keep track of the map count by source
+            map_cnts.append (map_cnt)
+            map_tot += map_cnt
+
+        self.maps = [{} for _ in range(map_tot)]
 
         # ------------------------------------------------------------
         #  Need to form every permutation of the maps
@@ -110,24 +145,39 @@ class Maps ():
         #    M1       3        2*3      12/(2*3)               2
         #    M2       2      2*3*2      12/(2*3*2)             1
         # -------------------------------------------------------
-        n = 1
-        for k, v in srcs.items():
-            for key, vals in v.items ():
-                l = len(vals)
-                n = n * l
-                rep = map_cnt // n
-                map_idx = 0
-                for idx in range(0, n):
+        src_idx = 0
+        map_gdx = 0
+        for srcs in srcs_list:
+            map_cnt = map_cnts[src_idx]
+            src_idx += 1
+            n = 1
+            for k, v in srcs.items():
 
-                    val_idx = idx % l
-                    for idy in range(0, rep):
+                for key, vals in v.items ():
+                    l = len(vals)
+                    n = n * l
+                    map_idx = map_gdx;
+                    rep = map_cnt // n
 
-                        v = vals[val_idx]
+                    for idx in range(0, n):
 
-                        # Add primary key and value
-                        self.maps[map_idx][key] = v#[0]
+                        val_idx = idx % l
+                        for idy in range(0, rep):
 
-                        map_idx += 1
+                            v = vals[val_idx]
+
+                            #print (f"Adding maps[{map_idx}][{key} = {v}")
+
+                            # Add primary key and value
+                            self.maps[map_idx][key] = v
+
+                            map_idx += 1
+
+            # ------------------------------------------
+            # Done with this set of maps
+            # Advance the global map index past this set
+            # ------------------------------------------
+            map_gdx += map_cnt
 
         if False:
             print("Final map")

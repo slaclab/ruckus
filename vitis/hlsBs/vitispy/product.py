@@ -494,10 +494,35 @@ class Product:
             keys = []
 
             idx : int = 2
-            errs = self.check (0, ctb_builds, (Product.CtbBuilds,),               keys, stem, errs)
-            errs = self.check (1, ctb_fpgas,  (Product.CtbFpgas,),                keys, stem, errs)
+            errs += self.check (0, ctb_builds, (Product.CtbBuilds,),
+                                keys, stem, errs)
+
+            if isinstance (ctb_fpgas, (list, tuple)):
+
+                # If have list or tuple, check each element
+                for cfpgas in ctb_fpgas :
+                    err  = self.check (1, cfpgas, (Product.CtbFpgas,),
+                                       keys, stem, errs)
+
+                    # Only report the first error scene
+                    if err:
+                        errs += err;
+                        break
+
+
+            else:
+                errs += self.check (1, ctb_fpgas,  (Product.CtbFpgas,),
+                                       keys, stem, errs)
+
+            # -------------------------------------------------------------
+            # Any remaining contributors must be only CtbFiles or CtbValues
+            # CtbBuilds and CtbFpgas can only appear as arg0 and arg1
+            # -------------------------------------------------------------
             for ctb in args:
-                errs = self.check (idx, ctb, (Product.CtbFiles,Product.CtbValues), keys, stem, errs)
+
+                errs += self.check (idx, ctb, (Product.CtbFiles,Product.CtbValues),
+                                    keys, stem, errs)
+                idx += 1
 
 
             if errs :
@@ -529,19 +554,34 @@ class Product:
             # --------------------------------------------------------
             ctb_err = not isinstance (ctb, allowed)
 
-            # ------------------------------------
-            # Check the contributors key is unique
-            # ------------------------------------
-            ctb_key = ctb.key
-            duplicates = [idy for idy, key_val in keys  if key_val == ctb_key]
-            keys.append ([idx, ctb_key])
-            key_err = len(duplicates)
+            # ------------------------------------------
+            # Check the contributors prefixes are unique
+            #
+            # Duplicates are not allowed between
+            # different contributor types.
+            #
+            # For duplicates within a contributor
+            # type, it is up to the user to ensure
+            # the values are unique
+            # --------------------------------------
+            ctb_prefix = ctb.key
+            ctb_key    = ctb.tvs[0]
+
+            duplicate = None
+            for idy, prefix, key, cls in keys:
+                if (ctb_prefix == prefix) and (ctb_key != key) :
+                   duplicate = [idy,prefix,key, cls]
+                   break;
+
+            # Only record if not a duplicate
+            if  duplicate is None:
+                keys.append ([idx, ctb_prefix, ctb_key, cls_name(ctb)])
 
 
             # ----------------------------------------------
             # If have any errors, construct the error string
             # ----------------------------------------------
-            if ctb_err or key_err:
+            if ctb_err or duplicate:
                 estr = ""
 
                 # ----------------------------
@@ -550,23 +590,27 @@ class Product:
                 if errs == 0:
                     estr += f"\nERROR: In Products.Contributors"
 
-                estr += f"\n     : Contributor #{idx} {cls_name(ctb)}"
+                estr += f"\n     * Contributor #{idx} {cls_name(ctb)}"
 
                 # ---------------------------------------
                 # Have passed an illegal contributor type
                 # ---------------------------------------
                 if ctb_err:
-                    estr += f"\n     * Must be of type(s) :  "
+                    estr += f"\n     : Must be of type(s) :  "
                     prefix = ''
                     for cls in allowed :
                         estr += prefix + '<' + cls.__qualname__ + '>'
                         prefix = " or "
 
-                # -----------------------------------
-                # All contributor keys must be unique
-                # -----------------------------------
-                if key_err:
-                    estr += f"\n     * Has a duplicate key: '{ctb_key}' from Contributors #{duplicates}"
+                # --------------------
+                # Report any duplicate
+                # --------------------
+                if  duplicate:
+                    dup = duplicate
+                    estr += f" and \n     : Contributor #{dup[0]} {dup[3]}\n"
+                    estr +=   f"     : Have a duplicate prefixes: '{ctb_prefix}'\n"
+
+
 
                 print (estr, file = sys.stderr)
                 return -1
@@ -608,9 +652,25 @@ class Product:
 
             stem = self.__module__
             errs = 0
-            errs += self.check (contributors, "contributors", Product.Contributors, stem, errs)
-            errs += self.check (cfg_template, "cfg_template", Product.CfgTemplate,  stem, errs)
-            errs += self.check (cmp_template, "cmp_template", Product.CmpTemplate,  stem, errs)
+
+            # -----------------------------------------------------
+            # Convert to a tuple if first contributor is a CtbBuild
+            # This means it is single list of contributors, not
+            # not a list or tuple of contributors list/tuples
+            # -----------------------------------------------------
+            if isinstance (contributors[0], Product.CtbBuilds) :
+                contributors = (contributors,)
+
+
+            for ctbs in contributors:
+                errs += self.check (ctbs, "contributors",
+                                    Product.Contributors, stem, errs)
+
+            errs += self.check (cfg_template, "cfg_template",
+                                Product.CfgTemplate,  stem, errs)
+
+            errs += self.check (cmp_template, "cmp_template",
+                                Product.CmpTemplate,  stem, errs)
 
             if errs:
                 frame = inspect.currentframe().f_back
