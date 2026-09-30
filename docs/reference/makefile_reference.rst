@@ -2,9 +2,11 @@ Makefile Reference
 ==================
 
 This page documents the targets and environment variables provided by the
-ruckus backend Makefile fragments — ``system_vivado.mk`` (Vivado) and
-``system_vitis_unified_aie.mk`` (Vitis AIE). Include one of these from your
-project's ``Makefile`` to access the corresponding build pipeline.
+ruckus backend Makefile fragments: ``system_vivado.mk`` (Vivado),
+``system_vitis_unified_aie.mk`` (Vitis AIE), ``system_iverilog.mk`` (Icarus
+Verilog, see :doc:`/how-to/iverilog_simulation`), and ``system_verilator.mk``
+(Verilator, see :doc:`/how-to/verilator_simulation`). Include one of these
+from your project's ``Makefile`` to access the corresponding build pipeline.
 
 For Vivado build pipeline context see :doc:`/explanation/build_pipeline`. For
 the AIE workflow walkthrough see :doc:`/how-to/vitis_aie`.
@@ -81,8 +83,8 @@ variable whose name contains** ``TOKEN`` from make entirely:
    $(foreach v,$(RUCKUS_TOKEN_VARS),$(eval undefine $v))
 
 Every backend that includes ``system_shared.mk`` inherits this, which covers the Vivado,
-GHDL, Genus, Design Compiler, and Vitis flows. ``system_vcs.mk`` includes no shared
-fragment, so the VCS flow is not covered.
+GHDL, Genus, Design Compiler, Vitis, Icarus Verilog, and Verilator flows. ``system_vcs.mk``
+includes no shared fragment, so the VCS flow is not covered.
 
 Both halves matter, because there are two separate ways a recipe can reach a variable:
 
@@ -481,6 +483,115 @@ Simulation Variables
    VCS simulation run flags.
 
    :default: ``-debug_acc+pp+dmptf +warn=none -kdb -lca``
+
+Icarus Verilog and Verilator Targets
+-------------------------------------
+
+These targets are provided by ``system_iverilog.mk`` (Icarus Verilog, see
+:doc:`/how-to/iverilog_simulation`) and ``system_verilator.mk`` (Verilator,
+see :doc:`/how-to/verilator_simulation`). Both backends share the same
+target names and dependency chain.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - Target
+     - Description
+   * - ``test``
+     - Print all environment variable values. The first rule in both
+       Makefile fragments, so a bare ``make`` prints the environment.
+   * - ``dir``
+     - Create ``$(OUT_DIR)`` and ``$(IMAGES_DIR)``. Depends on ``clean``, so
+       every ``dir`` run starts from an empty ``$(OUT_DIR)``.
+   * - ``load_source_code``
+     - Check the simulator tool/version floor, load the project's
+       ``ruckus.tcl`` tree, and write the ordered, deduplicated filelist to
+       ``$(OUT_DIR)/$(PROJECT).f``.
+   * - ``build``
+     - Build the Rogue SimLink library when a SimLink leaf is loaded (see
+       the Rogue Co-Simulation section of either how-to page), then compile
+       with ``iverilog -c`` or ``verilator -f``.
+   * - ``tb``
+     - Run the compiled simulation: ``vvp`` for Icarus Verilog, the built
+       ``V$(SIM_TOP)`` binary for Verilator.
+   * - ``gtkwave``
+     - Set ``WAVES=1``, run ``tb``, and open ``$(OUT_DIR)/$(PROJECT).fst`` in
+       GTKWave.
+   * - ``clean``
+     - Delete the entire ``$(OUT_DIR)`` build tree.
+
+Icarus Verilog and Verilator Variables
+----------------------------------------
+
+These variables are shared by ``system_iverilog.mk`` and
+``system_verilator.mk``, with each backend's own escape-hatch flags listed
+separately below. Set overrides in your project ``Makefile`` before the
+``include`` line, as with ``GHDLFLAGS``. :envvar:`PROJECT` and
+:envvar:`OUT_DIR` (declared above) apply unchanged to both flows.
+
+.. envvar:: SIM_TOP
+
+   Top module simulated by ``vvp`` (Icarus Verilog) or built as
+   ``V$(SIM_TOP)`` (Verilator).
+
+   :default: ``$(PROJECT)``
+
+.. envvar:: VERILOG_INCDIRS
+
+   Whitespace-separated list of extra include directories. Translated to
+   ``-I<dir>`` for Icarus Verilog and ``+incdir+<dir>`` for Verilator.
+
+   :default: (empty)
+
+.. envvar:: VERILOG_DEFINES
+
+   Whitespace-separated list of ``NAME`` or ``NAME=VAL`` words. Translated to
+   ``-D<def>`` for Icarus Verilog and ``+define+<def>`` for Verilator. Values
+   containing spaces are not supported.
+
+   :default: (empty)
+
+.. envvar:: SIM_PLUSARGS
+
+   Plusargs appended verbatim after the simulation binary on the run command
+   line (``vvp ... $(SIM_PLUSARGS)`` or ``./V$(SIM_TOP) $(SIM_PLUSARGS)``).
+
+   :default: (empty)
+
+.. envvar:: WAVES
+
+   Set to ``1`` to add the waveform-tracing flag to the build/run
+   (``-fst`` for Icarus Verilog, ``--trace-fst`` for Verilator). The
+   testbench still owns ``$dumpfile``/``$dumpvars``.
+
+   :default: (empty)
+
+.. envvar:: IVERILOG_FLAGS
+
+   Flags passed to ``iverilog``. Icarus Verilog only.
+
+   :default: ``-g2012``
+
+.. envvar:: VVP_FLAGS
+
+   Flags passed to ``vvp``. Icarus Verilog only.
+
+   :default: ``-n``
+
+.. envvar:: VERILATOR_FLAGS
+
+   Flags passed to ``verilator``. Verilator only.
+
+   :default: ``--binary --timing -j 0``
+
+.. envvar:: RUCKUS_SIM_BACKEND
+
+   Backend selector read by ``surf/simlink/ruckus.tcl``. Set automatically by
+   whichever Makefile fragment is included.
+
+   :default: ``iverilog`` (from ``system_iverilog.mk``) or ``verilator``
+             (from ``system_verilator.mk``)
 
 Partial Reconfiguration Variables
 ----------------------------------

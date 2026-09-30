@@ -13,6 +13,8 @@ setting up a project for the first time, see
    vitis_hls
    vitis_aie
    ghdl_simulation
+   iverilog_simulation
+   verilator_simulation
    xsim_rogue_cosim
    cadence_genus
    synopsys_dc

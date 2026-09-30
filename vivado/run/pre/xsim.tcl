@@ -19,7 +19,9 @@
 ########################################################
 ## Custom procs. Sourced before the guard (so the guard can use them) because
 ## this compile hook may run in a fresh Tcl interpreter without proc.tcl.
+## shared/proc.tcl supplies RogueCheckLibZmq, called below.
 ########################################################
+source -quiet $::env(RUCKUS_DIR)/shared/proc.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado/proc/sim_management.tcl
 
 ########################################################

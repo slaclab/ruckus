@@ -5,7 +5,7 @@
 A Makefile/TCL hybrid firmware build system for SLAC FPGA and ASIC projects.
 
 ruckus provides a standard library of TCL procedures and Makefile targets that
-abstract Vivado, Vitis HLS, GHDL, Cadence Genus, and Synopsys DC build flows into
+abstract Vivado, Vitis HLS, GHDL, Icarus Verilog, Verilator, Cadence Genus, and Synopsys DC build flows into
 a consistent `make bit` / `make syn` interface. It handles source loading, IP core
 management, hook script injection, and firmware release packaging.
 

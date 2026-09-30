@@ -2,7 +2,8 @@ Overview
 ========
 
 ruckus is a firmware build framework developed at SLAC National Accelerator Laboratory. It
-wraps Vivado and other EDA tools (Vitis HLS, GHDL, Cadence Genus, Synopsys DC) behind a
+wraps Vivado and other EDA tools (Vitis HLS, GHDL, Icarus Verilog, Verilator, Cadence Genus,
+Synopsys DC) behind a
 consistent GNU Make interface. Every firmware project that uses ruckus runs the same way:
 the engineer types ``make bit`` (or another target) and ruckus drives the EDA tool from
 project source description through to output artifacts.
