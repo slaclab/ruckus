@@ -419,6 +419,11 @@ yaml : $(SOURCE_DEPEND)
 # Tell surf/axi/simlink/ruckus.tcl which Rogue co-sim backend the invoked
 # target wants. Target-specific + exported so it propagates to the shared
 # $(SOURCE_DEPEND) prerequisite recipe and into the vivado subprocess.
+# Every other Vivado target (make, syn, bit, ...) defaults to xsim so the
+# backend never depends on whether VCS happens to be sourced in the shell.
+ifndef RUCKUS_SIM_BACKEND
+export RUCKUS_SIM_BACKEND = xsim
+endif
 xsim gui : export RUCKUS_SIM_BACKEND := xsim
 vcs      : export RUCKUS_SIM_BACKEND := vcs
 
