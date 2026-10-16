@@ -591,7 +591,8 @@ separately below. Set overrides in your project ``Makefile`` before the
    whichever Makefile fragment is included.
 
    :default: ``iverilog`` (from ``system_iverilog.mk``) or ``verilator``
-             (from ``system_verilator.mk``)
+             (from ``system_verilator.mk``). Under Vivado, ``make vcs`` sets
+             ``vcs`` and every other target defaults to ``xsim``.
 
 Partial Reconfiguration Variables
 ----------------------------------
