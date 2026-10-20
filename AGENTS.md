@@ -18,6 +18,7 @@ Start with [README.md](README.md) for user-facing links. Full documentation is p
 - `ghdl/`, `iverilog/`, `verilator/`, `cadence/genus/`, `synopsys/design_compiler/`, `vitis/` — TCL for the non-Vivado backends.
 - `scripts/` — Python helpers (`firmwareRelease.py`, `releaseGen.py`, `releaseNotes.py`, `createNewRepo.py`, `download_github_asset.py`, and small parsers). This is the only directory linted and syntax-checked by CI.
 - `MicroblazeBasicCore/` — reference MicroBlaze SDK/Vitis sources.
+- `vscode-plugin/` — the VS Code extension (TypeScript, built with `npm`). `resources/ruckus_scan.tcl` re-implements the public loader procedures as recorders and runs a project's `ruckus.tcl` tree with plain `tclsh`; keep its procedure names and options in sync with `vivado/proc/code_loading.tcl`. Build/package with `vscode-plugin/scripts/build.sh`; never commit `node_modules/`, `out/`, or `*.vsix`. See [docs/how-to/vscode_plugin.rst](docs/how-to/vscode_plugin.rst).
 - `docs/` — the Sphinx documentation site (see Documentation below).
 - `.github/workflows/` — CI (`ruckus_ci.yml`), documentation (`docs.yml`), release (`gen_release.yml`), and conda/docker build workflows.
 
@@ -124,6 +125,7 @@ ruckus has no RTL or unit-test suite of its own; verification is CI-driven and l
   ```
 
 - For Python changes, run `flake8 --count scripts/` and `python -m compileall -f scripts/`.
+- For `vscode-plugin/` changes, run `./scripts/build.sh --compile` (Node.js >= 18) and `node out/test/smoke.js <firmware target dir>` from `vscode-plugin/`.
 - For documentation changes, run `sphinx-build -b html -W --keep-going docs/ docs/_build/html` (install `docs/requirements.txt` first) and confirm a clean, warning-free build.
 - For TCL, Makefile, or backend changes, the most meaningful verification is a downstream build (`make bit`/`make sim` in a consuming firmware project) since ruckus is not exercised in isolation. When a full build is not practical, state what was and was not run and the remaining risk.
 - Do not hand-edit or commit generated output such as `docs/_build/`, `build/`, or release artifacts.

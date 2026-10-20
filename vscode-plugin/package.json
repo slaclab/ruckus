@@ -1,0 +1,786 @@
+{
+    "name": "slac-ruckus-plugin",
+    "displayName": "SLAC Ruckus for VS Code",
+    "description": "Design hierarchy, source explorer and make-target runner for SLAC ruckus firmware projects (Vivado, GHDL, VCS, ...)",
+    "version": "0.1.0",
+    "publisher": "slaclab",
+    "author": {
+        "name": "slaclab"
+    },
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/slaclab/ruckus.git",
+        "directory": "vscode-plugin"
+    },
+    "homepage": "https://slaclab.github.io/ruckus/how-to/vscode_plugin.html",
+    "engines": {
+        "vscode": "^1.90.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "fpga",
+        "vhdl",
+        "verilog",
+        "vivado",
+        "ruckus",
+        "slac",
+        "firmware"
+    ],
+    "main": "./out/src/extension.js",
+    "activationEvents": [
+        "workspaceContains:**/ruckus.tcl"
+    ],
+    "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "ruckus",
+                    "title": "Ruckus",
+                    "icon": "media/ruckus.svg"
+                }
+            ]
+        },
+        "views": {
+            "ruckus": [
+                {
+                    "id": "ruckus.design",
+                    "name": "Design Hierarchy",
+                    "icon": "media/ruckus.svg"
+                },
+                {
+                    "id": "ruckus.project",
+                    "name": "Sources (ruckus.tcl)"
+                },
+                {
+                    "id": "ruckus.libraries",
+                    "name": "Libraries & Categories"
+                },
+                {
+                    "id": "ruckus.make",
+                    "name": "Make Targets"
+                }
+            ]
+        },
+        "viewsWelcome": [
+            {
+                "view": "ruckus.design",
+                "contents": "No ruckus top level selected.\n[Select Top Level](command:ruckus.selectTarget)\nThe design hierarchy (instances, generates, processes) is built from the files loaded by the target's ruckus.tcl."
+            },
+            {
+                "view": "ruckus.project",
+                "contents": "No ruckus top level selected.\n[Select Top Level](command:ruckus.selectTarget)\nA top level is a directory under firmware/targets with a Makefile and a ruckus.tcl."
+            },
+            {
+                "view": "ruckus.make",
+                "contents": "Select a top level to see its make targets.\n[Select Top Level](command:ruckus.selectTarget)"
+            }
+        ],
+        "commands": [
+            {
+                "command": "ruckus.selectTarget",
+                "title": "Select Top Level",
+                "category": "Ruckus",
+                "icon": "$(target)"
+            },
+            {
+                "command": "ruckus.selectTargetFromExplorer",
+                "title": "Ruckus: Use as Top Level"
+            },
+            {
+                "command": "ruckus.refresh",
+                "title": "Refresh",
+                "category": "Ruckus",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "ruckus.toggleGrouping",
+                "title": "Toggle Grouping (Hierarchy / Origin)",
+                "category": "Ruckus",
+                "icon": "$(list-tree)"
+            },
+            {
+                "command": "ruckus.filter",
+                "title": "Filter Files",
+                "category": "Ruckus",
+                "icon": "$(filter)"
+            },
+            {
+                "command": "ruckus.clearFilter",
+                "title": "Clear Filter",
+                "category": "Ruckus",
+                "icon": "$(clear-all)"
+            },
+            {
+                "command": "ruckus.revealLoad",
+                "title": "Go to Load Statement",
+                "category": "Ruckus",
+                "icon": "$(go-to-file)"
+            },
+            {
+                "command": "ruckus.revealInExplorer",
+                "title": "Reveal in Explorer",
+                "category": "Ruckus"
+            },
+            {
+                "command": "ruckus.copyPath",
+                "title": "Copy Path",
+                "category": "Ruckus"
+            },
+            {
+                "command": "ruckus.showInfo",
+                "title": "Show Project Info",
+                "category": "Ruckus",
+                "icon": "$(info)"
+            },
+            {
+                "command": "ruckus.showScanLog",
+                "title": "Show Scan Log",
+                "category": "Ruckus",
+                "icon": "$(output)"
+            },
+            {
+                "command": "ruckus.exportFileList",
+                "title": "Export File List",
+                "category": "Ruckus",
+                "icon": "$(save)"
+            },
+            {
+                "command": "ruckus.runMake",
+                "title": "Run Make Target",
+                "category": "Ruckus",
+                "icon": "$(play)"
+            },
+            {
+                "command": "ruckus.runMakeWithArgs",
+                "title": "Run Make Target with Variables...",
+                "category": "Ruckus",
+                "icon": "$(debug-alt)"
+            },
+            {
+                "command": "ruckus.runMakeCustom",
+                "title": "Run Make (custom command)...",
+                "category": "Ruckus",
+                "icon": "$(terminal)"
+            },
+            {
+                "command": "ruckus.selectVivadoVersion",
+                "title": "Select Vivado Version",
+                "category": "Ruckus",
+                "icon": "$(versions)"
+            },
+            {
+                "command": "ruckus.followLog",
+                "title": "Follow Build Log...",
+                "category": "Ruckus",
+                "icon": "$(output)"
+            },
+            {
+                "command": "ruckus.openMakeTarget",
+                "title": "Go to Definition",
+                "category": "Ruckus",
+                "icon": "$(go-to-file)"
+            },
+            {
+                "command": "ruckus.toggleMakeGrouping",
+                "title": "Toggle Grouping (Common / Makefile)",
+                "category": "Ruckus",
+                "icon": "$(list-tree)"
+            },
+            {
+                "command": "ruckus.design.setTop",
+                "title": "Set Design Top...",
+                "category": "Ruckus",
+                "icon": "$(symbol-class)"
+            },
+            {
+                "command": "ruckus.design.resetTop",
+                "title": "Reset Design Top",
+                "category": "Ruckus",
+                "icon": "$(discard)"
+            },
+            {
+                "command": "ruckus.design.toggleProcesses",
+                "title": "Show/Hide Processes",
+                "category": "Ruckus",
+                "icon": "$(symbol-event)"
+            },
+            {
+                "command": "ruckus.design.toggleGenerates",
+                "title": "Show/Hide Generate Blocks",
+                "category": "Ruckus",
+                "icon": "$(git-compare)"
+            },
+            {
+                "command": "ruckus.design.togglePrimitives",
+                "title": "Show/Hide Vendor Primitives",
+                "category": "Ruckus",
+                "icon": "$(symbol-constant)"
+            },
+            {
+                "command": "ruckus.design.goToInstance",
+                "title": "Go to Instantiation",
+                "category": "Ruckus",
+                "icon": "$(references)"
+            },
+            {
+                "command": "ruckus.design.goToDefinition",
+                "title": "Go to Definition",
+                "category": "Ruckus",
+                "icon": "$(symbol-class)"
+            },
+            {
+                "command": "ruckus.design.copyPath",
+                "title": "Copy Hierarchical Path",
+                "category": "Ruckus"
+            },
+            {
+                "command": "ruckus.design.setAsTop",
+                "title": "Set as Design Top",
+                "category": "Ruckus"
+            },
+            {
+                "command": "ruckus.design.find",
+                "title": "Find Instance...",
+                "category": "Ruckus",
+                "icon": "$(search)"
+            },
+            {
+                "command": "ruckus.design.revealActive",
+                "title": "Reveal Current File in Hierarchy",
+                "category": "Ruckus",
+                "icon": "$(target)"
+            },
+            {
+                "command": "ruckus.simulateActiveFile",
+                "title": "Simulate Current File",
+                "category": "Ruckus",
+                "icon": "$(beaker)"
+            },
+            {
+                "command": "ruckus.simulateActiveFileWithArgs",
+                "title": "Simulate Current File with Variables...",
+                "category": "Ruckus"
+            },
+            {
+                "command": "ruckus.setupWorkspace",
+                "title": "Set Up Workspace (.vscode settings and tasks)",
+                "category": "Ruckus"
+            }
+        ],
+        "menus": {
+            "view/title": [
+                {
+                    "command": "ruckus.selectTarget",
+                    "when": "view == ruckus.design",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "ruckus.design.find",
+                    "when": "view == ruckus.design",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "ruckus.design.setTop",
+                    "when": "view == ruckus.design",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "ruckus.refresh",
+                    "when": "view == ruckus.design",
+                    "group": "navigation@9"
+                },
+                {
+                    "command": "ruckus.design.resetTop",
+                    "when": "view == ruckus.design && ruckus.customTop",
+                    "group": "navigation@4"
+                },
+                {
+                    "command": "ruckus.design.revealActive",
+                    "when": "view == ruckus.design",
+                    "group": "1_view@0"
+                },
+                {
+                    "command": "ruckus.design.toggleProcesses",
+                    "when": "view == ruckus.design",
+                    "group": "1_view@1"
+                },
+                {
+                    "command": "ruckus.design.toggleGenerates",
+                    "when": "view == ruckus.design",
+                    "group": "1_view@2"
+                },
+                {
+                    "command": "ruckus.design.togglePrimitives",
+                    "when": "view == ruckus.design",
+                    "group": "1_view@3"
+                },
+                {
+                    "command": "ruckus.filter",
+                    "when": "view == ruckus.project",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "ruckus.clearFilter",
+                    "when": "view == ruckus.project && ruckus.filterActive",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "ruckus.toggleGrouping",
+                    "when": "view == ruckus.project",
+                    "group": "navigation@4"
+                },
+                {
+                    "command": "ruckus.refresh",
+                    "when": "view == ruckus.project",
+                    "group": "navigation@5"
+                },
+                {
+                    "command": "ruckus.showInfo",
+                    "when": "view == ruckus.project",
+                    "group": "1_info"
+                },
+                {
+                    "command": "ruckus.showScanLog",
+                    "when": "view == ruckus.project",
+                    "group": "1_info"
+                },
+                {
+                    "command": "ruckus.exportFileList",
+                    "when": "view == ruckus.project",
+                    "group": "1_info"
+                },
+                {
+                    "command": "ruckus.refresh",
+                    "when": "view == ruckus.libraries",
+                    "group": "navigation"
+                },
+                {
+                    "command": "ruckus.runMakeCustom",
+                    "when": "view == ruckus.make",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "ruckus.followLog",
+                    "when": "view == ruckus.make",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "ruckus.selectVivadoVersion",
+                    "when": "view == ruckus.make",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "ruckus.toggleMakeGrouping",
+                    "when": "view == ruckus.make",
+                    "group": "navigation@3"
+                },
+                {
+                    "command": "ruckus.refresh",
+                    "when": "view == ruckus.make",
+                    "group": "navigation@4"
+                },
+                {
+                    "command": "ruckus.setupWorkspace",
+                    "when": "view == ruckus.project",
+                    "group": "1_info"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "ruckus.revealLoad",
+                    "when": "viewItem =~ /^ruckus\\.(file|node|dir)/",
+                    "group": "inline"
+                },
+                {
+                    "command": "ruckus.revealLoad",
+                    "when": "viewItem =~ /^ruckus\\.(file|node|dir)/",
+                    "group": "1_nav@1"
+                },
+                {
+                    "command": "ruckus.revealInExplorer",
+                    "when": "viewItem =~ /^ruckus\\.(file|node|dir)/",
+                    "group": "1_nav@2"
+                },
+                {
+                    "command": "ruckus.copyPath",
+                    "when": "viewItem =~ /^ruckus\\.(file|node|dir)/",
+                    "group": "2_copy"
+                },
+                {
+                    "command": "ruckus.runMake",
+                    "when": "viewItem == ruckus.makeTarget",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "ruckus.runMakeWithArgs",
+                    "when": "viewItem == ruckus.makeTarget",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "ruckus.runMake",
+                    "when": "viewItem == ruckus.makeTarget",
+                    "group": "1_run@1"
+                },
+                {
+                    "command": "ruckus.runMakeWithArgs",
+                    "when": "viewItem == ruckus.makeTarget",
+                    "group": "1_run@2"
+                },
+                {
+                    "command": "ruckus.openMakeTarget",
+                    "when": "viewItem == ruckus.makeTarget",
+                    "group": "2_nav"
+                },
+                {
+                    "command": "ruckus.design.goToInstance",
+                    "when": "view == ruckus.design && viewItem =~ /^ruckus\\.design(Inst|Leaf)/",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "ruckus.design.goToInstance",
+                    "when": "view == ruckus.design && viewItem =~ /^ruckus\\.design(Inst|Leaf)/",
+                    "group": "1_nav@1"
+                },
+                {
+                    "command": "ruckus.design.goToDefinition",
+                    "when": "view == ruckus.design && viewItem =~ /^ruckus\\.design(Inst|Unit)/",
+                    "group": "1_nav@2"
+                },
+                {
+                    "command": "ruckus.design.setAsTop",
+                    "when": "view == ruckus.design && viewItem =~ /^ruckus\\.design(Inst|Unit)/",
+                    "group": "2_top"
+                },
+                {
+                    "command": "ruckus.design.copyPath",
+                    "when": "view == ruckus.design",
+                    "group": "3_copy"
+                }
+            ],
+            "explorer/context": [
+                {
+                    "command": "ruckus.selectTargetFromExplorer",
+                    "when": "explorerResourceIsFolder",
+                    "group": "ruckus"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "ruckus.selectTargetFromExplorer",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.revealLoad",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.revealInExplorer",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.copyPath",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.openMakeTarget",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.design.goToInstance",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.design.goToDefinition",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.design.copyPath",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.design.setAsTop",
+                    "when": "false"
+                },
+                {
+                    "command": "ruckus.simulateActiveFile",
+                    "when": "ruckus.hasProject"
+                },
+                {
+                    "command": "ruckus.simulateActiveFileWithArgs",
+                    "when": "ruckus.hasProject"
+                },
+                {
+                    "command": "ruckus.setupWorkspace",
+                    "when": "ruckus.hasProject"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "ruckus.simulateActiveFile",
+                    "when": "ruckus.hasProject && resourceLangId =~ /^(vhdl|verilog|systemverilog)$/ || ruckus.hasProject && resourceExtname =~ /^\\.(vhdl?|s?v)$/",
+                    "group": "navigation@90"
+                }
+            ],
+            "editor/context": [
+                {
+                    "command": "ruckus.simulateActiveFile",
+                    "when": "ruckus.hasProject && resourceLangId =~ /^(vhdl|verilog|systemverilog)$/ || ruckus.hasProject && resourceExtname =~ /^\\.(vhdl?|s?v)$/",
+                    "group": "ruckus@1"
+                },
+                {
+                    "command": "ruckus.simulateActiveFileWithArgs",
+                    "when": "ruckus.hasProject && resourceLangId =~ /^(vhdl|verilog|systemverilog)$/ || ruckus.hasProject && resourceExtname =~ /^\\.(vhdl?|s?v)$/",
+                    "group": "ruckus@2"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "Ruckus",
+            "properties": {
+                "ruckus.tclsh": {
+                    "type": "string",
+                    "default": "tclsh",
+                    "description": "Tcl shell used to evaluate ruckus.tcl files (no Vivado needed)."
+                },
+                "ruckus.makeCommand": {
+                    "type": "string",
+                    "default": "make",
+                    "description": "Make executable used to run targets."
+                },
+                "ruckus.setupScript": {
+                    "type": "string",
+                    "default": "",
+                    "markdownDescription": "Script sourced before every make command (e.g. `${topDir}/setup_env_slac.sh`). The selected `ruckus.vivadoVersion` is passed as its first argument. Supports `${topDir}`, `${targetDir}`, `${workspaceFolder}` and `${vivadoVersion}`. If empty, see `ruckus.autoSourceSetupScript`."
+                },
+                "ruckus.autoSourceSetupScript": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "When `ruckus.setupScript` is empty, source the firmware's `setup_env_slac.sh` (or another `setup_env*.sh` in the firmware directory or its parent) before make."
+                },
+                "ruckus.env": {
+                    "type": "object",
+                    "default": {},
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "markdownDescription": "Extra environment variables for the ruckus.tcl scan, e.g. `{ \"RUCKUS_SIM_BACKEND\": \"vcs\" }`."
+                },
+                "ruckus.vivadoVersion": {
+                    "type": "string",
+                    "default": "",
+                    "markdownDescription": "Vivado version (e.g. `2025.1`) passed to the setup script before make and used as `VIVADO_VERSION` during the scan. Empty: the setup script's default. Use **Ruckus: Select Vivado Version** (status bar) to pick an installed one."
+                },
+                "ruckus.saveMakeLog": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Also write the make output to `build/logs/<target>_<goal>.log` (not for `gui`/`interactive`). Use **Ruckus: Follow Build Log...** to tail it or Vivado's own logs."
+                },
+                "ruckus.scanTimeout": {
+                    "type": "number",
+                    "default": 60000,
+                    "description": "Maximum time in ms for the ruckus.tcl scan."
+                },
+                "ruckus.targetSearchDepth": {
+                    "type": "number",
+                    "default": 6,
+                    "description": "How deep to search the workspace for ruckus top levels."
+                },
+                "ruckus.excludeDirs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        "submodules",
+                        "build",
+                        "node_modules",
+                        ".git",
+                        "images",
+                        "release"
+                    ],
+                    "description": "Directory names skipped when searching for top levels."
+                },
+                "ruckus.grouping": {
+                    "type": "string",
+                    "enum": [
+                        "hierarchy",
+                        "origin"
+                    ],
+                    "default": "hierarchy",
+                    "description": "Project view grouping: ruckus.tcl load hierarchy, or by library/origin."
+                },
+                "ruckus.showSimFiles": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show simulation-only (sim_1) files."
+                },
+                "ruckus.showProblems": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Report ruckus.tcl load errors in the Problems panel."
+                },
+                "ruckus.commonMakeTargets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        "bit",
+                        "prom",
+                        "syn",
+                        "dcp",
+                        "gui",
+                        "sources",
+                        "xsim",
+                        "vcs",
+                        "msim",
+                        "interactive",
+                        "elf",
+                        "vitis",
+                        "pyrogue",
+                        "yaml",
+                        "release",
+                        "release_files",
+                        "test",
+                        "clean"
+                    ],
+                    "description": "Make targets shown first in the Make Targets view (in this order)."
+                },
+                "ruckus.simulateTarget": {
+                    "type": "string",
+                    "enum": [
+                        "xsim",
+                        "vcs",
+                        "msim"
+                    ],
+                    "default": "xsim",
+                    "markdownDescription": "Simulator used by **Ruckus: Simulate Current File** for Vivado targets (`make <simulator> VIVADO_PROJECT_SIM=<unit>`). GHDL, Icarus Verilog and Verilator targets always use `make tb`."
+                },
+                "ruckus.design.showProcesses": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show processes / always blocks in the Design Hierarchy."
+                },
+                "ruckus.design.showGenerates": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show generate blocks as nodes (otherwise their content is flattened)."
+                },
+                "ruckus.design.showPrimitives": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show vendor primitives (IBUFDS, BUFG, ...)."
+                }
+            }
+        },
+        "taskDefinitions": [
+            {
+                "type": "ruckus",
+                "required": [
+                    "target"
+                ],
+                "properties": {
+                    "target": {
+                        "type": "string",
+                        "description": "Make target (e.g. bit, syn, xsim)"
+                    },
+                    "dir": {
+                        "type": "string",
+                        "description": "Ruckus top-level directory (defaults to the selected one). Supports ${workspaceFolder}, ${topDir} and ${targetDir}."
+                    },
+                    "args": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Extra make arguments / VAR=value"
+                    }
+                }
+            }
+        ],
+        "problemMatchers": [
+            {
+                "name": "ruckus-vivado",
+                "owner": "ruckus",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(ERROR|CRITICAL WARNING|WARNING): \\[([^\\]]+)\\] (.*) \\[(/[^:\\]]+):(\\d+)\\]\\s*$",
+                    "severity": 1,
+                    "code": 2,
+                    "message": 3,
+                    "file": 4,
+                    "line": 5
+                }
+            },
+            {
+                "name": "ruckus-ghdl",
+                "owner": "ruckus",
+                "source": "ghdl",
+                "fileLocation": [
+                    "autoDetect",
+                    "${cwd}"
+                ],
+                "severity": "error",
+                "pattern": {
+                    "regexp": "^([^\\s:]+\\.vhdl?):(\\d+):(\\d+):(?:(error|warning|note):)?\\s*(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            {
+                "name": "ruckus-iverilog",
+                "owner": "ruckus",
+                "source": "iverilog",
+                "fileLocation": [
+                    "autoDetect",
+                    "${cwd}"
+                ],
+                "pattern": {
+                    "regexp": "^([^\\s:]+\\.s?vh?):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            {
+                "name": "ruckus-verilator",
+                "owner": "ruckus",
+                "source": "verilator",
+                "fileLocation": [
+                    "autoDetect",
+                    "${cwd}"
+                ],
+                "pattern": {
+                    "regexp": "^%(Error|Warning)(?:-([A-Z0-9_]+))?: ([^\\s:]+):(\\d+):(?:(\\d+):)? (.*)$",
+                    "severity": 1,
+                    "code": 2,
+                    "file": 3,
+                    "line": 4,
+                    "column": 5,
+                    "message": 6
+                }
+            }
+        ]
+    },
+    "scripts": {
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "package": "vsce package --no-dependencies",
+        "smoke": "node out/test/smoke.js",
+        "test": "tsc -p ./ && node out/test/integration/runTest.js"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/vscode": "^1.90.0",
+        "@vscode/test-electron": "^3.1.0",
+        "@vscode/vsce": "^3.0.0",
+        "typescript": "^5.6.0"
+    }
+}
