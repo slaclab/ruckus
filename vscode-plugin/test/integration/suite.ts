@@ -17,7 +17,7 @@ export async function run() {
     const ext = vscode.extensions.all.find(e => e.packageJSON.name === 'slac-ruckus-plugin')!;
     const api = await ext.activate();
     const ws = vscode.workspace.workspaceFolders![0].uri.fsPath;
-    await api.selectDir(`${ws}/targets/Simple10GbeRudpKcu105Example`);
+    await api.selectDir(process.env.RUCKUS_TEST_TARGET ?? `${ws}/targets/Simple10GbeRudpKcu105Example`);
     const p = api.getProject();
     assert.ok(p, 'project loaded');
     assert.ok(p.files.length > 500, 'files loaded');
@@ -50,4 +50,10 @@ export async function run() {
     await vscode.commands.executeCommand('ruckus.design.focus');
     await vscode.commands.executeCommand('ruckus.design.toggleProcesses');
     await vscode.commands.executeCommand('ruckus.design.toggleProcesses');
+    // Panel report views resolve and render without errors
+    for (const c of ['ruckus.showLogReport', 'ruckus.showTiming', 'ruckus.showResources']) {
+        await vscode.commands.executeCommand(c);
+        await new Promise(r => setTimeout(r, 1500));
+    }
+    console.log(`toml: ${api.vhdlLsToml(p).split('\n').filter((l: string) => /^\w+\.files/.test(l)).join(' ')}`);
 }

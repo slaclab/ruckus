@@ -17,36 +17,71 @@ ruckus loader procedures (``loadRuckusTcl``, ``loadSource``, ...) and parses the
    ruckus procedures. You only need Vivado (or GHDL, Icarus Verilog, ...) to
    run ``make``.
 
+Features
+--------
+
+- **Design Hierarchy**: instance tree of the synthesis and simulation tops,
+  parsed from the HDL loaded by ``ruckus.tcl``.
+- **Sources** and **Libraries & Categories**: every file each ``ruckus.tcl``
+  loads, with its library, ``sim`` tag and the line that loaded it.
+- **Make Targets**: run ``make bit``, ``make xsim``, ... as VS Code tasks, after
+  sourcing the firmware setup script with the selected Vivado version.
+- **Simulate Current File**: simulate the testbench open in the editor.
+- **Build reports** (bottom panel): *Log Report* (filterable Vivado
+  messages), *Timing* (slack summary, failing clocks and paths) and
+  *Resources* (utilization, also per instance).
+- **Set Up Workspace**: ``.vscode`` settings and tasks, and ``vhdl_ls.toml``
+  for the VHDL language server.
+
 Prerequisites
 -------------
 
-- VS Code 1.90 or newer (local, or Remote-SSH on a Linux build server).
+- VS Code 1.90 or newer.
 - ``tclsh`` on PATH (or set ``ruckus.tclsh``). macOS and most Linux
   distributions already include it.
-- To build the extension from source: Node.js 18 or newer and ``npm``.
+- To build the extension from source: Node.js 18 or newer and ``npm``. If the
+  system Node.js is older, install one with conda:
 
-Install
--------
+  .. code-block:: bash
 
-Build the ``.vsix`` package and install it with the ``code`` command:
+     conda create -y -n node20 -c conda-forge nodejs=20
+     conda activate node20
+     node -v && npm -v
+
+Build and Install
+-----------------
+
+The extension runs where the firmware is: on your machine for a local
+checkout, on the server for VS Code Remote (SSH, containers, WSL). Build the
+package there:
 
 .. code-block:: bash
 
    cd ruckus/vscode-plugin
-   ./scripts/install.sh               # builds if needed, then code --install-extension
-   ./scripts/install.sh --uninstall
+   ./scripts/build.sh            # npm install, compile, package slac-ruckus-plugin-<version>.vsix
+   ./scripts/build.sh --compile  # compile only (out/), no package
 
-``./scripts/build.sh`` only builds the package
-(``slac-ruckus-plugin-<version>.vsix``). You can install that file from the
-Extensions view (``...`` > *Install from VSIX...*). CI builds the same file
-in the ``vscode_plugin`` job of ``ruckus_ci.yml`` and uploads it as an
-artifact.
+Then install it, with one of:
+
+- ``./scripts/install.sh`` (builds if needed, then runs
+  ``code --install-extension``). ``./scripts/install.sh --uninstall``
+  removes it.
+- The Extensions view: ``...`` > *Install from VSIX...*, then pick the
+  ``.vsix`` file.
+
+Run **Developer: Reload Window** afterwards. CI builds the same ``.vsix`` in
+the ``vscode_plugin`` job of ``ruckus_ci.yml`` and uploads it as an artifact,
+so you can also download it instead of building.
 
 .. tip::
 
-   With Remote-SSH, run ``install.sh`` in a terminal on the remote host. The
-   ``code`` command there installs the extension on the server, where your
-   firmware is.
+   **VS Code Remote:** connect to the server first, then run ``install.sh``
+   in a VS Code integrated terminal. That terminal provides a ``code``
+   command that installs on the server. A plain SSH shell has no ``code``
+   command: use *Install from VSIX...* while connected instead (the
+   ``.vsix`` can be built on either side). The Extensions view lists the
+   extension under *SSH: <host> - Installed*. ``tclsh``, ``make`` and Vivado
+   must be available on the server.
 
 Select a Top Level
 ------------------
@@ -68,7 +103,8 @@ pick the same files as a real build.
 Views
 -----
 
-All views are in the **Ruckus** activity-bar container.
+The tree views are in the **Ruckus** activity-bar container (the build
+reports are panel tabs, see `Build Reports`_).
 
 Design Hierarchy
    The tree of instances under the synthesis top (``set_property top``,
@@ -117,6 +153,45 @@ GHDL            ``file.vhd:line:col: msg``
 Icarus Verilog  ``file.v:line: error|warning: msg``
 Verilator       ``%Error|%Warning-CODE: file.v:line:col: msg``
 =============== =====================================================
+
+Build Reports
+-------------
+
+Three tabs in the bottom panel, next to the terminal, show the results of
+the last build of the selected top level. They refresh while visible and
+when a ``ruckus`` task ends. Run **Ruckus: Show Log Report**,
+**Ruckus: Show Timing Summary** or **Ruckus: Show Resource Utilization**
+to open them.
+
+*Ruckus: Log Report*
+   The messages of ``vivado.log`` and the ``synth_1`` / ``impl_1``
+   ``runme.log`` files, like the Vivado *Messages* window. Toggle errors,
+   critical warnings, warnings and infos independently, filter by text (a
+   ``-word`` excludes), and group by message ID, build step or source file.
+   The *Logs* menu also offers the out-of-context IP runs and the saved
+   ``make xsim/vcs/msim`` output. Click a message to open its source
+   location; :kbd:`Alt`-click opens the log line. For GHDL, Icarus Verilog
+   and Verilator targets the view reads the make output saved in
+   ``build/logs/``.
+
+*Ruckus: Timing*
+   ``impl_1/<top>_timing_summary_routed.rpt``: WNS/TNS, WHS/THS and
+   WPWS/TPWS, the *check_timing* issues, the intra-clock table (generated
+   clocks indented below their master), inter-clock and path-group tables,
+   and the worst paths sorted by slack. Negative slack, failing clocks and
+   violated paths are highlighted, and *Only failing* hides the rest. Click a
+   path to open its detail in the report.
+
+*Ruckus: Resources*
+   The placed (*Implementation*) and *Synthesis* utilization reports, with
+   the headline resources as bars, sorted by utilization, and every report
+   table. The *Hierarchy* tab shows utilization per instance. Vivado does
+   not write that report during the build, so **Generate hierarchical
+   utilization** (also **Ruckus: Generate Hierarchical Utilization**) runs
+   Vivado in batch mode on the routed checkpoint
+   (``report_utilization -hierarchical``, depth set by
+   ``ruckus.hierUtilizationDepth``) and writes
+   ``build/<target>/<target>_utilization_hierarchical.rpt``.
 
 Simulate the Current File
 -------------------------
@@ -174,7 +249,12 @@ project files that are also useful without the extension:
 
 ``vhdl_ls.toml`` (optional)
    The VHDL library mapping of every loaded file, for the VHDL-LS / rust_hdl
-   language server.
+   language server. VHDL-LS reserves ``work``, so files loaded without
+   ``-lib`` go to ``xil_defaultlib``, the Vivado default library. The
+   ``unisim``, ``unimacro`` and ``xpm`` libraries map to the VHDL sources of
+   the Vivado installation (``ruckus.vivadoPath``, otherwise
+   ``$XILINX_VIVADO``, the ``settings64.sh`` sourced by the setup script, or
+   ``ruckus.vivadoVersion`` under the usual install roots).
 
 The command never changes existing settings or tasks. It only adds missing
 keys and tasks with new labels, so you can run it again after you add a
@@ -210,9 +290,12 @@ Setting                          Default      Description
 ``ruckus.autoSourceSetupScript`` ``true``     Source ``setup_env_slac.sh`` when
                                               ``setupScript`` is empty
 ``ruckus.vivadoVersion``         (empty)      Vivado version for the setup script and scan
+``ruckus.vivadoPath``            (empty)      Vivado install used for ``unisim``/``xpm`` in
+                                              ``vhdl_ls.toml``
 ``ruckus.env``                   ``{}``       Extra variables for the scan, e.g.
                                               ``{"RUCKUS_SIM_BACKEND": "vcs"}``
 ``ruckus.saveMakeLog``           ``true``     Copy make output to ``build/logs/``
+``ruckus.hierUtilizationDepth``  ``8``        Depth of the hierarchical utilization report
 ``ruckus.simulateTarget``        ``xsim``     Vivado simulator for *Simulate Current File*
 ``ruckus.commonMakeTargets``     bit, ...     Order of the *Common* make targets
 ``ruckus.grouping``              hierarchy    Sources view grouping

@@ -71,6 +71,18 @@ and `for generate` loops are shown once.
 - clicking a target opens its definition; *Environment* shows the evaluated Makefile variables
 - toolbar: custom `make ...` command, grouping by *Common/Other* or by defining Makefile
 
+**Build reports** (bottom panel, next to the terminal; refreshed while visible and after each `ruckus` task):
+- **Ruckus: Log Report**: messages of `vivado.log` and the synth_1/impl_1 `runme.log` (plus OOC IP runs and saved
+  `make xsim` output), Vivado *Messages*-style: toggle errors / critical warnings / warnings / infos, text filter
+  (`-word` excludes), group by message ID, step or source file; click opens the source, Alt+click the log line.
+  Other backends read the make output saved in `build/logs/`
+- **Ruckus: Timing**: `<top>_timing_summary_routed.rpt`: WNS/TNS, WHS/THS, WPWS/TPWS, check_timing issues,
+  intra-clock (clock tree), inter-clock and path-group tables, worst paths by slack. Negative slack is highlighted,
+  *Only failing* hides the rest, clicking a path opens its detail in the report
+- **Ruckus: Resources**: placed and synthesis utilization (headline resources as bars, plus every report table) and a
+  *Hierarchy* tab: **Generate hierarchical utilization** runs Vivado in batch mode on the routed checkpoint
+  (`report_utilization -hierarchical`) and shows the per-instance tree
+
 **Simulate Current File** (beaker icon in the editor title, editor context menu):
 finds the entity/module of the active file (testbenches first) and runs the target's
 simulation with it as top: `make xsim VIVADO_PROJECT_SIM=<unit>` (Vivado; `ruckus.simulateTarget`
@@ -81,7 +93,9 @@ The make tasks use a problem matcher for the backend (Vivado, GHDL, Icarus, Veri
 **Set Up Workspace** (Sources view `...` menu) adds to `.vscode/settings.json` the Python paths of
 `submodules/*/python` and `software/python` (Pylance + terminal `PYTHONPATH`), excludes `build/` and
 `.Xil` from the file watcher/search, and adds `ruckus` tasks to `.vscode/tasks.json` (build, simulate
-current file, clean). It optionally writes `vhdl_ls.toml`. Existing keys and tasks are never changed.
+current file, clean). It optionally writes `vhdl_ls.toml`: files without `-lib` go to `xil_defaultlib` (VHDL-LS
+reserves `work`), and `unisim`/`unimacro`/`xpm` map to the Vivado installation's VHDL sources (`ruckus.vivadoPath`,
+else detected from `$XILINX_VIVADO`, the setup script or `ruckus.vivadoVersion`). Existing keys and tasks are never changed.
 
 Other: status-bar top-level picker, explorer context menu **Ruckus: Use as Top Level**,
 **Ruckus: Export File List** (plain, CSV, `vhdl_ls.toml`, Verilog `.f`),
@@ -105,7 +119,9 @@ Other: status-bar top-level picker, explorer context menu **Ruckus: Use as Top L
 | `ruckus.autoSourceSetupScript` | `true` | source `firmware/setup_env_slac.sh` (or `setup_env*.sh`) when `setupScript` is empty |
 | `ruckus.env` | `{}` | extra variables for the scan, e.g. `{"RUCKUS_SIM_BACKEND":"vcs"}` |
 | `ruckus.vivadoVersion` | | Vivado version passed to the setup script and assumed by the scan (empty: script default) |
+| `ruckus.vivadoPath` | | Vivado install (`$XILINX_VIVADO`) for `unisim`/`unimacro`/`xpm` in `vhdl_ls.toml` (empty: detected) |
 | `ruckus.saveMakeLog` | `true` | copy make output to `build/logs/<target>_<goal>.log` |
+| `ruckus.hierUtilizationDepth` | `8` | `-hierarchical_depth` of the generated hierarchical utilization |
 | `ruckus.simulateTarget` | `xsim` | Vivado simulator used by *Simulate Current File* (`xsim`, `vcs`, `msim`) |
 | `ruckus.commonMakeTargets` | bit, prom, syn, ... | order of the *Common* make targets |
 | `ruckus.grouping` | `hierarchy` | default Project view grouping |
@@ -121,6 +137,17 @@ Other: status-bar top-level picker, explorer context menu **Ruckus: Use as Top L
 ```
 
 Requires Node.js ≥ 18 to build and `tclsh` at runtime (pre-installed on macOS and most Linux).
+If the system Node.js is older, install one with conda:
+
+```sh
+conda create -y -n node20 -c conda-forge nodejs=20
+conda activate node20
+node -v && npm -v
+```
+
+With VS Code Remote, build and install on the server: run `install.sh` in a VS Code integrated
+terminal (its `code` command installs on the server), or use *Extensions → … → Install from VSIX...*
+while connected.
 To develop it, open this folder in VS Code and press F5 ("Run Extension").
 CI (`.github/workflows/ruckus_ci.yml`, job `vscode_plugin`) builds the `.vsix` and uploads it as an artifact.
 

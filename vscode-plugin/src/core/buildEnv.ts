@@ -90,3 +90,51 @@ export function findLogs(dir: string, maxDepth = 6, limit = 60): LogFile[] {
     walk(dir, 0);
     return out.sort((a, b) => b.mtime - a.mtime).slice(0, limit);
 }
+
+/**
+ * Vivado installation directory ($XILINX_VIVADO: the one holding data/vhdl/src).
+ * Tried in order: explicit setting, the environment, the settings64.sh sourced by
+ * the setup script, then <install root>/<version> layouts.
+ */
+export function findVivadoInstall(explicit: string, setupScript: string | undefined, version: string): string | undefined {
+    const ok = (d: string | undefined) => !!d && fs.existsSync(path.join(d, 'data', 'vhdl', 'src', 'unisims'));
+    if (explicit) { return ok(explicit) ? explicit : undefined; }
+    if (ok(process.env.XILINX_VIVADO)) { return process.env.XILINX_VIVADO; }
+    const cands: string[] = [];
+    const roots: string[] = [];
+    let defVersion: string | undefined;
+    if (setupScript) {
+        const info = parseSetupScript(setupScript);
+        defVersion = info.defaultVersion;
+        roots.push(...info.installRoots);
+        let text = '';
+        try { text = fs.readFileSync(setupScript, 'utf8'); } catch { /* unreadable */ }
+        for (const l of text.split('\n').filter(x => !/^\s*#/.test(x))) {
+            const m = /(\/[^\s"';]*)\/settings64\.sh/.exec(l);
+            if (m) { cands.push(m[1].replace(/\$\{?VIVADO_VERSION\}?/g, version || defVersion || '')); }
+        }
+    }
+    const v = version || defVersion;
+    for (const r of [...roots, ...COMMON_ROOTS]) {
+        const vs = v ? [v] : listVivadoVersions([r]);
+        for (const x of vs) {
+            cands.push(path.join(r, x), path.join(r, x, 'Vivado'), path.join(r, 'Vivado', x), path.join(r, x, 'Vivado', x));
+        }
+    }
+    return cands.find(ok);
+}
+
+/** vhdl_ls.toml library entries for the Vivado simulation libraries (component declarations + primitives) */
+export function vivadoVhdlLibraries(vivado: string): Record<string, string[]> {
+    const src = path.join(vivado, 'data', 'vhdl', 'src');
+    const libs: Record<string, string[]> = {};
+    const add = (lib: string, files: string[]) => {
+        const f = files.filter(x => x.includes('*') ? fs.existsSync(path.dirname(x)) : fs.existsSync(x));
+        if (f.length) { libs[lib] = f; }
+    };
+    add('unisim', [path.join(src, 'unisims', 'unisim_VPKG.vhd'), path.join(src, 'unisims', 'unisim_VCOMP.vhd')]);
+    add('unimacro', [path.join(src, 'unimacro', '*.vhd')]);
+    // XPM macros are SystemVerilog: only their VHDL component declarations exist
+    add('xpm', [path.join(vivado, 'data', 'ip', 'xpm', 'xpm_VCOMP.vhd')]);
+    return libs;
+}

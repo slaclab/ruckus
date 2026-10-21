@@ -1,11 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { findLogs, findSetupScript, listVivadoVersions, parseSetupScript } from './core/buildEnv';
+import { findLogs, findSetupScript, findVivadoInstall, listVivadoVersions, parseSetupScript, vivadoVhdlLibraries } from './core/buildEnv';
 import { enclosingTarget, findTargets, firmwareMakefile } from './core/discovery';
 import { isRuckusTarget, loadProject, makeTarget, MakeTargetInfo, RuckusProject, RuckusTarget } from './core/project';
 import { Design, DesignUnit } from './core/hdl/elaborate';
 import { relTo } from './views/common';
+import { hierUtilFile, routedCheckpoint } from './core/reports/locate';
+import { LogReportView, ReportHost, ResourceView, TimingView } from './views/reportViews';
 import { DesignElement, DesignTreeProvider, hierPath } from './views/designTree';
 import { LibrariesTreeProvider } from './views/librariesTree';
 import { MakeElement, MakeTreeProvider } from './views/makeTree';
@@ -49,6 +51,20 @@ export function activate(ctx: vscode.ExtensionContext) {
     const designView = vscode.window.createTreeView('ruckus.design', { treeDataProvider: designTree, showCollapseAll: true });
     ctx.subscriptions.push(projectView, libView, makeView, designView);
 
+    // ------------------------------------------------------------------
+    // Build results (panel views next to the terminal)
+    // ------------------------------------------------------------------
+    const reportHost: ReportHost = {
+        project: () => project,
+        open: (file, line) => openLine(file, line),
+        generateHierUtil: () => generateHierUtil(ctx),
+    };
+    const reportViews = [new LogReportView(ctx, reportHost), new TimingView(ctx, reportHost), new ResourceView(ctx, reportHost)];
+    ['ruckus.logReport', 'ruckus.timing', 'ruckus.resources'].forEach((id, i) =>
+        ctx.subscriptions.push(vscode.window.registerWebviewViewProvider(id, reportViews[i])));
+    const updateReports = () => reportViews.forEach(v => v.update());
+    ctx.subscriptions.push(vscode.tasks.onDidEndTaskProcess(e => { if (e.execution.task.source === 'ruckus') { updateReports(); } }));
+
     const updateAll = () => {
         projectTree.project = libTree.project = makeTree.project = project;
         makeTree.firmwareMakefile = project ? firmwareMakefile(project.topDir) : undefined;
@@ -75,6 +91,7 @@ export function activate(ctx: vscode.ExtensionContext) {
         vscode.commands.executeCommand('setContext', 'ruckus.filterActive', !!projectTree.filter);
         vscode.commands.executeCommand('setContext', 'ruckus.hasProject', !!project);
         updateVivadoStatus();
+        updateReports();
     };
 
     const updateVivadoStatus = () => {
@@ -420,6 +437,10 @@ export function activate(ctx: vscode.ExtensionContext) {
     reg('ruckus.simulateActiveFile', () => simulateActive(false));
     reg('ruckus.simulateActiveFileWithArgs', () => simulateActive(true));
     reg('ruckus.setupWorkspace', () => project && setupWorkspace(project));
+    reg('ruckus.showLogReport', () => vscode.commands.executeCommand('ruckus.logReport.focus'));
+    reg('ruckus.showTiming', () => vscode.commands.executeCommand('ruckus.timing.focus'));
+    reg('ruckus.showResources', () => vscode.commands.executeCommand('ruckus.resources.focus'));
+    reg('ruckus.generateHierUtilization', () => generateHierUtil(ctx));
 
     reg('ruckus.selectVivadoVersion', async () => {
         const setup = setupScript(project);
@@ -557,7 +578,7 @@ export function activate(ctx: vscode.ExtensionContext) {
     }
 
     // API used by the integration test
-    return { getProject: () => project, getDesign: () => design, projectTree, libTree, makeTree, designTree, buildTask, selectDir: useDir };
+    return { getProject: () => project, getDesign: () => design, projectTree, libTree, makeTree, designTree, buildTask, selectDir: useDir, vhdlLsToml };
 }
 
 export function deactivate() { /* nothing */ }
@@ -576,18 +597,7 @@ function buildTask(name: string, cwd: string, args: string[], proj: RuckusProjec
     const words = splitShell(name);
     // ${input:...} (tasks.json prompts) is substituted by VS Code and split by the shell
     const makeLine = [make, ...words, ...args].map(a => /^\$\{input:[\w.-]+\}$/.test(a) ? a : quote(a)).join(' ');
-    const setup = setupScript(proj);
-    const version = cfg.get<string>('vivadoVersion', '');
-    const steps: string[] = ['set -o pipefail'];
-    if (setup) {
-        // The setup script takes the Vivado version as $1 (setup_env_slac.sh convention)
-        const src = `source ${quote(setup)}${version ? ' ' + quote(version) : ''}`;
-        steps.push(`echo ${quote('==> ' + src)}`, `${src} || echo ${quote(`warning: ${path.basename(setup)} returned an error`)}`);
-    }
-    if (!proj || proj.backend === 'vivado') {
-        steps.push(`if command -v vivado >/dev/null; then echo "==> vivado: $(command -v vivado)"; ` +
-            `else echo ${quote('warning: vivado not found on PATH (configure ruckus.setupScript / ruckus.vivadoVersion)')}; fi`);
-    }
+    const steps = envSteps(proj, !proj || proj.backend === 'vivado');
     const log = cfg.get('saveMakeLog', true) && proj && !INTERACTIVE_TARGETS.includes(words[0]) ? makeLogFile(proj, words[0] ?? 'make') : undefined;
     if (log) {
         steps.push(`mkdir -p ${quote(path.dirname(log))}`, `echo ${quote('==> log: ' + log)}`, `echo ${quote('==> ' + makeLine)}`,
@@ -607,6 +617,45 @@ function buildTask(name: string, cwd: string, args: string[], proj: RuckusProjec
     }
     if (['xsim', 'vcs', 'msim'].includes(name)) { task.group = vscode.TaskGroup.Test; }
     return task;
+}
+
+/** Shell steps that source the setup script (and check for vivado) before a command */
+function envSteps(proj: RuckusProject | undefined, needVivado: boolean): string[] {
+    const setup = setupScript(proj);
+    const version = vscode.workspace.getConfiguration('ruckus').get<string>('vivadoVersion', '');
+    const steps: string[] = ['set -o pipefail'];
+    if (setup) {
+        // The setup script takes the Vivado version as $1 (setup_env_slac.sh convention)
+        const src = `source ${quote(setup)}${version ? ' ' + quote(version) : ''}`;
+        steps.push(`echo ${quote('==> ' + src)}`, `${src} || echo ${quote(`warning: ${path.basename(setup)} returned an error`)}`);
+    }
+    if (needVivado) {
+        steps.push(`if command -v vivado >/dev/null; then echo "==> vivado: $(command -v vivado)"; ` +
+            `else echo ${quote('warning: vivado not found on PATH (configure ruckus.setupScript / ruckus.vivadoVersion)')}; fi`);
+    }
+    return steps;
+}
+
+/** Runs Vivado in batch mode on the routed checkpoint to write the hierarchical utilization report */
+async function generateHierUtil(ctx: vscode.ExtensionContext) {
+    const p = project;
+    if (!p) { return; }
+    const dcp = routedCheckpoint(p);
+    if (!dcp) { vscode.window.showWarningMessage(`No implemented design for ${p.target.name} yet: run make bit first.`); return; }
+    const rpt = hierUtilFile(p);
+    const depth = vscode.workspace.getConfiguration('ruckus').get<number>('hierUtilizationDepth', 8);
+    const script = ctx.asAbsolutePath(path.join('resources', 'ruckus_hier_util.tcl'));
+    const tmp = path.join(path.dirname(rpt), '.ruckus_hier_util');
+    // Separate directory: Vivado's .Xil / journal files must not disturb the project
+    const cmd = `mkdir -p ${quote(tmp)} && cd ${quote(tmp)} && vivado -mode batch -nojournal -nolog -notrace -source ${quote(script)} -tclargs ${quote(dcp)} ${quote(rpt)} ${depth}`;
+    const steps = [...envSteps(p, true), `echo ${quote('==> ' + cmd)}`, cmd];
+    const task = new vscode.Task({ type: TASK_TYPE, target: 'hierarchical-utilization', dir: p.target.dir }, vscode.TaskScope.Workspace,
+        `hierarchical utilization (${p.target.name})`, 'ruckus',
+        new vscode.ShellExecution(steps.join('; '), { cwd: p.target.dir, executable: '/bin/bash', shellArgs: ['-c'] }));
+    task.presentationOptions = { reveal: vscode.TaskRevealKind.Silent, panel: vscode.TaskPanelKind.Dedicated, clear: true };
+    await vscode.tasks.executeTask(task);
+    vscode.window.setStatusBarMessage(`$(sync~spin) Ruckus: generating hierarchical utilization of ${path.basename(dcp)}...`,
+        new Promise<void>(res => { const d = vscode.tasks.onDidEndTask(e => { if (e.execution.task === task || e.execution.task.name === task.name) { d.dispose(); res(); } }); }));
 }
 
 /** make goal + variables that simulate `unit` instead of the target's default sim top */
@@ -800,14 +849,32 @@ async function exportFileList() {
     vscode.window.showInformationMessage(`Wrote ${uri.fsPath}`);
 }
 
+// VHDL_LS reserves "work" (it means "the library of the current file"): files
+// loaded without -lib go to Vivado's default library instead
+const VHDL_DEFAULT_LIB = 'xil_defaultlib';
+
 function vhdlLsToml(p: RuckusProject): string {
     const libs = new Map<string, string[]>();
     for (const f of p.files.filter(x => x.category === 'vhdl')) {
-        const l = f.lib || 'work';
+        const l = !f.lib || f.lib.toLowerCase() === 'work' ? VHDL_DEFAULT_LIB : f.lib;
         if (!libs.has(l)) { libs.set(l, []); }
         libs.get(l)!.push(f.path);
     }
-    return '[libraries]\n' + [...libs].map(([l, fs_]) => `${l}.files = [\n${fs_.map(x => `  "${x}",`).join('\n')}\n]`).join('\n') + '\n';
+    const toml = (s: string) => JSON.stringify(s);
+    const out = ['[libraries]', ''];
+    for (const [l, fs_] of libs) { out.push(`${l}.files = [`, ...fs_.map(x => `  ${toml(x)},`), ']', ''); }
+    const cfg = vscode.workspace.getConfiguration('ruckus');
+    const vivado = findVivadoInstall(cfg.get<string>('vivadoPath', ''), setupScript(p), cfg.get<string>('vivadoVersion', ''));
+    if (vivado) {
+        out.push(`# Xilinx simulation libraries of ${vivado}`);
+        for (const [l, fs_] of Object.entries(vivadoVhdlLibraries(vivado))) {
+            if (libs.has(l)) { continue; }
+            out.push(`${l}.files = [`, ...fs_.map(x => `  ${toml(x)},`), ']', `${l}.is_third_party = true`, '');
+        }
+    } else {
+        out.push('# unisim / unimacro / xpm: Vivado installation not found (setting ruckus.vivadoPath)', '');
+    }
+    return out.join('\n');
 }
 
 // ----------------------------------------------------------------------

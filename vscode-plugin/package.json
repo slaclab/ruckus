@@ -1,7 +1,7 @@
 {
     "name": "slac-ruckus-plugin",
     "displayName": "SLAC Ruckus for VS Code",
-    "description": "Design hierarchy, source explorer and make-target runner for SLAC ruckus firmware projects (Vivado, GHDL, VCS, ...)",
+    "description": "Design hierarchy, source explorer, make-target runner and build reports (messages, timing, utilization) for SLAC ruckus firmware projects (Vivado, GHDL, VCS, ...)",
     "version": "0.1.0",
     "publisher": "slaclab",
     "author": {
@@ -41,6 +41,23 @@
                     "title": "Ruckus",
                     "icon": "media/ruckus.svg"
                 }
+            ],
+            "panel": [
+                {
+                    "id": "ruckus-log",
+                    "title": "Ruckus: Log Report",
+                    "icon": "$(output)"
+                },
+                {
+                    "id": "ruckus-timing",
+                    "title": "Ruckus: Timing",
+                    "icon": "$(watch)"
+                },
+                {
+                    "id": "ruckus-resources",
+                    "title": "Ruckus: Resources",
+                    "icon": "$(dashboard)"
+                }
             ]
         },
         "views": {
@@ -61,6 +78,30 @@
                 {
                     "id": "ruckus.make",
                     "name": "Make Targets"
+                }
+            ],
+            "ruckus-log": [
+                {
+                    "type": "webview",
+                    "id": "ruckus.logReport",
+                    "name": "Log Report",
+                    "icon": "$(output)"
+                }
+            ],
+            "ruckus-timing": [
+                {
+                    "type": "webview",
+                    "id": "ruckus.timing",
+                    "name": "Timing",
+                    "icon": "$(watch)"
+                }
+            ],
+            "ruckus-resources": [
+                {
+                    "type": "webview",
+                    "id": "ruckus.resources",
+                    "name": "Resources",
+                    "icon": "$(dashboard)"
                 }
             ]
         },
@@ -267,6 +308,29 @@
             {
                 "command": "ruckus.setupWorkspace",
                 "title": "Set Up Workspace (.vscode settings and tasks)",
+                "category": "Ruckus"
+            },
+            {
+                "command": "ruckus.showLogReport",
+                "title": "Show Log Report",
+                "category": "Ruckus",
+                "icon": "$(output)"
+            },
+            {
+                "command": "ruckus.showTiming",
+                "title": "Show Timing Summary",
+                "category": "Ruckus",
+                "icon": "$(watch)"
+            },
+            {
+                "command": "ruckus.showResources",
+                "title": "Show Resource Utilization",
+                "category": "Ruckus",
+                "icon": "$(dashboard)"
+            },
+            {
+                "command": "ruckus.generateHierUtilization",
+                "title": "Generate Hierarchical Utilization (Vivado batch)",
                 "category": "Ruckus"
             }
         ],
@@ -515,6 +579,22 @@
                 {
                     "command": "ruckus.setupWorkspace",
                     "when": "ruckus.hasProject"
+                },
+                {
+                    "command": "ruckus.showLogReport",
+                    "when": "ruckus.hasProject"
+                },
+                {
+                    "command": "ruckus.showTiming",
+                    "when": "ruckus.hasProject"
+                },
+                {
+                    "command": "ruckus.showResources",
+                    "when": "ruckus.hasProject"
+                },
+                {
+                    "command": "ruckus.generateHierUtilization",
+                    "when": "ruckus.hasProject"
                 }
             ],
             "editor/title": [
@@ -573,10 +653,20 @@
                     "default": "",
                     "markdownDescription": "Vivado version (e.g. `2025.1`) passed to the setup script before make and used as `VIVADO_VERSION` during the scan. Empty: the setup script's default. Use **Ruckus: Select Vivado Version** (status bar) to pick an installed one."
                 },
+                "ruckus.vivadoPath": {
+                    "type": "string",
+                    "default": "",
+                    "markdownDescription": "Vivado installation directory (`$XILINX_VIVADO`, containing `data/vhdl/src`). Used to map `unisim`, `unimacro` and `xpm` in the generated `vhdl_ls.toml`. Empty: detected from the environment, the setup script and `ruckus.vivadoVersion`."
+                },
                 "ruckus.saveMakeLog": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "Also write the make output to `build/logs/<target>_<goal>.log` (not for `gui`/`interactive`). Use **Ruckus: Follow Build Log...** to tail it or Vivado's own logs."
+                },
+                "ruckus.hierUtilizationDepth": {
+                    "type": "number",
+                    "default": 8,
+                    "markdownDescription": "`-hierarchical_depth` of **Ruckus: Generate Hierarchical Utilization** (Resources panel)."
                 },
                 "ruckus.scanTimeout": {
                     "type": "number",
