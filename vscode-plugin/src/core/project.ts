@@ -163,6 +163,8 @@ export async function loadProject(target: RuckusTarget, opts: ScanOptions): Prom
     const env: Record<string, string> = {};
     for (const [k, v] of Object.entries(baseEnv)) { if (v !== undefined) { env[k] = v; } }
     Object.assign(env, exported, opts.extraEnv);
+    // system_shared.mk unexports every *TOKEN* variable before any recipe runs
+    for (const k of Object.keys(env)) { if (k.includes('TOKEN')) { delete env[k]; } }
     env.PROJECT ||= target.name;
     env.PROJ_DIR ||= target.dir;
     env.TOP_DIR ||= topDir;
