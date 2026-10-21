@@ -336,8 +336,9 @@ Development commands, run in ``vscode-plugin/``:
 
    npm install
    npm run compile                       # or: npm run watch
+   npm test                              # unit tests on test/fixtures/ (also run by CI)
    node out/test/smoke.js <target dir>   # print the project model, no VS Code needed
-   npm test -- <firmware dir>            # integration test inside VS Code
+   npm run test:vscode -- <firmware dir> # integration test inside VS Code
 
 To start an Extension Development Host, open ``vscode-plugin/`` in VS Code
 and press :kbd:`F5`.

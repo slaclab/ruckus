@@ -82,6 +82,9 @@ jobs:
       - name: Compile and package
         run: ./scripts/build.sh
 
+      - name: Unit tests (report parsers, ruckus.tcl scanner)
+        run: node out/test/unit.js
+
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: slac-ruckus-plugin

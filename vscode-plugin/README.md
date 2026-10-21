@@ -157,8 +157,9 @@ When a loader procedure or option is added to `ruckus/vivado/proc/code_loading.t
 add the same stub to `resources/ruckus_scan.tcl` in the same change.
 
 Tests:
+`npm test` runs the unit tests (report parsers and scanner, on the fixtures in `test/fixtures/`; also run by CI).
 `node out/test/smoke.js <target dir>` prints the model from the command line.
-`npm test -- <firmware dir>` runs the views inside VS Code. If you run it from a
+`npm run test:vscode -- <firmware dir>` runs the views inside VS Code. If you run it from a
 VS Code terminal, unset `ELECTRON_RUN_AS_NODE` first.
 
 ## How the scan works

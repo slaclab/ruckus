@@ -898,7 +898,8 @@
         "watch": "tsc -watch -p ./",
         "package": "vsce package --no-dependencies",
         "smoke": "node out/test/smoke.js",
-        "test": "tsc -p ./ && node out/test/integration/runTest.js"
+        "test": "tsc -p ./ && node out/test/unit.js",
+        "test:vscode": "tsc -p ./ && node out/test/integration/runTest.js"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

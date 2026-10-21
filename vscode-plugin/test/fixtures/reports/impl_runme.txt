@@ -1,0 +1,160 @@
+
+*** Running vivado
+    with args -log Simple10GbeRudpKcu105Example.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source Simple10GbeRudpKcu105Example.tcl -notrace
+
+INFO: [Common 17-3922] A valid Vivado Design Suite ENTERPRISE license has been detected. Your current license is active and will expire on Permanent.
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Wed Oct 21 10:01:54 2026
+# Process ID         : 3880857
+# Current directory  : /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1
+# Command line       : vivado -log Simple10GbeRudpKcu105Example.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source Simple10GbeRudpKcu105Example.tcl -notrace
+# Log file           : /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example.vdi
+# Journal file       : /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/vivado.jou
+# Running On         : buildhost
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 22.04.5 LTS
+# Processor Detail   : AMD Ryzen 9 3900X 12-Core Processor
+# CPU Frequency      : 2133.612 MHz
+# CPU Physical cores : 12
+# CPU Logical cores  : 24
+# Host memory        : 67342 MB
+# Swap memory        : 2147 MB
+# Total Virtual      : 69489 MB
+# Available Virtual  : 55038 MB
+#-----------------------------------------------------------
+
+****** Vivado v2026.1 (64-bit)
+  **** SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+  **** IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+  **** SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+  **** Start of session at: Wed Oct 21 10:01:54 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+INFO: [Common 17-1239] XILINX_LOCAL_USER_DATA is set to 'no'.
+source Simple10GbeRudpKcu105Example.tcl -notrace
+INFO: [Common 17-1565] set_msg_config should not be used to change the severity of DRC/METHODOLOGY checks. Please use the 'set_property SEVERITY <NEW_SEVERITY> [get_<drc|methodology>_checks <ID>]' command instead.
+INFO: [Common 17-1565] set_msg_config should not be used to change the severity of DRC/METHODOLOGY checks. Please use the 'set_property SEVERITY <NEW_SEVERITY> [get_<drc|methodology>_checks <ID>]' command instead.
+Command: open_checkpoint /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example.dcp
+INFO: [Device 21-403] Loading part xcku040-ffva1156-2-e
+Netlist sorting complete. Time (s): cpu = 00:00:00.51 ; elapsed = 00:00:00.52 . Memory (MB): peak = 2539.523 ; gain = 0.000 ; free physical = 11765 ; free virtual = 51158
+INFO: [Netlist 29-17] Analyzing 1701 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2026.1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Read ShapeDB Complete: Time (s): cpu = 00:00:00.08 ; elapsed = 00:00:00.09 . Memory (MB): peak = 2650.742 ; gain = 0.000 ; free physical = 11685 ; free virtual = 51079
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+WARNING: [Timing 38-476] Binary timing data restore encountered an issue: found incompatible netlist checksums (data written by Vivado 2026.1 with checksum 15d890de, read by Vivado 2026.1 with checksum d5578aa7)
+WARNING: [Timing 38-477] Binary timing data restore failed. Reverting to non-binary load.
+Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_board.xdc]
+Finished Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_board.xdc]
+Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_early.xdc]
+INFO: [Timing 38-35] Done setting XDC timing constraints. [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/e:/projects/firmware/KCU_2015_4/KCU_2015_4.srcs/sources_1/ip/TenGigEthGthUltraScale156p25MHzCore/synth/TenGigEthGthUltraScale156p25MHzCore.xdc:54]
+all_fanin: Time (s): cpu = 00:00:10 ; elapsed = 00:00:06 . Memory (MB): peak = 3240.867 ; gain = 490.176 ; free physical = 11256 ; free virtual = 50650
+Finished Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_early.xdc]
+Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example.xdc]
+INFO: [Timing 38-2] Deriving generated clocks [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/shared/xdc/Kcu105.xdc:74]
+Finished Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example.xdc]
+Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_late.xdc]
+Finished Parsing XDC File [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_late.xdc]
+INFO: [Designutils 20-5722] Start Reading Physical Databases.
+Reading placement.
+Read Netlist Cache: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3262.648 ; gain = 0.000 ; free physical = 11233 ; free virtual = 50626
+Reading placer database...
+Read Device Cache: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3262.648 ; gain = 0.000 ; free physical = 11232 ; free virtual = 50625
+Read PlaceDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3262.648 ; gain = 0.000 ; free physical = 11232 ; free virtual = 50625
+Read placeStorage: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00 . Memory (MB): peak = 3291.266 ; gain = 28.617 ; free physical = 11232 ; free virtual = 50625
+Read PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3291.266 ; gain = 0.000 ; free physical = 11232 ; free virtual = 50625
+Reading routing.
+Read RouteStorage: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3291.266 ; gain = 0.000 ; free physical = 11232 ; free virtual = 50625
+Read Physdb Files: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 3291.266 ; gain = 28.617 ; free physical = 11232 ; free virtual = 50625
+Restored from archive | CPU: 0.050000 secs | Memory: -0.183365 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 3291.266 ; gain = 28.617 ; free physical = 11233 ; free virtual = 50626
+INFO: [Project 1-1714] 1 XPM XDC files have been applied to the design.
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3291.266 ; gain = 0.000 ; free physical = 11234 ; free virtual = 50627
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 182 instances were transformed.
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 22 instances
+  IBUF => IBUF (IBUFCTRL, INBUF): 4 instances
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance
+  IOBUF => IOBUF (IBUFCTRL, INBUF, OBUFT): 2 instances
+  OBUFDS => OBUFDS_DUAL_BUF (INV, OBUF(x2)): 1 instance
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 2 instances
+  RAM256X1D => RAM256X1D (MUXF7(x4), MUXF8(x2), RAMD64E(x8)): 2 instances
+  RAM32M => RAM32M (RAMD32(x6), RAMS32(x2)): 14 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 99 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 3 instances
+  RAM64X1D => RAM64X1D (RAMD64E(x2)): 32 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2026.1 (64-bit) build 6511674
+open_checkpoint: Time (s): cpu = 00:00:37 ; elapsed = 00:00:22 . Memory (MB): peak = 3291.301 ; gain = 1709.160 ; free physical = 11236 ; free virtual = 50629
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/ip_repo'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/2026.1/data/ip'.
+source /work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/ruckus/vivado/run/pre/opt.tcl
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -2, Temperature grade: E, Delay Type: max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 8 CPUs
+WARNING: [Timing 38-164] This design has multiple clocks. Inter clock paths are considered valid unless explicitly excluded by timing constraints such as set_clock_groups or set_false_path.
+report_clock_interaction: Time (s): cpu = 00:00:31 ; elapsed = 00:00:17 . Memory (MB): peak = 4126.062 ; gain = 834.762 ; free physical = 10080 ; free virtual = 49690
+Command: opt_design
+Attempting to get a license for feature 'Implementation' and/or device 'xcku040'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xcku040'
+Running DRC as a precondition to command opt_design
+
+Starting DRC Task
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Project 1-461] DRC finished with 0 Errors, 1 Warnings
+INFO: [Project 1-462] Please refer to the DRC report (report_drc) for more information.
+
+Time (s): cpu = 00:00:03 ; elapsed = 00:00:00.79 . Memory (MB): peak = 4126.062 ; gain = 0.000 ; free physical = 10064 ; free virtual = 49675
+
+Starting Cache Timing Information Task
+Ending Cache Timing Information Task | Checksum: 26d4ecd70
+
+Time (s): cpu = 00:00:00.03 ; elapsed = 00:00:00.03 . Memory (MB): peak = 4126.062 ; gain = 0.000 ; free physical = 10064 ; free virtual = 49675
+
+Starting Logic Optimization Task
+
+Phase 1 Initialization
+
+Phase 1.1 Core Generation And Design Setup
+
+Phase 1.1.1 Generate And Synthesize Debug Cores
+INFO: [Chipscope 16-329] Generating Script for core instance : dbg_hub
+INFO: [IP_Flow 19-3806] Processing IP xilinx.com:ip:xsdbm:3.0 for cell dbg_hub_CV.
+INFO: [Chipscope 16-329] Generating Script for core instance : u_ila_0
+INFO: [IP_Flow 19-3806] Processing IP xilinx.com:ip:ila:6.2 for cell u_ila_0_CV.
+Done building netlist checker database: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 4162.719 ; gain = 0.000 ; free physical = 9882 ; free virtual = 49624
+Done building netlist checker database: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.03 . Memory (MB): peak = 4162.719 ; gain = 0.000 ; free physical = 9881 ; free virtual = 49622
+CRITICAL WARNING: [Common 17-55] 'get_property' expects at least one object. [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:59]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+CRITICAL WARNING: [Common 17-1548] Command failed: can't read "rd_clk_period": no such variable
+ [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:60]
+CRITICAL WARNING: [Common 17-55] 'get_property' expects at least one object. [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:64]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+CRITICAL WARNING: [Common 17-1548] Command failed: can't read "skew_value": no such variable
+ [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:65]
+CRITICAL WARNING: [Common 17-1548] Command failed: can't read "skew_value": no such variable
+ [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:68]
+CRITICAL WARNING: [Common 17-55] 'get_property' expects at least one object. [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:71]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+CRITICAL WARNING: [Common 17-1548] Command failed: can't read "wr_clk_period_2": no such variable
+ [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:73]
+CRITICAL WARNING: [Common 17-1548] Command failed: can't read "skew_value_2": no such variable
+ [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:81]
+CRITICAL WARNING: [Common 17-55] 'get_property' expects at least one object. [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:83]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+CRITICAL WARNING: [Common 17-1548] Command failed: can't read "skew_value_2": no such variable
+ [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/impl_1/.Xil/Vivado-3880857-buildhost/dbg_hub_CV.0/out/xsdbm_gc_late_late.xdc:84]
+Netlist sorting complete. Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.05 . Memory (MB): peak = 4162.719 ; gain = 0.000 ; free physical = 9936 ; free virtual = 49677
+Phase 1.1.1 Generate And Synthesize Debug Cores | Checksum: 1d3325f5b
+
+Time (s): cpu = 00:02:32 ; elapsed = 00:02:08 . Memory (MB): peak = 4162.719 ; gain = 21.812 ; free physical = 9934 ; free virtual = 49676
+Phase 1.1 Core Generation And Design Setup | Checksum: 1d3325f5b
+
+Time (s): cpu = 00:02:32 ; elapsed = 00:02:08 . Memory (MB): peak = 4162.719 ; gain = 21.812 ; free physical = 9934 ; free virtual = 49676
+

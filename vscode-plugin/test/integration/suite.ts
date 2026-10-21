@@ -1,4 +1,6 @@
 import * as assert from 'assert';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 async function walk(p: vscode.TreeDataProvider<any>, el: any, depth: number, out: string[], indent = ''): Promise<number> {
@@ -17,7 +19,13 @@ export async function run() {
     const ext = vscode.extensions.all.find(e => e.packageJSON.name === 'slac-ruckus-plugin')!;
     const api = await ext.activate();
     const ws = vscode.workspace.workspaceFolders![0].uri.fsPath;
-    await api.selectDir(process.env.RUCKUS_TEST_TARGET ?? `${ws}/targets/Simple10GbeRudpKcu105Example`);
+    // RUCKUS_TEST_TARGET, else the first target under targets/ (a directory with
+    // several targets would open the target picker, which a headless run cannot answer)
+    const targets = fs.existsSync(path.join(ws, 'targets')) ? fs.readdirSync(path.join(ws, 'targets')).sort()
+        .map(t => path.join(ws, 'targets', t)).filter(d => fs.existsSync(path.join(d, 'ruckus.tcl'))) : [];
+    const target = process.env.RUCKUS_TEST_TARGET ?? targets[0];
+    assert.ok(target, `no target in ${ws}/targets (set RUCKUS_TEST_TARGET)`);
+    await api.selectDir(target);
     const p = api.getProject();
     assert.ok(p, 'project loaded');
     assert.ok(p.files.length > 500, 'files loaded');
