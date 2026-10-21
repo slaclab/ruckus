@@ -42,7 +42,7 @@ export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
 ## is required for the AIE Python API used by vitis/aie/{create_proj,build}.py.
 ##############################################################################
 ifndef XILINX_VITIS
-$(error XILINX_VITIS not set — source firmware/setup_env_slac.sh first)
+$(error XILINX_VITIS not set; source firmware/setup_env_slac.sh first)
 endif
 
 include $(TOP_DIR)/submodules/ruckus/system_shared.mk
@@ -64,15 +64,15 @@ ifeq ($(strip $(AIE_PLATFORM)$(AIE_PART)),)
 $(error Define either AIE_PLATFORM (.xpfm path, e.g. $$(XILINX_VITIS)/base_platforms/<board>/<board>.xpfm) or AIE_PART (Versal device ID, e.g. xcve2802-vsvh1760-2MP-e-S) in the target's AIE Makefile)
 endif
 ifneq ($(and $(strip $(AIE_PLATFORM)),$(strip $(AIE_PART))),)
-$(error Define only one of AIE_PLATFORM or AIE_PART, not both — use AIE_PLATFORM for dev boards with a shipped .xpfm, AIE_PART for custom boards without one)
+$(error Define only one of AIE_PLATFORM or AIE_PART, not both. Use AIE_PLATFORM for dev boards with a shipped .xpfm, AIE_PART for custom boards without one)
 endif
 
 ifndef AIE_SOURCES
-$(error AIE_SOURCES not set — define it in the target's AIE Makefile as a whitespace-separated list of `path[:dest_subdir]` entries. File entries import that one file; directory entries import every .cpp/.cc/.h/.hpp file in the directory (non-recursive). Without `:dest_subdir`, files land flat at the component root; with `:dest_subdir`, they import into <component>/<dest_subdir>/ (matches the AMD-canonical `kernels/` layout where graph.h does `adf::source(loop) = "kernels/loopback.cc";`). e.g. AIE_SOURCES = $$(CURDIR)/aie $$(CURDIR)/aie/kernels:kernels $$(TOP_DIR)/submodules/aie-lib/util.cc)
+$(error AIE_SOURCES not set; define it in the target's AIE Makefile as a whitespace-separated list of `path[:dest_subdir]` entries. File entries import that one file; directory entries import every .cpp/.cc/.h/.hpp file in the directory (non-recursive). Without `:dest_subdir`, files land flat at the component root; with `:dest_subdir`, they import into <component>/<dest_subdir>/ (matches the AMD-canonical `kernels/` layout where graph.h does `adf::source(loop) = "kernels/loopback.cc";`). e.g. AIE_SOURCES = $$(CURDIR)/aie $$(CURDIR)/aie/kernels:kernels $$(TOP_DIR)/submodules/aie-lib/util.cc)
 endif
 
 ifndef AIE_TOP_LEVEL_FILE
-$(error AIE_TOP_LEVEL_FILE not set — define it in the target's AIE Makefile (e.g. AIE_TOP_LEVEL_FILE = graph.cpp))
+$(error AIE_TOP_LEVEL_FILE not set; define it in the target's AIE Makefile (e.g. AIE_TOP_LEVEL_FILE = graph.cpp))
 endif
 
 ##############################################################################
@@ -101,7 +101,7 @@ endif
 
 # AIE dynamic-overlay PDI deliverable. Named $(PROJECT).pdi (not
 # $(PROJECT)_aie_dynamic.pdi) so ip/ matches the normalized /boot/aie/<name>
-# pair basename — program.sh uploads it verbatim, and still strips a legacy
+# pair basename; program.sh uploads it verbatim, and still strips a legacy
 # _aie_dynamic/_dynamic suffix if a consumer overrides AIE_PDI to keep one.
 #
 # No device-tree overlay is part of the deliverable: the AIE PDI is a
@@ -121,7 +121,7 @@ ifndef USE_BOOTGEN_FALLBACK
 export USE_BOOTGEN_FALLBACK = 0
 endif
 
-# AIE_PROGRAM_SCRIPT — helper invoked by `make program` to deploy AIE_PDI
+# AIE_PROGRAM_SCRIPT: helper invoked by `make program` to deploy AIE_PDI
 # to the board. Defaults to the ruckus-shipped vitis/aie/program.sh, which
 # is a generic Versal/PetaLinux deploy (scp PDI+conf → /boot/aie/, reboot,
 # verify the boot loop loaded the AIE). Override if your project needs richer
@@ -133,7 +133,7 @@ ifndef AIE_PROGRAM_SCRIPT
 export AIE_PROGRAM_SCRIPT = $(RUCKUS_DIR)/vitis/aie/program.sh
 endif
 
-# AIE_PARTITION_CONF_SCRIPT — helper invoked by `make partition_conf` to extract
+# AIE_PARTITION_CONF_SCRIPT: helper invoked by `make partition_conf` to extract
 # AIE partition geometry from the Vitis-emitted aie_partition.json and write
 # ip/<PROJECT>.partition.conf for the /boot/aie/ runtime (aie-partition-init).
 # Defaults to the ruckus-shipped vitis/aie/emit_partition_conf.sh; driven purely
@@ -194,13 +194,13 @@ x86sim : proj
 	@cd $(OUT_DIR); vitis -s $(RUCKUS_DIR)/vitis/aie/build.py --x86sim
 
 ###############################################################
-#### Package — wraps libadf.a + XSA into dynamic PDI ##########
+#### Package: wraps libadf.a + XSA into dynamic PDI ###########
 ###############################################################
 .PHONY : package
 package : build
 	$(call ACTION_HEADER,"Vitis AIE Package")
 	@if [ -z "$(VIVADO_XSA_DIR)" ]; then \
-	  echo "ERROR: VIVADO_XSA_DIR not set — define the directory containing the Vivado-built .xsa"; \
+	  echo "ERROR: VIVADO_XSA_DIR not set; define the directory containing the Vivado-built .xsa"; \
 	  echo "       in the target's AIE Makefile, e.g. export VIVADO_XSA_DIR = \$$(TOP_DIR)/targets/<target>/images"; \
 	  exit 1; \
 	fi
@@ -215,9 +215,9 @@ partition_conf: package
 	@bash $(AIE_PARTITION_CONF_SCRIPT)
 
 ###############################################################
-#### program — deploy AIE_PDI to the target board #############
+#### program: deploy AIE_PDI to the target board ##############
 ###############################################################
-# Wraps $(AIE_PROGRAM_SCRIPT) — defaults to ruckus's vitis/aie/program.sh,
+# Wraps $(AIE_PROGRAM_SCRIPT), which defaults to ruckus's vitis/aie/program.sh,
 # overridable per project. AIE_BOARD_IP is forwarded as `-i` if set.
 # Asserts are recipe-time (not parse-time) so other targets aren't affected.
 .PHONY : program

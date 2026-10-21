@@ -9,10 +9,10 @@
 # contained in the LICENSE.txt file.
 # ----------------------------------------------------------------------------
 #
-# program.sh — generic AIE PDI deploy helper invoked by the `program` target
+# program.sh: generic AIE PDI deploy helper invoked by the `program` target
 # in system_vitis_unified_aie.mk. Uploads the dynamic PDI (and optional
 # partition.conf sidecar) to /boot/aie/<name>.{pdi,partition.conf} on the
-# target board, optionally reboots, and verifies that the Phase-2
+# target board, optionally reboots, and verifies that the on-board
 # startup-app-init boot loop loaded the AIE (journal line + fpga_manager
 # dmesg write) and the aie-partition-init@<name>.service instance is active.
 #
@@ -23,18 +23,18 @@
 # The <name> is the -p PDI basename minus .pdi, with any legacy dynamic-PDI
 # suffix stripped: AieLoopback.pdi -> AieLoopback (legacy
 # AieLoopback_aie_dynamic.pdi -> AieLoopback still works). The pair members
-# share the normalized basename (required for the Phase-2 boot loop to find
+# share the normalized basename (required for the on-board boot loop to find
 # them).
 #
 # Required flags:
 #   -p <path>        runtime PDI to upload
-#   -i <user@host>   board target (no default — required)
+#   -i <user@host>   board target (required, no default)
 #
 # Optional flags:
 #   -c <path>        partition.conf sidecar (default: derived from PDI dir as
 #                    $(dirname PDI)/<name>.partition.conf); warn-not-fail if
-#                    absent — the pdi still uploads, aie-partition-init will
-#                    not start for this image
+#                    absent (the pdi still uploads, but aie-partition-init
+#                    will not start for this image)
 #   -r               stage-only: upload pair to /boot/aie/ without rebooting
 #                    or verifying (useful when scheduling a maintenance window)
 #   -h               show this help
@@ -90,10 +90,10 @@ while getopts "i:p:c:rh" flag; do
     esac
 done
 
-# Derive the normalized <name> from the PDI basename (D-01):
+# Derive the normalized <name> from the PDI basename:
 #   AieLoopback.pdi -> AieLoopback  (legacy AieLoopback_aie_dynamic.pdi ->
 #   AieLoopback_aie_dynamic -> AieLoopback also collapses via the strips below)
-# This round-trips through the Phase-2 boot loop's own derivation:
+# This round-trips through the on-board boot loop's own derivation:
 #   base="${pdi%.pdi}"; name="$(basename "$base")"
 # so the uploaded /boot/aie/<name>.pdi filename matches what the boot loop
 # expects for the conf and aie-partition-init@<name>.service lookups.
@@ -159,7 +159,7 @@ upload() {
         "$PDI_LOCAL" "$BOARD_IP:/boot/aie/${name}.pdi"
     echo "[PASS] ${name}.pdi uploaded"
 
-    # Upload partition.conf sidecar if present (D-02b): warn-not-fail if absent.
+    # Upload partition.conf sidecar if present: warn-not-fail if absent.
     if [[ -s "$conf_src" ]]; then
         echo "---- scp $(basename "$conf_src") -> $BOARD_IP:/boot/aie/${name}.partition.conf ----"
         scp -o BatchMode=yes -o ConnectTimeout=5 -o ForwardX11=no \
@@ -167,7 +167,7 @@ upload() {
         echo "[PASS] ${name}.partition.conf uploaded"
         CONF_UPLOADED="$conf_src"
     else
-        echo "WARNING: no ${name}.partition.conf found — aie-partition-init will not start for ${name}"
+        echo "WARNING: no ${name}.partition.conf found; aie-partition-init will not start for ${name}"
         CONF_UPLOADED=""
     fi
 }
@@ -196,11 +196,11 @@ wait_for_board_up() {
     return 1
 }
 
-# Poll journalctl for the Phase-2 startup-app-init AIE load log line.
+# Poll journalctl for the on-board startup-app-init AIE load log line.
 # The boot loop emits: AIE load: $pdi
 # We match the leading substring: AIE load: /boot/aie/<name>.pdi
 # journalctl -b restricts to the current boot so a line from a prior boot
-# cannot produce a false success (D-03b).
+# cannot produce a false success.
 wait_for_aie_load_complete() {
     local name="$1"
     local elapsed=0
@@ -219,16 +219,16 @@ wait_for_aie_load_complete() {
 }
 
 # Final one-shot check: the fpga_manager must have actually written the PDI
-# (dmesg "writing <name>.pdi" — the journal "AIE load:" echo alone proved
+# (dmesg "writing <name>.pdi"; the journal "AIE load:" echo alone proved
 # false-positive when the load path silently failed), the
 # aie-partition-init@<name>.service must be active AND /sys/class/aie must
 # exist (confirms the xilinx-ai-engine driver enumerated the partition).
-# No dependence on fpga_manager/fpga0/state (D-03).
+# No dependence on fpga_manager/fpga0/state.
 check_aie_active() {
     local name="$1"
     if ! ssh -o ConnectTimeout=5 -o BatchMode=yes -o ForwardX11=no \
              "$BOARD_IP" "dmesg | grep -q 'writing ${name}.pdi'" >/dev/null 2>&1; then
-        echo "[FAIL] no fpga_manager dmesg record of writing ${name}.pdi — PDI never reached the PLM"
+        echo "[FAIL] no fpga_manager dmesg record of writing ${name}.pdi; PDI never reached the PLM"
         return 1
     fi
     echo "[PASS] fpga_manager wrote ${name}.pdi (dmesg)"
@@ -255,7 +255,7 @@ print_summary() {
     local name="$2"
     local verdict
     if [[ $DO_REBOOT -eq 0 ]]; then
-        verdict="Staged to /boot/aie/ — reboot required to load AIE (verification skipped)"
+        verdict="Staged to /boot/aie/; reboot required to load AIE (verification skipped)"
     elif [[ $overall -eq 0 ]]; then
         verdict="AIE PROGRAMMED"
     else
@@ -266,7 +266,7 @@ print_summary() {
     echo "--------------------------------------------------------------"
     echo "  Board IP:           $BOARD_IP"
     echo "  PDI uploaded:       $PDI_LOCAL"
-    echo "  Conf uploaded:      ${CONF_UPLOADED:-<none — aie-partition-init will not start>}"
+    echo "  Conf uploaded:      ${CONF_UPLOADED:-<none: aie-partition-init will not start>}"
     echo "  Dest dir:           /boot/aie/${name}"
     echo "  Reboot performed:   $([[ $DO_REBOOT -eq 1 ]] && echo yes || echo no)"
     echo "--------------------------------------------------------------"
