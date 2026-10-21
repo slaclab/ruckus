@@ -20,13 +20,15 @@ export interface LogInfo { file: string; mtime: number; messages: LogMessage[]; 
 
 const VIVADO = /^(ERROR|CRITICAL WARNING|WARNING|INFO): \[([^\]]+)\] (.*)$/;
 const VIVADO_NOID = /^(ERROR|CRITICAL WARNING|WARNING): (.*)$/;
-const GHDL = /^([^\s:]+\.vhdl?):(\d+):(\d+):(?:(error|warning|note):)?\s*(.*)$/;
+// ghdl -r output: tb.vhd:45:9:@10ns:(report note): text / (assertion failure)
+const GHDL_RUN = /^([^\s:]+\.vhdl?):(\d+):(\d+):@[^:]*:\((report|assertion) (note|warning|error|failure)\):\s*(.*)$/;
+const GHDL = /^([^\s:]+\.vhdl?):(\d+):(\d+):(?!@)(?:(error|warning|note):)?\s*(.*)$/;
 const IVERILOG = /^([^\s:]+\.s?vh?):(\d+):\s+(error|warning|sorry):\s+(.*)$/;
 const VERILATOR = /^%(Error|Warning)(?:-([A-Z0-9_]+))?: (?:([^\s:]+):(\d+):(?:\d+:)? )?(.*)$/;
 
 const SEV: Record<string, Severity> = {
     'ERROR': 'error', 'CRITICAL WARNING': 'critical', 'WARNING': 'warning', 'INFO': 'info',
-    error: 'error', sorry: 'error', warning: 'warning', note: 'info', Error: 'error', Warning: 'warning',
+    error: 'error', sorry: 'error', failure: 'error', warning: 'warning', note: 'info', Error: 'error', Warning: 'warning',
 };
 
 /** Trailing "[/abs/file.vhd:123]" source location of Vivado messages */
@@ -51,6 +53,8 @@ export function parseLog(text: string, file: string, mtime: number): LogInfo {
         } else if ((m = VIVADO_NOID.exec(l))) {
             const loc = location(m[2]);
             out.push({ severity: SEV[m[1]], id: '', ...loc, logFile: file, logLine: i + 1, step });
+        } else if ((m = GHDL_RUN.exec(l))) {
+            out.push({ severity: SEV[m[5]], id: `ghdl ${m[4]}`, text: m[6], file: m[1], line: Number(m[2]), logFile: file, logLine: i + 1, step });
         } else if ((m = GHDL.exec(l))) {
             out.push({ severity: m[4] ? SEV[m[4]] : 'error', id: 'ghdl', text: m[5], file: m[1], line: Number(m[2]), logFile: file, logLine: i + 1, step });
         } else if ((m = IVERILOG.exec(l))) {

@@ -680,7 +680,7 @@ function simGoal(p: RuckusProject, unit: string, vivadoSim: string): { goal: str
 /** Problem matchers (package.json) for the tools a backend runs */
 function problemMatchers(proj: RuckusProject | undefined): string[] {
     switch (proj?.backend) {
-        case 'ghdl': return ['$ruckus-ghdl'];
+        case 'ghdl': return ['$ruckus-ghdl', '$ruckus-ghdl-run-error', '$ruckus-ghdl-run-warning'];
         case 'iverilog': return ['$ruckus-iverilog'];
         case 'verilator': return ['$ruckus-verilator'];
         default: return ['$ruckus-vivado'];

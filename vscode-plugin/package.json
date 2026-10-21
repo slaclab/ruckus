@@ -815,12 +815,46 @@
                 ],
                 "severity": "error",
                 "pattern": {
-                    "regexp": "^([^\\s:]+\\.vhdl?):(\\d+):(\\d+):(?:(error|warning|note):)?\\s*(.*)$",
+                    "regexp": "^([^\\s:]+\\.vhdl?):(\\d+):(\\d+):(?!@)(?:(error|warning|note):)?\\s*(.*)$",
                     "file": 1,
                     "line": 2,
                     "column": 3,
                     "severity": 4,
                     "message": 5
+                }
+            },
+            {
+                "name": "ruckus-ghdl-run-error",
+                "owner": "ruckus",
+                "source": "ghdl",
+                "fileLocation": [
+                    "autoDetect",
+                    "${cwd}"
+                ],
+                "severity": "error",
+                "pattern": {
+                    "regexp": "^([^\\s:]+\\.vhdl?):(\\d+):(\\d+):@[^:]*:\\((?:report|assertion) (?:error|failure)\\):\\s*(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                }
+            },
+            {
+                "name": "ruckus-ghdl-run-warning",
+                "owner": "ruckus",
+                "source": "ghdl",
+                "fileLocation": [
+                    "autoDetect",
+                    "${cwd}"
+                ],
+                "severity": "warning",
+                "pattern": {
+                    "regexp": "^([^\\s:]+\\.vhdl?):(\\d+):(\\d+):@[^:]*:\\((?:report|assertion) (?:warning)\\):\\s*(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
                 }
             },
             {
