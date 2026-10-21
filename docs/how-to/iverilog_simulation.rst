@@ -155,8 +155,8 @@ own:
    end
 
 ``WAVES=1`` adds ``-fst`` to the ``vvp`` run, so the dump above is written in
-FST format. ``make gtkwave`` sets ``WAVES=1`` for you and opens the ``.fst``
-file. Without ``-fst``, ``vvp`` still honors ``$dumpfile``/``$dumpvars`` but
+FST format. ``make gtkwave`` sets ``WAVES=1`` for you and opens
+``$(PROJECT).fst``, so name the dump file to match. Without ``-fst``, ``vvp`` still honors ``$dumpfile``/``$dumpvars`` but
 writes plain VCD text under the ``.fst`` filename.
 
 Rogue Co-Simulation

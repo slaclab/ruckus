@@ -1,5 +1,5 @@
 How to Publish a Firmware Release
-==================================
+=================================
 
 **Goal:** Tag a versioned firmware release on GitHub, package build artifacts, and
 publish release notes using the ruckus release workflow.
@@ -12,10 +12,10 @@ Prerequisites
 - A GitHub personal access token with ``repo`` scope set in the ``GITHUB_TOKEN``
   environment variable
 - Python packages installed: ``pip install gitpython pygithub pyyaml``
-- A clean git working tree — uncommitted changes will cause the script to abort
+- A clean git working tree (uncommitted changes cause ``make release`` to abort before tagging)
 
 Step 1: Create ``releases.yaml``
----------------------------------
+--------------------------------
 
 Create ``releases.yaml`` at the firmware repository root. This file describes what
 artifacts to package. The minimum required schema is:
@@ -42,11 +42,12 @@ artifacts to package. The minimum required schema is:
 
 **Schema fields:**
 
-- ``GitBase`` — base directory of the firmware git submodule (usually ``firmware``)
-- ``Targets`` — map of build targets; each entry specifies where images live and what
+- ``GitBase``: base directory of the firmware git repository (usually ``firmware``)
+- ``Targets``: map of build targets; each entry specifies where images live and what
   file extensions to include in the release archive
-- ``Releases`` — map of release configurations; each entry specifies which targets to
-  package, the archive type, and whether this is the primary release
+- ``Releases``: map of release configurations; each entry specifies which targets to
+  package, the archive type (``Rogue`` and/or ``CPSW``), and whether this is the
+  primary release
 
 **Release tag format:**
 
@@ -54,7 +55,7 @@ artifacts to package. The minimum required schema is:
 - Non-primary release: tag ``RelName_v1.2.3``, archive ``rogue_RelName_v1.2.3.zip``
 
 Step 2: Set the GitHub Token
------------------------------
+----------------------------
 
 .. code-block:: bash
 
@@ -71,7 +72,7 @@ The token must have ``repo`` scope to create tags and publish GitHub releases.
    :ref:`credential-scoping`.
 
 Step 3: Run the Release Workflow
----------------------------------
+--------------------------------
 
 .. code-block:: bash
 
@@ -79,11 +80,14 @@ Step 3: Run the Release Workflow
 
 This calls ``scripts/firmwareRelease.py --push`` interactively. The script prompts for:
 
-- **Release name** — auto-selected if only one release is defined in ``releases.yaml``
-- **Build base name** — enter ``latest`` to auto-select the newest build in
-  ``images/``
-- **Release version** — e.g., ``v1.2.3``
-- **Previous tag** — the existing tag used as the starting point for release notes
+- **Release name**: auto-selected if only one release is defined in ``releases.yaml``;
+  otherwise pass ``RELEASE=<name>`` on the ``make`` command line to skip the prompt
+- **Build**: the index of the build to include, chosen from the builds found in each
+  target's ``ImageDir`` (pass ``--build=latest`` on a direct script invocation to
+  auto-select the newest build)
+- **Release version**: e.g., ``v1.2.3``
+- **Previous version**: the existing version used as the starting point for release
+  notes (press Enter for none)
 
 To generate release files locally without pushing to GitHub (dry run):
 
@@ -101,36 +105,38 @@ The ``firmwareRelease.py`` script automatically refuses to publish if any of the
 following conditions are true:
 
 - The local git repository has uncommitted changes (dirty working tree)
-- The specified previous tag does not exist locally and remotely
+- The specified previous tag does not exist locally or remotely
 - The new version tag already exists (prevents duplicate releases)
 
 Direct Script Invocation (Advanced)
--------------------------------------
+-----------------------------------
 
 For non-interactive use in CI or scripted workflows:
 
 .. code-block:: bash
 
-   cd $(RELEASE_DIR)
-   python3 $(RUCKUS_DIR)/scripts/firmwareRelease.py \
-     --project=$(TOP_DIR) \
+   cd <TOP_DIR>/release
+   python3 <TOP_DIR>/submodules/ruckus/scripts/firmwareRelease.py \
+     --project=<TOP_DIR> \
      --release=MyRelease \
      --build=latest \
      --version=v1.2.3 \
+     --prev=v1.2.2 \
      --push
 
-All arguments can also be passed via environment variables or combined with
-``make release`` overrides.
+Any argument that is omitted is prompted for interactively. The GitHub token is
+read from ``GITHUB_TOKEN`` unless ``--token`` is given. Through ``make``, only the
+release name can be preset (``make release RELEASE=MyRelease``).
 
 Troubleshooting
 ---------------
 
-**"Repository is dirty"**
+**"Cannot create tag! Git repo is dirty!"**
    Commit or stash all local changes before running ``make release``. The release
    script enforces a clean working tree to ensure that tagged releases reflect a
    known repository state.
 
-**"Tag already exists"**
+**"newTag=... already does exist"**
    Choose a higher version number. Git tags are permanent; do not delete and recreate
    tags once they have been pushed to GitHub.
 
@@ -138,6 +144,6 @@ Troubleshooting
    ``GITHUB_TOKEN`` is not set or has expired. Generate a new token with ``repo`` scope
    at https://github.com/settings/tokens and export it in your shell.
 
-**"'-' in relName"**
+**"Invalid release name. Release names with '-' are not support in python!"**
    Rename your release in ``releases.yaml``. Hyphens are not permitted in release
    names. Replace ``My-Release`` with ``MyRelease`` or ``My_Release``.

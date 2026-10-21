@@ -32,8 +32,8 @@ Replace the example paths with your actual PDK installation paths.
 Top-Level ruckus.tcl Structure
 ------------------------------
 
-Unlike the Vivado build flow (which automatically calls ``GenBuildString`` and
-``AnalyzeSrcFileLists`` internally), the Cadence Genus flow requires you to call
+Unlike the Vivado build flow (which calls ``GenBuildString`` automatically and
+has no ``AnalyzeSrcFileLists`` step), the Cadence Genus flow requires you to call
 these procedures explicitly in your project's top-level ``ruckus.tcl``. The
 ``GenBuildString`` call generates the build-metadata VHDL package; ``AnalyzeSrcFileLists``
 passes all source files collected by prior ``loadRuckusTcl`` calls to Genus for analysis.
@@ -73,8 +73,10 @@ Steps
 
       make behavioral_verilog
 
-   Runs ``genus -f behavioral_verilog.tcl`` to export the post-synthesis netlist.
-   Useful for downstream gate-level simulation or handoff to a P&R tool.
+   Runs ``genus -f behavioral_verilog.tcl``, which elaborates the design
+   (without synthesis) and writes a generic, technology-independent Verilog
+   netlist to ``$(IMAGES_DIR)/$(PROJECT).v``. Useful as a Verilog view of the
+   design for simulation or other downstream tools.
 
 3. **Run VCS simulation (if VCS is available):**
 
@@ -89,11 +91,12 @@ Output Artifacts
 
 After a successful ``make syn`` run, outputs are placed in the following locations:
 
-- ``$(OUT_DIR)/syn/`` — synthesis working directory
-- ``$(OUT_DIR)/syn/out/`` — output netlists and reports
-- ``$(OUT_DIR)/syn/out/reports/`` — timing and area reports
-- ``$(OUT_DIR)/syn/out/svf/`` — SVF (Scan and Test Verification File)
-- ``$(IMAGES_DIR)/`` — final promoted artifacts
+- ``$(OUT_DIR)/syn/``: synthesis working directory
+- ``$(OUT_DIR)/syn/out/``: output netlists, SDF, and SDC
+- ``$(OUT_DIR)/syn/out/reports/``: area, gates, timing, and power reports
+- ``$(OUT_DIR)/syn/out/svf/``: created for parity with the Design Compiler
+  flow (where it holds the Formality SVF); unused by Genus
+- ``$(IMAGES_DIR)/``: final promoted artifacts
 
 Key Variables
 -------------
@@ -127,7 +130,7 @@ Key Variables
 .. note::
 
    ``GIT_BYPASS = 1`` means the git dirty-state check is **disabled** by default.
-   ASIC flows typically manage provenance through other mechanisms (e.g., SVF).
+   ASIC flows typically manage provenance through other mechanisms.
    Set ``GIT_BYPASS = 0`` to re-enable the check if your flow requires it.
 
 See the :doc:`../reference/makefile_reference` for the complete variable reference.

@@ -16,10 +16,10 @@ Before running the simulation flow, ensure the following are in place:
 
 - ``ghdl`` binary installed and on PATH (version 2.0+ recommended)
 - ``gtkwave`` installed for waveform viewing
-- A ruckus project with ``system_ghdl.mk`` and a ``ghdl/load_source_code.tcl``
-  source enumeration file
-- ``yosys`` with GHDL plugin installed — only required if using
-  ``make export_verilog`` (optional step)
+- ``vhdeps`` installed (used by ``make analysis`` to order the sources)
+- A project ``ruckus.tcl`` tree that loads the design's VHDL sources
+- ``yosys`` with the GHDL plugin installed (only required for the optional
+  ``make export_verilog`` step)
 - Project ``Makefile`` includes ``system_ghdl.mk``
 
 Makefile Setup
@@ -31,14 +31,14 @@ Add the following to your project ``Makefile``:
 
    include $(TOP_DIR)/submodules/ruckus/system_ghdl.mk
 
-No PDK variables are required. GHDL uses only the VHDL sources enumerated by
-``ghdl/load_source_code.tcl``.
+No PDK variables are required. GHDL uses only the VHDL sources loaded by the
+project's ``ruckus.tcl`` tree.
 
 Steps
 -----
 
-GHDL uses a staged pipeline. Each step corresponds to a distinct GHDL command.
-Run targets in the order shown below.
+GHDL uses a staged pipeline. Steps 3 through 7 each correspond to a distinct
+GHDL command. Run targets in the order shown below.
 
 1. **Create output directories:**
 
@@ -46,7 +46,8 @@ Run targets in the order shown below.
 
       make dir
 
-   Creates ``$(OUT_DIR)`` and ``$(IMAGES_DIR)`` if they do not exist.
+   Removes any existing ``$(OUT_DIR)`` (``dir`` depends on ``clean``), then
+   creates ``$(OUT_DIR)`` and ``$(IMAGES_DIR)``.
 
 2. **Load source file list:**
 
@@ -54,8 +55,9 @@ Run targets in the order shown below.
 
       make load_source_code
 
-   Runs ``ghdl/load_source_code.tcl`` to enumerate the VHDL source files for
-   the project.
+   Runs ruckus's ``ghdl/load_source_code.tcl``, which generates the build
+   info package and loads the project's ``ruckus.tcl`` tree to enumerate the
+   VHDL source files.
 
 3. **Analyze VHDL sources** (``ghdl -a``):
 
@@ -63,8 +65,9 @@ Run targets in the order shown below.
 
       make analysis
 
-   Parses and type-checks all VHDL source files. Errors here indicate syntax or
-   type-checking problems in your HDL.
+   Parses and type-checks all VHDL source files in dependency order (computed
+   with ``vhdeps``). Errors here indicate syntax or type-checking problems in
+   your HDL.
 
 4. **Import design units** (``ghdl -i``):
 
@@ -80,8 +83,7 @@ Run targets in the order shown below.
 
       make elab_order
 
-   Writes the elaboration order to
-   ``$(IMAGES_DIR)/$(PROJECT).elab_order`` for reference.
+   Prints the elaboration order of the top-level design unit.
 
 6. **Build (elaborate) the design** (``ghdl -m``):
 
@@ -89,7 +91,9 @@ Run targets in the order shown below.
 
       make build
 
-   Elaborates the top-level design unit into a simulation executable.
+   Elaborates the top-level design unit into a simulation executable and
+   writes the source analysis order to ``$(IMAGES_DIR)/$(PROJECT).elab_order``
+   for reference.
 
 7. **Run simulation** (``ghdl -r``):
 
@@ -112,8 +116,10 @@ Run targets in the order shown below.
 .. note::
 
    Steps 1 through 7 can be run individually in sequence, or you can run
-   ``make tb`` directly. Because ``make tb`` declares all prior targets as
-   dependencies, it will execute the full chain automatically from a clean state.
+   ``make tb`` directly. Because ``make tb`` depends on every prior target
+   except ``analysis``, it executes the full chain automatically from a clean
+   state. ``make analysis`` is a standalone check and is not part of the
+   ``make tb`` chain.
 
 Optional: Export Synthesizable Verilog
 --------------------------------------
@@ -125,8 +131,9 @@ synthesizable Verilog netlist from the VHDL design:
 
    make export_verilog
 
-This runs ``yosys -m ghdl`` to synthesize the VHDL design into Verilog.
-This step is independent of the simulation flow and does not require GTKWave.
+This runs ``yosys -m ghdl`` to synthesize the VHDL design into Verilog,
+written to ``$(IMAGES_DIR)/$(PROJECT).v``. This step is independent of the
+simulation flow and does not require GTKWave.
 
 Key Variables
 -------------

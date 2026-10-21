@@ -1,5 +1,5 @@
 How to Integrate a MicroBlaze ELF Binary
-=========================================
+========================================
 
 **Goal:** Build a MicroBlaze C/C++ application, compile it to an ELF binary, and embed
 it into the Vivado bitstream.
@@ -39,12 +39,12 @@ Steps
 
    .. code-block:: bash
 
-      make vitis    # opens Vitis IDE (if vitis binary detected on PATH)
-      # or
-      make sdk      # opens Xilinx SDK (if only xsdk is available)
+      make vitis    # or: make sdk
 
-   The IDE workspace is created at ``$(OUT_DIR)/$(PROJECT).vitis``. Use the IDE to
-   write and debug your C/C++ application before building the ELF.
+   The two targets are aliases: both open the Vitis IDE when the ``vitis`` binary is
+   on ``PATH`` and fall back to Xilinx SDK (``xsdk``) otherwise. The Vitis workspace
+   is ``$(OUT_DIR)/$(PROJECT)_project.vitis`` (``.sdk`` for the SDK flow). Use the
+   IDE to write and debug your C/C++ application before building the ELF.
 
 2. **Build the ELF and embed it into the bitstream:**
 
@@ -55,18 +55,22 @@ Steps
    The ``make elf`` target automatically:
 
    - Opens the existing Vivado project
-   - Exports the hardware platform (``.xsa``)
+   - Exports the hardware platform (``$(OUT_DIR)/$(PROJECT).xsa``)
    - Creates a Vitis application project (``app_0``) scoped to ``$(EMBED_PROC)``
-   - Builds the ELF (``app_0/Release/app_0.elf``)
+     (through XSCT for Vitis 2025.x and older, or the Vitis Python API for
+     Vitis 2026.1 and newer)
+   - Builds the ELF and copies it to ``$(VITIS_ELF)``
    - Adds the ELF to Vivado sources, scoped to the MicroBlaze instance
    - Resets ``impl_1`` and reruns ``write_bitstream`` to embed the ELF
-   - Calls ``CreateFpgaBit`` to produce the final artifact
+   - Calls ``CreateFpgaBit`` (``CreateVersalOutputs`` on Versal) to produce the
+     final artifact
 
 Custom Hook
 -----------
 
-If ``$(VIVADO_DIR)/vitis.tcl`` exists in your project's ``vivado/`` directory, the
-entire Vitis project creation and build is replaced by that custom script. Use this for
+If ``vitis.tcl`` exists in your project's ``vivado/`` directory
+(``$(VIVADO_DIR)/vitis.tcl``), it replaces the entire Vitis project creation, ELF
+build, and bitstream rebuild. Use this for
 non-standard BSP configurations or multi-processor designs.
 
 Key Variables
@@ -106,7 +110,8 @@ Troubleshooting
    in the Vivado block design. Open the block design in Vivado and check the cell name.
 
 **"xsct: command not found"**
-   ``xsct`` ships with Vitis. If it is missing, verify that the full Vitis installation
+   ``xsct`` ships with Vitis 2025.x and older (Vitis 2026.1 and newer use the Vitis
+   Python API instead and do not need it). If it is missing, verify that the full Vitis installation
    (not just Vivado) is installed and that its ``settings64.sh`` is sourced. The
    ``xsct`` binary is in the Vitis ``bin/`` directory, not the Vivado ``bin/``
    directory.

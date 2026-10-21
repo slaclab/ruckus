@@ -7,10 +7,11 @@ Vivado project.
 .. note::
 
    Two HLS backends are available. Use the **Legacy Vitis HLS** backend
-   (``system_vitis_hls.mk``) if your project calls the ``vitis_hls`` binary (Vivado
-   2020.x and earlier workflows). Use the **Vitis Unified HLS** backend
+   (``system_vitis_hls.mk``) if your project calls the standalone ``vitis_hls``
+   binary (Vitis HLS 2021.1 or later; older versions are rejected by
+   ``HlsVersionCheck``). Use the **Vitis Unified HLS** backend
    (``system_vitis_unified_hls.mk``) if your project uses the ``vitis`` binary
-   (Vivado 2022.x and later unified toolchain).
+   (Vitis Unified IDE, 2023.2 and later).
 
 Legacy Vitis HLS
 ----------------
@@ -18,8 +19,10 @@ Legacy Vitis HLS
 Prerequisites
 ~~~~~~~~~~~~~
 
-- ``vitis_hls`` binary on PATH
+- ``vitis_hls`` binary on ``PATH``
 - A ``sources.tcl`` file at ``$(PROJ_DIR)/sources.tcl`` defining HLS source files
+- A ``directives.tcl`` file at ``$(PROJ_DIR)/directives.tcl`` (sourced
+  unconditionally by the build step)
 - Makefile includes ``system_vitis_hls.mk``
 
 Makefile include line:
@@ -61,7 +64,7 @@ Steps
 
       make gui
 
-**Output:** IP core placed in ``$(PROJ_DIR)/ip/``
+**Output:** IP core archive placed at ``$(PROJ_DIR)/ip/$(PROJECT).zip``
 
 Available Targets
 ~~~~~~~~~~~~~~~~~
@@ -126,7 +129,7 @@ Vitis Unified HLS
 Prerequisites
 ~~~~~~~~~~~~~
 
-- ``vitis`` binary on PATH (Vivado 2022.x or later unified toolchain)
+- ``vitis`` binary on ``PATH`` (Vitis Unified IDE, 2023.2 or later)
 - An ``hls_config.cfg`` file at ``$(PROJ_DIR)/hls_config.cfg``
 - Makefile includes ``system_vitis_unified_hls.mk``
 
@@ -152,7 +155,7 @@ Steps
       make build
 
    If ``vivado.syn_dcp=1`` is set in ``hls_config.cfg``, the build also generates
-   and renames a DCP file automatically.
+   a DCP file and renames it automatically.
 
 3. Run C-simulation only (faster iteration):
 
@@ -213,10 +216,10 @@ Key Variables
 
 .. note::
 
-   ``OUT_DIR`` in the Unified backend defaults to ``$(PROJ_DIR)/build`` — the output
-   is scoped to each project directory. In the legacy backend, the output directory is
-   within ``$(TOP_DIR)/build`` at the repository root. Keep this in mind when looking
-   for generated artifacts.
+   ``OUT_DIR`` in the Unified backend defaults to ``$(PROJ_DIR)/build``, so the
+   output is scoped to each project directory. In the legacy backend, the output
+   directory is ``$(TOP_DIR)/build/$(PROJECT)`` at the repository root. Keep this in
+   mind when looking for generated artifacts.
 
 Troubleshooting
 ---------------
@@ -231,7 +234,7 @@ Troubleshooting
       source /path/to/Vitis/settings64.sh
 
 **"vitis: command not found"**
-   The Unified backend requires the Vitis unified toolchain (2022.x or later). Source
+   The Unified backend requires the Vitis Unified IDE (2023.2 or later). Source
    the Vitis settings script and verify with:
 
    .. code-block:: bash

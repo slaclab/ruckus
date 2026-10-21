@@ -155,7 +155,7 @@ own:
 
 ``WAVES=1`` adds ``--trace-fst`` to the ``verilator`` build, so the dump above
 is written in FST format. ``make gtkwave`` sets ``WAVES=1`` for you and opens
-the ``.fst`` file.
+``$(PROJECT).fst``, so name the dump file to match.
 
 .. note::
 
