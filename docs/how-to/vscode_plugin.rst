@@ -117,8 +117,11 @@ Design Hierarchy
 Sources (ruckus.tcl)
    The ``loadRuckusTcl`` tree, with one node per ``ruckus.tcl``. For each
    loaded file it shows the library, the ``sim`` tag, and the
-   ``ruckus.tcl:line`` that loaded it. Load problems (missing directory, bad
-   extension, Tcl error) also appear in the Problems panel. The view also
+   ``ruckus.tcl:line`` that loaded it. Load problems also appear in the
+   Problems panel: a missing directory, a bad extension, a Tcl error, an
+   ``exit`` call (where a real build aborts), and a relative ``-path`` or
+   ``-dir`` (Vivado resolves it against ``OUT_DIR``, not the source tree; use
+   ``$::DIR_PATH``). The view also
    lists the project's hook scripts (see :doc:`../reference/hook_scripts`).
 
 Libraries & Categories

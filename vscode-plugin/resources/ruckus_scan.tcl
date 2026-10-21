@@ -168,6 +168,13 @@ proc ::rs::collect {cmd kind o exts extra} {
       ::rs::problem "$cmd: Cannot specify both -path and -dir"
       return
    }
+   # Vivado runs in OUT_DIR, not in the source tree: a relative path that the
+   # scan resolves (cwd = PROJ_DIR) aborts the real build
+   foreach {opt v} [list -path $path -dir $dir] {
+      if {$v ne "" && [file pathtype $v] ne "absolute"} {
+         ::rs::problem "$cmd: $opt \"$v\" is relative; Vivado resolves it against OUT_DIR. Use \"\$::DIR_PATH/$v\"" warning
+      }
+   }
    lassign [::rs::loc] file line
    set node [::rs::current]
    if {$path ne ""} {
@@ -362,19 +369,31 @@ proc add_files {args} {
    return ""
 }
 
-proc exit {args} { error "__ruckus_exit__" }
+# A real build aborts at `exit`: report it where it was called, then stop the scan
+rename exit ::rs::realexit
+proc exit {args} {
+   set code [expr {[llength $args] ? [lindex $args 0] : 0}]
+   if {$code != 0} {
+      ::rs::problem "exit $code: the build would abort here"
+   } else {
+      ::rs::problem "exit: the build would stop here" warning
+   }
+   error "__ruckus_exit__"
+}
 proc exec {args} { return "" }
 
 # `source` of the ruckus proc library is a no-op; anything else is evaluated
 rename source ::rs::realsource
 proc source {args} {
-   set f [lindex $args 0]
-   if {$f eq "-notrace" || $f eq "-quiet"} { set f [lindex $args 1] }
+   # The file is the last argument (source ?-encoding name? ?-notrace? ?-quiet? file)
+   set f [lindex $args end]
+   set opts [lrange $args 0 end-1]
+   set enc [lsearch -exact $opts -encoding]
+   set encArgs [expr {$enc >= 0 ? [lrange $opts $enc [expr {$enc + 1}]] : {}}]
    # Anything inside RUCKUS_DIR (vivado/proc.tcl, vivado_proc.tcl, shared/proc.tcl,
    # ...) is the real ruckus library and would overwrite the stubs above.
    set nf [file normalize $f]
-   if {$f eq $::env(RUCKUS_PROC_TCL) || [string match */vivado/proc.tcl $f] ||
-       [string match *proc.tcl $f] && [string match *ruckus* $f] ||
+   if {($::env(RUCKUS_PROC_TCL) ne "" && $nf eq [file normalize $::env(RUCKUS_PROC_TCL)]) ||
        ($::env(RUCKUS_DIR) ne "" &&
         [string first [file normalize $::env(RUCKUS_DIR)]/ $nf] == 0)} {
       return
@@ -383,7 +402,7 @@ proc source {args} {
       ::rs::problem "source: $f doesn't exist" warning
       return
    }
-   uplevel 1 [list ::rs::realsource $f]
+   uplevel 1 [list ::rs::realsource {*}$encArgs $f]
 }
 
 proc package {args} {
@@ -403,3 +422,4 @@ set projDir [file normalize [lindex $argv 0]]
 ::rs::emit t start proj $projDir arch [getFpgaArch]
 loadRuckusTcl $projDir
 ::rs::emit t done
+::rs::realexit 0
