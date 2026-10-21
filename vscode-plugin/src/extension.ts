@@ -100,7 +100,10 @@ export function activate(ctx: vscode.ExtensionContext) {
         const v = cfg().get<string>('vivadoVersion', '');
         const def = setup ? parseSetupScript(setup).defaultVersion : undefined;
         vivadoStatus.text = `$(versions) Vivado ${v || def || '(PATH)'}`;
+        const ignored = setup && v && !parseSetupScript(setup).takesVersionArg;
+        vivadoStatus.text = `$(versions) Vivado ${ignored ? def ?? v : v || def || '(PATH)'}${ignored ? ' $(warning)' : ''}`;
         vivadoStatus.tooltip = (setup ? `make runs after: source ${setup}${v ? ' ' + v : ''}` : 'No setup script: make uses the Vivado found on PATH') +
+            (ignored ? `\n${path.basename(setup!)} ignores its argument: the selected ${v} only affects the scan` : '') +
             '\nClick to select the Vivado version';
         vivadoStatus.show();
     };
@@ -444,7 +447,7 @@ export function activate(ctx: vscode.ExtensionContext) {
 
     reg('ruckus.selectVivadoVersion', async () => {
         const setup = setupScript(project);
-        const info = setup ? parseSetupScript(setup) : { defaultVersion: undefined, installRoots: [] };
+        const info = setup ? parseSetupScript(setup) : { defaultVersion: undefined, installRoots: [], takesVersionArg: false };
         const current = cfg().get<string>('vivadoVersion', '');
         type Item = vscode.QuickPickItem & { value?: string };
         const items: Item[] = [{
@@ -516,9 +519,9 @@ export function activate(ctx: vscode.ExtensionContext) {
         resolveTask: (task) => {
             const d = task.definition as { target?: string; dir?: string; args?: string[] };
             if (!d.target) { return undefined; }
-            const dir = d.dir ? resolveVars(d.dir) : project?.target.dir;
+            const dir = d.dir ? resolveVars(d.dir, project) : project?.target.dir;
             if (!dir) { return undefined; }
-            return buildTask(d.target, dir, (d.args ?? []).map(a => resolveVars(a)), project, task.definition);
+            return buildTask(d.target, dir, (d.args ?? []).map(a => resolveVars(a, project)), project, task.definition);
         },
     }));
 
@@ -625,9 +628,12 @@ function envSteps(proj: RuckusProject | undefined, needVivado: boolean): string[
     const version = vscode.workspace.getConfiguration('ruckus').get<string>('vivadoVersion', '');
     const steps: string[] = ['set -o pipefail'];
     if (setup) {
-        // The setup script takes the Vivado version as $1 (setup_env_slac.sh convention)
+        // Opt-in convention: a setup script that reads $1 gets the selected Vivado version
         const src = `source ${quote(setup)}${version ? ' ' + quote(version) : ''}`;
         steps.push(`echo ${quote('==> ' + src)}`, `${src} || echo ${quote(`warning: ${path.basename(setup)} returned an error`)}`);
+        if (version && !parseSetupScript(setup).takesVersionArg) {
+            steps.push(`echo ${quote(`warning: ${path.basename(setup)} ignores its argument, so ruckus.vivadoVersion=${version} has no effect on make`)}`);
+        }
     }
     if (needVivado) {
         steps.push(`if command -v vivado >/dev/null; then echo "==> vivado: $(command -v vivado)"; ` +
@@ -700,12 +706,13 @@ function scanVivadoVersion(t: RuckusTarget): string {
     const v = cfg.get<string>('vivadoVersion', '');
     if (v) { return v; }
     const s = cfg.get<string>('setupScript', '');
-    const script = s ? resolveVars(s, project?.target.dir === t.dir ? project : undefined) :
-        findSetupScript(path.resolve(t.dir, '..', '..'), 1);
+    // The project of t may not be loaded yet: derive ${topDir} from the target directory
+    const topDir = project?.target.dir === t.dir ? project.topDir : path.resolve(t.dir, '..', '..');
+    const script = s ? resolveVars(s, { topDir, target: t }) : findSetupScript(topDir, 1);
     return (script && parseSetupScript(script).defaultVersion) || '2024.2';
 }
 
-function resolveVars(s: string, proj = project): string {
+function resolveVars(s: string, proj: { topDir: string; target: { dir: string } } | undefined): string {
     const ws = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '';
     const version = vscode.workspace.getConfiguration('ruckus').get<string>('vivadoVersion', '');
     const file = vscode.window.activeTextEditor?.document.uri.fsPath ?? '';

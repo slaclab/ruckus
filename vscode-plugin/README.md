@@ -61,8 +61,10 @@ and `for generate` loops are shown once.
 **Make Targets**: targets of the selected top level, mostly inherited from
 `ruckus/system_*.mk`, plus the firmware-level `Makefile` (`build`, `clean` for all targets):
 - ▶ runs `make <target>` in a dedicated terminal (as a VS Code task, with a Vivado problem matcher).
-  The firmware's `setup_env_slac.sh` is sourced first, with the selected Vivado version as argument
-  (`source setup_env_slac.sh 2025.1`), so `vivado`/`vcs` are on the PATH
+  The firmware's `setup_env_slac.sh` is sourced first, so `vivado`/`vcs` are on the PATH. The Vivado version
+  is read from it (e.g. `source .../2026.1/Vivado/2026.1/settings64.sh`) and used by the scan. A version
+  selected in the status bar is passed as `$1` (`source setup_env_slac.sh 2025.1`); this is opt-in and only
+  affects `make` if the script reads `$1`
 - the Vivado version is picked from the status bar or the view toolbar (**Ruckus: Select Vivado Version**);
   installed versions are listed from the install path found in the setup script
 - the make output is also saved to `build/logs/<target>_<goal>.log`; **Follow Build Log...** tails it,
@@ -115,7 +117,7 @@ Other: status-bar top-level picker, explorer context menu **Ruckus: Use as Top L
 | Setting | Default | |
 |---|---|---|
 | `ruckus.tclsh` | `tclsh` | Tcl shell used for the scan |
-| `ruckus.setupScript` | | sourced before `make` with the Vivado version as `$1`, e.g. `${topDir}/setup_env_slac.sh` |
+| `ruckus.setupScript` | | sourced before `make`, e.g. `${topDir}/setup_env_slac.sh`; gets the selected Vivado version as `$1` |
 | `ruckus.autoSourceSetupScript` | `true` | source `firmware/setup_env_slac.sh` (or `setup_env*.sh`) when `setupScript` is empty |
 | `ruckus.env` | `{}` | extra variables for the scan, e.g. `{"RUCKUS_SIM_BACKEND":"vcs"}` |
 | `ruckus.vivadoVersion` | | Vivado version passed to the setup script and assumed by the scan (empty: script default) |

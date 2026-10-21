@@ -10,6 +10,8 @@ export interface SetupScriptInfo {
     defaultVersion?: string;
     /** Directories containing one sub-directory per Vivado version (from `.../$VIVADO_VERSION/...` paths) */
     installRoots: string[];
+    /** The script reads its first argument ($1), so the selected version is passed to it */
+    takesVersionArg: boolean;
 }
 
 const VERSION_RE = /^\d{4}\.\d+$/;
@@ -32,7 +34,7 @@ export function findSetupScript(dir: string, levels = 3): string | undefined {
 
 export function parseSetupScript(file: string): SetupScriptInfo {
     let text = '';
-    try { text = fs.readFileSync(file, 'utf8'); } catch { return { installRoots: [] }; }
+    try { text = fs.readFileSync(file, 'utf8'); } catch { return { installRoots: [], takesVersionArg: false }; }
     const lines = text.split('\n').filter(l => !/^\s*#/.test(l));
     let defaultVersion: string | undefined;
     const roots = new Set<string>();
@@ -41,8 +43,17 @@ export function parseSetupScript(file: string): SetupScriptInfo {
         if (m && !defaultVersion) { defaultVersion = m[1]; }
         const p = /(\/[^\s"'$;]*\/)\$\{?VIVADO_VERSION\}?/.exec(l);
         if (p) { roots.add(p[1].replace(/\/+$/, '')); }
+        // Hard-coded install: source /.../xilinx/2026.1/Vivado/2026.1/settings64.sh
+        const s = /(\/[^\s"'$;]*)\/settings64\.sh/.exec(l);
+        const parts = s ? s[1].split('/') : [];
+        const i = parts.findIndex(x => VERSION_RE.test(x));
+        if (i > 0) {
+            if (!defaultVersion) { defaultVersion = parts[i]; }
+            roots.add(parts.slice(0, i).join('/'));
+        }
     }
-    return { defaultVersion, installRoots: [...roots] };
+    const takesVersionArg = lines.some(l => /\$\{?1\b|\$@|\$\*/.test(l));
+    return { defaultVersion, installRoots: [...roots], takesVersionArg };
 }
 
 const COMMON_ROOTS = ['/opt/Xilinx/Vivado', '/tools/Xilinx/Vivado', '/opt/Xilinx', '/tools/Xilinx'];

@@ -139,8 +139,13 @@ Run make
 --------
 
 Before ``make``, every task sources the firmware's ``setup_env_slac.sh`` (or
-``ruckus.setupScript``) with the selected Vivado version as its argument.
-To choose the version, click the Vivado item in the status bar. The
+``ruckus.setupScript``). The Vivado version is read from the script, for
+example from ``source .../2026.1/Vivado/2026.1/settings64.sh``, and the scan
+uses it as ``VIVADO_VERSION``. To choose another version, click the Vivado
+item in the status bar. The selection is passed to the script as its first
+argument, which is opt-in: it only changes the Vivado used by ``make`` if
+the script reads ``$1`` (for example ``VIVADO_VERSION=${1:-2025.1}``).
+Otherwise the status bar shows a warning and only the scan uses it. The
 make output is also saved to ``build/logs/<target>_<goal>.log``. To tail that
 log, or any Vivado log in the build directory, run
 **Ruckus: Follow Build Log...**.
