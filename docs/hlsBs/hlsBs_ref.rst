@@ -302,13 +302,13 @@ The setup itself has 3 distinct pieces. These establish
 
 1. The **hlsBs** command set
 
-  - Makes the **hlsBs** commands available to the *bash* shell.
-  - There is no dependency on the Vitis version or your specific project, so
-    this can be a one-time login thing.
+   - Makes the **hlsBs** commands available to the *bash* shell.
+   - There is no dependency on the Vitis version or your specific project, so
+     this can be a one-time login thing.
 
 2. The Vitis version to use
 
-  - Once selected, viable until it is changed.
+   - Once selected, viable until it is changed.
 
 3. Your :ref:`project <project_file-label>` specific setup
 
@@ -417,7 +417,7 @@ two steps can be done in any order.
 
        .. code-block:: bash
 
-          hlsToolChain() {export HLSBS_XILINX_SETUP='/sdf/group/faders/tools/xilinx/${version}';`}
+          hlsToolChain() { export HLSBS_XILINX_SETUP='/sdf/group/faders/tools/xilinx/${version}'; }
 
        .. admonition:: Recommendation
          :class: tip
@@ -442,15 +442,15 @@ two steps can be done in any order.
        file path/name, then some other way of selecting and setting up
        the Vitis version must be used.
 
-  - Defining this environment variable can be omitted if some other
-    method of selecting and invoking the desired Vitis setup script
-    is preferred. However, the full functionality of the command
-    **hlsVersion** <*version*> depends on this environment variable, so
-    the convenience of easily switching versions will be lost.
+   - Defining this environment variable can be omitted if some other
+     method of selecting and invoking the desired Vitis setup script
+     is preferred. However, the full functionality of the command
+     **hlsVersion** <*version*> depends on this environment variable, so
+     the convenience of easily switching versions will be lost.
 
-  ..
+   ..
 
-  - Try it, you'll like it.
+   - Try it, you'll like it.
 
 2. Source the **hlsBs** setup script
 
@@ -487,7 +487,7 @@ two steps can be done in any order.
    - Once the Xilinx/Vitis version has been established, the internal
      **hlsBs** version dependent context is initialized.
 
-   - Again, no project specific context is setup.
+   - Again, no project specific context is set up.
 
    - Example:
 
@@ -518,7 +518,7 @@ repository for more of a *How-To*.
    :header-rows: 1
 
    * - Command
-     - Descriptions
+     - Description
    * - hlsBs
      - Provides a quick summary of all the commands, basically the online version of this section.
    * - hlsVersion
@@ -584,7 +584,7 @@ it seems particularly vulnerable.
 
 ..
 
-2. Do not place a positional parameters immediately following an optional
+2. Do not place a positional parameter immediately following an optional
    parameter that accepts a value or list of values.  Since the bash shell
    enforces no formal binding or grouping, a positional parameter juxtaposed
    to such an optional parameter will be *eaten* by that optional parameter.
@@ -712,7 +712,7 @@ and **HLSBS_IP** environment variables are useful for one-off ad-hoc
 experimentation. Products produced during such experimentation can be
 redirected so as to not pollute the regular directories.
 
-**HLSBS_INI** is a :ref:`advanced feature <parameter_files-label>`
+**HLSBS_INI** is an :ref:`advanced feature <parameter_files-label>`
 allowing one to collect a number of :ref:`parameter files <parameter_files-label>`
 used to modify command line parameters in a colon separated list of such files.
 
@@ -753,12 +753,12 @@ a single test bench and hls file, reducing it to a *fill-in-the-form* exercise.
     class initialized with the values from the project dependent project file.
 
 .. warning::
-     
+
    A downside of the Project File is only the basic settings are available.
    Due to the sheer number and the fact that some change Vitis release to
    release, it was practical to implement only the most basic. If experience
    shows that these are needed, a method of adding these via a user provided
-   Python method can be added. 
+   Python method can be added.
 
 .. _product_parameter-label:
 
@@ -766,8 +766,8 @@ Environment Variables & Product Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Environment variables (both the
 :ref:`hlsBs defined ones <environment_variables-label>` and user defined project
-specific ones) and product parameters- think of them as
-variables in a programming language - are used extensively in the project file. This
+specific ones) and product parameters (think of them as
+variables in a programming language) are used extensively in the project file. This
 is one of the primary advantages of **hlsBs** over the standard
 Xilinx/Vitis/HLS methods.  It allows for abstraction; instead of hard-coding,
 environment variables and product parameters, such as product parameter representing
@@ -781,7 +781,7 @@ Python class, having a name (generally referred to in this document as the *pref
 and a set of attributes. An example might be *fpga.part*.  These can be used within
 the project file as references to their actual values for the product being constructed.
 For example, in a project file defining products with different FPGAs, *fpga.part* is
-the FPGA part for each specific product. 
+the FPGA part for each specific product.
 
 Conventions: What to Name the Project File & Where to Put It
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -882,7 +882,7 @@ the directory structure above
 
 .. code-block:: python
 
-   def get_project_root (project) : return os.path.dirname(os.path.dirname(__file__)
+   def get_project_root (project) : return os.path.dirname(os.path.dirname(__file__))
 
 or the more modern and syntactically cleaner
 
@@ -909,7 +909,7 @@ This returns the umbrella directory where the various products (workspace,
 configuration files, ip) are placed.  While **hlsBs** provides the
 ability to individually place these anywhere, it is convenient to place
 these within a common directory. Doing so allows one to remove all products
-with a simple `rm -rf <products_dir>`.
+with a simple ``rm -rf <products_dir>``.
 
 Example
 
@@ -987,7 +987,7 @@ This returns the location of the workspace directory. Example
 
 .. code-block:: python
 
-   def get_workspace (project) :	return '$MY_WORKSPACE'
+   def get_workspace (project) : return '$MY_WORKSPACE'
 
 or locate it relative to the build directory
 
@@ -1042,7 +1042,7 @@ This is the default.
    A reason not to locate it relative to the build directory is if you wish
    the configuration files to be committed to *git*.  This is not usual, but
    **hlsCfg** ensures that all file references that can be made relative to
-   the project directory are. If resulting configuration contains no
+   the project directory are. If the resulting configuration contains no
    absolute file paths, it can be checked out of *git* and used as is. A
    reasonable alternative is to locate the configuration directory relative
    to the *projects.products* directory.
@@ -1076,7 +1076,7 @@ This is the default.
     Locate the ip directory relative to the products directory and include
     the Vitis version.
 
-.. admonition:: warning
+.. warning::
 
    The *.dcp* and *.zip* files can be large.  If committing to git, consider
    adding
@@ -1182,13 +1182,13 @@ get_products - An example
        verbose       = Product.DefineValue  (name  = 'VERBOSE',
                                              value = 'true')
 
-       # --------=--------------------------------------------------
+       # -----------------------------------------------------------
        # Includes an explicitly named file to the source code
        # #include IMPORT_FILE(OPT_FILE)
        # The actual path generated is relative to the <include_path>
-       # ---------=-------------------------------------------------
+       # -----------------------------------------------------------
        opt_file      = Product.IncludeFile  (name     = 'OPT_FILE',
-                                             file     = 'opt/Opt1.hh'
+                                             file     = 'opt/Opt1.hh',
                                              rel_path = include_path)
 
        # -----------------------------------------------------
@@ -1197,7 +1197,7 @@ get_products - An example
        #       The synthesis needs only opt_file
        # -----------------------------------------------------
        tb_srcs       = Product.Sources (root     = code_root,
-                                        files    = 'src/example/ExampleTb.cc'.
+                                        files    = 'src/example/ExampleTb.cc',
                                         includes = include_paths,
                                         defines  = (verbose, opt_file))
 
@@ -1210,11 +1210,11 @@ get_products - An example
        # Creates a build
        # ---------------
        build         = Product.Build  (id         = 'example',
-                                       top        = 'doit'
+                                       top        = 'doit',
                                        tb         = tb_srcs,
                                        syn        = syn_srcs,
                                        csim_argv  = '--ntests=10',
-                                       cosim_argv = '--ntests=100'} )
+                                       cosim_argv = '--ntests=100')
 
        # -------------------------------------------------------------------
        # Defines the FPGAs to use. Here 2 are defined as a tuple, but a list
@@ -1225,7 +1225,7 @@ get_products - An example
                                       clock       = '6',
                                       uncertainty = None),
 
-                        Product.Fpga (id          = '5ns,
+                        Product.Fpga (id          = '5ns',
                                       part        = 'xcku115-flvb2104-2-i',
                                       clock       = '5',
                                       uncertainty = None))
@@ -1257,7 +1257,7 @@ get_products - An example
        #   - the template is not an absolute file path (use product.cfg_root)
        #   - the extension is omitted (use '.cfg').
        # --------------------------------------------------------------------
-       cfg_template = Product.CfgTemplate  (prefix     = 'cfg'
+       cfg_template = Product.CfgTemplate  (prefix     = 'cfg',
                                             template   = '{build.id}-{fpga.id}')
 
        # ----------------------------------------------------------------------
@@ -1294,7 +1294,7 @@ get_products - An example
        #      '{git.branch}'
        #      '{git.hash_short}'
        #      '{git.hash_long}'
-       #      '{git.hash_msg
+       #      '{git.hash_msg}'
        #    or any combination.
        # ---------------------------------------------------------
        package_ip     = Product.Package.Ip     (name     = '{cfg.name}',
@@ -1358,7 +1358,7 @@ IncludePaths
 
    include_paths = Product.IncludePaths (root  = code_root,
                                          paths = 'include',
-                                         type  = 'rel_path)
+                                         type  = 'rel_path')
 
 ..
 
@@ -1429,7 +1429,7 @@ DefineValue
 
 This simply results in the macro definition, ``#define VERBOSE true``
 in the source code. It is made available to the relevant source code
-files via the `defines =` parameter in the
+files via the ``defines =`` parameter in the
 :ref:`Product.Sources <product_sources-label>`.
 
 .. list-table:: Define Value Parameters
@@ -1447,7 +1447,7 @@ files via the `defines =` parameter in the
 
     The advanced topic section, see
     :ref:`Product.CtbValues <product_ctb_values-label>`, shows how
-    to use a per component product parameters value, replacing the explicit
+    to use a per-component product parameter value, replacing the explicit
     value, to leverage *Product.DefineValue* to generate multiple
     components each with a different value of the macro name.
 
@@ -1456,8 +1456,8 @@ IncludeFile
 
 .. code-block:: python
 
-   opt_file = Product.IncludeFile (name     = 'OPT_FILE'
-                                   file     = 'opt/Opt1.hh'
+   opt_file = Product.IncludeFile (name     = 'OPT_FILE',
+                                   file     = 'opt/Opt1.hh',
                                    rel_path = include_path)
 
 This forces an include of the file *include_path/opt/Opt1.hh* into the source
@@ -1479,8 +1479,8 @@ file.
    * - rel_path
      - The file is located relative to this path
 
-This introduces a ``#define OPT_FILE opt/Opt.hh`` into the *Product.Sources*
-by specifying the `defines = opt_file` parameter. It is a variation of
+This introduces a ``#define OPT_FILE opt/Opt1.hh`` into the *Product.Sources*
+by specifying the ``defines = opt_file`` parameter. It is a variation of
 *Product.DefineValue* for including files which has special semantics when
 explicitly including a file with a macro name.
 
@@ -1519,7 +1519,7 @@ Sources
 .. code-block::  python
 
    tb_srcs  = Product.Sources (root     = code_root,
-                               files    = 'src/example/ExampleTb.cc'.
+                               files    = 'src/example/ExampleTb.cc',
                                includes = include_paths,
                                defines  = (verbose, opt_file))
 
@@ -1589,7 +1589,7 @@ Build
                                   tb         = tb_srcs,
                                   syn        = syn_srcs,
                                   csim_argv  = '--ntests=10',
-                                  cosim_argv = '--ntests=100'} )
+                                  cosim_argv = '--ntests=100')
 
 This defines all the ingredients necessary to build the *csim*, *synthesis*, *cosim*,
 *etc.*
@@ -1628,7 +1628,7 @@ Fpga
        fpgas = (Product.Fpga (id          = '6ns',
                               part        = 'xcku115-flvb2104-2-i',
                               clock       = '6',
-                              uncertainty = None)
+                              uncertainty = None),
 
 
                 Product.Fpga (id          = '5ns',
@@ -1655,7 +1655,7 @@ are defined.
    * - clock
      - The FPGA clock, can include all the usual units like MHz, ns, etc
    * - uncertainty
-     - The uncertainty in absolute time units or percentage, None = the
+     - The uncertainty in absolute time units or percentage (None = the
        default 15%)
 
 
@@ -1672,7 +1672,7 @@ in uniquely naming the components.
    *id* serves as a convenient user chosen nickname for the FPGA specification.
 
 .. admonition:: Recommendation
-   :Class: tip
+   :class: tip
 
    Choose a meaningful name for the *id* so it is apparent from the component
    name what it means.  Ids such as 'f0' and 'f1' convey little.
@@ -1698,7 +1698,7 @@ much of the  information needed to generate and identify the *csim.exe*,
    * - Parameter
      - Meaning
    * - prefix
-     - The prefix used when referencing build's identifier, *i.e. *{build.id}*
+     - The prefix used when referencing build's identifier, *i.e.* *{build.id}*
    * - builds
      - | A single, list or tuple of named builds where each named build
        | consists of an identifier and its *Product.Build* expressed as
@@ -1732,8 +1732,8 @@ Contributors
 
 .. code-block:: python
 
-   contributors = Product.Contributors (builds = ctb_builds,
-                                        fpgas  = ctb_fpgas)
+   contributors = Product.Contributors (ctb_builds = ctb_builds,
+                                        ctb_fpgas  = ctb_fpgas)
 
 This collects all the contributors to eventually be used in defining a
 *component*.
@@ -1743,9 +1743,9 @@ This collects all the contributors to eventually be used in defining a
 
    * - Parameter
      - Meaning
-   * - builds
+   * - ctb_builds
      - a single, list or tuple of *Product.CtbBuilds*
-   * - fpgas
+   * - ctb_fpgas
      - a single, list or tuple of *Product.CtbFpgas*
 
 A component is composed of a number of contributors. The minimum component
@@ -1765,7 +1765,7 @@ instance of *Product.CtbFpgas*.
 
 To aid in composing unique names for the configuration file paths and
 components, attributes of the build and FPGAs can be accessed using
-*build* and *fpga* prefix strings that appear in the above specification.
+*build* and *fpga* prefix strings that appear in the above specification
 to form :ref:`product parameters <product_parameter-label>`. Think of the *prefix*
 as an instantiated class in Python or C++ with the attributes as its field members.
 
@@ -1854,6 +1854,7 @@ Here the configuration file's name is composed of the
 - If no file extension has been provided, *.cfg* is used.
 
 .. admonition:: Recommendation
+   :class: tip
 
    Use product parameters to generate the configuration file name, even in a simple
    HLS project consisting of a single component. This accommodates future changes.
@@ -1867,7 +1868,7 @@ Here the configuration file's name is composed of the
      ``Bld_{build.id}-Fpga_{fpga.id}`` to add meaning or increase clarity.
 
 
-Configuration file attributes and their derive product parameters are as follows.
+Configuration file attributes and their derived product parameters are as follows.
 These are useful in naming other products such as the component and the ip products.
 In this example ``<prefix> = cfg``
 
@@ -2060,14 +2061,14 @@ Two noteworthy things:
      .. warning::
 
         Only the branch is guaranteed to be immediately available. The others,
-        *git.tag*, *git.hash_short* and *git.hash_long* and *git.hash_msg* are
+        *git.tag*, *git.hash_short*, *git.hash_long* and *git.hash_msg* are
         only valid after a *git* commit. These will come up as *None* or *Dirty*
         if the current code has not been committed.
 
         For testing, since one can know the *git tag* prior to formally defining it
         to *git*, one option is to specify the version on the command line. Of
         course this *pre-commit* option is not possible for the *git* hashes and
-        could be a bit dicey if the evventual actual git tag is not the same.
+        could be a bit dicey if the eventual actual git tag is not the same.
 
 Package.Output
 ~~~~~~~~~~~~~~
@@ -2101,15 +2102,15 @@ Package
 Simply combines *Product.Package.Ip* and *Product.Package.Output* into a single
 class.
 
- .. list-table::  Package Parameters
-    :header-rows: 1
+.. list-table::  Package Parameters
+   :header-rows: 1
 
-    * - Parameter
-      - Meaning
-    * - ip
-      - The instantiation of *Product.Package.Ip*
-    * - output
-      - The instantiation of *Product.Package.Output*
+   * - Parameter
+     - Meaning
+   * - ip
+     - The instantiation of *Product.Package.Ip*
+   * - output
+     - The instantiation of *Product.Package.Output*
 
 
 Vivado
@@ -2207,7 +2208,7 @@ Annotated get_ip
            # -------------------------------------------------------
            # Placing the .dcp and .ip in the product_root/ directory
            # will generally mean these files are committed to git.
-           # Given that these files are likely very dependent to the
+           # Given that these files are likely very dependent on the
            # Vitis version that produced them, including the Vitis
            # version is sensible.
            # -------------------------------------------------------
@@ -2229,7 +2230,7 @@ Annotated get_ip
            # The <project.build>/ip directory is the default stem.
            # By placing them in the build directory, they will
            # not (if the .build directory is set in '.gitignore')
-           # be committed to git..
+           # be committed to git.
            # -----------------------------------------------------
            dgn_dir    = 'dgn/',
            jou_file   = '{dcp_name}',
@@ -2253,7 +2254,7 @@ parameter value to *None*. To accept *all* the defaults, either
 
 .. note::
    The default ip directory is in the *products/* directory. Without
-   a special entry in *.gitignore*. the *.dcp* and *.zip* file will be committed
+   a special entry in *.gitignore*, the *.dcp* and *.zip* file will be committed
    to *git*.  This is usually the desired behavior. Since these files can be
    large, add the following to the *.gitattributes* file.
 
@@ -2392,7 +2393,7 @@ project versions.
 
 
 If there is no *git* repository, these return as *None*.
-       
+
 Advanced Usage
 ==============
 The above covers the basics, but with usage, common repeating patterns occur.
@@ -2456,7 +2457,7 @@ Consider a *Product.Components* definition with
 - A *CtbFiles* with 5 files
 
 The number of generated components will be 2 * 3 * 4 * 5 = 120. This may
-take awhile to build all the output products. However, it is this ability
+take a while to build all the output products. However, it is this ability
 to easily generate many components that enables experimentation and testing
 of a large number of variations of a package.
 
@@ -2518,13 +2519,13 @@ Example:
 
     Where:
 
-    .. list-table: Value Product Parameters
+    .. list-table:: Value Product Parameters
        :header-rows: 1
 
        * - Parameter
          - Meaning
        * - id
-         - A string identifying this value,
+         - A string identifying this value
        * - value
          - A string giving the value
 
@@ -2543,9 +2544,9 @@ Example:
     - *None*
 
     If an empty string or *None*, the *id* will be the *value*. This should only
-    be used in very simple cases, since the default of using the *value* maybe
+    be used in very simple cases, since the default of using the *value* may be
     awkward or fail to convey meaning when used to generate a configuration or
-    component name.s
+    component name.
 
 2.  Instantiate the value contributors using the previously
     created *Product.Value*'s
@@ -2590,9 +2591,9 @@ Example:
 
 ..
 
-3.  As in the original project file example
+3. As in the original project file example
 
-   - Instantiate a  *Product.DefineValue* to be used in *Product.SourceFiles*
+   - Instantiate a *Product.DefineValue* to be used in *Product.Sources*
 
 
    .. code-block:: python
@@ -2602,10 +2603,10 @@ Example:
 
    - Modify the cfg_template
 
-    .. code-block:: python
+   .. code-block:: python
 
-       cfg_template = Product.CfgTemplate (prefix   = 'cfg'
-                                           template = '{build.id}-{verbosity.id}-{fpga.id}')
+      cfg_template = Product.CfgTemplate (prefix   = 'cfg',
+                                          template = '{build.id}-{verbosity.id}-{fpga.id}')
 
    Note the only difference is the use of product parameters
 
@@ -2694,7 +2695,7 @@ generated by the following
 .. code-block:: python
 
    ctb_files = Product.CtbFiles (prefix = 'opt',
-                                 files  = os.path.join (code_root, 'opt', '*.hh')
+                                 files  = os.path.join (code_root, 'opt', '*.hh'))
 
 
 The following product parameters are made available:
@@ -2726,7 +2727,7 @@ The following product parameters are made available:
 - The *name*  attribute can be useful in constructing the configuration file
   path and the component name, *i.e.* ``{<prefix>.name}``
 - The *path* is used in the *Product.IncludeFile* to reference the full path
-  name, *i.e.* ``{<prefix>.path>}``. It is the value of the defined macro name.
+  name, *i.e.* ``{<prefix>.path}``. It is the value of the defined macro name.
 
 2. Adding *ctb_files* to the *Product.Contributors* class after the
    *Product.CtbBuilds* and *CtbFpgas* contributors.
@@ -2745,7 +2746,7 @@ The following product parameters are made available:
 
    opt_file  = Product.IncludeFile (name     = "MY_OPT",     # Name of #define
                                     file     = '{opt.path}', # File to include
-                                                             # (from attribute table below)
+                                                             # (from attribute table above)
                                     rel_path = include_path) # Reference by a relative path
 
 Note that the only difference in *Product.IncludeFile* from the example project
@@ -2775,7 +2776,7 @@ Each file satisfying the wildcard generates a new component.
    SNL uses this to great advantage. All SNL networks use the same testbench
    and HLS synthesis code with only the network definition changing. SNL
    network definitions are entered into a user provided directory. The ``files``
-   parameter of *Project.CtbFiles* is then specified as a wildcard, *e.g.*
+   parameter of *Product.CtbFiles* is then specified as a wildcard, *e.g.*
    *<network>/\*.hh*.
 
    The project file then generates a component for each network specification.
@@ -2827,7 +2828,7 @@ While simple, it may be too simple
 
    - Versatility
 
-     - including an :ref:`parameter file<parameter_files-label>`
+     - including a :ref:`parameter file<parameter_files-label>`
        specified as an environment variable in *csim_argv* or *cosim_argv* allows
        parameters to be modified when the command is executed:
 
@@ -2852,13 +2853,13 @@ test bench code, add the following:
 .. code-block:: c++
 
    // Make the utility available
-   #include "hlsHelpers::ExpandArgs.hh"
+   #include "hlsHelpers/ExpandArgs.hh"
 
 and
 
 .. code-block:: c++
 
-   // Create and use the expanded set of command line parameter
+   // Create and use the expanded set of command line parameters
    hlsHelpers::ExpandArgs cl (argc, argv);
    getopt (cl.m_argc, cl.m_argv);
 
@@ -2887,7 +2888,7 @@ reference, use an environment variable:
 
      - This is the recommended action
 
-   - Copy the *hlsHelpers::ExpandArgs.hh include file into your project and
+   - Copy the *hlsHelpers/ExpandArgs.hh* include file into your project and
      add any necessary *-I include_path* to it in the configuration file.
 
      - The file is in *<path_to>/ruckus/vitis/hlsBs/include*
@@ -2905,7 +2906,7 @@ and *cosim_argv* values.
    run with an environment variable.
 
 However, using environment variables directly specifying them as
-${ENV}, in *csim_argv* and *cosim_argv* is problematic at best - they are
+${ENV}, in *csim_argv* and *cosim_argv* is problematic at best; they are
 translated at different stages by *csim* and *cosim*. As a workaround **hlsBs**
 provides 2 classes to encode the environment variables, one for
 variables and one for files so behavior in *csim* and *cosim* is the same.
@@ -2968,12 +2969,13 @@ a C++ utility has been provided.
    tvar = hlsHelpers::expand_envs (my_string)
 
 
-.. warning:
+.. warning::
 
    Presuming all the environment variables have been defined, the
    resulting csim.exe and cosim.exe both will execute using
 
    .. code-block:: shell
+
       $ hlsRun <components> --csim=run
       $ hlsRun <components> --cosim
       $ hlsExe <component>
@@ -3018,7 +3020,7 @@ variables, except *almost* as in *csim_argv* and *cosim_argv* strings,
 environment variables must be translated when the configuration file is
 created.
 
-Since the *testbench*, *hls/synthesis* and *include * file paths are
+Since the *testbench*, *hls/synthesis* and *include* file paths are
 generally reinterpreted as relative to the configuration file, this is
 not a problem. However, for *csim_argv* and *cosim_argv*, the choice
 to defer the translation to runtime is desirable and that method has been
@@ -3049,7 +3051,7 @@ described.  But there are dangers.
 
        This is not a theoretical problem. It cost the author a couple of days
        to learn this. Because of this, **hlsBs** is very careful in its
-       handling of environmental variables.
+       handling of environment variables.
 
     Using the **hlsBs** commands does have the advantage that commands inherit
     the context of the shell they are launched from, so it is more immediate.

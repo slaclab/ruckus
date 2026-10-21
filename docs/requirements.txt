@@ -1,4 +1,4 @@
-# Documentation dependencies — versions verified via pip index 2026-03-27
+# Documentation dependencies (versions verified via pip index 2026-03-27)
 sphinx==8.1.3
 sphinx-rtd-theme>=3.0  # 3.0 added Sphinx 8 support; keep in sync with sphinx pin above
 myst-parser==4.0.1

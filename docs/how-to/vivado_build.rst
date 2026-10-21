@@ -63,7 +63,7 @@ Step 3: Run the full build
 
    make bit
 
-``make bit``, ``make mcs``, and ``make pdi`` all invoke the same build rule. Use
+``make bit``, ``make mcs``, ``make prom``, and ``make pdi`` all invoke the same build rule. Use
 whichever matches your desired output format. The generated artifacts are placed in
 ``images/`` with the naming pattern:
 
@@ -165,9 +165,9 @@ Troubleshooting
 
       mkdir $(TOP_DIR)/build
 
-**"PRJ_PART is not set" error**
-   Add ``export PRJ_PART = <your-part>`` to your project ``Makefile`` before the
-   ``include`` line (see Step 2).
+**"can't read "::env(PRJ_PART)": no such variable" error**
+   ``PRJ_PART`` is not set. Add ``export PRJ_PART = <your-part>`` to your
+   project ``Makefile`` before the ``include`` line (see Step 2).
 
 **Timing violations fail the build**
    See the timing override variables (``TIG``, ``TIG_SETUP``, ``TIG_HOLD``) in the

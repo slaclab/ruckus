@@ -63,8 +63,8 @@ Steps
 
    This invokes the Design Compiler command (``dc_shell-xg-t -64bit
    -topographical_mode -f syn.tcl`` by default) with colored status output
-   through ``$(DC_MSG)``. Parallelism is auto-detected from ``/proc/cpuinfo``
-   unless overridden with ``PARALLEL_SYNTH``.
+   through ``$(DC_MSG)``. Parallelism is set by ``MAX_CORES`` (passed to
+   ``set_host_option -max_cores``).
 
 2. **Run VCS simulation (if VCS is available):**
 
@@ -80,8 +80,8 @@ Output Artifacts
 After a successful ``make syn`` run, outputs follow the same directory structure
 as the Cadence Genus flow:
 
-- ``$(OUT_DIR)/syn/out/`` — output netlists and reports
-- ``$(IMAGES_DIR)/`` — final promoted artifacts
+- ``$(OUT_DIR)/syn/out/``: output netlists and reports
+- ``$(IMAGES_DIR)/``: final promoted artifacts
 
 Key Variables
 -------------
@@ -108,7 +108,8 @@ Key Variables
        DC variant or mode.
    * - ``PARALLEL_SYNTH``
      - auto (from ``/proc/cpuinfo``)
-     - CPU count used for parallelism. Auto-detected if not set.
+     - Detected CPU count, printed by ``make test``. Not used by the Design
+       Compiler scripts; set ``MAX_CORES`` to control parallelism.
    * - ``SIM_TIMESCALE``
      - ``1ns/1ps``
      - VCS simulation timescale used by ``make sim``.

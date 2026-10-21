@@ -46,7 +46,7 @@ This is the single most important concept in the codebase. Every firmware projec
 ruckus injects optional, project-supplied TCL at fixed points in the Vivado pipeline. Hooks are silently skipped when absent. Two tiers exist:
 
 - **Tier-1 (pipeline-level):** files in a project's `$PROJ_DIR/vivado/` such as `sources.tcl`, `project_setup.tcl`, `properties.tcl`, `pre_synthesis.tcl`, `post_synthesis.tcl`, `post_route.tcl` (conditional on `CheckTiming`), and `post_build.tcl`.
-- **Tier-2 (in-run):** `pre_*_run.tcl` / `post_*_run.tcl` registered via `STEPS.<STEP>.TCL.PRE/POST`, running inside the synth/impl subprocess where ruckus procedures are NOT auto-sourced.
+- **Tier-2 (in-run):** `pre_*_run.tcl` / `post_*_run.tcl`, sourced by the ruckus `vivado/run/pre|post/*.tcl` wrappers that are registered via `STEPS.<STEP>.TCL.PRE/POST`. They run inside the synth/impl subprocess; the wrappers source `env_var.tcl` and `proc.tcl` first, so ruckus variables and procedures are available.
 
 The hook filenames, firing order, and the set of TCL variables in scope are a contract. Do not rename hooks, change when they fire, or drop variables from scope without updating [docs/reference/hook_scripts.rst](docs/reference/hook_scripts.rst) in the same change. `post_route.tcl` must remain conditional on `CheckTiming`.
 

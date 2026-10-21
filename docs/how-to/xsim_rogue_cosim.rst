@@ -5,14 +5,14 @@ How to Run the Rogue Co-Simulation in Vivado XSIM
 either interactively in the GUI or in batch mode.
 
 The co-simulation HDL and C sources live in the **surf** submodule under
-``axi/simlink/``; ruckus provides only the build and simulate orchestration
-described here. Any ``axi/simlink/...`` path below is relative to the surf
+``simlink/``; ruckus provides only the build and simulation orchestration
+described here. Any ``simlink/...`` path below is relative to the surf
 submodule root, not ruckus.
 
 .. note::
 
    This flow is GUI-interactive/local only and requires a licensed Vivado
-   install. It has no CI coverage — verification is manual against a local
+   install. It has no CI coverage; verification is manual against a local
    Vivado + Rogue environment.
 
 Prerequisites
@@ -21,11 +21,11 @@ Prerequisites
 - ``libzmq >= 4.1.0`` and ``pkg-config`` on the build machine.
 - A Rogue-environment Python shell for the peer script (it imports
   ``pyrogue`` / ``rogue``).
-- Vivado 2023.1 or newer — the floor enforced by ``project.tcl``'s
-  ``VersionCheck``. The latest *tested* Vivado release is tracked centrally by
+- Vivado 2023.1 or newer, the floor enforced by ``VersionCheck`` in the
+  co-sim pre-compile hook (``vivado/run/pre/xsim.tcl``). The latest *tested* Vivado release is tracked centrally by
   ``CheckVivadoVersion`` (see :doc:`../reference/tcl_api`), which warns when the
   active Vivado is newer; this page intentionally does not restate a version.
-- A surf version that provides the ``axi/simlink/xsim/`` DPI backend. Older
+- A surf version that provides the ``simlink/xsim/`` DPI backend. Older
   surf (legacy ``axi/simlink/sim`` + ``src`` VHPI layout) is VCS-only; use
   ``make vcs`` there.
 
@@ -46,8 +46,8 @@ doesn't contain a Rogue co-sim source.
 
    ``make xsim`` and ``make gui`` automatically select the surf xsim DPI-C
    backend (they export ``RUCKUS_SIM_BACKEND=xsim``), so having Synopsys VCS
-   sourced in the same shell alongside Vivado — common in a combined setup
-   script — no longer misroutes the flow to the VCS/VHPI backend. Switching
+   sourced in the same shell alongside Vivado (common in a combined setup
+   script) no longer misroutes the flow to the VCS/VHPI backend. Switching
    between this xsim flow and ``make vcs`` in the same build directory swaps
    the backend automatically; no ``make clean`` is needed.
 
@@ -60,40 +60,44 @@ Steps
 
       make gui
 
-   For a headless batch run, name the demo testbench and let the simulation
+   For a headless batch run, name your co-sim testbench and let the simulation
    free-run so the peer can connect and drive it:
 
    .. code-block:: bash
 
-      make xsim VIVADO_PROJECT_SIM=RogueTcpStreamXsimDemoTb
+      make xsim VIVADO_PROJECT_SIM=<MyCoSimTb>
 
-   The batch path elaborates ``VIVADO_PROJECT_SIM`` (default ``$(PROJECT)``,
-   the synthesis top), so it must name the demo testbench. The run length is
+   When ``VIVADO_PROJECT_SIM`` is set, the batch path elaborates it as the
+   ``sim_1`` top instead of the top set in ``ruckus.tcl``, so here it names
+   the co-sim testbench. The run length is
    ``VIVADO_PROJECT_SIM_TIME``, whose default ``all`` free-runs until the
-   testbench calls ``$finish``/``$stop`` or is interrupted. The demo
-   testbenches have neither, so the run does not self-terminate — background
+   testbench calls ``$finish``/``$stop`` or is interrupted. A co-sim
+   testbench typically has neither, so the run does not self-terminate: background
    it, wait for the ``Listening on ports N & N+1`` print, start the peer, then
    stop the simulation once the peer reports its result. To bound a run
    instead, pass a time value, e.g. ``VIVADO_PROJECT_SIM_TIME="1000 ns"``.
 
-   Either target triggers ruckus's pre-compile hook, which detects any of
+   Either target triggers ruckus's pre-compile hook
+   (``vivado/run/pre/xsim.tcl``), which detects any of
    ``RogueTcpStream.vhd``, ``RogueTcpMemory.vhd``, or ``RogueSideBand.vhd`` in
-   the simulation sources, builds the combined ``RogueTcpDpi.so`` via ``xsc``,
-   and binds it with ``-sv_lib RogueTcpDpi`` — no manual build step.
+   the simulation sources and builds the combined ``libRogueSimLinkDpi.so``
+   via ``xsc``. The matching ``-sv_lib libRogueSimLinkDpi`` elaboration
+   binding is registered at project generation by ``vivado/sources.tcl``, so
+   there is no manual build step.
 
 2. **Watch the console for the build and bind:**
 
    Confirm the ``pkg-config``/``xsc`` build messages appear with no errors,
    and, after ``launch_simulation``/``run``, the module's one-time
-   ``Listening on ports N & N+1`` print — that is the ready-for-peer signal.
+   ``Listening on ports N & N+1`` print, which is the ready-for-peer signal.
 
 3. **Start the matching Rogue peer script:**
 
    .. code-block:: bash
 
-      python3 prbsLoopbackDemo.py
+      python3 <my_peer_script>.py
 
-   Run this in a separate terminal, pointed at the same host/port the demo
+   Run this in a separate terminal, pointed at the same host/port the
    testbench is listening on. Ruckus and the DPI hook are entirely automatic
    up to this point; starting the peer and, if switching modules, selecting
    the desired top-level testbench in the target's ``ruckus.tcl``
@@ -115,17 +119,18 @@ Key Variables
      - Default
      - Description
    * - ``VIVADO_PROJECT_SIM``
-     - ``$(PROJECT)``
-     - Top module for Vivado simulation. Set to the demo testbench (e.g.
-       ``RogueTcpStreamXsimDemoTb``) for a batch ``make xsim`` co-sim run.
+     - (empty)
+     - Top module for Vivado simulation. When empty, the ``sim_1`` top set in
+       ``ruckus.tcl`` is used. Set it to your co-sim testbench for a batch
+       ``make xsim`` co-sim run.
    * - ``VIVADO_PROJECT_SIM_TIME``
      - ``all``
      - Simulation run length. The default ``all`` free-runs until the
-       testbench calls ``$finish``/``$stop`` or is interrupted — required for
-       co-sim so the external peer can drive the testbench. Pass a time value
+       testbench calls ``$finish``/``$stop`` or is interrupted, which co-sim
+       requires so the external peer can drive the testbench. Pass a time value
        (e.g. ``1000 ns``) to bound the run instead.
 
-There is no co-sim-specific variable — the DPI hook auto-registers and
+There is no co-sim-specific variable: the DPI hook auto-registers and
 auto-detects, so the existing simulation variables above are the only ones
 relevant to this flow.
 
@@ -142,10 +147,10 @@ Troubleshooting
    Install libzmq, or source the Rogue setup scripts that put it on
    ``PKG_CONFIG_PATH``, then re-run ``make gui``/``make xsim``.
 
-**"no axi/simlink/xsim/ DPI co-simulation backend" at compile**
+**"this surf has no simlink/xsim/ DPI co-simulation backend" at compile**
    The surf version in your project predates the xsim DPI backend (legacy
    ``axi/simlink/sim`` + ``src`` VHPI layout). The Vivado xsim co-sim requires
-   a surf that provides ``axi/simlink/xsim/``. Use ``make vcs`` for VCS
+   a surf that provides ``simlink/xsim/``. Use ``make vcs`` for VCS
    co-simulation with that surf version, or update surf.
 
 **"DPI function ... not found" at elaboration**
@@ -156,5 +161,6 @@ Troubleshooting
 
 **Waveform runs with no data movement**
    The peer script has not connected. Confirm it is running against the
-   correct host/port pair and that push/pull directions are not swapped —
-   see the port table in ``axi/simlink/README.md`` in surf.
+   correct host/port pair and that push/pull directions are not swapped (see
+   the port documentation under ``simlink/`` in surf, starting from
+   ``simlink/README.md``).

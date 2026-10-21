@@ -6,14 +6,14 @@ build system. You will clone a working example project, examine its structure, a
 ``make bit`` to produce a bitstream.
 
 The example project is `Simple-10GbE-RUDP-KCU105-Example
-<https://github.com/slaclab/Simple-10GbE-RUDP-KCU105-Example>`_ — a real SLAC firmware
-project for the KCU105 evaluation board. Its Makefile and ruckus.tcl are minimal and
+<https://github.com/slaclab/Simple-10GbE-RUDP-KCU105-Example>`_, a real SLAC firmware
+project for the KCU105 evaluation board. Its ``Makefile`` and ``ruckus.tcl`` are minimal and
 representative of how ruckus projects are structured.
 
 By the end of this tutorial you will understand:
 
 - What the three mandatory files in a ruckus project are and what each does
-- How ruckus.tcl declares sources using ``$::DIR_PATH/``
+- How ``ruckus.tcl`` declares sources using ``$::DIR_PATH/``
 - How to run a build from scratch and what the output artifacts look like
 
 
@@ -22,27 +22,27 @@ Prerequisites
 
 Before you begin, ensure you have:
 
-- **Linux** — ruckus requires a Linux environment. macOS and Windows are not supported.
-- **Vivado** — Xilinx/AMD Vivado installed and on your PATH. The example project requires
+- **Linux**: ruckus requires a Linux environment. macOS and Windows are not supported.
+- **Vivado**: AMD (Xilinx) Vivado installed and on your ``PATH``. The example project requires
   Vivado 2023.1 or later. Test with:
 
   .. code-block:: bash
 
      vivado -version
 
-- **git** — version 2.9.0 or later. Test with:
+- **git**: version 2.9.0 or later. Test with:
 
   .. code-block:: bash
 
      git --version
 
-- **git-lfs** — version 2.1.1 or later. Test with:
+- **git-lfs**: version 2.1.1 or later. Test with:
 
   .. code-block:: bash
 
      git lfs version
 
-- **Python 3** — required only for ``make release`` (not for ``make bit``).
+- **Python 3**: required only for ``make release`` (not for ``make bit``).
   Install pip packages if you plan to use release targets:
 
   .. code-block:: bash
@@ -79,7 +79,7 @@ If you forget ``--recursive``, initialize submodules manually:
 
    git submodule update --init --recursive
 
-ruckus itself lives at ``firmware/submodules/ruckus/`` inside the cloned repository — it
+ruckus itself lives at ``firmware/submodules/ruckus/`` inside the cloned repository; it
 is a git submodule, not a system-wide tool. Every ruckus-based project carries its own
 pinned copy this way.
 
@@ -111,10 +111,10 @@ After cloning, the relevant structure under ``firmware/`` is:
 
 The three mandatory files for any ruckus project are:
 
-1. **Makefile** — includes ``system_vivado.mk`` from the ruckus submodule
-2. **ruckus.tcl** — declares the project's sources using ruckus procedures
-3. **images/** directory — receives output artifacts (ruckus creates it automatically
-   on the first successful build)
+1. **Makefile**: includes ``system_vivado.mk`` from the ruckus submodule
+2. **ruckus.tcl**: declares the project's sources using ruckus procedures
+3. **images/** directory: receives output artifacts (ruckus creates it automatically
+   during the first build)
 
 Everything else in the structure above (``shared/``, ``surf/``, etc.) belongs to this
 particular example project. A minimal new project needs only the three items above.
@@ -134,7 +134,7 @@ Look at the Makefile for this target
 
 Three lines. ``TOP_DIR`` points two levels up to the ``firmware/`` root. ``shared_version.mk``
 sets ``PRJ_VERSION``, ``PRJ_PART``, and the default build target. ``system_vivado.mk``
-provides all build targets (``bit``, ``mcs``, ``gui``, ``sim``, etc.) and the complete
+provides all build targets (``bit``, ``mcs``, ``gui``, ``xsim``, etc.) and the complete
 pipeline logic.
 
 The ``shared_version.mk`` for this project:
@@ -151,18 +151,19 @@ The ``shared_version.mk`` for this project:
 
 ``PRJ_PART`` identifies the target FPGA device (the Kintex UltraScale KU040 on the KCU105
 board). ``PRJ_VERSION`` is a 32-bit firmware version number embedded in the output filename
-and in the bitstream. The ``target: prom`` line makes ``make prom`` the default target
-instead of ``make bit`` — for this project, the default build produces both a bitstream
-and a PROM programming file.
+and in the bitstream. The ``target: prom`` line makes ``prom`` the default target, so a bare ``make``
+runs the full build. In ruckus, ``bit``, ``mcs``, ``prom``, and ``pdi`` all run the same
+build; a PROM programming file (``.mcs``) is produced alongside the bitstream whenever the
+target provides ``vivado/promgen.tcl``.
 
-To understand the full list of variables that ``system_vivado.mk`` recognizes, see
-:doc:`../explanation/build_pipeline`.
+For the full list of variables that ``system_vivado.mk`` recognizes, see
+:doc:`../reference/makefile_reference`.
 
 
 Understanding ruckus.tcl
 --------------------------
 
-The ruckus.tcl for this target
+The ``ruckus.tcl`` for this target
 (``firmware/targets/Simple10GbeRudpKcu105Example/ruckus.tcl``):
 
 .. code-block:: tcl
@@ -182,38 +183,38 @@ The ruckus.tcl for this target
    loadConstraints -dir "$::DIR_PATH/hdl"
 
    # Load local simulation source code
-   loadSource -sim_only -dir  "$::DIR_PATH/tb"
+   loadSource -sim_only -dir "$::DIR_PATH/tb"
    set_property top {Simple10GbeRudpKcu105ExampleTb} [get_filesets sim_1]
 
 Walk through each line:
 
-- ``source $::env(RUCKUS_PROC_TCL)`` — loads all ruckus procedures. This must appear first
-  in every top-level ruckus.tcl. ``RUCKUS_PROC_TCL`` is set by ``system_vivado.mk`` and
+- ``source $::env(RUCKUS_PROC_TCL)``: loads all ruckus procedures. This must appear first
+  in every top-level ``ruckus.tcl``. ``RUCKUS_PROC_TCL`` is set by ``system_vivado.mk`` and
   points to ``submodules/ruckus/vivado/proc.tcl``.
 
-- ``VersionCheck 2023.1`` — enforces the minimum Vivado version for this project. The build
+- ``VersionCheck 2023.1``: enforces the minimum Vivado version for this project. The build
   exits immediately with a non-zero status if the installed Vivado is older than 2023.1.
   Each project sets its own minimum; ruckus itself imposes no global minimum.
 
-- ``loadRuckusTcl $::env(TOP_DIR)/submodules/surf`` — loads the surf submodule's ruckus.tcl,
+- ``loadRuckusTcl $::env(TOP_DIR)/submodules/surf``: loads the surf submodule's ``ruckus.tcl``,
   which recursively adds all of surf's source files to the Vivado project.
 
-- ``loadRuckusTcl $::env(TOP_DIR)/shared`` — loads the shared library's ruckus.tcl.
+- ``loadRuckusTcl $::env(TOP_DIR)/shared``: loads the shared library's ``ruckus.tcl``.
 
-- ``loadSource -dir "$::DIR_PATH/hdl"`` — adds all HDL files (VHDL, Verilog, SystemVerilog)
+- ``loadSource -dir "$::DIR_PATH/hdl"``: adds all HDL files (VHDL, Verilog, SystemVerilog)
   in the ``hdl/`` subdirectory of **this target** to the project. ``$::DIR_PATH`` is set by
-  ruckus to the directory of the currently-executing ruckus.tcl, so this path always resolves
+  ruckus to the directory of the currently executing ``ruckus.tcl``, so this path always resolves
   correctly regardless of where the build was initiated. See
   :doc:`../explanation/ruckus_tcl_model` for details.
 
-- ``loadConstraints -dir "$::DIR_PATH/hdl"`` — adds all XDC constraint files from the same
+- ``loadConstraints -dir "$::DIR_PATH/hdl"``: adds all XDC constraint files from the same
   directory. Constraint files sit alongside the RTL sources in this project.
 
-- ``loadSource -sim_only -dir "$::DIR_PATH/tb"`` — adds files in the ``tb/`` directory as
+- ``loadSource -sim_only -dir "$::DIR_PATH/tb"``: adds files in the ``tb/`` directory as
   simulation-only sources. They are included in the simulation fileset but not the synthesis
   fileset.
 
-- ``set_property top {Simple10GbeRudpKcu105ExampleTb} [get_filesets sim_1]`` — sets the
+- ``set_property top {Simple10GbeRudpKcu105ExampleTb} [get_filesets sim_1]``: sets the
   simulation top-level entity, which Vivado needs to know to run simulation.
 
 
@@ -235,11 +236,11 @@ For a minimal new project that has no submodule dependencies, the pattern is:
 
 The ``$::DIR_PATH/`` prefix is mandatory on every path argument to ``loadSource``,
 ``loadConstraints``, ``loadIpCore``, and ``loadBlockDesign``. Without it, the path is
-resolved against Vivado's current working directory — the build output directory, not
-your module's source directory — and the build will fail immediately with a
+resolved against Vivado's current working directory (the build output directory, not
+your module's source directory), and the build will fail immediately with a
 directory-not-found error.
 
-This is the most common mistake when writing a first ruckus.tcl. See
+This is the most common mistake when writing a first ``ruckus.tcl``. See
 :doc:`../explanation/ruckus_tcl_model` for the full explanation of why ``$::DIR_PATH``
 is necessary and how it works.
 
@@ -253,7 +254,8 @@ Navigate to the target directory:
 
    cd firmware/targets/Simple10GbeRudpKcu105Example
 
-Create the build directory (required before the first build):
+Create the build directory (``make bit`` also runs this step, but running it first surfaces
+a missing build directory early):
 
 .. code-block:: bash
 
@@ -293,9 +295,9 @@ Run the full build:
 
 This runs two Vivado invocations in sequence:
 
-1. **Source setup** — Vivado assembles the project by executing all ruckus.tcl files
+1. **Source setup**: Vivado assembles the project by executing all ``ruckus.tcl`` files
    recursively. This creates the ``.xpr`` project file in the build directory.
-2. **Build** — Vivado runs synthesis, implementation, and bitstream generation.
+2. **Build**: Vivado runs synthesis, implementation, and bitstream generation.
 
 A complete build takes 30-90 minutes depending on the design size and host machine.
 You will see Vivado log output scrolling in the terminal. The build is complete when
@@ -315,11 +317,11 @@ When the build succeeds, output files appear in
 
 The filename encodes:
 
-- **Project name** — ``Simple10GbeRudpKcu105Example``
-- **Firmware version** — ``0x02180000`` (from ``PRJ_VERSION`` in ``shared_version.mk``)
-- **Build timestamp** — ``20240315143022`` (UTC, format ``YYYYMMDDHHMMSS``)
-- **Username** — ``smith`` (the ``$USER`` shell variable at build time)
-- **Git commit hash** — ``a1b2c3d`` (short hash of the HEAD commit)
+- **Project name**: ``Simple10GbeRudpKcu105Example``
+- **Firmware version**: ``0x02180000`` (from ``PRJ_VERSION`` in ``shared_version.mk``)
+- **Build timestamp**: ``20240315143022`` (local time, format ``YYYYMMDDHHMMSS``)
+- **Username**: ``smith`` (the ``$USER`` shell variable at build time)
+- **Git commit hash**: ``a1b2c3d`` (short hash of the HEAD commit)
 
 If git shows uncommitted changes at build time, the git hash is replaced with ``dirty``:
 
@@ -329,7 +331,7 @@ If git shows uncommitted changes at build time, the git hash is replaced with ``
    └── Simple10GbeRudpKcu105Example-0x02180000-20240315143022-smith-dirty.bit
 
 The ``dirty`` suffix is a signal that the bitstream was built from a modified working
-tree — it cannot be reproduced exactly from the git history. For reproducible builds,
+tree; it cannot be reproduced exactly from the git history. For reproducible builds,
 commit all changes before running ``make bit``.
 
 See :doc:`../explanation/output_artifacts` for the complete output artifact naming
@@ -343,12 +345,12 @@ Other Useful Make Targets
 
    make gui       # Open Vivado GUI with the assembled project (without building)
    make syn       # Run synthesis only
-   make sim       # Run simulation (XSIM)
+   make xsim      # Run simulation (XSIM)
    make clean     # Delete the build output directory (keeps images/)
    make test      # Print all resolved Makefile variables (useful for debugging)
 
 ``make gui`` is particularly useful during development: it assembles the Vivado project
-from the ruckus.tcl declarations and then opens the Vivado GUI, so you can interactively
+from the ``ruckus.tcl`` declarations and then opens the Vivado GUI, so you can interactively
 explore the project, run synthesis, or modify constraints without leaving the GUI.
 
 
@@ -357,11 +359,11 @@ Next Steps
 
 Now that you have a working build, explore the rest of the documentation:
 
-- :doc:`../explanation/ruckus_tcl_model` — Deep explanation of ``$::DIR_PATH`` and the
-  recursive loading model. Required reading before writing your own ruckus.tcl files.
-- :doc:`../explanation/build_pipeline` — Full pipeline walkthrough showing every step
+- :doc:`../explanation/ruckus_tcl_model`: deep explanation of ``$::DIR_PATH`` and the
+  recursive loading model. Required reading before writing your own ``ruckus.tcl`` files.
+- :doc:`../explanation/build_pipeline`: full pipeline walkthrough showing every step
   from ``make bit`` to the images directory, including hook injection points.
-- :doc:`../explanation/output_artifacts` — Complete output artifact naming convention
+- :doc:`../explanation/output_artifacts`: complete output artifact naming convention
   and the full list of file types generated per build.
-- :doc:`../explanation/overview` — Conceptual overview of what ruckus is, the problem
+- :doc:`../explanation/overview`: conceptual overview of what ruckus is, the problem
   it solves, and how it fits into a firmware repository.
