@@ -125,7 +125,7 @@ ruckus has no RTL or unit-test suite of its own; verification is CI-driven and l
   ```
 
 - For Python changes, run `flake8 --count scripts/` and `python -m compileall -f scripts/`.
-- For `vscode-plugin/` changes, run `./scripts/build.sh --compile` (Node.js >= 18) and `node out/test/smoke.js <firmware target dir>` from `vscode-plugin/`.
+- For `vscode-plugin/` changes, run `./scripts/build.sh --compile` (Node.js >= 18), `npm test` (unit tests on `test/fixtures/`, needs `tclsh`) and `node out/test/smoke.js <firmware target dir>` from `vscode-plugin/`.
 - For documentation changes, run `sphinx-build -b html -W --keep-going docs/ docs/_build/html` (install `docs/requirements.txt` first) and confirm a clean, warning-free build.
 - For TCL, Makefile, or backend changes, the most meaningful verification is a downstream build (`make bit`/`make sim` in a consuming firmware project) since ruckus is not exercised in isolation. When a full build is not practical, state what was and was not run and the remaining risk.
 - Do not hand-edit or commit generated output such as `docs/_build/`, `build/`, or release artifacts.

@@ -25,6 +25,10 @@ namespace eval ::rs {
    variable stack {}
 }
 
+# Load clock.tcl and msgcat now: once `unknown`, `package` and `source` are
+# stubbed below, Tcl's package loader can no longer find msgcat
+clock format 0
+
 fconfigure stdout -encoding utf-8 -translation lf
 fconfigure stderr -encoding utf-8
 

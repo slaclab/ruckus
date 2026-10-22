@@ -93,7 +93,7 @@ jobs:
 # ----------------------------------------------------------------------------
 
   gen_release:
-    needs: [test_and_document]
+    needs: [test_and_document, vscode_plugin]
     uses: slaclab/ruckus/.github/workflows/gen_release.yml@main
     with:
       version: '1.0.0'

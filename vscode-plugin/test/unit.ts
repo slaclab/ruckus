@@ -99,6 +99,8 @@ test('ruckus.tcl scan', async () => {
     assert.ok(files.includes('helper/Helper.vhd'), 'helper_proc.tcl sourced');
     // *TOKEN* variables are withheld like in system_shared.mk
     assert.ok(files.includes('tok/Tok_0.vhd') && !files.includes('tok/Tok_1.vhd'), 'TOKEN variable hidden');
+    // clock format/scan work although unknown, package and source are stubbed
+    assert.ok(files.includes('clock/Clock_1970.vhd'), 'clock format/scan');
     // exit aborts the rest of stop/ruckus.tcl and is reported, the parent continues
     assert.ok(!p.files.some(f => f.lib === 'never'), 'nothing loaded after exit');
     assert.ok(files.includes('sub/Sub.vhd'));

@@ -99,11 +99,10 @@ export function activate(ctx: vscode.ExtensionContext) {
         if (!project || (!setup && project.backend !== 'vivado')) { vivadoStatus.hide(); return; }
         const v = cfg().get<string>('vivadoVersion', '');
         const def = setup ? parseSetupScript(setup).defaultVersion : undefined;
-        vivadoStatus.text = `$(versions) Vivado ${v || def || '(PATH)'}`;
         const ignored = setup && v && !parseSetupScript(setup).takesVersionArg;
         vivadoStatus.text = `$(versions) Vivado ${ignored ? def ?? v : v || def || '(PATH)'}${ignored ? ' $(warning)' : ''}`;
         vivadoStatus.tooltip = (setup ? `make runs after: source ${setup}${v ? ' ' + v : ''}` : 'No setup script: make uses the Vivado found on PATH') +
-            (ignored ? `\n${path.basename(setup!)} ignores its argument: the selected ${v} only affects the scan` : '') +
+            (ignored ? `\n${path.basename(setup!)} ignores its argument: the selected ${v} has no effect (make and the scan use ${def ?? 'the script\'s Vivado'})` : '') +
             '\nClick to select the Vivado version';
         vivadoStatus.show();
     };
@@ -700,16 +699,18 @@ function setupScript(proj: RuckusProject | undefined): string | undefined {
     return undefined;
 }
 
-/** VIVADO_VERSION assumed by the scan: the selected version, else the setup script's default */
+/** VIVADO_VERSION assumed by the scan: the version make will use */
 function scanVivadoVersion(t: RuckusTarget): string {
     const cfg = vscode.workspace.getConfiguration('ruckus');
     const v = cfg.get<string>('vivadoVersion', '');
-    if (v) { return v; }
     const s = cfg.get<string>('setupScript', '');
     // The project of t may not be loaded yet: derive ${topDir} from the target directory
     const topDir = project?.target.dir === t.dir ? project.topDir : path.resolve(t.dir, '..', '..');
-    const script = s ? resolveVars(s, { topDir, target: t }) : findSetupScript(topDir, 1);
-    return (script && parseSetupScript(script).defaultVersion) || '2024.2';
+    const script = s ? resolveVars(s, { topDir, target: t }) : cfg.get('autoSourceSetupScript', true) ? findSetupScript(topDir, 1) : undefined;
+    const info = script ? parseSetupScript(script) : undefined;
+    // A script that ignores $1 fixes the version make uses: scan with that one
+    if (v && (!info || info.takesVersionArg)) { return v; }
+    return info?.defaultVersion || v || '2024.2';
 }
 
 function resolveVars(s: string, proj: { topDir: string; target: { dir: string } } | undefined): string {

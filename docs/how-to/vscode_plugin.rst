@@ -145,9 +145,10 @@ uses it as ``VIVADO_VERSION``. To choose another version, click the Vivado
 item in the status bar. The selection is passed to the script as its first
 argument, which is opt-in: it only changes the Vivado used by ``make`` if
 the script reads ``$1`` (for example ``VIVADO_VERSION=${1:-2025.1}``).
-Otherwise the status bar shows a warning and only the scan uses it. The
-make output is also saved to ``build/logs/<target>_<goal>.log``. To tail that
-log, or any Vivado log in the build directory, run
+Otherwise the status bar shows a warning, and both ``make`` and the scan
+use the script's own version. The make output is also saved to
+``build/logs/<target>_<goal>.log``. To tail that log, or any Vivado log in
+the build directory, run
 **Ruckus: Follow Build Log...**.
 
 The problem matcher depends on the backend, so errors and warnings with a
