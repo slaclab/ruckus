@@ -170,6 +170,12 @@ proc GenerateBdWrappers { } {
       # Loop through the has block designs
       foreach bdpath ${bdList} {
 
+         # Skip block designs owned by an IP core (e.g. the MicroBlaze bd_0 inside DDR4 MIG),
+         # which the IP generates itself and make_wrapper cannot process
+         if { [string match {*.xci*} [get_property PARENT_COMPOSITE_FILE [get_files $bdpath]]] } {
+            continue
+         }
+
          # Attempt to create the wrapper and catch any errors
          set result [catch {
             set wrapper_path [make_wrapper -force -files [get_files $bdpath] -top]
