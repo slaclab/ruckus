@@ -907,5 +907,8 @@
         "@vscode/test-electron": "^3.1.0",
         "@vscode/vsce": "^3.0.0",
         "typescript": "^5.6.0"
+    },
+    "overrides": {
+        "@azure/msal-node": "^7.1.0"
     }
 }
