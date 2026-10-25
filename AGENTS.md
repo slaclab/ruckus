@@ -18,6 +18,7 @@ Start with [README.md](README.md) for user-facing links. Full documentation is p
 - `ghdl/`, `iverilog/`, `verilator/`, `cadence/genus/`, `synopsys/design_compiler/`, `vitis/` — TCL for the non-Vivado backends.
 - `scripts/` — Python helpers (`firmwareRelease.py`, `releaseGen.py`, `releaseNotes.py`, `createNewRepo.py`, `download_github_asset.py`, and small parsers). This is the only directory linted and syntax-checked by CI.
 - `MicroblazeBasicCore/` — reference MicroBlaze SDK/Vitis sources.
+- `vscode-plugin/` — the VS Code extension (TypeScript, built with `npm`). `resources/ruckus_scan.tcl` re-implements the public loader procedures as recorders and runs a project's `ruckus.tcl` tree with plain `tclsh`; keep its procedure names and options in sync with `vivado/proc/code_loading.tcl`. Build/package with `vscode-plugin/scripts/build.sh`; never commit `node_modules/`, `out/`, or `*.vsix`. See [docs/how-to/vscode_plugin.rst](docs/how-to/vscode_plugin.rst).
 - `docs/` — the Sphinx documentation site (see Documentation below).
 - `.github/workflows/` — CI (`ruckus_ci.yml`), documentation (`docs.yml`), release (`gen_release.yml`), and conda/docker build workflows.
 
@@ -46,7 +47,7 @@ This is the single most important concept in the codebase. Every firmware projec
 ruckus injects optional, project-supplied TCL at fixed points in the Vivado pipeline. Hooks are silently skipped when absent. Two tiers exist:
 
 - **Tier-1 (pipeline-level):** files in a project's `$PROJ_DIR/vivado/` such as `sources.tcl`, `project_setup.tcl`, `properties.tcl`, `pre_synthesis.tcl`, `post_synthesis.tcl`, `post_route.tcl` (conditional on `CheckTiming`), and `post_build.tcl`.
-- **Tier-2 (in-run):** `pre_*_run.tcl` / `post_*_run.tcl` registered via `STEPS.<STEP>.TCL.PRE/POST`, running inside the synth/impl subprocess where ruckus procedures are NOT auto-sourced.
+- **Tier-2 (in-run):** `pre_*_run.tcl` / `post_*_run.tcl`, sourced by the ruckus `vivado/run/pre|post/*.tcl` wrappers that are registered via `STEPS.<STEP>.TCL.PRE/POST`. They run inside the synth/impl subprocess; the wrappers source `env_var.tcl` and `proc.tcl` first, so ruckus variables and procedures are available.
 
 The hook filenames, firing order, and the set of TCL variables in scope are a contract. Do not rename hooks, change when they fire, or drop variables from scope without updating [docs/reference/hook_scripts.rst](docs/reference/hook_scripts.rst) in the same change. `post_route.tcl` must remain conditional on `CheckTiming`.
 
@@ -124,6 +125,7 @@ ruckus has no RTL or unit-test suite of its own; verification is CI-driven and l
   ```
 
 - For Python changes, run `flake8 --count scripts/` and `python -m compileall -f scripts/`.
+- For `vscode-plugin/` changes, run `./scripts/build.sh --compile` (Node.js >= 18), `npm test` (unit tests on `test/fixtures/`, needs `tclsh`) and `node out/test/smoke.js <firmware target dir>` from `vscode-plugin/`.
 - For documentation changes, run `sphinx-build -b html -W --keep-going docs/ docs/_build/html` (install `docs/requirements.txt` first) and confirm a clean, warning-free build.
 - For TCL, Makefile, or backend changes, the most meaningful verification is a downstream build (`make bit`/`make sim` in a consuming firmware project) since ruckus is not exercised in isolation. When a full build is not practical, state what was and was not run and the remaining risk.
 - Do not hand-edit or commit generated output such as `docs/_build/`, `build/`, or release artifacts.

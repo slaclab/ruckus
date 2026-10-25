@@ -1,0 +1,65 @@
+
+*** Running vivado
+    with args -log Simple10GbeRudpKcu105Example.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source Simple10GbeRudpKcu105Example.tcl
+
+INFO: [Common 17-3922] A valid Vivado Design Suite ENTERPRISE license has been detected. Your current license is active and will expire on Permanent.
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Wed Oct 21 09:53:27 2026
+# Process ID         : 3864408
+# Current directory  : /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/synth_1
+# Command line       : vivado -log Simple10GbeRudpKcu105Example.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source Simple10GbeRudpKcu105Example.tcl
+# Log file           : /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/synth_1/Simple10GbeRudpKcu105Example.vds
+# Journal file       : /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_project.runs/synth_1/vivado.jou
+# Running On         : buildhost
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 22.04.5 LTS
+# Processor Detail   : AMD Ryzen 9 3900X 12-Core Processor
+# CPU Frequency      : 2200.000 MHz
+# CPU Physical cores : 12
+# CPU Logical cores  : 24
+# Host memory        : 67342 MB
+# Swap memory        : 2147 MB
+# Total Virtual      : 69489 MB
+# Available Virtual  : 56542 MB
+#-----------------------------------------------------------
+
+****** Vivado v2026.1 (64-bit)
+  **** SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+  **** IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+  **** SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+  **** Start of session at: Wed Oct 21 09:53:27 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+INFO: [Common 17-1239] XILINX_LOCAL_USER_DATA is set to 'no'.
+source Simple10GbeRudpKcu105Example.tcl -notrace
+INFO: [Common 17-1565] set_msg_config should not be used to change the severity of DRC/METHODOLOGY checks. Please use the 'set_property SEVERITY <NEW_SEVERITY> [get_<drc|methodology>_checks <ID>]' command instead.
+INFO: [Common 17-1565] set_msg_config should not be used to change the severity of DRC/METHODOLOGY checks. Please use the 'set_property SEVERITY <NEW_SEVERITY> [get_<drc|methodology>_checks <ID>]' command instead.
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/ip_repo'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/2026.1/data/ip'.
+source /work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/ruckus/vivado/run/pre/synth.tcl
+Command: synth_design -top Simple10GbeRudpKcu105Example -part xcku040-ffva1156-2-e -flatten_hierarchy none -assert
+INFO: [Vivado_Tcl 97-130] Option flatten_hierarchy used for synth_design is: none
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xcku040'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xcku040'
+INFO: [Device 21-403] Loading part xcku040-ffva1156-2-e
+INFO: [Designutils 20-5008] Incremental synthesis strategy default
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 3864798
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 2850.805 ; gain = 440.852 ; free physical = 10461 ; free virtual = 52180
+---------------------------------------------------------------------------------
+INFO: [Synth 8-638] synthesizing module 'Simple10GbeRudpKcu105Example' [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/targets/Simple10GbeRudpKcu105Example/hdl/Simple10GbeRudpKcu105Example.vhd:74]
+WARNING: [Synth 8-6014] Unused sequential element r_reg[sAxiWriteSlaves][0][wready] was removed.  [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/surf/axi/axi-lite/rtl/AxiLiteCrossbar.vhd:500]
+WARNING: [Synth 8-6014] Unused sequential element r_reg[writeSlave][wready] was removed.  [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/surf/axi/bridge/rtl/AxiLiteToDrp.vhd:289]
+WARNING: [Synth 8-6014] Unused sequential element SYNC_RST.r_reg[enb] was removed.  [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/surf/base/fifo/rtl/inferred/FifoRdFsm.vhd:314]
+WARNING: [Synth 8-6014] Unused sequential element SYNC_RST.r_reg[regceb] was removed.  [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/surf/base/fifo/rtl/inferred/FifoRdFsm.vhd:314]
+WARNING: [Synth 8-6014] Unused sequential element SYNC_RST.r_reg[valid] was removed.  [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/surf/base/fifo/rtl/inferred/FifoRdFsm.vhd:314]
+WARNING: [Synth 8-6014] Unused sequential element SYNC_RST.r_reg[enb] was removed.  [/work/Simple-10GbE-RUDP-KCU105-Example/firmware/submodules/surf/base/fifo/rtl/inferred/FifoRdFsm.vhd:314]

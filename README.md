@@ -17,6 +17,7 @@ management, hook script injection, and firmware release packaging.
 - [TCL API Reference](https://slaclab.github.io/ruckus/reference/tcl_api.html)
 - [Makefile Reference](https://slaclab.github.io/ruckus/reference/makefile_reference.html)
 - [How-To Guides](https://slaclab.github.io/ruckus/how-to/index.html)
+- [VS Code Extension](https://slaclab.github.io/ruckus/how-to/vscode_plugin.html) (sources in [`vscode-plugin/`](vscode-plugin/))
 
 ## Prerequisites
 

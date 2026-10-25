@@ -22,3 +22,4 @@ setting up a project for the first time, see
    dfx_partial_reconfig
    segmented_configuration
    microblaze_elf
+   vscode_plugin

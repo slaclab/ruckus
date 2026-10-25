@@ -1,0 +1,499 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
+| Date              : Wed Oct 21 10:12:11 2026
+| Host              : buildhost running 64-bit Ubuntu 22.04.5 LTS
+| Command           : report_timing_summary -max_paths 10 -routable_nets -report_unconstrained -file Simple10GbeRudpKcu105Example_timing_summary_routed.rpt -pb Simple10GbeRudpKcu105Example_timing_summary_routed.pb -rpx Simple10GbeRudpKcu105Example_timing_summary_routed.rpx -warn_on_violation
+| Design            : Simple10GbeRudpKcu105Example
+| Device            : xcku040-ffva1156
+| Speed File        : -2  PRODUCTION 1.25 12-04-2018
+| Design State      : Routed
+| Temperature Grade : E
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+  Merge Timing Exceptions                    :  Yes
+  Inter-SLR Compensation                     :  Conservative
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+------------------------------------------------------------------------------------------------
+| Report Methodology
+| ------------------
+------------------------------------------------------------------------------------------------
+
+Rule       Severity          Description                                                Violations  
+---------  ----------------  ---------------------------------------------------------  ----------  
+TIMING-17  Critical Warning  Non-clocked sequential cell                                536         
+LUTAR-1    Warning           LUT drives async reset alert                               16          
+SYNTH-5    Warning           Mapped onto distributed RAM because of timing constraints  2           
+SYNTH-6    Warning           Timing of a RAM block might be sub-optimal                 26          
+TIMING-9   Warning           Unknown CDC Logic                                          1           
+TIMING-18  Warning           Missing input or output delay                              17          
+TIMING-24  Warning           Overridden Max delay datapath only                         3           
+TIMING-28  Warning           Auto-derived clock referenced by a timing constraint       2           
+XDCB-5     Warning           Runtime inefficient way to find pin objects                2           
+CLKC-5     Advisory          BUFGCE with constant CE has BUFG driver                    1           
+
+Note: This report is based on the most recent report_methodology run and may not be up-to-date. Run report_methodology on the current design for the latest report.
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock (536)
+2. checking constant_clock (0)
+3. checking pulse_width_clock (0)
+4. checking unconstrained_internal_endpoints (1061)
+5. checking no_input_delay (4)
+6. checking no_output_delay (11)
+7. checking multiple_clock (0)
+8. checking generated_clocks (0)
+9. checking loops (0)
+10. checking partial_input_delay (0)
+11. checking partial_output_delay (0)
+12. checking latch_loops (0)
+
+1. checking no_clock (536)
+--------------------------
+ There are 536 register/latch pins with no clock driven by root clock pin: U_Core/GEN_ETH.U_Rudp/U_DmaXvcWrapper/U_XVC/U_XvcServer/U_AxisJtagDebugBridge/U_AXIS_JTAG/U_JTAG/U_Jtag/r_reg[tck]/Q (HIGH)
+
+
+2. checking constant_clock (0)
+------------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock (0)
+---------------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints (1061)
+---------------------------------------------------
+ There are 1061 pins that are not constrained for maximum delay. (HIGH)
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay (4)
+------------------------------
+ There are 4 input ports with no input delay specified. (HIGH)
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay (11)
+--------------------------------
+ There are 11 ports with no output delay specified. (HIGH)
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock (0)
+------------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks (0)
+--------------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops (0)
+---------------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay (0)
+------------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay (0)
+-------------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops (0)
+----------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      0.579        0.000                      0               150679        0.004        0.000                      0               150653        0.252        0.000                       0                 53333  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock                                                                                                                                                               Waveform(ns)           Period(ns)      Frequency(MHz)
+-----                                                                                                                                                               ------------           ----------      --------------
+ethClkP                                                                                                                                                             {0.000 3.200}          6.400           156.250         
+  U_Core/GEN_ETH.U_Rudp/U_DmaXvcWrapper/U_XVC/U_XvcServer/U_AxisJtagDebugBridge/U_JTAG_BSCAN/U0/bsip/U0/USE_SOFTBSCAN.U_BSCAN_TAP/U_BASETAP/U_TAP/UPDATEDR_O_reg/Q  {0.000 3.200}          6.400           156.250         
+  qPllOutClk[0]                                                                                                                                                     {0.000 0.097}          0.194           5156.250        
+    rxoutclk_out[0]_1                                                                                                                                               {0.000 1.600}          3.200           312.500         
+      rxrecclk_out_1                                                                                                                                                {0.000 3.200}          6.400           156.250         
+    txoutclk_out[0]_1                                                                                                                                               {0.000 1.600}          3.200           312.500         
+      txClockGt                                                                                                                                                     {0.000 3.200}          6.400           156.250         
+  qPllOutRefClk[0]                                                                                                                                                  {0.000 3.200}          6.400           156.250         
+phyClkP                                                                                                                                                             {0.000 0.800}          1.600           625.000         
+sysClk300P                                                                                                                                                          {0.000 1.666}          3.333           300.030         
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock                      WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----                      -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+ethClkP                      0.579        0.000                      0               111827        0.004        0.000                      0               111827        0.925        0.000                       0                 38670  
+    rxoutclk_out[0]_1                                                                                                                                                    0.265        0.000                       0                     3  
+      rxrecclk_out_1         2.967        0.000                      0                 2742        0.033        0.000                      0                 2742        0.704        0.000                       0                  1388  
+    txoutclk_out[0]_1                                                                                                                                                    0.252        0.000                       0                     3  
+      txClockGt              1.227        0.000                      0                35773        0.031        0.000                      0                35772        0.307        0.000                       0                 13235  
+sysClk300P                   1.653        0.000                      0                   90        0.079        0.000                      0                   90        1.391        0.000                       0                    34  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock      To Clock            WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------      --------            -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+txClockGt       rxrecclk_out_1        2.708        0.000                      0                   12                                                                        
+rxrecclk_out_1  txClockGt             2.437        0.000                      0                    5                                                                        
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group         From Clock         To Clock               WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------         ----------         --------               -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+**async_default**  ethClkP            ethClkP                  3.173        0.000                      0                  219        0.119        0.000                      0                  219  
+**async_default**  txClockGt          txClockGt                2.755        0.000                      0                    3        1.280        0.000                      0                    3  
+**default**        ethClkP                                     5.896        0.000                      0                    8                                                                        
+
+
+------------------------------------------------------------------------------------------------
+| User Ignored Path Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group      From Clock      To Clock      
+----------      ----------      --------      
+(none)          ethClkP                         
+(none)                          ethClkP         
+(none)          ethClkP         ethClkP         
+(none)          rxrecclk_out_1  ethClkP         
+(none)          sysClk300P      ethClkP         
+(none)          txClockGt       ethClkP         
+(none)                          rxrecclk_out_1  
+(none)          ethClkP         rxrecclk_out_1  
+(none)          rxrecclk_out_1  rxrecclk_out_1  
+(none)          txClockGt       rxrecclk_out_1  
+(none)                          txClockGt       
+(none)          ethClkP         txClockGt       
+(none)          rxrecclk_out_1  txClockGt       
+(none)          txClockGt       txClockGt       
+
+
+------------------------------------------------------------------------------------------------
+| Unconstrained Path Table
+| ------------------------
+------------------------------------------------------------------------------------------------
+
+Path Group                                                                                                                                                        From Clock                                                                                                                                                        To Clock                                                                                                                                                        
+----------                                                                                                                                                        ----------                                                                                                                                                        --------                                                                                                                                                        
+(none)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+(none)                                                                                                                                                            U_Core/GEN_ETH.U_Rudp/U_DmaXvcWrapper/U_XVC/U_XvcServer/U_AxisJtagDebugBridge/U_JTAG_BSCAN/U0/bsip/U0/USE_SOFTBSCAN.U_BSCAN_TAP/U_BASETAP/U_TAP/UPDATEDR_O_reg/Q                                                                                                                                                                    
+(none)                                                                                                                                                            ethClkP                                                                                                                                                                                                                                                                                                                             
+(none)                                                                                                                                                            txClockGt                                                                                                                                                                                                                                                                                                                           
+(none)                                                                                                                                                                                                                                                                                                                              ethClkP                                                                                                                                                           
+(none)                                                                                                                                                                                                                                                                                                                              txClockGt                                                                                                                                                         
+
+
+------------------------------------------------------------------------------------------------
+| Timing Details
+| --------------
+------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+From Clock:  ethClkP
+  To Clock:  ethClkP
+
+Setup :            0  Failing Endpoints,  Worst Slack        0.579ns,  Total Violation        0.000ns
+Hold  :            0  Failing Endpoints,  Worst Slack        0.004ns,  Total Violation        0.000ns
+PW    :            0  Failing Endpoints,  Worst Slack        0.925ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.579ns  (required time - arrival time)
+  Source:                 U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_24/CLKBWRCLK
+                            (rising edge-triggered cell RAMB36E2 clocked by ethClkP  {rise@0.000ns fall@3.200ns period=6.400ns})
+  Destination:            U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/r_reg[appSsiMaster][data][3]/D
+                            (rising edge-triggered cell FDRE clocked by ethClkP  {rise@0.000ns fall@3.200ns period=6.400ns})
+  Path Group:             ethClkP
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.400ns  (ethClkP rise@6.400ns - ethClkP rise@0.000ns)
+  Data Path Delay:        5.452ns  (logic 3.730ns (68.415%)  route 1.722ns (31.585%))
+  Logic Levels:           9  (LUT4=1 LUT6=1 RAMB36E2=7)
+  Clock Path Skew:        -0.393ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.974ns = ( 9.374 - 6.400 ) 
+    Source Clock Delay      (SCD):    3.700ns
+    Clock Pessimism Removal (CPR):    0.334ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+  Clock Net Delay (Source):      2.940ns (routing 1.264ns, distribution 1.676ns)
+  Clock Net Delay (Destination): 2.436ns (routing 1.153ns, distribution 1.283ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ethClkP rise edge)    0.000     0.000 r  <hidden>
+    GTHE3_COMMON_X0Y3                                 0.000     0.000 r  ethClkP
+                         net (fo=0)                   0.000     0.000    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/gtClkP
+    GTHE3_COMMON_X0Y3    IBUFDS_GTE3 (Prop_IBUFDS0_GTE3_GTHE3_COMMON_I_ODIV2)
+                                                      0.363     0.363 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/IBUFDS_GTE3_Inst/ODIV2
+                         net (fo=2, routed)           0.082     0.445    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/refClkCopy
+    BUFG_GT_X0Y85        BUFG_GT (Prop_BUFG_GT_I_O)
+                                                      0.315     0.760 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/BUFG_GT_Inst/O
+    X1Y2 (CLOCK_ROOT)    net (fo=38730, routed)       2.940     3.700    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/clkb
+    RAMB36_X1Y40         RAMB36E2                                     r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_24/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB36_X1Y40         RAMB36E2 (Prop_RAMB36E2_RAMB36_CLKBWRCLK_CASDOUTB[3])
+                                                      1.465     5.165 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_24/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     5.200    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_24_n_64
+    RAMB36_X1Y41         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_CASDOUTB[3])
+                                                      0.301     5.501 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_25/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     5.536    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_25_n_64
+    RAMB36_X1Y42         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_CASDOUTB[3])
+                                                      0.301     5.837 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_26/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     5.872    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_26_n_64
+    RAMB36_X1Y43         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_CASDOUTB[3])
+                                                      0.301     6.173 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_27/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     6.208    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_27_n_64
+    RAMB36_X1Y44         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_CASDOUTB[3])
+                                                      0.301     6.509 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_28/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     6.544    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_28_n_64
+    RAMB36_X1Y45         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_CASDOUTB[3])
+                                                      0.301     6.845 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_29/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     6.880    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_29_n_64
+    RAMB36_X1Y46         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_CASDOUTB[3])
+                                                      0.301     7.181 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_30/CASDOUTB[3]
+                         net (fo=1, routed)           0.035     7.216    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_30_n_64
+    RAMB36_X1Y47         RAMB36E2 (Prop_RAMB36E2_RAMB36_CASDINB[3]_DOUTBDOUT[3])
+                                                      0.205     7.421 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_31/DOUTBDOUT[3]
+                         net (fo=1, routed)           1.250     8.671    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/mem_reg_bram_31_n_128
+    SLICE_X32Y272        LUT6 (Prop_F6LUT_SLICEM_I0_O)
+                                                      0.119     8.790 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/GEN_RX.U_RAM/GEN_INFERRED.U_RAM/doutb[3]_INST_0/O
+                         net (fo=1, routed)           0.200     8.990    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/rdBuffData_i[3]
+    SLICE_X32Y273        LUT4 (Prop_D6LUT_SLICEM_I0_O)
+                                                      0.135     9.125 r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/r[appSsiMaster][data][3]_i_1/O
+                         net (fo=1, routed)           0.027     9.152    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/comb.v[appSsiMaster][data][3]
+    SLICE_X32Y273        FDRE                                         r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/r_reg[appSsiMaster][data][3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ethClkP rise edge)    6.400     6.400 r  <hidden>
+    GTHE3_COMMON_X0Y3                                 0.000     6.400 r  ethClkP
+                         net (fo=0)                   0.000     6.400    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/gtClkP
+    GTHE3_COMMON_X0Y3    IBUFDS_GTE3 (Prop_IBUFDS0_GTE3_GTHE3_COMMON_I_ODIV2)
+                                                      0.209     6.609 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/IBUFDS_GTE3_Inst/ODIV2
+                         net (fo=2, routed)           0.046     6.655    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/refClkCopy
+    BUFG_GT_X0Y85        BUFG_GT (Prop_BUFG_GT_I_O)
+                                                      0.283     6.938 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/BUFG_GT_Inst/O
+    X1Y2 (CLOCK_ROOT)    net (fo=38730, routed)       2.436     9.374    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/clk_i
+    SLICE_X32Y273        FDRE                                         r  U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/r_reg[appSsiMaster][data][3]/C
+                         clock pessimism              0.334     9.707    <hidden>
+                         clock uncertainty           -0.035     9.672    <hidden>
+    SLICE_X32Y273        FDRE (Setup_DFF_SLICEM_C_D)
+                                                      0.059     9.731    U_Core/GEN_ETH.U_Rudp/GEN_VEC[1].U_RssiServer/U_RssiCore/RxFSM_INST/r_reg[appSsiMaster][data][3]
+  -------------------------------------------------------------------
+                         required time                          9.731    <hidden>
+                         arrival time                          -9.152    <hidden>
+  -------------------------------------------------------------------
+                         slack                                  0.579    <hidden>
+
+Min Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.004ns  (arrival time - required time)
+  Source:                 u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[2].U_ALL_SRL_SLICE/u_srlA/S1/CLK
+                            (rising edge-triggered cell SRLC32E clocked by ethClkP  {rise@0.000ns fall@3.200ns period=6.400ns})
+  Destination:            u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[1].U_ALL_SRL_SLICE/u_srlD/S2/D
+                            (rising edge-triggered cell SRL16E clocked by ethClkP  {rise@0.000ns fall@3.200ns period=6.400ns})
+  Path Group:             ethClkP
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ethClkP rise@0.000ns - ethClkP rise@0.000ns)
+  Data Path Delay:        0.255ns  (logic 0.255ns (100.000%)  route 0.000ns (0.000%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.007ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.789ns
+    Source Clock Delay      (SCD):    3.246ns
+    Clock Pessimism Removal (CPR):    0.537ns
+  Clock Net Delay (Source):      2.708ns (routing 1.153ns, distribution 1.555ns)
+  Clock Net Delay (Destination): 3.029ns (routing 1.264ns, distribution 1.765ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ethClkP rise edge)    0.000     0.000 r  <hidden>
+    GTHE3_COMMON_X0Y3                                 0.000     0.000 r  ethClkP
+                         net (fo=0)                   0.000     0.000    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/gtClkP
+    GTHE3_COMMON_X0Y3    IBUFDS_GTE3 (Prop_IBUFDS0_GTE3_GTHE3_COMMON_I_ODIV2)
+                                                      0.209     0.209 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/IBUFDS_GTE3_Inst/ODIV2
+                         net (fo=2, routed)           0.046     0.255    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/refClkCopy
+    BUFG_GT_X0Y85        BUFG_GT (Prop_BUFG_GT_I_O)
+                                                      0.283     0.538 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/BUFG_GT_Inst/O
+    X1Y2 (CLOCK_ROOT)    net (fo=38730, routed)       2.708     3.246    u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[2].U_ALL_SRL_SLICE/u_srlA/CLK
+    SLICE_X66Y136        SRLC32E                                      r  u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[2].U_ALL_SRL_SLICE/u_srlA/S1/CLK
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y136        SRLC32E (Prop_E6LUT_SLICEM_CLK_Q31)
+                                                      0.255     3.501 r  u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[2].U_ALL_SRL_SLICE/u_srlA/S1/Q31
+                         net (fo=2, unplaced)         0.000     3.501    u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[1].U_ALL_SRL_SLICE/u_srlD/CDI
+    SLICE_X66Y136        SRL16E                                       r  u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[1].U_ALL_SRL_SLICE/u_srlD/S2/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ethClkP rise edge)    0.000     0.000 r  <hidden>
+    GTHE3_COMMON_X0Y3                                 0.000     0.000 r  ethClkP
+                         net (fo=0)                   0.000     0.000    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/gtClkP
+    GTHE3_COMMON_X0Y3    IBUFDS_GTE3 (Prop_IBUFDS0_GTE3_GTHE3_COMMON_I_ODIV2)
+                                                      0.363     0.363 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/IBUFDS_GTE3_Inst/ODIV2
+                         net (fo=2, routed)           0.082     0.445    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/refClkCopy
+    BUFG_GT_X0Y85        BUFG_GT (Prop_BUFG_GT_I_O)
+                                                      0.315     0.760 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/BUFG_GT_Inst/O
+    X1Y2 (CLOCK_ROOT)    net (fo=38730, routed)       3.029     3.789    u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[1].U_ALL_SRL_SLICE/u_srlD/CLK
+    SLICE_X66Y136        SRL16E                                       r  u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[1].U_ALL_SRL_SLICE/u_srlD/S2/CLK
+                         clock pessimism             -0.537     3.253    <hidden>
+    SLICE_X66Y136        SRL16E (Hold_D5LUT_SLICEM_CLK_D)
+                                                      0.244     3.497    u_ila_0/inst/ila_core_inst/u_trig/N_DDR_TC.N_DDR_TC_INST[0].U_TC/allx_typeA_match_detection.ltlib_v1_0_4_allx_typeA_inst/DUT/I_WHOLE_SLICE.G_SLICE_IDX[1].U_ALL_SRL_SLICE/u_srlD/S2
+  -------------------------------------------------------------------
+                         required time                         -3.497    <hidden>
+                         arrival time                           3.501    <hidden>
+  -------------------------------------------------------------------
+                         slack                                  0.004    <hidden>
+
+--------------------------------------------------------------------------------------
+Path Group:  (none)
+From Clock:  ethClkP
+  To Clock:  
+
+Max Delay            94 Endpoints
+Min Delay           102 Endpoints
+--------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack:                    inf
+  Source:                 dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD1/ctl_reg_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by ethClkP  {rise@0.000ns fall@3.200ns period=6.400ns})
+  Destination:            dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD5/shift_reg_in_reg[0]/R
+  Path Group:             (none)
+  Path Type:              Max at Slow Process Corner
+  Data Path Delay:        1.542ns  (logic 0.114ns (7.393%)  route 1.428ns (92.607%))
+  Logic Levels:           0  
+  Clock Uncertainty:      0.025ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.050ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+  Clock Net Delay (Source):      3.029ns (routing 1.264ns, distribution 1.765ns)
+  Timing Exception:       False Path
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ethClkP rise edge)    0.000     0.000 r  <hidden>
+    GTHE3_COMMON_X0Y3                                 0.000     0.000 r  ethClkP
+                         net (fo=0)                   0.000     0.000    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/gtClkP
+    GTHE3_COMMON_X0Y3    IBUFDS_GTE3 (Prop_IBUFDS0_GTE3_GTHE3_COMMON_I_ODIV2)
+                                                      0.363     0.363 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/IBUFDS_GTE3_Inst/ODIV2
+                         net (fo=2, routed)           0.082     0.445    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/refClkCopy
+    BUFG_GT_X0Y85        BUFG_GT (Prop_BUFG_GT_I_O)
+                                                      0.315     0.760 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/BUFG_GT_Inst/O
+    X1Y2 (CLOCK_ROOT)    net (fo=38730, routed)       3.029     3.789    dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD1/clk
+    SLICE_X69Y107        FDRE                                         r  dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD1/ctl_reg_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X69Y107        FDRE (Prop_DFF_SLICEM_C_Q)
+                                                      0.114     3.903 r  dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD1/ctl_reg_reg[0]/Q
+                         net (fo=176, routed)         1.428     5.331    dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD5/ctl_reg_reg[0]_0
+    SLICE_X67Y118        FDRE                                         r  dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD5/shift_reg_in_reg[0]/R
+  -------------------------------------------------------------------    -------------------
+
+Min Delay Paths
+--------------------------------------------------------------------------------------
+Slack:                    inf
+  Source:                 dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/gnxpm_cdc.rd_pntr_gc_reg[3]/C
+                            (rising edge-triggered cell FDCE clocked by ethClkP  {rise@0.000ns fall@3.200ns period=6.400ns})
+  Destination:            dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/gnxpm_cdc.gsync_stage[1].wr_stg_inst/Q_reg_reg[3]/D
+  Path Group:             (none)
+  Path Type:              Min at Fast Process Corner
+  Data Path Delay:        0.155ns  (logic 0.049ns (31.613%)  route 0.106ns (68.387%))
+  Logic Levels:           0  
+  Clock Uncertainty:      0.025ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.050ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+  Clock Net Delay (Source):      1.461ns (routing 0.678ns, distribution 0.783ns)
+  Timing Exception:       False Path
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ethClkP rise edge)    0.000     0.000 r  <hidden>
+    GTHE3_COMMON_X0Y3                                 0.000     0.000 r  ethClkP
+                         net (fo=0)                   0.000     0.000    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/gtClkP
+    GTHE3_COMMON_X0Y3    IBUFDS_GTE3 (Prop_IBUFDS0_GTE3_GTHE3_COMMON_I_ODIV2)
+                                                      0.166     0.166 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/IBUFDS_GTE3_Inst/ODIV2
+                         net (fo=2, routed)           0.018     0.184    U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/refClkCopy
+    BUFG_GT_X0Y85        BUFG_GT (Prop_BUFG_GT_I_O)
+                                                      0.100     0.284 r  U_Core/GEN_ETH.U_Rudp/GEN_10G.U_10GigE/TenGigEthGthUltraScaleClk_Inst/BUFG_GT_Inst/O
+    X1Y2 (CLOCK_ROOT)    net (fo=38730, routed)       1.461     1.745    dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/rd_clk
+    SLICE_X73Y115        FDCE                                         r  dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/gnxpm_cdc.rd_pntr_gc_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X73Y115        FDCE (Prop_EFF_SLICEL_C_Q)
+                                                      0.049     1.794 r  dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/gnxpm_cdc.rd_pntr_gc_reg[3]/Q
+                         net (fo=1, routed)           0.106     1.900    dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/gnxpm_cdc.gsync_stage[1].wr_stg_inst/Q[3]
+    SLICE_X72Y115        FDCE                                         r  dbg_hub/inst/BSCANID.u_xsdbm_id/CORE_XSDB.UUT_MASTER/U_ICON_INTERFACE/U_CMD6_WR/U_WR_FIFO/SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst/inst_fifo_gen/gconvfifo.rf/grf.rf/gntv_or_sync_fifo.gcx.clkx/gnxpm_cdc.gsync_stage[1].wr_stg_inst/Q_reg_reg[3]/D
+  -------------------------------------------------------------------    -------------------

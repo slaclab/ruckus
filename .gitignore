@@ -38,6 +38,9 @@ build*
 docs/_build/
 # Exception: documentation files whose names start with "build"
 !docs/**/build_*.rst
+# Exception: VS Code extension sources whose names start with "build"
+!vscode-plugin/scripts/build.sh
+!vscode-plugin/src/core/buildEnv.ts
 images*
 bin*
 .Xil*
@@ -69,3 +72,5 @@ linux*
 .planning/
 planning/
 CLAUDE.md
+# Exception: launch configuration of the VS Code extension
+!vscode-plugin/.vscode/
