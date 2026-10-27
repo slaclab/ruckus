@@ -28,6 +28,16 @@ export VIVADO_VERSION  := $(shell vivado -version | grep -Po "v(\d+\.)+\d+" | cu
 export RUCKUS_DIR       = $(TOP_DIR)/submodules/ruckus
 export SOURCE_DEPEND    = $(OUT_DIR)/$(PROJECT)_sources.txt
 
+# Tcl batch launcher. Newer AMD installations provide vitis-run instead of
+# standalone vitis_hls. Keep the legacy command when it is available on PATH.
+ifndef HLS_TCL_CMD
+ifneq ($(shell command -v vitis_hls 2>/dev/null),)
+export HLS_TCL_CMD = vitis_hls -f
+else
+export HLS_TCL_CMD = vitis-run --mode hls --tcl
+endif
+endif
+
 # Source Files
 ifndef SRC_FILE
 export SRC_FILE = $(PROJ_DIR)/sources.tcl
@@ -115,6 +125,7 @@ all: target
 .PHONY : test
 test:
 	@echo VIVADO_VERSION: $(VIVADO_VERSION)
+	@echo HLS_TCL_CMD: $(HLS_TCL_CMD)
 	@echo PROJECT: $(PROJECT)
 	@echo PROJ_DIR: $(PROJ_DIR)
 	@echo TOP_DIR: $(TOP_DIR)
@@ -159,7 +170,7 @@ $(SOURCE_DEPEND) :
 			 echo ""; false; }
 	@test -d $(OUT_DIR)     || mkdir $(OUT_DIR)
 	@test -d $(PROJ_DIR)/ip || mkdir $(PROJ_DIR)/ip
-	@cd $(OUT_DIR); SKIP_CSIM=1 vitis_hls -f $(RUCKUS_DIR)/vitis/hls/sources.tcl
+	@cd $(OUT_DIR); SKIP_CSIM=1 $(HLS_TCL_CMD) $(RUCKUS_DIR)/vitis/hls/sources.tcl
 
 ###############################################################
 #### Vitis HLS Batch Build Mode ###############################
@@ -167,7 +178,7 @@ $(SOURCE_DEPEND) :
 .PHONY : build
 build : $(SOURCE_DEPEND)
 	$(call ACTION_HEADER,"Vitis HLS Build")
-	@cd $(OUT_DIR); SKIP_CSIM=$(SKIP_CSIM) vitis_hls -f $(RUCKUS_DIR)/vitis/hls/build.tcl
+	@cd $(OUT_DIR); SKIP_CSIM=$(SKIP_CSIM) $(HLS_TCL_CMD) $(RUCKUS_DIR)/vitis/hls/build.tcl
 
 ###############################################################
 #### Vitis HLS Interactive ####################################
