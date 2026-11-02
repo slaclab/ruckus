@@ -652,6 +652,23 @@ Vitis / SDK Variables
 
    :default: unset
 
+Vitis HLS Variables
+-------------------
+
+.. envvar:: HLS_TCL_CMD
+
+   Tcl batch command used by ``system_vitis_hls.mk`` for ``sources`` and
+   ``build``. Includes the option preceding the Tcl script filename.
+   Project source, solution and directive Tcl files are used by either launcher.
+
+   :default: ``vitis_hls -f`` when ``vitis_hls`` is on ``PATH``;
+             otherwise ``vitis-run --mode hls --tcl``
+
+   Override in the project Makefile, environment or make command line when
+   selecting a specific launcher. Source the matching AMD settings first.
+   This does not change the legacy ``gui`` or ``interactive`` targets, which
+   require standalone ``vitis_hls``. See :doc:`../how-to/vitis_hls`.
+
 Vitis AIE Targets
 -----------------
 
