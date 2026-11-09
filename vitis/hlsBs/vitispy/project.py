@@ -17,6 +17,7 @@ from .workspace import Workspace
 from .importfile import ImportFile
 from .version import Version
 from .files import add_version
+from .git import Git
 
 
 
@@ -26,6 +27,7 @@ from .files import add_version
 class Project:
 
     from .product import Product
+    from .git     import Git
 
     # --------------------------------------------------------------------------
     # Project Ip parameterization
@@ -33,20 +35,30 @@ class Project:
     class Ip:
         # ----------------------------------------------------------------------
         def __init__(self,
-                     dir=None,
-                     zip_file=None,
-                     dcp_rename=None,
-                     dcp_file=None,
                      family=None,
+                     dcp_rename=None,
+
+                     # Output file specifications
+                     dir=None,
+
+                     # IP/Zip FPGA augmentation
+                     zip_file=None,
+
+                     # DCP rename
+                     dcp_file=None,
                      dgn_dir=None,
                      jou_file=None,
                      log_file=None):
 
+
+
+            self.family = family
+            self.dcp_rename = dcp_rename if dcp_rename else '{cmp.name}'
+
             self.dir = dir
             self.zip_file = zip_file
-            self.dcp_rename = dcp_rename if dcp_rename else '{cmp.name}'
+
             self.dcp_file = dcp_file
-            self.family = family
             self.dgn_dir = dgn_dir
             self.jou_file = jou_file if jou_file else '{dcp.name}'
             self.log_file = log_file if log_file else '{dcp.name}'
@@ -142,79 +154,6 @@ class Project:
     # END: Product.Ip
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
-    # GIT
-    # --------------------------------------------------------------------------
-
-    class Git:
-        def __init__(self, root):
-            import subprocess
-            from directory import Directory
-
-            self.repo = None
-            script = os.path.join(Directory.sh, 'git.sh')
-            cmd = ['sh', script]
-            with subprocess.Popen(cmd,
-                                  cwd=root,
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE,
-                                  text=True,
-                                  bufsize=1) as process:
-
-                for line in process.stdout:
-                    line = line.strip()
-                    info = eval(line)
-
-                    repo = info['Repo']
-                    if repo:
-                        self.repo = info['Repo']
-                        self.tag = info['Tag']
-                        self.dirty = info['Dirty']
-                        self.branch = info['Branch']
-                        self.hash_long = info['HashLong']
-                        self.hash_short = info['HashShort']
-                        self.hash_msg = info['HashMsg']
-                    else:
-                        self.repo = "None"
-                        self.tag = "None"
-                        self.dirty = True
-                        self.branch = "None"
-                        self.hash_long = "None"
-                        self.hash_short = "None"
-                        self.hash_msg = "None"
-                    break
-
-                process.wait()
-
-                self.ns = SimpleNamespace (repo       = self.repo,
-                                           tag        = self.tag,
-                                           dirty      = self.dirty,
-                                           branch     = self.branch,
-                                           hash_long  = self.hash_long,
-                                           hash_short = self.hash_short,
-                                           hash_msg   = self.hash_msg
-                                           )
-                return
-
-        def print(self, printer, pad: int, verbose):
-            if self.repo is None:
-                return
-
-            dirty_msg = "Dirty" if self.dirty else "Clean"
-            pm3 = pad - len('Git')
-            printer.line(f"Git{' '*pm3}.repo", self.repo)
-            printer.line(f"{' '*pad}.branch", self.branch)
-
-            if not self.dirty:
-                printer.line(f"{' '*pad}.hash", self.hash_short)
-                printer.line(f"{' '*pad}.tag", self.tag)
-            else:
-                printer.line(f"{' '*pad}.dirty", dirty_msg)
-
-            return
-    # --------------------------------------------------------------------------
-    # END: Product.Git
-    # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
     class Print:
@@ -273,12 +212,14 @@ class Project:
         self.configurations = None
         self.spc_print = None
         self.target_label = None
+        self.git = None
 
         needs = in_needs
 
         if self.root:
             needs &= ~Project.Need.Root
             self.root = os.path.expandvars(self.root)
+            self.git = Git (self.root)
 
         # If need the workspace
         if needs & Project.Need.Workspace:
@@ -365,6 +306,10 @@ class Project:
                     self.root = os.path.split(
                         os.path.split(self.prj_files[0])[0])[0]
 
+            # Make the git information available
+            if not self.git:
+                self.git = Git (self.root)
+
             # Project Products
             if needs & Project.Need.Products_Root:
                 if hasattr(module, 'get_products_root'):
@@ -376,13 +321,12 @@ class Project:
                 if self.products_root is None:
                     self.products_root = os.path.join(self.root, 'products')
 
-                self.products_root = add_version (self.products_root)
                 needs &= ~Project.Need.Products_Root
 
             # Project Build
             if needs & Project.Need.Build_Root:
-                if hasattr(module, 'get_build'):
-                    self.build = module.get_build(self)
+                if hasattr(module, 'get_build_root'):
+                    self.build_root = module.get_build_root(self)
                     if self.build_root:
                         self.build_root = os.path.expandvars(self.build_root)
 
@@ -421,7 +365,7 @@ class Project:
                     return
 
                 self.products_root = os.path.join(self.root, 'products')
-                self.products_root = add_version (self.products_root)
+
             self.products_root = os.path.expandvars(self.products_root)
 
         if needs & Project.Need.Build_Root:
@@ -441,8 +385,6 @@ class Project:
                                               'ws',
                                               '{vitis.version}')
 
-            self.workspace = Workspace.get(self.workspace)
-
         if needs & Project.Need.Cfg_Root:
             if self.cfg_root is None:
                 if self.build_root is None:
@@ -459,14 +401,37 @@ class Project:
                     self.error = Project.Need.Ip_Root
                     return
 
-                self.iproot = os.path.join(self.build_root,
-                                           'ip',
-                                           '{vitis.version}')
+                self.ip_root = os.path.join(self.build_root,
+                                            'ip',
+                                            '{vitis.version}')
+
+        # ---------------------------------------------------
+        # Add any unresolved vitis version or git information
+        # Convert all to absolute paths
+        # ---------------------------------------------------
+        self.global_map = { 'vitis' : SimpleNamespace (version = Version.version),
+                            'git'   : self.git.ns }
+        self.products_root = self.resolve (self.products_root)
+        self.build_root = self.resolve (self.build_root)
+        self.workspace = self.resolve (self.workspace)
+        self.cfg_root = self.resolve (self.cfg_root)
+        self.ip_root = self.resolve (self.ip_root)
         return
     # --------------------------------------------------------------------------
 
+
+    # --------------------------------------------------------------------------
+    def resolve (self, file) :
+        if file:
+            file = os.path.expandvars (file)
+            file = file.format_map (self.global_map)
+            file = os.path.abspath (file)
+
+        return file
     # --------------------------------------------------------------------------
 
+
+    # --------------------------------------------------------------------------
     def report(self, needs):
         if needs & Project.Need.Workspace:
             print(
@@ -485,16 +450,19 @@ class Project:
         elif needs & Project.Need.Root:
             print(
                 "\nERROR: Could not determine project root directory, one of\n"
-                "       --root must be specified",
+                "         --root must be specified",
                 file = sys.stderr)
             return self.error
 
         return 0
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
     def get_products(self):
+
+        if not self.git:
+            self.git = Git(os.path.expandvars(self.root))
 
         products = self.modules[0].module.get_products(self)
 
@@ -502,32 +470,32 @@ class Project:
             products = [products]
 
         self.products = products
-        self.git = self.Git(os.path.expandvars(self.root))
+
 
         return products
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
     def get_ip(self):
 
         if hasattr(self.modules[0].module, 'get_ip'):
-            self.ip = self.modules[0].module.get_ip(self)
+            self.ip = self.modules[0].module.get_ip
         else:
             self.ip = None
 
         return self.ip
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
     def get_dcp(self):
         self.dcp = self.modules[0].module.get_dcp(self)
         return self.dcp
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
     def replace(self, args):
 
         # Check if args override project settings
@@ -542,8 +510,8 @@ class Project:
         return
     # --------------------------------------------------------------------------
 
-    # --------------------------------------------------------------------------
 
+    # --------------------------------------------------------------------------
     @staticmethod
     def add_arguments(parser, add_cfg=False):      # Project
 

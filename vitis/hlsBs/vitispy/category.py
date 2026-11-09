@@ -9,7 +9,8 @@
 # ----------------------------------------------------------------------------
 
 import os
-
+import sys
+from   vitispy.optError import optError
 
 class Category:
     '''
@@ -68,27 +69,59 @@ class Category:
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def categorize(olist, default_opt):
+    def categorize(olist, action, default_opt, cmd_action = None):
         if not olist:
             return default_opt
 
-        msk = 0
-        if Category.is_in('e', olist):
-            msk |= Category.Existing
-        if Category.is_in('m', olist):
-            msk |= Category.Missing
-        if Category.is_in('k', olist):
-            msk |= Category.CruftLo
-        if Category.is_in('K', olist):
-            msk |= Category.CruftHi
-        if Category.is_in('c', olist):
-            msk |= Category.Cruft
-        if Category.is_in('a', olist):
-            msk |= Category.All
+        gbl_msk = 0
+        for opt in olist:
+            n = len(opt)
+            lcl_msk = 0
+            if 'existing'[:n] == opt:
+                lcl_msk = Category.Existing
+                gbl_msk |= lcl_msk
+                continue
 
-        if msk == 0:
-            msk = default_opt
-        return msk
+            if 'missing'[:n]  ==  opt:
+                lcl_msk = Category.Missing
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'kruft'[:n]    == opt:
+                lcl_msk = Category.CruftLo
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'Kruft'[:n]   == opt:
+                lcl_msk = Category.CruftHi
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'cruft'[:n]   == opt:
+                lcl_msk = Category.Cruft
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'all'[:n]     ==  opt:
+                lcl_msk = Category.All
+                gbl_msk |= lcl_msk
+                continue
+
+            # Error: No option not found
+            if cmd_action == None:
+                cmd = 'unknown'
+                action = 'unknown'
+            else:
+                cmd = cmd_action[0]
+                action = cmd_action[1]
+
+            optError ('hlsCfg', 'Category', action, opt, olist, 'existing, missing, cruft, kruft, Kruft')
+            exit (-1)
+
+
+        if  gbl_msk == 0:
+            gbl_msk = default_opt
+        return gbl_msk
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------

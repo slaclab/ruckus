@@ -332,6 +332,7 @@ class Targets:
 
                     if target.cmp_name not in self.targets:
                         self.targets.append(target)
+
                         prd_target.cfg_path = target.cfg_path
                         prd_target.cfg_dir = target.cfg_dir
                         prd_target.cfg_name = target.cfg_name
@@ -342,7 +343,6 @@ class Targets:
                         print(
                             f"ERROR: duplicate component found {target.cmp_name}")
 
-        self.targets.sort(key=lambda x: x.cmp_name)
         return
     # --------------------------------------------------------------------------
 
@@ -448,6 +448,7 @@ class Targets:
         if len(filtered.accepts) == 0:
             Targets.no_user_targets(filtered.rejects, 'classifying', filters)
             return None
+
         category.missing = filtered.accepts
 
         # -----------------------------------------------------------
@@ -464,16 +465,50 @@ class Targets:
         # Scavenge for cruft in components in the workspace
         # -------------------------------------------------
         cmp_wc = os.path.join(workspace, '*')
-        cmp_paths = glob.glob(cmp_wc)
+        cmp_paths_org = glob.glob(cmp_wc)
+        cmp_paths = []
+
+        # --------------------------------------------------
+        # Reorder the cmp_paths in the order of the targets
+        # This is horrible implementation, but it doesn't
+        # change the original classification loop
+        #
+        # TODO: Redo this to avoid a lot of duplicate work
+        # --------------------------------------------------
+        for target in targets:
+
+            # --------------------------------------------------
+            # Since cmp_paths_org will be have elements removed
+            # the loop must be done over a copy, And folk wonder
+            # why Python is slow...
+            # --------------------------------------------------
+            cmp_paths_cpy = cmp_paths_org.copy()
+            for cmp_path in cmp_paths_cpy:
+                if target.cmp_path == cmp_path:
+
+                    # Place all the existing ones first on the list
+                    cmp_paths.append(cmp_path)
+                    cmp_paths_org.remove(cmp_path)
+
+                elif cmp_path in ignore_paths or not os.path.isdir(cmp_path) :
+
+                    # Remove any ignore paths and non-directories
+                    cmp_paths_org.remove(cmp_path)
+
+        # Tack on all the remaining
+        cmp_paths.extend (cmp_paths_org)
+
+
         for cmp_path in cmp_paths:
 
-            # Ignore the _ide,logs, etc directories in the workspace
-            if cmp_path in ignore_paths:
-                continue
+            #  Ignore the _ide,logs, etc directories in the workspace
+            ## The reorder loops has removed the ignore_paths and non-directories
+            ## if cmp_path in ignore_paths:
+            ##    continue
 
-            # Component path must be a directory
-            if not os.path.isdir(cmp_path):
-                continue
+            ## Component path must be a directory
+            ## if not os.path.isdir(cmp_path):
+            ##    continue
 
             cmp_info = ComponentInfo(cmp_path, True)
             if cmp_info.errs:

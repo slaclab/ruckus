@@ -15,9 +15,11 @@ import inspect
 from .version import Version
 
 
+
 class Product:
 
     from .fpga import Fpga
+
 
     # --------------------------------------------------------------------------
     class Value:
@@ -99,7 +101,7 @@ class Product:
           e.g.     [ 'network' : [$NETWORKS/a.hh, $NETWORKS/b.hh,..] ]
         '''
         # --------------------------------------------------------------------------
-        def __init__(self, key, tvs):
+        def __init__(self, prefix, kvs):
             '''
             Constructs a class consisting of a 2 element list
 
@@ -107,15 +109,15 @@ class Product:
                key:   A string which will eventually become the dictionary's key
                tvs:   A 2 element list consisting of a type and one or a list of values
             '''
-            self.key = key
-            self.tvs = tvs
+            self.prefix = prefix
+            self.kvs = kvs
             return
         # ----------------------------------------------------------------------
 
 
         # ----------------------------------------------------------------------
         def __str__(self):
-            return "key = {}\n, tvs = {}".format(self.key, self.tvs)
+            return "key = {}\n, kvs = {}".format(self.key, self.kvs)
         # -----------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
@@ -302,8 +304,8 @@ class Product:
         file to the compilation
 
         Args:
-           name     : The name of the #define
-           file     : The include file path. This may be an explict value, .e.g.
+          name     : The name of the #define
+          inc_path : The include file path. This may be an explict value, .e.g.
                      'file.hh' or a logical symbolic, e.g. '{file_path}'
           rel_path : If specified the relative path to use when including
                      the file. If omitted or specified as None, the path
@@ -320,16 +322,16 @@ class Product:
                              /Opt2.hh
 
         To explicitly include this at compile-time
-        def_include = Product.Include ('OPT_FILE',
-                                       'opt/Opt1.hh',
-                                       '<path_to>/include/myproject')
+        def_include = Product.IncludeFile (name     = 'OPT_FILE',
+                                           inc_path = 'opt/Opt1.hh',
+                                           rel_path = '<path_to>/include/myproject')
 
         More likely one has defined a component contributor
         '''
         # ----------------------------------------------------------------------
-        def __init__(self, name, paths, rel_path=None):
+        def __init__(self, name, inc_path, rel_path=None):
             self.name = name
-            self.value = paths
+            self.value = inc_path
             self.rel_path = rel_path
             self.type = 'rel_file' if rel_path else 'abs_file'
             return
@@ -488,8 +490,8 @@ class Product:
         '''
         # ----------------------------------------------------------------------
         def __init__ (self, ctb_builds, ctb_fpgas, *args):
-            stem  = self.__module__
 
+            stem  = self.__module__
             errs = 0
             keys = []
 
@@ -544,7 +546,7 @@ class Product:
 
         # ----------------------------------------------------------------------
         @staticmethod
-        def check (idx, ctb, allowed, keys, stem, errs):
+        def check (ctb_idx, ctb, allowed, keys, stem, errs):
             cls_name = lambda cls: (type(cls) if not type(cls).__module__ == stem
                                     else '<' + type(cls).__qualname__ + '>')
 
@@ -564,18 +566,18 @@ class Product:
             # type, it is up to the user to ensure
             # the values are unique
             # --------------------------------------
-            ctb_prefix = ctb.key
-            ctb_key    = ctb.tvs[0]
+            ctb_prefix = ctb.prefix
+            ctb_key    = ctb.kvs[0]
 
             duplicate = None
-            for idy, prefix, key, cls in keys:
-                if (ctb_prefix == prefix) and (ctb_key != key) :
-                   duplicate = [idy,prefix,key, cls]
+            for idx, prefix, key, cls in keys:
+                if (ctb_prefix == prefix) and (ctb_idx != idx) :
+                   duplicate = [idx, prefix, key, cls]
                    break;
 
             # Only record if not a duplicate
             if  duplicate is None:
-                keys.append ([idx, ctb_prefix, ctb_key, cls_name(ctb)])
+                keys.append ([ctb_idx, ctb_prefix, ctb_key, cls_name(ctb)])
 
 
             # ----------------------------------------------
@@ -590,7 +592,7 @@ class Product:
                 if errs == 0:
                     estr += f"\nERROR: In Products.Contributors"
 
-                estr += f"\n     * Contributor #{idx} {cls_name(ctb)}"
+                estr += f"\n     * Contributor #{ctb_idx} {cls_name(ctb)}"
 
                 # ---------------------------------------
                 # Have passed an illegal contributor type
@@ -630,13 +632,16 @@ class Product:
            contributors: These are Product.Builds, Product.Fpgas,
                          Product.Include
                          together determine the components
-           cfg_template: How to name the configuration file path
-           cmp_template: How to name the component
+           cmp_template: How to name the component, defaults to the
+                         contributors id, name
+           cfg_template: How to name the configuration file path,
+                         defaults to the components name
+
 
         Details:
         The contributors must include at least one instance of the the .Builds
-        and .Fpgas. All contributors may appear multiple times provided they
-        are uniquely named
+        and .Fpgas. All other contributors may appear multiple times provided
+        they are uniquely named
 
         The cfg_template and cmp_template must contain at least one logical
         symbol name from every contributor class that has more than one member.
@@ -644,11 +649,14 @@ class Product:
         the directory structure.
 
         Example:
-           cfg_template {build_id}-{fpga_id}
-           cmp_template {cfg_name}
+           cfg_template {build.id}-{fpga.id}
+           cmp_template {cfg.name}
         '''
         # ----------------------------------------------------------------------
-        def __init__(self, contributors, cfg_template, cmp_template):
+        def __init__(self,
+                     contributors,
+                     cmp_template = None,
+                     cfg_template = None):
 
             stem = self.__module__
             errs = 0
@@ -666,12 +674,16 @@ class Product:
                 errs += self.check (ctbs, "contributors",
                                     Product.Contributors, stem, errs)
 
-            errs += self.check (cfg_template, "cfg_template",
-                                Product.CfgTemplate,  stem, errs)
 
-            errs += self.check (cmp_template, "cmp_template",
-                                Product.CmpTemplate,  stem, errs)
+            if cmp_template:
+                errs += self.check (cmp_template, "cmp_template",
+                                    Product.CmpTemplate,  stem, errs)
 
+            if cfg_template:
+                errs += self.check (cfg_template, "cfg_template",
+                                    Product.CfgTemplate,  stem, errs)
+
+            # Abort on an errors
             if errs:
                 frame = inspect.currentframe().f_back
                 print ( " at\n"
@@ -680,6 +692,45 @@ class Product:
                        file = sys.stderr)
 
                 sys.exit (-1)
+
+            if cmp_template is None:
+
+                # No component template specified and no errors, default it
+
+                # Build and Fpga contributor can only occur on the first contributors
+                ctbs = contributors[0]
+                if ctbs[0].kvs[0] == 'Builds':
+                    template = '{' + ctbs[0].prefix + '.id}'
+
+
+                if ctbs[1].kvs[0] == 'Fpgas':
+                    if isinstance(ctbs[1].kvs[1], list) or ctbs[1].kvs[1][0].id:
+                        template += '-{' + ctbs[1].prefix + '.id}'
+
+                # First set of contributors has already dealt with the 'Builds' and 'Fgpas'
+                # which must be contributoes 0 and 1
+                ctb_beg = 2
+                for ctbs in contributors:
+
+                    for ctb in ctbs[ctb_beg:]:
+
+                        ctb_type = ctb.kvs[0]
+                        ctb_beg = 0
+
+                        if   ctb_type == 'Files':
+                            template += '-{' + ctb.prefix + '.name}'
+
+                        elif ctb_type == 'Values':
+                            template += '-{' + ctb.prefix + '.id}'
+
+                cmp_template = Product.CmpTemplate (None, template)
+
+
+            # If not specified, default to the component's name
+            if cfg_template is None:
+                cfg_template = Product.CfgTemplate (
+                                       None,
+                                       '{' + cmp_template.prefix + '.name}')
 
             self.contributors = contributors
             self.cfg_template = cfg_template
@@ -724,9 +775,9 @@ class Product:
 
     # --------------------------------------------------------------------------
     class Vivado:
-        def __init__(self, flow, syn_dcp):
-            self.flow = flow
-            self.syn_dcp = syn_dcp
+        def __init__(self, flow = None, syn_dcp = None):
+            self.flow = flow if flow else 'syn'
+            self.syn_dcp = syn_dcp if syn_dcp else '1'
             return
         # ----------------------------------------------------------------------
 
@@ -781,14 +832,82 @@ class Product:
             # ------------------------------------------------------------------
             # Construct the package IP
             # ------------------------------------------------------------------
-            def __init__(self, name, vendor, library, version):  # Package.Ip
+            def __init__(self, name, vendor, version = None, library = None):  # Package.Ip
+                self.frame = inspect.currentframe().f_back
                 self.name_template = name
                 self.vendor = vendor
-                self.library = library
                 self.version = version
+                self.library = library if library else 'hls'
                 self.name = None
                 return
             # ------------------------------------------------------------------
+
+
+            # ------------------------------------------------------------------
+            def resolve(self, git):
+
+                if isinstance(self.version, str):
+                    self.version = os.path.expandvars (self.version).format_map (git.map)
+                    return
+
+                # If no version, try HLSBS_IP_VERSION
+                if self.version is None:
+                    choices = os.getenv ('HLSBS_IP_VERSION')
+                    if choices is None:
+                        choices = git
+                else:
+                    choices = self.version
+
+                # -----------------------------------------------
+                # Ensure choices is a list or tuple,
+                # -----------------------------------------------
+                if not isinstance (choices, (list, tuple)):
+                    choices = (choices, "--None--")
+
+                for choice in choices:
+                    is_git = False
+
+                    if choice is None:
+                        continue
+                    if isinstance(choice, type (git)):
+                        is_git = True
+
+                    if is_git:
+                        if choice.valid:
+                            if choice.tag:
+                                self.version = choice.tag.format_map (git.map)
+                                if self.version != 'None':
+                                    return
+                            elif choice.hash_msg:
+                                self.version = choice.hash_msg.format_map (git.map)
+                                if self.version != 'None':
+                                    return
+
+                                return
+                        else:
+                            continue
+
+                    elif isinstance (choice, str):
+                        self.version = os.path.expandvars (choice).format_map (git.map)
+                        if self.version != 'None':
+                            return
+                        else:
+                            continue
+                    else:
+                        vtype = type(choice)
+                        frame = self.frame
+                        print ("\n"
+                               f"ERROR: Package.Ip version {vtype} is not Git or a string\n\n"
+                                "       from version\n"
+                               f"     : {choices}\n\n"
+                               f"       at\n"
+                               f"     : {frame.f_code.co_filename}\n"
+                               f"     : {frame.f_code.co_name}:{frame.f_lineno}\n",
+
+                               file = sys.stderr)
+                        sys.exit(-1)
+
+                return
 
             # -------------------------------`----------------------------------
             # Add the Package IP command line arguments to the parser
@@ -821,13 +940,13 @@ class Product:
 
             def print(self, printer):     # Package.Ip
 
-                # This is printed with configuration/component
+                # This is�� printed with configuration/component
                 # if self.name : print (f"\n{'Name'          :{n}s}: {self.name}")
 
                 print()
                 printer.line('Ip    .Vendor', self.vendor)
-                printer.line('      .Library', self.library)
                 printer.line('      .Version', self.version)
+                printer.line('      .Library', self.library)
                 return
             # ------------------------------------------------------------------
 
@@ -849,9 +968,9 @@ class Product:
             # ------------------------------------------------------------------
             # Construct the output specification
             # ------------------------------------------------------------------
-            def __init__(self, format, syn):   # Package.Output
-                self.format = format
-                self.syn = syn
+            def __init__(self, format = None, syn = None):   # Package.Output
+                self.format = format if format else 'ip_catalog'
+                self.syn = syn if syn else 'false'
                 return
             # ------------------------------------------------------------------
 
@@ -951,9 +1070,9 @@ class Product:
 
 
         # ----------------------------------------------------------------------
-        def __init__(self, ip, output):     # Package
+        def __init__(self, ip, output = None):     # Package
             self.ip = ip
-            self.output = output
+            self.output = output if output else Product.Package.Output()
             return
 
         ip: Ip
@@ -966,7 +1085,7 @@ class Product:
 
 
     # ----------------------------------------------------------------------
-    def __init__(self, project, components, package, vivado): # Product
+    def __init__(self, project, components, package, vivado = None): # Product
 
         # ----------------------------------------------------------------
         # Targets are precompiled components, i.e. they have not had their
@@ -975,7 +1094,9 @@ class Product:
         self.targets = components
         self.project = project
         self.project.package = package
-        self.project.vivado = vivado
+        self.project.vivado = vivado if vivado else Product.Vivado()
+
+        package.ip.resolve(project.git)
 
         return
     # ----------------------------------------------------------------------

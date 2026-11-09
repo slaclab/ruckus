@@ -218,8 +218,8 @@ class Dcp:
                   "ERROR: The .dcp file was not found in the hls directory tree\n"
                   f"  ->   {self.hls_dir}\n"
                   f"       {self.hls_name}\n"
-                  "  Either it was deleted or -implementation did not correctly run",
-                  sys.stderr)
+                  "  Either it was deleted or -implementation did not correctly run\n",
+                  file = sys.stderr)
         return
     # --------------------------------------------------------------------------
 
