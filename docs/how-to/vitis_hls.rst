@@ -6,20 +6,21 @@ Vivado project.
 
 .. note::
 
-   Two HLS backends are available. Use the **Legacy Vitis HLS** backend
-   (``system_vitis_hls.mk``) if your project calls the standalone ``vitis_hls``
-   binary (Vitis HLS 2021.1 or later; older versions are rejected by
-   ``HlsVersionCheck``). Use the **Vitis Unified HLS** backend
+   Two HLS backends are available. Use the **Tcl Vitis HLS** backend
+   (``system_vitis_hls.mk``) for existing Tcl projects. It selects standalone
+   ``vitis_hls`` when available, otherwise ``vitis-run --mode hls --tcl``.
+   Vitis HLS versions before 2021.1 are rejected by ``HlsVersionCheck``.
+   Use the **Vitis Unified HLS** backend
    (``system_vitis_unified_hls.mk``) if your project uses the ``vitis`` binary
    (Vitis Unified IDE, 2023.2 and later).
 
-Legacy Vitis HLS
+Tcl Vitis HLS
 ----------------
 
 Prerequisites
 ~~~~~~~~~~~~~
 
-- ``vitis_hls`` binary on ``PATH``
+- ``vitis_hls`` or ``vitis-run`` binary on ``PATH``, from the selected AMD installation
 - A ``sources.tcl`` file at ``$(PROJ_DIR)/sources.tcl`` defining HLS source files
 - A ``directives.tcl`` file at ``$(PROJ_DIR)/directives.tcl`` (sourced
   unconditionally by the build step)
@@ -58,11 +59,15 @@ Steps
 
       SKIP_CSIM=1 SKIP_COSIM=1 make build
 
-3. Open the Vitis HLS GUI to inspect results:
+3. With a standalone ``vitis_hls`` installation, open its GUI to inspect results:
 
    .. code-block:: bash
 
       make gui
+
+The Tcl backend's ``gui`` and ``interactive`` targets still require standalone
+``vitis_hls``. Tcl batch compatibility does not migrate a legacy project into a
+Unified IDE component; use the Unified backend for that workflow.
 
 **Output:** IP core archive placed at ``$(PROJ_DIR)/ip/$(PROJECT).zip``
 
@@ -99,6 +104,9 @@ Key Variables
    * - ``SKIP_CSIM``
      - ``0``
      - Set to ``1`` to skip C-simulation.
+   * - ``HLS_TCL_CMD``
+     - Auto-detected
+     - Batch launcher and script option; see :envvar:`HLS_TCL_CMD`.
    * - ``SKIP_COSIM``
      - ``0``
      - Set to ``1`` to skip co-simulation.
@@ -224,14 +232,23 @@ Key Variables
 Troubleshooting
 ---------------
 
-**"vitis_hls: command not found"**
-   Source your Vivado or Vitis settings script:
+**HLS launcher not found**
+   Source the settings script for the AMD installation you intend to use:
 
    .. code-block:: bash
 
       source /path/to/Vivado/settings64.sh
       # or for the unified toolchain:
       source /path/to/Vitis/settings64.sh
+
+   ``make test`` prints the selected ``HLS_TCL_CMD``. Batch builds prefer
+   ``vitis_hls -f`` when ``vitis_hls`` is on ``PATH``; otherwise they use
+   ``vitis-run --mode hls --tcl``. Avoid mixing installation paths. To select
+   the newer launcher explicitly when both are available:
+
+   .. code-block:: bash
+
+      make build HLS_TCL_CMD="vitis-run --mode hls --tcl"
 
 **"vitis: command not found"**
    The Unified backend requires the Vitis Unified IDE (2023.2 or later). Source
