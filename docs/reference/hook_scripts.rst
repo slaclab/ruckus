@@ -2,8 +2,8 @@ Hook Script Reference
 =====================
 
 ruckus supports two tiers of hook scripts that allow you to inject custom TCL at
-specific points in the build pipeline. Hook scripts are optional — ruckus silently
-skips them if they do not exist.
+specific points in the build pipeline. Hook scripts are optional; ruckus silently
+skips any that do not exist.
 
 For an overview of where hooks fit in the pipeline, see
 :doc:`/explanation/build_pipeline`.
@@ -20,14 +20,16 @@ Hook scripts fire in the following order relative to the Vivado build stages:
 .. code-block:: text
 
    make bit
-     |
+     │
      ├── sources.tcl loaded (ruckus.tcl recursive loading)
+     │     ├── [hook] vivado/properties.tcl      (after run-step hook registration)
+     │     ├── [hook] vivado/project_setup.tcl   (after project properties set)
      │     └── [hook] vivado/sources.tcl         (after all sources loaded)
-     │     └── [hook] vivado/project_setup.tcl   (after project properties set)
-     │     └── [hook] vivado/properties.tcl      (after run-step hook registration)
-     |
+     │
+     ├── [hook] vivado/properties.tcl            (re-sourced when build.tcl opens the project)
+     │
      ├── BuildIpCores (IP synthesis)
-     |
+     │
      ├── [hook] vivado/pre_synthesis.tcl          (before synth_1 launch)
      │
      ├── SYNTHESIS (synth_1 run)
@@ -37,20 +39,20 @@ Hook scripts fire in the following order relative to the Vivado build stages:
      ├── [hook] vivado/post_synthesis.tcl         (after synth_1 completes)
      │
      ├── IMPLEMENTATION (impl_1 run)
-     │     ├── [in-run hook] pre_opt_run.tcl            (OPT_DESIGN PRE)
-     │     ├── [in-run hook] post_opt_run.tcl           (OPT_DESIGN POST)
-     │     ├── [in-run hook] pre_power_opt_run.tcl      (POWER_OPT_DESIGN PRE)
-     │     ├── [in-run hook] post_power_opt_run.tcl     (POWER_OPT_DESIGN POST)
-     │     ├── [in-run hook] pre_place_run.tcl          (PLACE_DESIGN PRE)
-     │     ├── [in-run hook] post_place_run.tcl         (PLACE_DESIGN POST)
-     │     ├── [in-run hook] pre_post_place_power_opt_run.tcl  (POST_PLACE_POWER_OPT PRE)
-     │     ├── [in-run hook] post_post_place_power_opt_run.tcl (POST_PLACE_POWER_OPT POST)
-     │     ├── [in-run hook] pre_phys_opt_run.tcl       (PHYS_OPT_DESIGN PRE)
-     │     ├── [in-run hook] post_phys_opt_run.tcl      (PHYS_OPT_DESIGN POST)
-     │     ├── [in-run hook] pre_route_run.tcl          (ROUTE_DESIGN PRE)
-     │     ├── [in-run hook] post_route_run.tcl         (ROUTE_DESIGN POST)
-     │     ├── [in-run hook] pre_post_route_phys_opt_run.tcl   (POST_ROUTE_PHYS_OPT PRE)
-     │     └── [in-run hook] post_post_route_phys_opt_run.tcl  (POST_ROUTE_PHYS_OPT POST)
+     │     ├── [in-run hook] pre_opt_run.tcl                   (OPT_DESIGN PRE)
+     │     ├── [in-run hook] post_opt_run.tcl                  (OPT_DESIGN POST)
+     │     ├── [in-run hook] pre_power_opt_run.tcl             (POWER_OPT_DESIGN PRE)
+     │     ├── [in-run hook] post_power_opt_run.tcl            (POWER_OPT_DESIGN POST)
+     │     ├── [in-run hook] pre_place_run.tcl                 (PLACE_DESIGN PRE)
+     │     ├── [in-run hook] post_place_run.tcl                (PLACE_DESIGN POST)
+     │     ├── [in-run hook] pre_post_place_power_opt_run.tcl  (POST_PLACE_POWER_OPT_DESIGN PRE)
+     │     ├── [in-run hook] post_post_place_power_opt_run.tcl (POST_PLACE_POWER_OPT_DESIGN POST)
+     │     ├── [in-run hook] pre_phys_opt_run.tcl              (PHYS_OPT_DESIGN PRE)
+     │     ├── [in-run hook] post_phys_opt_run.tcl             (PHYS_OPT_DESIGN POST)
+     │     ├── [in-run hook] pre_route_run.tcl                 (ROUTE_DESIGN PRE)
+     │     ├── [in-run hook] post_route_run.tcl                (ROUTE_DESIGN POST)
+     │     ├── [in-run hook] pre_post_route_phys_opt_run.tcl   (POST_ROUTE_PHYS_OPT_DESIGN PRE)
+     │     └── [in-run hook] post_post_route_phys_opt_run.tcl  (POST_ROUTE_PHYS_OPT_DESIGN POST)
      │
      ├── CheckTiming  ← if timing fails and no TIG override is set, stops here
      │
@@ -63,8 +65,8 @@ Hook scripts fire in the following order relative to the Vivado build stages:
 Tier-1 Hooks (Pipeline-Level)
 ------------------------------
 
-Tier-1 hooks are sourced directly by the outer ruckus TCL scripts (``build.tcl``,
-``sources.tcl``, ``project.tcl``). They run in the outer Vivado session context,
+Tier-1 hooks are sourced by the outer ruckus TCL scripts (``vivado/sources.tcl``,
+``vivado/project.tcl``, ``vivado/build.tcl``, and the stage scripts it sources). They run in the outer Vivado session context,
 outside any synthesis or implementation run subprocess.
 
 Place these files in your project's ``vivado/`` directory (i.e., ``$PROJ_DIR/vivado/``).
@@ -77,26 +79,27 @@ Place these files in your project's ``vivado/`` directory (i.e., ``$PROJ_DIR/viv
      - When It Fires
      - Sourced By
    * - ``sources.tcl``
-     - After all source files loaded (end of ``vivado/sources.tcl``)
+     - After all source files are loaded (end of ``vivado/sources.tcl``)
      - ``vivado/sources.tcl``
    * - ``project_setup.tcl``
      - After Vivado project properties are configured
      - ``vivado/project.tcl``
    * - ``properties.tcl``
-     - After run-step hook registrations complete
+     - After run-step hook registrations complete (once from ``vivado/project.tcl``
+       and again when ``vivado/build.tcl`` opens the project)
      - ``vivado/properties.tcl``
    * - ``pre_synthesis.tcl``
-     - After IP cores built, before ``launch_runs synth_1``
-     - ``build.tcl``
+     - After IP cores are built, before ``launch_runs synth_1``
+     - ``vivado/pre_synthesis.tcl``
    * - ``post_synthesis.tcl``
      - After ``synth_1`` completes, before implementation
-     - ``build.tcl``
+     - ``vivado/post_synthesis.tcl``
    * - ``post_route.tcl``
      - After implementation and *only if* :func:`CheckTiming` returns ``true``
-     - ``build.tcl``
+     - ``vivado/post_route.tcl``
    * - ``post_build.tcl``
-     - After ``CreateFpgaBit``/``CreateVersalOutputs`` — the final hook
-     - ``build.tcl``
+     - After ``CreateFpgaBit``/``CreateVersalOutputs`` (the final hook)
+     - ``vivado/build.tcl``
 
 .. warning::
 
@@ -119,16 +122,17 @@ Tier-2 Hooks (In-Run)
 
 Tier-2 hooks are registered via ``STEPS.<STEP>.TCL.PRE`` / ``STEPS.<STEP>.TCL.POST``
 properties in ``vivado/properties.tcl``. They run inside the Vivado synthesis or
-implementation run subprocess. The Vivado project is open but the run is in progress.
+implementation run subprocess, while the run is in progress.
 
 Place these files in your project's ``vivado/`` directory (i.e., ``$PROJ_DIR/vivado/``).
 
 .. note::
 
    In-run hooks do **not** have access to Vivado project-level commands that require
-   a closed run (e.g., ``open_run``). Environment variables from ``env_var.tcl`` are
-   available; ruckus procedure definitions are NOT automatically sourced in the
-   run subprocess.
+   a closed run (e.g., ``open_run``). The ruckus wrapper registered for each step
+   (``vivado/run/pre/*.tcl`` / ``vivado/run/post/*.tcl``) sources ``env_var.tcl``
+   and ``proc.tcl`` before calling your hook, so the variables from ``env_var.tcl``
+   and the ruckus procedures are available in the run subprocess.
 
 .. list-table::
    :header-rows: 1
@@ -162,10 +166,10 @@ Place these files in your project's ``vivado/`` directory (i.e., ``$PROJ_DIR/viv
      - ``PLACE_DESIGN``
      - POST
    * - ``pre_post_place_power_opt_run.tcl``
-     - ``POST_PLACE_POWER_OPT``
+     - ``POST_PLACE_POWER_OPT_DESIGN``
      - PRE
    * - ``post_post_place_power_opt_run.tcl``
-     - ``POST_PLACE_POWER_OPT``
+     - ``POST_PLACE_POWER_OPT_DESIGN``
      - POST
    * - ``pre_phys_opt_run.tcl``
      - ``PHYS_OPT_DESIGN``
@@ -180,10 +184,10 @@ Place these files in your project's ``vivado/`` directory (i.e., ``$PROJ_DIR/viv
      - ``ROUTE_DESIGN``
      - POST
    * - ``pre_post_route_phys_opt_run.tcl``
-     - ``POST_ROUTE_PHYS_OPT``
+     - ``POST_ROUTE_PHYS_OPT_DESIGN``
      - PRE
    * - ``post_post_route_phys_opt_run.tcl``
-     - ``POST_ROUTE_PHYS_OPT``
+     - ``POST_ROUTE_PHYS_OPT_DESIGN``
      - POST
 
 **TCL variables in scope for all Tier-2 hooks** (sourced from ``env_var.tcl``):
@@ -199,5 +203,5 @@ Place these files in your project's ``vivado/`` directory (i.e., ``$PROJ_DIR/viv
 
 .. seealso::
 
-   :func:`CheckTiming` — the procedure that reads TIG variables and determines
+   :func:`CheckTiming`: the procedure that reads the TIG variables and determines
    whether ``post_route.tcl`` fires.

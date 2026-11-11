@@ -1,0 +1,5 @@
+tb.vhd:45:9:@0ms:(report note): hello
+tb.vhd:50:9:@10ns:(assertion warning): slow
+tb.vhd:55:9:@20ns:(assertion failure): broken
+tb.vhd:12:3: no declaration for "foo"
+tb.vhd:13:3:warning: unused

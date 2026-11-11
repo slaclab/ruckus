@@ -2,9 +2,11 @@ Makefile Reference
 ==================
 
 This page documents the targets and environment variables provided by the
-ruckus backend Makefile fragments — ``system_vivado.mk`` (Vivado) and
-``system_vitis_unified_aie.mk`` (Vitis AIE). Include one of these from your
-project's ``Makefile`` to access the corresponding build pipeline.
+ruckus backend Makefile fragments: ``system_vivado.mk`` (Vivado),
+``system_vitis_unified_aie.mk`` (Vitis AIE), ``system_iverilog.mk`` (Icarus
+Verilog, see :doc:`/how-to/iverilog_simulation`), and ``system_verilator.mk``
+(Verilator, see :doc:`/how-to/verilator_simulation`). Include one of these
+from your project's ``Makefile`` to access the corresponding build pipeline.
 
 For Vivado build pipeline context see :doc:`/explanation/build_pipeline`. For
 the AIE workflow walkthrough see :doc:`/how-to/vitis_aie`.
@@ -23,7 +25,7 @@ Targets
    * - Target
      - Description
    * - ``bit`` / ``mcs`` / ``prom`` / ``pdi``
-     - Full Vivado batch build: synthesis + implementation + bitstream. ``mcs``, ``prom``, and ``pdi`` are aliases for ``bit``; output format is controlled by output format variables.
+     - Full Vivado batch build: synthesis + implementation + bitstream. ``mcs``, ``prom``, and ``pdi`` are aliases for ``bit``; the files produced are selected by the output format variables below.
    * - ``syn``
      - Synthesis only (sets ``SYNTH_ONLY=1``). Stops after ``synth_1`` completes.
    * - ``dcp``
@@ -33,19 +35,19 @@ Targets
    * - ``interactive``
      - Open Vivado in TCL interactive mode.
    * - ``sources``
-     - Run source setup (ruckus.tcl loading) only — no synthesis. Useful for verifying project structure.
+     - Run source setup (``ruckus.tcl`` loading) only, without synthesis. Useful for verifying project structure.
    * - ``sdk`` / ``vitis``
      - Open the Vitis/SDK workspace GUI. ``sdk`` and ``vitis`` are aliases.
    * - ``elf``
-     - Build MicroBlaze ELF and embed in bitstream. Requires ``VITIS_SRC_PATH``.
+     - Build the MicroBlaze ELF and embed it in the bitstream. Requires ``VITIS_SRC_PATH``.
    * - ``release``
      - Run ``firmwareRelease.py`` and push a release tag. Requires a clean git tree and a GitHub token; see :ref:`credential-scoping`.
    * - ``release_files``
      - Run ``firmwareRelease.py`` without pushing the tag. Useful for generating release archives locally. Does not need a GitHub token.
    * - ``pyrogue``
-     - Generate PyRogue tarball.
+     - Generate the PyRogue tarball.
    * - ``yaml``
-     - Generate CPSW YAML tarball.
+     - Generate the CPSW YAML tarball.
    * - ``xsim``
      - Run Vivado XSIM simulation. Automatically detects and builds the Rogue TCP/SideBand co-simulation DPI library when present; see :doc:`../how-to/xsim_rogue_cosim`.
    * - ``vcs``
@@ -53,11 +55,11 @@ Targets
    * - ``msim``
      - Run ModelSim/Questa simulation.
    * - ``batch``
-     - Open Vivado project in batch mode.
+     - Open the Vivado project in batch mode.
    * - ``test``
      - Print all environment variable values. Useful for debugging Makefile variable resolution.
    * - ``dir``
-     - Create the build directory structure (``OUT_DIR``, ``SYN_DIR``, ``IMPL_DIR``, ``IMAGES_DIR``).
+     - Create the build directories (``OUT_DIR``, ``RELEASE_DIR``, ``IP_REPO``). Fails if ``$(TOP_DIR)/build`` does not exist.
    * - ``clean``
      - Delete the entire ``OUT_DIR`` build tree.
 
@@ -81,8 +83,8 @@ variable whose name contains** ``TOKEN`` from make entirely:
    $(foreach v,$(RUCKUS_TOKEN_VARS),$(eval undefine $v))
 
 Every backend that includes ``system_shared.mk`` inherits this, which covers the Vivado,
-GHDL, Genus, Design Compiler, and Vitis flows. ``system_vcs.mk`` includes no shared
-fragment, so the VCS flow is not covered.
+GHDL, Genus, Design Compiler, Vitis, Icarus Verilog, and Verilator flows. ``system_vcs.mk``
+includes no shared fragment, so the VCS flow is not covered.
 
 Both halves matter, because there are two separate ways a recipe can reach a variable:
 
@@ -164,14 +166,14 @@ Project Identity Variables
 --------------------------
 
 These variables define the project's identity and directory structure. They are set
-by ``system_vivado.mk`` and ``system_shared.mk`` using ``ifndef VAR / export VAR``
-— if a variable is already set in the shell environment, the shell value takes precedence.
+by ``system_vivado.mk`` and ``system_shared.mk`` using ``ifndef VAR / export VAR``,
+so if a variable is already set in the shell environment, the shell value takes precedence.
 
 .. envvar:: PROJECT
 
    Project name. Used for the Vivado project name and output filenames.
 
-   :default: ``$(notdir $(PWD))`` — the name of the project directory
+   :default: ``$(notdir $(PWD))`` (the name of the project directory)
 
 .. envvar:: PROJ_DIR
 
@@ -217,7 +219,7 @@ Build Behaviour Variables
 
    Controls whether the build requires a clean git working tree.
 
-   :default: ``1`` (bypass **enabled** — git checking is skipped)
+   :default: ``1`` (bypass **enabled**; git checking is skipped)
    :valid values: ``0`` (strict: fail if uncommitted files exist), ``1`` (permissive: allow dirty trees)
 
    .. warning::
@@ -225,7 +227,7 @@ Build Behaviour Variables
       The default is ``1``, which means git checking is **disabled** by default.
       Set ``GIT_BYPASS=0`` to enforce a clean tree before building.
 
-   .. code-block:: make
+   .. code-block:: bash
 
       GIT_BYPASS=0 make bit
 
@@ -321,9 +323,9 @@ after a successful build.
    :default: ``0`` (disabled)
    :valid values: ``0``, ``1``
 
-**Example — build Versal PDI only:**
+**Example: build a Versal PDI only**
 
-.. code-block:: make
+.. code-block:: bash
 
    GEN_BIT_IMAGE=0 GEN_MCS_IMAGE=0 GEN_PDI_IMAGE=1 make bit
 
@@ -331,23 +333,23 @@ Timing Violation Override Variables
 ------------------------------------
 
 These variables override timing failure checks in :func:`CheckTiming`. They are
-boolean environment variables: ruckus uses ``[string is true -strict ...]``
-which recognises ``true``, ``yes``, ``on``, and ``1`` as truthy.
+boolean environment variables: ruckus uses ``[string is true -strict ...]``,
+which recognizes ``true``, ``yes``, ``on``, and ``1`` as truthy. Any other value,
+including ``false`` and ``0``, leaves the override disabled.
 
 **All timing override variables are unset by default.** Leaving a variable unset
-is the correct way to keep it disabled. Setting ``TIG=false`` does *not* disable
-the override — pass ``false`` as a string and TCL may evaluate it as truthy depending
-on context; the safe approach is to leave the variable unset.
+is the clearest way to keep it disabled.
 
 .. envvar:: TIG
 
-   Override **all** timing failures (setup + hold + pulse-width).
-   Use with extreme caution — this allows a non-timing-clean bitstream to be produced.
+   Override **all** timing failures (setup, hold, and pulse width). Routing
+   failures are never overridden. Use with extreme caution: this allows a bitstream
+   that does not meet timing to be produced.
 
    :default: unset (override disabled)
    :valid values: ``true``, ``1`` (to enable); leave unset to disable
 
-   .. code-block:: make
+   .. code-block:: bash
 
       TIG=true make bit
 
@@ -386,7 +388,7 @@ on context; the safe approach is to leave the variable unset.
       and ``Synth 8-6859`` / ``Synth 8-3352`` messages are elevated to ERROR.
       When truthy, they are demoted to INFO.
 
-   .. code-block:: make
+   .. code-block:: bash
 
       ALLOW_MULTI_DRIVEN=1 make bit
 
@@ -396,15 +398,16 @@ on context; the safe approach is to leave the variable unset.
    implementation.
 
    :default: unset (CDC report and CDC check are both skipped)
-   :valid values: ``0`` or ``false`` (a critical CDC violation aborts the build),
+   :valid values: ``0`` or ``false`` (a critical CDC violation aborts the build);
       any other value (no report, no check, build continues)
 
    .. note::
 
       This variable has no ``ifndef`` default in any Makefile. It must be passed
       explicitly as an environment variable. Unlike the timing overrides above,
-      it is not evaluated with ``[string is true -strict ...]``: only ``0`` and
-      ``false`` enable the check, and every other value bypasses it.
+      it is evaluated with ``[string is false -strict ...]``: only a false value
+      (``0``, ``false``, ``no``, or ``off``) enables the check, and every other
+      value bypasses it.
 
       While the variable is unset, the post-``opt_design`` script skips
       ``report_cdc`` and performs no CDC checking at all. This is intentionally
@@ -434,7 +437,7 @@ on context; the safe approach is to leave the variable unset.
       releases, which lack the ``report_cdc -all_checks_per_endpoint`` option
       needed to keep the result deterministic.
 
-   .. code-block:: make
+   .. code-block:: bash
 
       # Enable the CDC check (aborts on a critical violation)
       ALLOW_CDC_VIOLATIONS=0 make bit
@@ -447,11 +450,12 @@ Simulation Variables
 
 .. envvar:: VIVADO_PROJECT_SIM
 
-   Top module name for Vivado simulation. For a batch Rogue co-sim, set this to
-   the demo testbench (e.g. ``RogueTcpStreamXsimDemoTb``); see
+   Top module name for Vivado simulation. When left empty, the ``sim_1`` top set
+   by the target's ``ruckus.tcl`` is used; define it only to override that top.
+   For a batch Rogue co-sim, set this to your co-sim testbench; see
    :doc:`../how-to/xsim_rogue_cosim`.
 
-   :default: ``$(PROJECT)``
+   :default: (empty)
 
 .. envvar:: VIVADO_PROJECT_SIM_TIME
 
@@ -460,7 +464,7 @@ Simulation Variables
    (and a free-running clock) never self-terminates, so a batch ``make xsim``
    must be stopped manually. Pass a time value (e.g. ``1000 ns``) to bound the
    run. ``all`` is required for the Rogue co-sim so the external peer can drive
-   the testbench — see :doc:`../how-to/xsim_rogue_cosim`.
+   the testbench; see :doc:`../how-to/xsim_rogue_cosim`.
 
    :default: ``all``
 
@@ -482,6 +486,116 @@ Simulation Variables
 
    :default: ``-debug_acc+pp+dmptf +warn=none -kdb -lca``
 
+Icarus Verilog and Verilator Targets
+-------------------------------------
+
+These targets are provided by ``system_iverilog.mk`` (Icarus Verilog, see
+:doc:`/how-to/iverilog_simulation`) and ``system_verilator.mk`` (Verilator,
+see :doc:`/how-to/verilator_simulation`). Both backends share the same
+target names and dependency chain.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - Target
+     - Description
+   * - ``test``
+     - Print all environment variable values. The first rule in both
+       Makefile fragments, so a bare ``make`` prints the environment.
+   * - ``dir``
+     - Create ``$(OUT_DIR)`` and ``$(IMAGES_DIR)``. Depends on ``clean``, so
+       every ``dir`` run starts from an empty ``$(OUT_DIR)``.
+   * - ``load_source_code``
+     - Check the simulator tool/version floor, load the project's
+       ``ruckus.tcl`` tree, and write the ordered, deduplicated filelist to
+       ``$(OUT_DIR)/$(PROJECT).f``.
+   * - ``build``
+     - Build the Rogue SimLink library when a SimLink leaf is loaded (see
+       the Rogue Co-Simulation section of either how-to page), then compile
+       with ``iverilog -c`` or ``verilator -f``.
+   * - ``tb``
+     - Run the compiled simulation: ``vvp`` for Icarus Verilog, the built
+       ``V$(SIM_TOP)`` binary for Verilator.
+   * - ``gtkwave``
+     - Set ``WAVES=1``, run ``tb``, and open ``$(OUT_DIR)/$(PROJECT).fst`` in
+       GTKWave.
+   * - ``clean``
+     - Delete the entire ``$(OUT_DIR)`` build tree.
+
+Icarus Verilog and Verilator Variables
+----------------------------------------
+
+These variables are shared by ``system_iverilog.mk`` and
+``system_verilator.mk``, with each backend's own escape-hatch flags listed
+separately below. Set overrides in your project ``Makefile`` before the
+``include`` line, as with ``GHDLFLAGS``. :envvar:`PROJECT` and
+:envvar:`OUT_DIR` (declared elsewhere on this page) apply unchanged to both flows.
+
+.. envvar:: SIM_TOP
+
+   Top module simulated by ``vvp`` (Icarus Verilog) or built as
+   ``V$(SIM_TOP)`` (Verilator).
+
+   :default: ``$(PROJECT)``
+
+.. envvar:: VERILOG_INCDIRS
+
+   Whitespace-separated list of extra include directories. Translated to
+   ``-I<dir>`` for Icarus Verilog and ``+incdir+<dir>`` for Verilator.
+
+   :default: (empty)
+
+.. envvar:: VERILOG_DEFINES
+
+   Whitespace-separated list of ``NAME`` or ``NAME=VAL`` words. Translated to
+   ``-D<def>`` for Icarus Verilog and ``+define+<def>`` for Verilator. Values
+   containing spaces are not supported.
+
+   :default: (empty)
+
+.. envvar:: SIM_PLUSARGS
+
+   Plusargs appended verbatim after the simulation binary on the run command
+   line (``vvp ... $(SIM_PLUSARGS)`` or ``./V$(SIM_TOP) $(SIM_PLUSARGS)``).
+
+   :default: (empty)
+
+.. envvar:: WAVES
+
+   Set to ``1`` to add the waveform-tracing flag to the build/run
+   (``-fst`` for Icarus Verilog, ``--trace-fst`` for Verilator). The
+   testbench still owns ``$dumpfile``/``$dumpvars``.
+
+   :default: (empty)
+
+.. envvar:: IVERILOG_FLAGS
+
+   Flags passed to ``iverilog``. Icarus Verilog only.
+
+   :default: ``-g2012``
+
+.. envvar:: VVP_FLAGS
+
+   Flags passed to ``vvp``. Icarus Verilog only.
+
+   :default: ``-n``
+
+.. envvar:: VERILATOR_FLAGS
+
+   Flags passed to ``verilator``. Verilator only.
+
+   :default: ``--binary --timing -j 0``
+
+.. envvar:: RUCKUS_SIM_BACKEND
+
+   Backend selector read by ``surf/simlink/ruckus.tcl``. Set automatically by
+   whichever Makefile fragment is included.
+
+   :default: ``iverilog`` (from ``system_iverilog.mk``) or ``verilator``
+             (from ``system_verilator.mk``). Under Vivado, ``make vcs`` sets
+             ``vcs`` and every other target defaults to ``xsim``.
+
 Partial Reconfiguration Variables
 ----------------------------------
 
@@ -490,7 +604,7 @@ Partial Reconfiguration Variables
    Path to static DCP for DFX (Dynamic Function eXchange) partial reconfiguration
    build. Set to a valid DCP path to enable partial reconfiguration mode.
 
-   :default: ``0`` (standard build — partial reconfiguration disabled)
+   :default: ``0`` (standard build; partial reconfiguration disabled)
 
 .. envvar:: RECONFIG_ENDPOINT
 
@@ -593,7 +707,7 @@ asserted at recipe time so only ``package`` requires it.
 
    Absolute path to the platform ``.xpfm``. Use this for dev boards with an
    AMD-shipped xpfm (e.g. ``xilinx_vek280_base_*``). Mutually exclusive with
-   :envvar:`AIE_PART` — set exactly one.
+   :envvar:`AIE_PART`; set exactly one.
 
    :default: unset (the Makefile errors at parse time if neither
              ``AIE_PLATFORM`` nor ``AIE_PART`` is defined)
@@ -604,9 +718,9 @@ asserted at recipe time so only ``package`` requires it.
           $(XILINX_VITIS)/base_platforms/xilinx_vek280_base_*/xilinx_vek280_base_*.xpfm))
 
    The wildcard pattern keeps the same Makefile working across Vitis
-   releases — AMD bumps the numeric suffix per release (``202510_1`` in
-   2025.1, ``202520_1`` in 2025.2, …) so a literal path would pin the
-   project to one Vitis version.
+   releases. AMD bumps the numeric suffix per release (``202510_1`` in
+   2025.1, ``202520_1`` in 2025.2, and so on), so a literal path would pin
+   the project to one Vitis version.
 
 .. envvar:: AIE_PART
 
@@ -623,7 +737,7 @@ asserted at recipe time so only ``package`` requires it.
 
    - a **file** path → imports just that file, **or**
    - a **directory** path → imports every ``.cpp`` / ``.cc`` / ``.h`` /
-     ``.hpp`` file in that directory (**non-recursive** — subdirectories
+     ``.hpp`` file in that directory (**non-recursive**: subdirectories
      are not walked).
 
    Without ``:dest_subdir``, imports land flat at the component root; with
@@ -648,7 +762,7 @@ asserted at recipe time so only ``package`` requires it.
 
    Top-level graph file **basename** only (e.g. ``graph.cpp``). The
    top-level graph imports at the component root, so this is just the
-   filename — never a path.
+   filename, never a path.
 
    :default: unset (parse-time error)
 
@@ -680,7 +794,7 @@ asserted at recipe time so only ``package`` requires it.
    Optional ``partition.conf`` sidecar path, forwarded to
    ``$(AIE_PROGRAM_SCRIPT)`` as the ``-c`` flag when set. When unset the
    default helper auto-derives it from the PDI directory as
-   ``<pdi-dir>/<name>.partition.conf`` — which matches the ``ip/`` pair
+   ``<pdi-dir>/<name>.partition.conf``. That matches the ``ip/`` pair
    written by the default ``target`` chain, so most consumers never set
    it.
 
@@ -692,7 +806,7 @@ asserted at recipe time so only ``package`` requires it.
    ``$(AIE_PROGRAM_SCRIPT)`` as the ``-i`` flag when set.
 
    :default: unset (the default ``program.sh`` errors if no ``-i`` is
-             passed — most consumers set a project default with
+             passed, so most consumers set a project default with
              ``AIE_BOARD_IP ?= root@<dev-ip>``)
 
 .. envvar:: OUT_DIR
@@ -713,7 +827,7 @@ asserted at recipe time so only ``package`` requires it.
 
    Output dynamic PDI path written by ``make package``. Named
    ``$(PROJECT).pdi`` so ``ip/`` matches the normalized
-   ``/boot/aie/<name>`` pair basename — the deploy helper uploads it
+   ``/boot/aie/<name>`` pair basename. The deploy helper uploads it
    verbatim, and still strips a legacy ``_aie_dynamic`` / ``_dynamic``
    suffix if a consumer overrides ``AIE_PDI`` to keep one.
 
@@ -768,7 +882,7 @@ asserted at recipe time so only ``package`` requires it.
         - Board target (required; forwarded from :envvar:`AIE_BOARD_IP`)
       * - ``-c <path>``
         - ``partition.conf`` sidecar (optional; forwarded from
-          :envvar:`AIE_CONF` when set — auto-derived from the PDI
+          :envvar:`AIE_CONF` when set; auto-derived from the PDI
           directory otherwise)
 
 .. envvar:: AIE_PARTITION_CONF_SCRIPT
@@ -776,10 +890,10 @@ asserted at recipe time so only ``package`` requires it.
    ``partition.conf`` extractor invoked by ``make partition_conf``. The
    default helper reads the AIE partition geometry from the Vitis-emitted
    ``aie_partition.json`` (``Work/arch/``) and writes
-   ``$(AIE_IP_DIR)/$(PROJECT).partition.conf`` with two lines —
-   ``PARTITION_ID=<hex>`` and ``UID=<hex>`` — consumed on-board by
+   ``$(AIE_IP_DIR)/$(PROJECT).partition.conf`` with two lines
+   (``PARTITION_ID=<hex>`` and ``UID=<hex>``) consumed on-board by
    ``aie-partition-init``. Driven purely by the ``OUT_DIR`` / ``PROJECT``
    / ``AIE_IP_DIR`` env vars. Override only if a project needs bespoke
-   partition.conf emission.
+   ``partition.conf`` emission.
 
    :default: ``$(RUCKUS_DIR)/vitis/aie/emit_partition_conf.sh``

@@ -190,6 +190,26 @@ proc CheckGitVersion { } {
    }
 }
 
+## Verify libzmq >= 4.1.0 is available via pkg-config for the Rogue co-sim,
+## printing a clear diagnostic and exiting on failure. Called by the VCS flow
+## (vivado/vcs.tcl), the xsim pre-compile hook (vivado/run/pre/xsim.tcl) and
+## the Icarus Verilog and Verilator SimLink build (shared/verilog_proc.tcl).
+proc RogueCheckLibZmq {} {
+   set err_ret [catch {exec pkg-config --exists {libzmq >= 4.1.0} --print-errors} libzmq]
+   if { ${libzmq} != "" } {
+      puts "\n\n\n\n\n********************************************************"
+      if { [string match "*Package libzmq was not found*" ${libzmq}] == 1 } {
+         puts "libzmq package was not found"
+         puts "Please make sure that you have libzmq installed"
+         puts "or have sourced the necessary rogue setup scripts"
+      } else {
+         puts ${libzmq}
+      }
+      puts "********************************************************\n\n\n\n\n"
+      exit -1
+   }
+}
+
 ## Checks the submodule tag release to a user defined value
 proc SubmoduleCheck { name lockTag  {mustBeExact ""} } {
 

@@ -85,7 +85,7 @@ proc ExportSegmentedPdi { } {
    }
    set pldPdi [lindex ${pldList} 0]
 
-   # Copy with SLAC suffix naming (per D-04)
+   # Copy with SLAC suffix naming
    if { $::env(GEN_PDI_IMAGE) != 0 } {
       exec cp -f ${bootPdi} ${imagePath}_static.pdi
       exec cp -f ${pldPdi}  ${imagePath}_dynamic.pdi
@@ -102,7 +102,7 @@ proc ExportSegmentedPdi { } {
    }
 
    # Maintain side-effect parity with CreateVersalOutputs:
-   # the segmented path REPLACES the single-PDI path (D-06), so .ltx and .xsa
+   # the segmented path REPLACES the single-PDI path, so .ltx and .xsa
    # must still be emitted here.
    CopyLtxFile
    CreateXsaFile

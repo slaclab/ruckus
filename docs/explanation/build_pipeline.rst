@@ -66,13 +66,13 @@ Phase 1: sources.tcl in Detail
 declarations. Key steps:
 
 1. Load ``env_var.tcl`` and ``proc.tcl`` to set up all build variables and custom procedures.
-2. ``CheckWritePermission`` — verify the ruckus installation is writable (required for
-   internal bookkeeping files).
-3. ``CheckGitVersion`` — require git >= 2.9.0 and git-lfs >= 2.1.1; abort if too old.
+2. ``CheckWritePermission``: verify the ruckus checkout is writable by touching
+   ``ruckus/LICENSE.txt`` (this catches an expired Unix session before the build starts).
+3. ``CheckGitVersion``: require git >= 2.9.0 and git-lfs >= 2.1.1; abort if too old.
 4. Create the ``images/`` output directory if it does not yet exist.
 5. Open or create the Vivado project (``.xpr``) via ``project.tcl``, then run
    ``VivadoRefresh`` to update the IP catalog.
-6. ``GenBuildString`` — generates ``BuildInfoPkg.vhd`` in the project's source directory,
+6. ``GenBuildString``: generate ``BuildInfoPkg.vhd`` in the Vivado project's ``.srcs`` directory,
    embedding the firmware version and git hash as VHDL constants.
 7. Check whether the git hash or firmware version has changed since the last run; if so,
    reset the synthesis run to force a full rebuild.
@@ -80,11 +80,11 @@ declarations. Key steps:
    ``::BD_FILES``) to empty, then call ``loadRuckusTcl ${PROJ_DIR}`` to recursively traverse
    all ``ruckus.tcl`` files. This is the entry point for all source, constraint, IP core, and
    block design declarations. See :doc:`ruckus_tcl_model` for how this recursion works.
-9. Set ``PATH_MODE AbsoluteFirst`` on all file sets (sources, simulation, constraints) so
+9. Set ``PATH_MODE AbsoluteFirst`` on all filesets (sources, simulation, constraints) so
    Vivado uses absolute paths regardless of where the project is opened.
 10. Upgrade any IP cores discovered during the ``ruckus.tcl`` traversal (``::IP_LIST``).
-11. ``SourceTclFile ${VIVADO_DIR}/sources.tcl`` — fire the project-specific sources hook,
-    allowing additional source additions after the recursive load is complete.
+11. ``SourceTclFile ${VIVADO_DIR}/sources.tcl``: fire the project-specific sources hook,
+    allowing additional sources to be added after the recursive load is complete.
 12. Write ``dirList.txt``, ``ipList.txt``, and ``bdList.txt`` to ``OUT_DIR`` for reference,
     then close the project.
 
@@ -97,27 +97,27 @@ Key steps:
 
 1. Load ``env_var.tcl`` and ``proc.tcl``, then open the project and apply ``properties.tcl``
    and ``messages.tcl`` settings.
-2. ``update_compile_order`` — refresh the compile order for the ``sources_1`` fileset.
-3. ``CheckPrjConfig`` — verify that ``sources_1`` and ``sim_1`` are valid; abort if not.
-4. ``CheckImpl`` / ``CheckSynth`` — inspect run state; reset any incomplete or stale runs.
-5. ``BuildIpCores`` — re-synthesize any IP cores that are out-of-date (skipped if no IPs).
-6. ``source ${RUCKUS_DIR}/vivado/pre_synthesis.tcl`` — generates block design wrappers and
-   dispatches the ``${VIVADO_DIR}/pre_synthesis.tcl`` hook.
-7. ``launch_runs synth_1 -jobs $PARALLEL_SYNTH`` — run synthesis; wait and check result.
-8. ``source ${RUCKUS_DIR}/vivado/post_synthesis.tcl`` — dispatches the
+2. ``update_compile_order``: refresh the compile order for the ``sources_1`` fileset.
+3. ``CheckPrjConfig``: verify that ``sources_1`` and ``sim_1`` are valid; abort if not.
+4. ``CheckImpl`` / ``CheckSynth``: inspect run state; reset any incomplete or stale runs.
+5. ``BuildIpCores``: re-synthesize any IP cores that are out of date (skipped if there are no IP cores).
+6. ``source ${RUCKUS_DIR}/vivado/pre_synthesis.tcl``: generate block design wrappers and
+   dispatch the ``${VIVADO_DIR}/pre_synthesis.tcl`` hook.
+7. ``launch_runs synth_1 -jobs $PARALLEL_SYNTH``: run synthesis, then wait and check the result.
+8. ``source ${RUCKUS_DIR}/vivado/post_synthesis.tcl``: dispatch the
    ``${VIVADO_DIR}/post_synthesis.tcl`` hook.
-9. If ``SYNTH_ONLY=1``: write BuildInfo and exit 0 (partial flow). If ``SYNTH_DCP=1``:
+9. If ``SYNTH_ONLY=1``, write BuildInfo and exit 0 (partial flow). If ``SYNTH_DCP=1``,
    export a design checkpoint (DCP) and exit 0.
-10. ``launch_runs -to_step write_bitstream impl_1`` — run place-and-route through bitstream
-    generation; wait and check result.
-11. ``CheckTiming`` — inspect timing report; exit with an error if setup or hold violations
+10. ``launch_runs -to_step write_bitstream impl_1``: run place-and-route through bitstream
+    generation, then wait and check the result.
+11. ``CheckTiming``: inspect the timing report; exit with an error if setup or hold violations
     exist. Timing ignore groups (``TIG_*`` overrides) can suppress specific violations.
-12. ``source ${RUCKUS_DIR}/vivado/post_route.tcl`` — runs BuildInfo, optional pyrogue/YAML
-    packaging, optional MicroBlaze ELF integration, and dispatches the
+12. ``source ${RUCKUS_DIR}/vivado/post_route.tcl``: run BuildInfo, optional PyRogue/YAML
+    packaging, optional MicroBlaze ELF integration, and dispatch the
     ``${VIVADO_DIR}/post_route.tcl`` hook.
-13. ``CreateFpgaBit`` (non-Versal) or ``CreateVersalOutputs`` (Versal) — copies the bitstream
+13. ``CreateFpgaBit`` (non-Versal) or ``CreateVersalOutputs`` (Versal): copy the bitstream
     and any additional output files to ``images/$(IMAGENAME).*``.
-14. ``SourceTclFile ${VIVADO_DIR}/post_build.tcl`` — fire the post-build hook.
+14. ``SourceTclFile ${VIVADO_DIR}/post_build.tcl``: fire the post-build hook.
 15. ``close_project`` and exit 0.
 
 
@@ -125,23 +125,23 @@ Interactive Builds with ``make gui``
 --------------------------------------
 
 Running ``make gui`` opens Vivado in interactive GUI mode instead of batch mode.
-Before presenting the GUI, ruckus still runs Phase 1 in full — ``sources.tcl`` assembles
+Before presenting the GUI, ruckus still runs Phase 1 in full: ``sources.tcl`` assembles
 the Vivado project exactly as it would for ``make bit``. By the time Vivado's window
 appears, the project is fully assembled: all sources, constraints, IP cores, and block
 designs are registered and the IP catalog is up to date.
 
 Common use cases for ``make gui``:
 
-- **Early project exploration** — inspect the assembled source tree, fileset membership,
+- **Early project exploration**: inspect the assembled source tree, fileset membership,
   and IP configurations before committing to a full batch build.
-- **Reviewing synthesis and implementation results** — open a project where ``synth_1``
+- **Reviewing synthesis and implementation results**: open a project where ``synth_1``
   or ``impl_1`` has already run and examine timing reports, resource utilization, or
   schematic views interactively.
-- **Running XSIM simulation** — launch the simulator from the Vivado GUI against the
+- **Running XSIM simulation**: launch the simulator from the Vivado GUI against the
   assembled simulation fileset.
-- **Investigating timing closure failures** — explore the timing report, highlight
+- **Investigating timing closure failures**: explore the timing report, highlight
   critical paths in the device view, and experiment with placement constraints.
-- **Reading error and warning messages** — the Vivado Messages window aggregates
+- **Reading error and warning messages**: the Vivado Messages window aggregates
   synthesis and implementation diagnostics in a filterable view that is easier to
   navigate than the raw log files.
 
@@ -157,18 +157,19 @@ Dynamic Function eXchange (DFX) and Partial Build Flows
 AMD's current terminology for partial FPGA reconfiguration is **Dynamic Function eXchange
 (DFX)**; the legacy name is *partial reconfiguration*. See AMD UG909 for the full DFX
 design flow. The partial build flows below (``SYNTH_ONLY``, ``SYNTH_DCP``) are the
-ruckus mechanisms most commonly used when working with DFX projects — the synthesized
-checkpoint (DCP) produced by ``make dcp`` serves as the static-region input for a
-subsequent DFX implementation run.
+ruckus mechanisms most commonly used when working with DFX projects. Note that the
+static-region input for a DFX implementation run is the routed ``_static.dcp`` exported by a
+full ``make bit`` of the static design (see :doc:`/how-to/dfx_partial_reconfig`), not the
+synthesized checkpoint produced by ``make dcp``.
 
 Two environment variables enable partial builds:
 
-- ``SYNTH_ONLY=1`` — the build exits after synthesis completes and writes a BuildInfo file.
+- ``SYNTH_ONLY=1``: the build exits after synthesis completes and writes a BuildInfo file.
   Use ``make syn`` to invoke this flow.
-- ``SYNTH_DCP=1`` — the build exports a synthesis design checkpoint (DCP) after synthesis
-  completes. Use ``make dcp`` to invoke this flow. The DCP can be used as a starting point
+- ``SYNTH_DCP=1``: the build synthesizes out of context and exports a design checkpoint
+  (DCP) after synthesis completes. Use ``make dcp`` to invoke this flow. The DCP can be used as a starting point
   for implementation in another project.
 
 These are the standard mechanisms for running only part of the Vivado pipeline. For the
-complete hook script reference — including all Tier 1 and Tier 2 hook filenames and when
-they fire — see :doc:`output_artifacts`.
+complete hook script reference, including all Tier-1 and Tier-2 hook filenames and when
+they fire, see :doc:`/reference/hook_scripts`.

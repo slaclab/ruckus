@@ -1,0 +1,45 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (lin64) Build 6511674 Tue Jun 16 11:01:26 MDT 2026
+| Date         : Wed Oct 21 10:15:10 2026
+| Host         : buildhost running 64-bit Ubuntu 22.04.5 LTS
+| Command      : report_utilization -hierarchical -hierarchical_depth 8 -file /work/Simple-10GbE-RUDP-KCU105-Example/firmware/build/Simple10GbeRudpKcu105Example/Simple10GbeRudpKcu105Example_utilization_hierarchical.rpt.tmp
+| Design       : Simple10GbeRudpKcu105Example
+| Device       : xcku040-ffva1156-2-e
+| Speed File   : -2
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------+------------+
+|                                  Instance                                 |                                             Module                                            | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs  | RAMB36 | RAMB18 | URAM | DSP Blocks |
++---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------+------------+
+| Simple10GbeRudpKcu105Example                                              |                                                                                         (top) |      35767 |      34412 |     954 |  401 | 51152 |    158 |      7 |    0 |         22 |
+|   (Simple10GbeRudpKcu105Example)                                          |                                                                                         (top) |          1 |          1 |       0 |    0 |     0 |      0 |      0 |    0 |          0 |
+|   U_App                                                                   |                                                                                           App |        560 |        560 |       0 |    0 |   520 |      1 |      0 |    0 |          0 |
+|     (U_Mem)                                                               |                                                                AxiDualPortRam__parameterized0 |         21 |         21 |       0 |    0 |    51 |      0 |      0 |    0 |          0 |
+|     U_AppTx                                                               |                                                                                         AppTx |        287 |        287 |       0 |    0 |   267 |      0 |      0 |    0 |          0 |
+|     U_XBAR                                                                |                                                               AxiLiteCrossbar__parameterized2 |        252 |        252 |       0 |    0 |   202 |      0 |      0 |    0 |          0 |
+|   U_Core                                                                  |                                                                                          Core |      33420 |      32272 |     934 |  214 | 47729 |    156 |      6 |    0 |         22 |
+|     U_XBAR                                                                |                                                               AxiLiteCrossbar__parameterized0 |        676 |        676 |       0 |    0 |   539 |      0 |      0 |    0 |          0 |
+|     GEN_ETH.U_Rudp                                                        |                                                                                          Rudp |      30484 |      29339 |     934 |  211 | 44669 |    156 |      4 |    0 |         22 |
+|     GEN_REAL.GEN_SFP[2].U_I2C                                             |                                                                        AxiI2cRegMasterCore__1 |        302 |        301 |       0 |    1 |   283 |      0 |      0 |    0 |          0 |
+|     GEN_REAL.GEN_SFP[3].U_I2C                                             |                                                                           AxiI2cRegMasterCore |        302 |        301 |       0 |    1 |   283 |      0 |      0 |    0 |          0 |
+|     GEN_REAL.GEN_VEC[0].U_BootProm                                        |                                                                             AxiMicronN25QCore |        190 |        190 |       0 |    0 |   237 |      0 |      1 |    0 |          0 |
+|     GEN_REAL.GEN_VEC[1].U_BootProm                                        |                                                                          AxiMicronN25QCore__1 |        182 |        182 |       0 |    0 |   237 |      0 |      1 |    0 |          0 |
+|     GEN_REAL.U_SysMon                                                     |                                                                         xil_defaultlib_Sysmon |        217 |        217 |       0 |    0 |   264 |      0 |      0 |    0 |          0 |
+|     GEN_REAL.U_XbarI2cMux                                                 |                                                                         AxiLiteCrossbarI2cMux |        706 |        705 |       0 |    1 |   577 |      0 |      0 |    0 |          0 |
+|     U_AxiVersion                                                          |                                                                                    AxiVersion |        341 |        341 |       0 |    0 |   612 |      0 |      0 |    0 |          0 |
+|   dbg_hub                                                                 |                                                                                       dbg_hub |        432 |        412 |      20 |    0 |   741 |      0 |      0 |    0 |          0 |
+|     inst                                                                  |                                                                    dbg_hub_xsdbm_v3_0_6_xsdbm |        432 |        412 |      20 |    0 |   741 |      0 |      0 |    0 |          0 |
+|   u_ila_0                                                                 |                                                                                       u_ila_0 |       1355 |       1168 |       0 |  187 |  2162 |      1 |      1 |    0 |          0 |
+|     inst                                                                  |                                                                       u_ila_0_ila_v6_2_20_ila |       1355 |       1168 |       0 |  187 |  2162 |      1 |      1 |    0 |          0 |
++---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------+------------+

@@ -160,7 +160,7 @@ The setup itself has three distinct pieces. These establish
 
 2. The Vitis version to use
 
-  - Once selected, viable until it is changed.
+   - Once selected, viable until it is changed.
 
 3. Your :ref:`project <project_file-label>` specific setup
 
@@ -371,7 +371,7 @@ repository for more of a *How-To*.
    :header-rows: 1
 
    * - Command
-     - Descriptions
+     - Description
    * - hlsBs
      - Provides a quick summary of all the commands, the online version of this section.
    * - hlsVersion
@@ -2417,7 +2417,6 @@ If there is no *Git* repository, these return as *None*.
 .. _beyond_basics-label:
 
 Beyond the Basics
-=================
 The above covers the basics, but with usage, common repeating patterns occur.
 While the first (but not the second) of the following could be done with what
 has already been given, formalizing these patterns makes usage easier and more
@@ -2639,7 +2638,7 @@ Example:
 
 4. Modify the cmp_template
 
-    .. code-block:: python
+   .. code-block:: python
 
        cmp_template = Product.CmpTemplate (prefix   = 'cmp',
                                            template = '{build.id}-{fpga.id}-{verbose.id}')

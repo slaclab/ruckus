@@ -2,13 +2,13 @@ The ruckus.tcl Recursive Loading Model
 ========================================
 
 Every firmware project using ruckus has a ``ruckus.tcl`` file in the target directory. This
-file is the project manifest — it declares what source files, IP cores, and constraint files
+file is the project manifest: it declares what source files, IP cores, and constraint files
 belong to the project. When a project depends on submodule libraries, those libraries each
 have their own ``ruckus.tcl``. ruckus loads them all recursively by following
 ``loadRuckusTcl`` calls.
 
-Understanding this recursive model — and specifically the ``::DIR_PATH`` variable that makes
-it work — is essential for writing correct ``ruckus.tcl`` files.
+Understanding this recursive model, and specifically the ``::DIR_PATH`` variable that makes
+it work, is essential for writing correct ``ruckus.tcl`` files.
 
 
 The loadRuckusTcl Procedure
@@ -20,7 +20,9 @@ the target directory, and restores the original value after the sourced file ret
 a manual call-stack discipline in a language (TCL) that has no native per-call scope for
 global variables.
 
-The exact implementation from ``vivado/proc/code_loading.tcl``:
+A simplified version of the implementation in ``vivado/proc/code_loading.tcl`` (the real
+procedure also prints the load path, honors a ``debug`` flag that drops ``-notrace``, and
+calls ``exit -1`` if ``ruckus.tcl`` is missing):
 
 .. code-block:: tcl
 
@@ -37,12 +39,12 @@ The exact implementation from ``vivado/proc/code_loading.tcl``:
       set ::DIR_LIST "$::DIR_LIST ${filePath}"
    }
 
-Three operations happen in sequence around the ``source`` call:
+Four operations happen in sequence:
 
-1. ``set LOC_PATH $::DIR_PATH`` — saves the caller's current directory path into a local variable
-2. ``set ::DIR_PATH ${filePath}`` — sets the global to the directory being entered
-3. ``source ${filePath}/ruckus.tcl -notrace`` — executes the child ``ruckus.tcl``
-4. ``set ::DIR_PATH ${LOC_PATH}`` — restores the caller's directory path after return
+1. ``set LOC_PATH $::DIR_PATH`` saves the caller's current directory path into a local variable.
+2. ``set ::DIR_PATH ${filePath}`` sets the global to the directory being entered.
+3. ``source ${filePath}/ruckus.tcl -notrace`` executes the child ``ruckus.tcl``.
+4. ``set ::DIR_PATH ${LOC_PATH}`` restores the caller's directory path after return.
 
 The result is that ``::DIR_PATH`` always holds the directory of the ``ruckus.tcl`` file that
 is currently executing, for the lifetime of that file's execution.
@@ -53,7 +55,7 @@ The ::DIR_PATH Variable
 
 ``::DIR_PATH`` is a TCL global variable with a precise, invariant meaning:
 
-- Its value is always the absolute path to the directory containing the currently-executing
+- Its value is always the absolute path to the directory containing the currently executing
   ``ruckus.tcl`` file.
 - It is set by ``loadRuckusTcl`` before sourcing each ``ruckus.tcl``, and restored after.
 - It is initialized to ``""`` in ``vivado/sources.tcl`` before the first
@@ -98,7 +100,7 @@ looks like ``build/Simple10GbeRudpKcu105Example/``). There is no ``hdl`` subdire
 ``loadSource`` will detect that the directory does not exist and call ``exit -1``, aborting
 the build.
 
-The failure mode without ``$::DIR_PATH/`` is always an error — either an immediate
+The failure mode without ``$::DIR_PATH/`` is always an error: either an immediate
 ``exit -1`` from ``loadSource``'s directory-existence check, or (for single file paths with
 ``-path``) a similar check that the named file exists. There is no silent data loss: a missing
 prefix will always produce a build failure before any synthesis starts.
@@ -141,14 +143,14 @@ The call sequence when ``make bit`` is run:
    Every ``loadRuckusTcl`` call performs the same three-step discipline around the
    ``source`` call it wraps:
 
-   1. **[SAVE]** — the caller's ``::DIR_PATH`` is stashed in a local variable
+   1. **[SAVE]**: the caller's ``::DIR_PATH`` is stashed in a local variable
       (``LOC_PATH``) before anything changes.
-   2. **[SET]** — ``::DIR_PATH`` is updated to the directory being entered,
+   2. **[SET]**: ``::DIR_PATH`` is updated to the directory being entered,
       so the child ``ruckus.tcl`` sees its own directory in ``$::DIR_PATH``.
-   3. **[RESTORE]** — after the child returns, ``::DIR_PATH`` is written back
+   3. **[RESTORE]**: after the child returns, ``::DIR_PATH`` is written back
       from ``LOC_PATH``, so the caller resumes with the correct path.
 
    The key invariant: at any point during the recursive load, ``$::DIR_PATH``
    equals the directory of the ``ruckus.tcl`` that is currently running.
-   Writing ``$::DIR_PATH/`` as a prefix on every path argument is not optional —
+   Writing ``$::DIR_PATH/`` as a prefix on every path argument is not optional;
    it is the mechanism that makes the recursive loading model correct.
