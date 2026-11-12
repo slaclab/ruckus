@@ -2,7 +2,7 @@
 .SH NAME
 hlsCtx \- Prints the values of HLS project environment variables
 .SH SYNOPSIS
-.B hlsCtx [-h | --help]
+.B hlsCtx [-h | --help | -a | --all]
 
 .SH DESCRIPTION
 .TP
@@ -12,6 +12,15 @@ can sometimes result in their values being unintentionally used.
 \fBhlsCtx\fR will show which environment variables used by the \fBhls\fR are set and their values.
 The user can then determine their relevancy. This can be of particular help when moving between projects
 to ensure any leftover context has been removed.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help
+Displays this message\
+
+.TP
+\fB-a, \-\--all
+Prints the values of all HLSBS environment variables. The default is to print only the defined ones
 
 .SH AUTHOR
 Written by JJRussell

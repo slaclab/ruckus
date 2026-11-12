@@ -81,12 +81,6 @@ def add_arguments(parser):
                         action='store_true',
                         default=False)
 
-    parser.add_argument('--targets',
-                        help='Inputs are targets',
-                        nargs='?',
-                        const='*_no_value_*',
-                        default=None)
-
     parser.add_argument('--components',
                         help='Manual entry of components to create',
                         nargs='?',
@@ -107,24 +101,24 @@ def add_arguments(parser):
 def get_opts(action, args):
     if action & Action.List:
         label = 'Listing'
-        opts = Category.categorize(args.list, Category.All)
+        opts = Category.categorize(args.list, Category.All, ('hlsComp', 'list'))
 
     elif action & Action.Clean:
         label = 'Cleaning'
-        opts = Category.categorize(args.clean, Category.Existing)
+        opts = Category.categorize(args.clean, Category.Existing, ('hlsComp', 'clean'))
 
     elif action & Action.Replace:
         label = 'Replacing'
-        opts = Category.categorize(args.replace, Category.Existing)
+        opts = Category.categorize(args.replace, Category.Existing, ('hlsComp', 'replace'))
 
     elif action & Action.Create:
         label = 'Creating'
-        opts = Category.categorize(args.create, Category.Missing)
+        opts = Category.categorize(args.create, Category.Missing, ('hlsComp', 'create'))
 
     else:
         label = 'Creating'
         args.create = ['missing']
-        opts = Category.categorize(args.create, Category.Missing)
+        opts = Category.categorize(args.create, Category.Missing, ('hlsComp', 'create'))
 
     return label, opts
 # ------------------------------------------------------------------------------
@@ -435,9 +429,11 @@ def doit():
         display_manpage(__file__)
         exit(0)
 
+
     action = Action(args).action
+    label, opts = get_opts(action, args)
     dry_run = args.dry_run
-    cmpList = merge(args.parameters, args.targets)
+    cmpList = merge(args.parameters, args.components)
 
     # -------------------------------------------
     # Check if target list of components is empty
@@ -448,7 +444,7 @@ def doit():
         else:
             cmpList = ['*']
 
-    label, opts = get_opts(action, args)
+
     printer = Printer(20, 78, 15)
     noCfgAction = False
     full = not args.configurations and args.project is not None

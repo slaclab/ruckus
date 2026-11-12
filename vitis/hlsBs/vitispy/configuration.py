@@ -288,6 +288,10 @@ class Configuration:
                 else:
                     return False, [message]
 
+            elif not self.dry_run:
+                os.remove (target.cfg_path)
+                shutil.rmtree (target.cmp_path)
+
         self.fpga = target.fpga
         if not self.dry_run:
 

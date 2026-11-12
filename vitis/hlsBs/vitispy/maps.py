@@ -27,60 +27,100 @@ else:
 # ------------------------------------------------------------------------------
 class Maps ():
 
-    def __init__(self, ctbs, ctb_type):
-        srcs = {}
+    class Src:
+        def __init__(self, ctb_type, prefix, kvs):
+            self.ctb_type = ctb_type
+            self.prefix = prefix
+            self.kvs = [kvs]
+            return
 
-        # Is this a single contributor
+    def __init__(self, ctbs, ctb_type):
+        # ---------------------------------------------------------
+        # Is this a single contributor?
+        # This is all but impossible since there must be at least 2
+        #  - A CtbBuids
+        #  - A CtbFpgas
+        # ---------------------------------------------------------
         if isinstance(ctbs, ctb_type):
+            srcs_list = [[] for _ in range(1)]
+
             # ctbs is just one ctb
-            self.compile(srcs, ctbs)
+            self.compile(srcs_list, ctbs)
 
         else:
-            # Is this a list or tuple of contributors
+            # Is this a list or tuple of contributors?
             is_list = all(issubclass(type(ctb), ctb_type)
                           for ctb in ctbs)
             if is_list:
+                srcs_list = [{} for _ in range(1)]
 
                 for ctb in ctbs:
-                    n = self.compile(srcs, ctb)
+                    n = self.compile(srcs_list[0], ctb)
 
-            # Is this lists or tuples of contributors
+            # Is this lists or tuples of contributors?
             elif isinstance(ctbs, (list, tuple)):
 
+                srcs_list = [[] for _ in range (len (ctbs)) ]
+
+                idx = 0
+                err = 0
                 for ctbList in ctbs:
 
-                    # Is this a single contributor
+                    # ------------------------------------
+                    # Is this a single contributor?
+                    # Almost impossible, see comment above
+                    # ------------------------------------
                     if isinstance(ctbList, ctb_type):
-                        self.compile(srcs, ctbList)
+                        self.compile(srcs_list[idx], ctbList)
 
                     # Is this a list,tuple of multiple contributors
-                    elif all(issubclass(type(ctb), ctb_type) for ctb in ctbList):
+                    else:
 
                         for ctb in ctbList:
-                            self.compile(srcs, ctb)
-                    else:
+                            if issubclass(type(ctb), ctb_type):
+                                self.compile(srcs_list[idx], ctb)
+
+                            elif isinstance (ctb, (list, tuple)):
+                                for c in ctb:
+                                    if  issubclass(type(c), ctb_type):
+                                        self.compile (srcs_list[idx], c)
+                                    else:
+                                        err += 1
+                            else:
+                                err += 1
+
+                    if err:
                         print("ERROR: Unknown contributors specification\n"
                               "       This may be\n"
                               "         a) A single contributor\n"
                               "         b) A list or tuple of contributor\n"
                               "         c) A lists or tuples of contributor\n",
                               file = sys.stderr)
+                    idx += 1
 
         # -------------------------------------------------------------
         # Calculate the number of permutations/combinations in all the
         # compiled 'srcs' and make a list of contributor types large
         # enough to accommodate them all.
         # -------------------------------------------------------------
-        map_cnt = 1
+        map_tot = 0
+        map_cnts = []
         self.ctb_types = array.array ('i', [-1,-1,-1,-1,-1])
-        idx = 0
-        for k, v in srcs.items():
-            if    k == 'Builds' : self.ctb_types[0] = idx
-            elif  k == 'Fpgas'  : self.ctb_types[1] = idx
-            idx += 1
-            for vals in v.values():
-                map_cnt *= len(vals)
-        self.maps = [{} for _ in range(map_cnt)]
+        for srcs in srcs_list:
+
+            map_cnt = 1
+            idx = 0
+            for src in srcs:
+                if    src.ctb_type == 'Builds' : self.ctb_types[0] = idx
+                elif  src.ctb_type == 'Fpgas'  : self.ctb_types[1] = idx
+                idx += 1
+                map_cnt *= len (src.kvs)
+
+            # Keep track of the map count by source
+            map_cnts.append (map_cnt)
+            map_tot += map_cnt
+
+        self.maps = [{} for _ in range(map_tot)]
 
         # ------------------------------------------------------------
         #  Need to form every permutation of the maps
@@ -110,24 +150,40 @@ class Maps ():
         #    M1       3        2*3      12/(2*3)               2
         #    M2       2      2*3*2      12/(2*3*2)             1
         # -------------------------------------------------------
-        n = 1
-        for k, v in srcs.items():
-            for key, vals in v.items ():
-                l = len(vals)
+        src_idx = 0
+        map_gdx = 0
+        for srcs in srcs_list:
+            map_cnt = map_cnts[src_idx]
+            src_idx += 1
+            n = 1
+            for src in srcs:
+
+                prefix = src.prefix
+
+                l = len(src.kvs)
                 n = n * l
+                map_idx = map_gdx;
                 rep = map_cnt // n
-                map_idx = 0
+
                 for idx in range(0, n):
 
                     val_idx = idx % l
                     for idy in range(0, rep):
 
-                        v = vals[val_idx]
+                        v = src.kvs[val_idx]
 
-                        # Add primary key and value
-                        self.maps[map_idx][key] = v#[0]
+                        # print (f"Adding maps[{map_idx}][{prefix}] = {v}")
+
+                        # Add prefix and value (attributes)
+                        self.maps[map_idx][prefix] = v
 
                         map_idx += 1
+
+            # ------------------------------------------
+            # Done with this set of maps
+            # Advance the global map index past this set
+            # ------------------------------------------
+            map_gdx += map_cnt
 
         if False:
             print("Final map")
@@ -143,32 +199,72 @@ class Maps ():
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def add_srcs(srcs, src_type, primary_key, primary_val, kvs):
+    def add_srcs(srcs, ctb_type, prefix, kvs):
+        '''
+        Adds or appends a source to the list of sources
 
-        if not src_type in srcs or primary_key not in srcs[src_type]  :
-            # ----------------------------------------
-            # First time this key has been encountered
-            # Add the key values
-            # ----------------------------------------
-            srcs[src_type] = primary_key
-            srcs[src_type] = { primary_key : [kvs] }
-            return 0
+        Args:
+            srcs   : The list of sources to be added to or have an existing one
+                     appended to
+           ctb_type: The contributor type, i.e. 'Builds', 'Fpgas', etc.
+           prefix  : The prefix used to reference the list of attributes in kvs.
+                     e.g. 'builds', 'fpgas'.
+           kvs     : The attributes preseentation as a SimpleNamespace,
+                     e.g. for fpgas this would be
+                        'id'          : <identification>,
+                        'part'        : <fpga part>
+                        'clock'       : <clock in frequency, nsecs, etc>
+                        'uncertainty' : <clock uncertainity, None=Default, +/-nsec, etc>
 
-        else:
+         The usage of the prefix and the attributes in kvs in the fpga example
+         is {fpga.id}, {fpga.part}, etc. This is generally used in formating string
+         with the prefix, kvs being captured in a format_map.
 
-            # --------------------------------------------------
-            # Not the first, so need to check this key is unique
-            # before appending
-            # --------------------------------------------------
-            if False: #primary_key in srcs[src_type]:
+         If the prefix has been encountered before, it must occur with in a
+         different contributor type.  The rule is 'prefixes must be unique
+         across all contributor source types, e.g. if the prefix 'fpga' is
+         used in an Product.CtbFpga contributor, it can not be used in any other
+         Product.Ctb<xxxx> contributor.  If it does, it is an error.
 
-                print(f"WARNING: Ignoring duplicate {primary_key} entry of\n"
-                      f"         {primary_val}")
-                return -1
+         Once it is determined that it has occurred in the same source type
+         its kvs/attributes are appended. An example would be an
+           Product.CtbFpgas ('fpga', (fpga0, fpga1).
 
-            else:
-                srcs[src_type][primary_key].append(kvs)
+        Here both fpga0 and fpga1 share the same prefix and result in two
+        instances of the otherwise same component being created, one wiht fpga0
+        and one with fpga1.
 
+        If the prefix has not been encountered before, by virtue that the prefix
+        must be unique to the contributor source type, this must represent a new
+        new source, so one is created and added to list of soruces.
+        '''
+        for src in srcs:
+            if prefix == src.prefix:
+
+                if ctb_type != src.ctb_type :
+
+                    # ------------------------------------------------------------
+                    # This is an internal error
+                    # This should have been flagged when entering the contributors
+                    # ------------------------------------------------------------
+                    print(f"ERROR: Contributor prefix {prefix} found in differings\n"
+                          f"       {ctb_type} & src.ctb_type\n")
+                    return -1
+
+                # -----------------------------------------------------------
+                # Have seen this prefix with this source type, append to kvs
+                # -----------------------------------------------------------
+                src.kvs.append (kvs)
+                return 0
+        # --------------------------------------------------
+
+        # ------------------------------------------------
+        # First time this source type has been encountered
+        # Create its source and add to list of sources.
+
+        # ------------------------------------------------
+        src = Maps.Src (ctb_type, prefix, kvs)
+        srcs.append (src)
         return 0
     # --------------------------------------------------------------------------
 
@@ -181,8 +277,13 @@ class Maps ():
         set of sources if the contributor value contains wildcards or a list
 
         Args:
-           srcs        : Expanded source information consisting of the primary
-                         key information and derived entries
+           srcs        : Filled in with contributor information consisting of
+                         the  contributor type and its prefix and kvs/namespace
+                         attributes (i.e. for fpga this might be
+                          prefix = 'fpgas'
+                          kvs/namespace = SimpleNamespace ('id' : <id>,
+                                                           'part' : <fpga_part,
+                                                           etc)
            contributor: The user's contributor definition
 
         Examples of contributors
@@ -191,13 +292,16 @@ class Maps ():
            contributor = Product.CtFpgas('file', ['Files', ['cfgs/*.cfg'])
         '''
 
-        key = contributor.key
-        dtype, vs = contributor.tvs
+        prefix = contributor.prefix
+        dtype, vs = contributor.kvs
 
         if dtype == 'Builds':
             for build in vs:
+
+                # The kvs/namespace for the build
                 kvs = SimpleNamespace(object = build, id = build.id)
-                Maps.add_srcs(srcs, 'Builds', key, build, kvs)
+                Maps.add_srcs(srcs, 'Builds', prefix, kvs)
+
             return len(vs)
 
         if dtype == 'Files':
@@ -224,14 +328,14 @@ class Maps ():
                     dir = os.path.split(dirs)[1]
                     name, ext = os.path.splitext(namext)
 
-                    # Derived key,values for files
+                    # The kvs/namspace for the file
                     kvs = SimpleNamespace (object = file,
                                            path   = path,
                                            dir    = dir,
                                            name   = name,
                                            ext    = ext)
 
-                    Maps.add_srcs(srcs, 'Files', key, file, kvs)
+                    Maps.add_srcs(srcs, 'Files', prefix, kvs)
                 nfiles += len(files)
 
             if errs:
@@ -241,13 +345,14 @@ class Maps ():
         if dtype == 'Fpgas':
 
             for fpga in vs:
-                # Derived key values for fpgas
+
+                # The kvs/namespacer fo the fpga
                 kvs = SimpleNamespace (object     = fpga,
                                        id         = fpga.id,
                                       part        = fpga.part,
                                       clock       = fpga.clock,
                                       uncertainty = fpga.uncertainty)
-                Maps.add_srcs(srcs, 'Fpgas', key, fpga, kvs)
+                Maps.add_srcs(srcs, 'Fpgas', prefix, kvs)
             return len(vs)
 
         if dtype == 'Values':
@@ -256,11 +361,12 @@ class Maps ():
                 val = id_val.value
                 id  = id_val.id if id_val.id else val
 
+                # The kvs/namspace of the value
                 kvs = SimpleNamespace (object = id_val,
                                        id     = id,
                                        value  = val)
 
-                Maps.add_srcs(srcs, 'Values', key, id_val, kvs)
+                Maps.add_srcs(srcs, 'Values', prefix, kvs)
             return len(vs)
 
         return
