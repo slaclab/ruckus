@@ -152,8 +152,8 @@ function hlsPrj ()
 {
     local s=''
 
-    if [[ -n "${HLSBS_INI}"  ]] ; then
-        IFS=':' read -ra arr <<< "${HLSBS_INI}"
+    if [[ -n "${HLSBS_PF}"  ]] ; then
+        IFS=':' read -ra arr <<< "${HLSBS_PF}"
         local tarr=("${arr[@]/#/@}")
         s+=${tarr[@]}
     fi
@@ -162,8 +162,8 @@ function hlsPrj ()
         s+=' --project='${HLSBS_PROJECT}
     fi
 
-    if [[ -n "${HLSBS_PRODUCTS}" ]]; then
-        s+=' --products-root='${HLSBS_PRODUCTS}
+    if [[ -n "${HLSBS_PRODUCTS_ROOT}" ]]; then
+        s+=' --products-root='${HLSBS_PRODUCTS_ROOT}
     fi
 
     if [[ -n "${HLSBS_BUILD}"   ]];  then
@@ -187,50 +187,67 @@ function hlsCtx ()
         return
     fi
 
+    all=false
+    if [[ "$1" == @(-a|--a|--al|--all) ]]; then
+       all=true
+    fi
+
+#    explain="--explain"
+#    n=${#1}
+#    ex="${explain:0:$n}"
+#    if [[ "$1" == "-e" || "$1" == $ex ]]; then
+#       echo "Print table"
+#       return 0
+#    fi
+
     echo "HLSBS Project environment variables"
 
-    if [[ -n "${HLSBS_ROOT}"          ]] ; then
+    if  ${all} || [[ -n "${HLSBS_ROOT}"          ]] ; then
         echo   "HLSBS_ROOT           = ${HLSBS_ROOT}"
     fi
 
-    if [[ -n "${HLSBS_XILINX_SETUP}"   ]] ; then
+    if  ${all} || [[ -n "${HLSBS_XILINX_SETUP}"   ]] ; then
         echo   "HLSBS_XILINX_SETUP   = ${HLSBS_XILINX_SETUP}"
     fi
 
-    if [[ -n "${HLSBS_XILINX_VERSION}" ]] ; then
+    if  ${all} || [[ -n "${HLSBS_XILINX_VERSION}" ]] ; then
         echo   "HLSBS_XILINX_VERSION = ${HLSBS_XILINX_VERSION}"
     fi
 
-    if [[ -n "${HLSBS_INI}"            ]] ; then
-        echo   "HLSBS_INI            = ${HLSBS_INI}"
+    if  ${all} || [[ -n "${HLSBS_PF}"             ]] ; then
+        echo   "HLSBS_PF             = ${HLSBS_PF}"
     fi
 
-    if [[ -n "${HLSBS_PROJECT_ROOT}"   ]] ; then
+    if  ${all} || [[ -n "${HLSBS_PROJECT_ROOT}"   ]] ; then
         echo   "HLSBS_PROJECT_ROOT   = ${HLSBS_PROJECT_ROOT}"
     fi
 
-    if [[ -n "${HLSBS_PROJECT}"       ]]; then
+    if  ${all} || [[ -n "${HLSBS_PROJECT}"       ]]; then
         echo   "HLSBS_PROJECT        = ${HLSBS_PROJECT}"
     fi
 
-    if [[ -n "${HLSBS_PRODUCTS}"      ]] ; then
-        echo   "HLSBS_PRODUCTS       = ${HLSBS_PRODUCTS}"
+    if  ${all} || [[ -n "${HLSBS_PRODUCTS_ROOT}" ]] ; then
+        echo   "HLSBS_PRODUCTS_ROOT  = ${HLSBS_PRODUCTS_ROOT}"
     fi
 
-    if [[ -n "${HLSBS_BUILD}"         ]] ; then
-        echo   "HLSBS_BUILD         = ${HLSBS_BUILD}"
+    if  ${all} || [[ -n "${HLSBS_BUILD}"         ]] ; then
+        echo   "HLSBS_BUILD          = ${HLSBS_BUILD}"
     fi
 
-    if [[ -n "${HLSBS_WORKSPACE}"     ]] ; then
+    if  ${all} || [[ -n "${HLSBS_WORKSPACE}"     ]] ; then
         echo   "HLSBS_WORKSPACE      = ${HLSBS_WORKSPACE}"
     fi
 
-    if [[ -n "${HLSBS_CFG}"           ]] ; then
-        echo   "HLSBS_CFG            = ${HLSBS_CFG}"
+    if  ${all} || [[ -n "${HLSBS_CFG_ROOT}"      ]] ; then
+        echo   "HLSBS_CFG_ROOT       = ${HLSBS_CFG_ROOT}"
     fi
 
-    if [[ -n "${HLSBS_IP}"           ]] ; then
-        echo   "HLSBS_IP             = ${HLSBS_IP}"
+    if  ${all} || [[ -n "${HLSBS_IP_ROOT}"      ]] ; then
+        echo   "HLSBS_IP_ROOT        = ${HLSBS_IP_ROOT}"
+    fi
+
+    if  ${all} || [[ -n "${HLSBS_IP_VERSION}"   ]] ; then
+        echo   "HLSBS_IP_VERSION     = ${HLSBS_IP_VERSION}"
     fi
 }
 # ------------------------------------------------------------------------------
@@ -278,8 +295,8 @@ function hlsCfg ()
     fi
 
     s=''
-    if [[ -n "${HLSBS_CFG}" ]] ; then
-        s+=' --cfg-root='${HLSBS_CFG}
+    if [[ -n "${HLSBS_CFG_ROOT}" ]] ; then
+        s+=' --cfg-root='${HLSBS_CFG_ROOT}
     fi
 
     (export LD_LIBRARY_PATH=$HLSBS_LD_LIBRARY_PATH; set -f; \
@@ -338,8 +355,8 @@ function hlsRun ()
     fi
 
     s=''
-    if [[ -n "${HLSBS_IP}" ]] ; then
-        s+=' --ip-root='${HLSBS_IP}
+    if [[ -n "${HLSBS_IP_ROOT}" ]] ; then
+        s+=' --ip-root='${HLSBS_IP_ROOT}
     fi
 
     (export LD_LIBRARY_PATH=${lpath}; set -f; \

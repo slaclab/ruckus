@@ -38,7 +38,7 @@ class Fpga:
         cfg_file.set_value(section='hls', key='clock', value=self.clock)
 
         if (self.uncertainty):
-            cfg_file.set_value(section='hls', key='uncertainty',
+            cfg_file.set_value(section='hls', key='clock_uncertainty',
                                value=self.uncertainty)
         return
     # --------------------------------------------------------------------------
@@ -63,6 +63,7 @@ class Fpga:
     # ------------------------------------------------------------------------------
     def __str__(self):
         uncertainty = self.uncertainty if self.uncertainty else 'Vitis Default'
-        str = self.id + ' => ' + self.part + ' @ ' + self.clock + ' -/+ ' + uncertainty
+        id  = self.id if self.id else "ID"
+        str = id + ' => ' + self.part + ' @ ' + self.clock + ' -/+ ' + uncertainty
         return str
     # ------------------------------------------------------------------------------

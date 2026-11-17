@@ -100,31 +100,33 @@ class Run:
         Ip_Dcp: int = 64
         All: int = 127
 
-        def __init__(self, stages, csim, cosim, ip):
+        def __init__(self, stages, csim, cosim, get_ip, args):
             self.stages = stages
             self.csim = csim
             self.cosim = cosim
-            self.ip = ip
+            self.get_ip = get_ip
+            self.args = args
             return
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
 
-    def __init__(self, options, root, ip, printer):
+    def __init__(self, options, project, args, printer):
         '''
         Captures the run options which include which stages to run and their
         options, plus output verbosity.
 
         Args:
            options: The stages and their options
-              root: Project's root directory
-                ip: The runtime parameters used for the IP stage
+           project: Project's definition
+              args: The command line parameters
            printer: The printer used to display output
         '''
         # ----------------------------------------------------------------------
         self.options = options
-        self.root = root
-        self.ip = ip
+        self.project = project
+        self.root = project.products_root
+        self.args = args
         self.printer = printer
 
         return
@@ -213,6 +215,57 @@ class Run:
             if caption:
                 self.printer.itemPlain(caption, '')
         return True
+    # --------------------------------------------------------------------------
+
+
+    @staticmethod
+    def compose_ip (project, args, info):
+
+        ip = None
+        if project.has_project_file:
+
+            get_ip = project.get_ip()
+
+            if get_ip:
+                ip = get_ip(project, Ip.Info (info.cmp_name,
+                                              info.pkg_name,
+                                              info.hls_top_level,
+                                              info.fpga))
+
+            # -----------------------------------------
+            # If have project defined ip, override with
+            # command line arguments
+            # -----------------------------------------
+            if ip:
+                ip.replace(args)
+
+        # ----------------------------------------------------
+        # If no project defined ip, use from the args/defaults
+        # ----------------------------------------------------
+        if not ip:
+            ip = project.Ip(dir=args.ip_dir,
+                            zip_file=args.ip_zip_file,
+                            dcp_file=args.ip_dcp_file,
+                            family=args.ip_family,
+                            dgn_dir=args.ip_dgn_dir,
+                            jou_file=args.ip_dcp_jou_file,
+                            log_file=args.ip_dcp_log_file)
+
+        # Establish default output directories
+        if not ip.dir:
+            ip.dir = os.path.join(
+                project.products_root, 'ip', '{vitis.version}')
+
+        # No dgn_dir
+        if not ip.dgn_dir:
+            ip.dgn_dir = os.path.join(
+                project.build_root, 'ip', 'dgn', '{vitis.version}')
+
+        # If have a relative dgn_dir
+        elif not os.path.isabs (ip.dgn_dir):
+            ip.dgn_dir = os.path.join(project.build_root, ip.dgn_dir)
+
+        return ip
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
@@ -570,26 +623,32 @@ class Run:
         # ----------------------------------------------------------------------
         # IP
         # --
-        if self.options.stages & Run.Stage.Ip_Zip:
-            if not self.ip.dir:
+        if self.options.stages & (Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp):
+
+            ip = self.compose_ip (self.project, self.args, info)
+
+            if not ip.dir:
                 self.printer.itemPlain(
                     'ERROR',
                     'IP Zip generation did not specify an output directory',
                     '*')
                 return -1
 
+
+        if self.options.stages & Run.Stage.Ip_Zip:
             self.announce(True, "IP FPGA family augmentation",
                           self.options.verbose)
-            ip = Ip(self.ip.dir,
-                    self.ip.zip_file,
-                    self.ip.family,
-                    cmp_path,
-                    info)
 
-            ip.print(self.printer, True)
+            ip_zip = Ip(ip.dir,
+                        ip.zip_file,
+                        ip.family,
+                        cmp_path,
+                        info)
+
+            ip_zip.print(self.printer, True)
             if not self.options.dry_run:
-                status = ip.execute(self.printer,
-                                    self.options.verbose)
+                status = ip_zip.execute(self.printer,
+                                        self.options.verbose)
             else:
                 status = 0
 
@@ -602,21 +661,21 @@ class Run:
         # ----------
         if (self.options.stages & Run.Stage.Ip_Dcp) \
                 and info.syn_dcp:
-            if not self.ip.dir:
+            if not ip.dir:
                 self.printer.itemPlain(
                     'ERROR',
                     'IP DCP renaming did not specify an output directory', '*')
                 return -1
 
             self.announce(True, "DCP file rename", self.options.verbose)
-            dcp = Dcp(self.ip.dir,
-                      self.ip.dcp_rename,
-                      self.ip.dcp_file,
+            dcp = Dcp(ip.dir,
+                      ip.dcp_rename,
+                      ip.dcp_file,
                       os.path.join(cmp_path, info.cmp_name),
                       info.cmp_name,
-                      self.ip.dgn_dir,
-                      self.ip.jou_file,
-                      self.ip.log_file)
+                      ip.dgn_dir,
+                      ip.jou_file,
+                      ip.log_file)
 
             dcp.print(self.printer, True)
 
@@ -651,7 +710,7 @@ class Run:
         if "Generating" in line[0:10]:
             suppress = False
 
-        if suppress:
+        if not suppress:
             line = line.rstrip()
             print(line)
         return

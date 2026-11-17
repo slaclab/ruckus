@@ -20,10 +20,26 @@ class ComponentInfo:
     ErrJsonDecode = 4
     ErrUnknown = 8
 
+    class Fpga:
+        def __init__ (self):
+            self.part = None
+            self.clock = None
+            self.uncertainty = None
+            return
+
+        part: str
+        clock: str
+        uncertainty: str
+
+        def __repr__(self):
+            return f"ComponentInfo.Fpga(part={self.part} clock={self.clock} uncertainty={self.uncertainty})"
+
+
     def __init__(self, component_path, silence_error=False):
 
         vitis_comp_path = os.path.join(component_path, 'vitis-comp.json')
         self.errs = 0
+        self.fpga = ComponentInfo.Fpga()
 
         try:
             with open(vitis_comp_path, 'r') as f:
@@ -60,8 +76,11 @@ class ComponentInfo:
                         self.sim_argv = ''
                         self.syn_dcp = False
 
-                        look: int = 15
+                        look: int = 0xff
                         for line in file:
+
+                            if line == '\n':
+                                continue
 
                             if (look & 1) and (line[0:9] == "csim.argv"):
                                 idx = line[9:].find('=')
@@ -94,6 +113,34 @@ class ComponentInfo:
                                 if look == 0:
                                     break
 
+                            elif (look & 0x10) and (line[0:4] == 'part'):
+                                idx = line[4:].find('=')
+                                look &= ~0x10
+                                self.fpga.part=line[idx+4+1:].strip()
+                                if look == 0:
+                                    break
+
+                            elif (look & 0x20) and (line[0:5] == 'clock'):
+                                idx = line[5:].find('=')
+                                look &= ~0x20
+                                self.fpga.clock=line[idx+5+1:].strip()
+                                if look == 0:
+                                    break
+
+                            elif (look & 0x40) and (line[0:11] == 'uncertainty'):
+                                idx = line[11:].find('=')
+                                look &= ~0x40
+                                self.fpga.uncertainty = line[idx+11+1:].strip()
+                                if look == 0:
+                                    break
+
+                            elif (look & 0x80) and (line[0:15] == 'package.ip.name'):
+                                idx = line[15:].find('=')
+                                look &= ~0x80
+                                self.pkg_name = line[idx+15+1:].strip()
+                                if look == 0:
+                                    break
+
                 except FileNotFoundError:
                     self.errs |= ComponentInfo.ErrNoCfgFile
                     if not silence_error:
@@ -113,4 +160,6 @@ class ComponentInfo:
             self.errs |= ComponentInfo.ErrUnknown
             if not silence_error:
                 print(f"An unexpected error occurred: {e}")
+
+        return
 # ------------------------------------------------------------------------------

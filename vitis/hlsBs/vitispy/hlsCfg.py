@@ -705,8 +705,9 @@ def main():
     # Cleaning
     # --------
     if args.clean is not None:
-        opts = Category.categorize(args.clean,
-                                   Category.Existing | Category.Cruft)
+        opts = Category.categorize(args.clean, 'clean',
+                                   Category.Existing | Category.Cruft,
+                                   ('hlsCfg', 'clean'))
         # --------------------------------------
         # Removing the configuration without
         # removing the component is nonsensical
@@ -725,7 +726,10 @@ def main():
     # Listing
     # -------
     elif args.list is not None:
-        opts = Category.categorize(args.list, Category.All)
+        opts = Category.categorize(args.list,
+                                   'list',
+                                   Category.All,
+                                   ('hlsCfg', 'list'))
 
         listConfigurations(project,
                            cmpList,
@@ -742,11 +746,17 @@ def main():
     else:
         replace = args.replace is not None
         if replace:
-            opts = Category.categorize(args.replace, Category.Existing)
+            opts = Category.categorize(args.replace,
+                                       'replace',
+                                       Category.Existing,
+                                       ('hlsCfg','replace'))
         else:
             if args.create is None:
                 args.create = []
-            opts = Category.categorize(args.create,  Category.Missing)
+            opts = Category.categorize(args.create,
+                                       'create',
+                                       Category.Missing,
+                                       ('hlsCfg', 'replace'))
 
         for product in project.products:
             cfg = hlsCfg.Configuration(args,

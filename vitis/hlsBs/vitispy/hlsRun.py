@@ -25,6 +25,7 @@ from vitispy.printer import Printer
 from vitispy.workspace import Workspace
 from vitispy.dry_run import DryRun
 from vitispy.run import Run
+from vitispy.optError import optError
 from vitispy.manpage import display_manpage
 
 # ------------------------------------------------------------------------------
@@ -257,7 +258,7 @@ class Options:
     def csim_set(self, list):
 
         # Hold on to the original request
-        msk = self.action_msk(list, Run.Msk.Make | Run.Msk.Run)
+        msk = self.action_msk('csim', list, Run.Msk.Make | Run.Msk.Run)
         self.csim = msk != 0
         self.csim_msk = msk
 
@@ -276,7 +277,7 @@ class Options:
     def cosim_set(self, list):
 
         # Hold on to the original request
-        msk = self.action_msk(list, Run.Msk.Make | Run.Msk.Run)
+        msk = self.action_msk('cosim', list, Run.Msk.Make | Run.Msk.Run)
         self.cosim = msk != 0
 
         # --------------------------------------------------
@@ -307,23 +308,69 @@ class Options:
             msk = Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp
             return msk
 
-        if Options.is_in('z', ip_list):
-            msk |= Run.Stage.Ip_Zip
-        if Options.is_in('d', ip_list):
-            msk |= Run.Stage.Ip_Dcp
-        if Options.is_in('a', ip_list):
-            msk = Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp
+        gbl_msk = 0
 
-        return msk
+        for opt in ip_list:
+            n = len (opt)
+            lcl_msk = 0
+
+            if 'all'[0:n] == opt:
+                lcl_msk =  Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp
+                gbl_msk |= lcl_msk;
+                continue
+
+            if 'dcp'[0:n] == opt:
+                lcl_msk = Run.Stage.Ip_Dcp
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'zip'[0:n] == opt:
+                lcl_msk = Run.Stage.Ip_Zip
+                gbl_msk |= lcl_msk
+                continue
+
+            optError ('hlsRun', 'Parameter', 'ip', opt, ip_list, 'dcp, zip, all')
+            exit (-1)
+
+            opts = ""
+            last = len(ip_list) - 1
+            idx = 0
+            for o in ip_list:
+                opts += o
+                if idx == last:
+                    break
+                opts += ','
+                idx += 1
+
+            nrm = Ansi.nrm
+            bold = Ansi.bold
+            italic = Ansi.italic
+            red = Ansi.red
+            green = Ansi.green
+
+
+            print (f"\n{red}ERROR{nrm}: Parameter {italic}{opt}{nrm} for {italic}--ip{nrm} is not one of"
+                   f" [{italic}dcp, zip, all{nrm}]\n\n"
+                   f" Perhaps a misspelling or the component selection is immediately after {italic}--ip, e.g{nrm}.\n\n"
+                   f" $ {italic}hlsRun --ip '{opts}'{nrm}        {italic}# Wrong: '{opt}' will be eaten by --ip{nrm}\n"
+                   f" $ {italic}hlsRun '{opts}'{nrm} --ip=<opts> {italic}# Okay\n\n"
+                   f"  The parameter {italic}'--ip'{nrm} accepts a list which, according to bash rules,\n"
+                   f"  will be whatever immediately follows, {italic}i.e.{nrm} '{opts}'\n\n",
+                   f" {green}SUGGESTION{nrm}: Either specify the positional argument as the first argument or\n"
+                   f"              use the safer, optional argument {italic}--component='{opts}'{nrm}\n", file=sys.stderr)
+            exit (-1)
+
+
+        return gbl_msk
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def is_in(s, list):
-        n = len(s)
-        for member in list:
-            if s == member[0:n]:
+    def is_in(s, opList):
+        for opt in opList:
+            n = len(opt)
+            if opt == s[0:n]:
                 return True
         return False
     # --------------------------------------------------------------------------
@@ -331,35 +378,81 @@ class Options:
     # --------------------------------------------------------------------------
 
     @staticmethod
-    def action_msk(list, default_msk):
+    def action_msk(prm, optList, default_msk):
 
         # If List is None, no action
-        if list is None:
+        if optList is None:
             return 0
 
         msk = 0
 
         # If empty list, return the default action mask
-        if len(list) == 0:
+        if len(optList) == 0:
             msk = default_msk
             return msk
 
-        all = Options.is_in('a', list)
-        if all:
-            msk = Run.Msk.Clean | Run.Msk.Make | Run.Msk.Run
-        else:
-            if Options.is_in('c', list):
-                msk |= Run.Msk.Clean
-            if Options.is_in('m', list):
-                msk |= Run.Msk.Make
-            if Options.is_in('r', list):
-                msk |= Run.Msk.Run
+        gbl_msk = 0
+
+        for opt in optList:
+            n = len (opt)
+            lcl_msk = 0
+
+            if 'all'[0:n] == opt:
+                lcl_msk = Run.Msk.Clean | Run.Msk.Make | Run.Msk.Run
+                gbl_msk |= lcl_msk;
+                continue
+
+            if 'clean'[0:n] == opt:
+                lcl_msk = Run.Msk.Clean
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'make'[0:n] == opt:
+                lcl_msk = Run.Msk.Make
+                gbl_msk |= lcl_msk
+                continue
+
+            if 'run'[0:n] == opt:
+                lcl_msk = Run.Msk.Run
+                gbl_msk |= lcl_msk
+                continue
+
+            # Option was not recognized
+            optError ('hlsRun', 'Parameter', prm, opt, optList, 'clean, make, run, all')
+            exit (-1)
+
+            opts = ""
+            last = len(optList) - 1
+            idx = 0
+            for o in optList:
+                opts += o
+                if idx == last:
+                    break
+                opts += ','
+                idx += 1
+
+            nrm = Ansi.nrm
+            italic = Ansi.italic
+            red = Ansi.red
+            green = Ansi.green
+
+            print (f"\n{red}ERROR{nrm}: Parameter {italic}{opt}{nrm} for {italic}--{prm}{nrm} is not one of\n"
+                   f"       [{italic}clean, make, run, all{nrm}]\n\n"
+                   f" Perhaps a misspelling or the component selection is immediately after {italic}--{prm}, e.g{nrm}.\n\n"
+                   f" $ {italic}hlsRun --{prm} '{opts}'{nrm}        {italic}# Wrong: '{opt}' will be eaten by --{prm}{nrm}\n"
+                   f" $ {italic}hlsRun '{opts}'{nrm} --{prm}=<opts> {italic}# Okay\n\n"
+                   f"  The parameter {italic}'--{prm}'{nrm} accepts a list which,\n"
+                   f"  according to bash rules, will be whatever immediately follows, {italic}i.e.{nrm} '{opts}'\n\n",
+                   f" {green}SUGGESTION{nrm}: Either specify the positional argument as the first argument or\n"
+                   f"              use the safer, optional argument {italic}--component='{opts}'{nrm}\n", file=sys.stderr)
+            exit (-1)
+
 
             # Default the action if clean or run not specified
-            if not (msk & Run.Msk.Clean) and not (msk & Run.Msk.Run):
-                msk |= Run.Msk.Make
+            if not (gbl_msk & Run.Msk.Clean) and not (gbl_msk & Run.Msk.Run):
+                gbl_msk |= Run.Msk.Make
 
-        return msk
+        return gbl_msk
     # --------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
@@ -456,34 +549,6 @@ def doit():
                       args.dry_run,
                       args.verbose)
 
-    # ----------------------------
-    # Setup IP family augmentation
-    # ----------------------------
-    ip = None
-    if options.stages & (Run.Stage.Ip_Zip | Run.Stage.Ip_Dcp):
-        if project.has_project_file:
-            ip = project.get_ip()
-            if ip:
-                ip.replace(args)
-
-        if not ip:
-            ip = Project.Ip(dir=args.ip_dir,
-                            zip_file=args.ip_zip_file,
-                            dcp_file=args.ip_dcp_file,
-                            family=args.ip_family,
-                            dgn_dir=args.ip_dgn_dir,
-                            jou_file=args.ip_dcp_jou_file,
-                            log_file=args.ip_dcp_log_file)
-
-        if not ip.dir:
-            ip.dir = os.path.join(
-                project.products_root, 'ip', '{vitis.version}')
-
-        if not ip.dgn_dir:
-            ip.dgn_dir = os.path.join(
-                project.build_root, 'ip', 'dgn', '{vitis.version}')
-        elif not os.path.isabs (ip.dgn_dir):
-            ip.dgn_dir = os.path.join(project.build_root, ip.dgn_dir)
 
     if args.list:
         rc = 0
@@ -513,7 +578,7 @@ def doit():
               file=sys.stderr)
         return -1
 
-    run = Run(options, project.root, ip, printer)
+    run = Run(options, project, args, printer)
     workspace = Workspace.get(workspace)
 
     report(args.verbose, printer, project, workspace, components, run)

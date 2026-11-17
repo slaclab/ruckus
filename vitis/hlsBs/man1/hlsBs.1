@@ -7,7 +7,7 @@ A quick reference guide for a suite of hls commands along with a brief
 synopsis of what they do.
 
 While command parameters and options can be specified on the command
-line in the traditional manner, by using a project file or indirect file
+line in the traditional manner, by using a project file or parameter file
 (see below) to capture commonly used options, many commands can be
 invoked with just the command, eliminating both tedium and typos when
 using them interactively.
@@ -28,26 +28,34 @@ chronological use.  The \fBhlsWs\fR and \fBhlsCfg\fR fall into the use
 almost exclusively once the workspace, configuration files and
 components are created.
 
-More detailed help can be found by either, \fIe.g.\fR
+All commands have a \fI-h\fR | \fI--help\fR option. Detailed help on all
+command can be found by either, \fIe.g.\fR
   - $ hlsCfg [-h | --help]
   - $ man hlsCfg
 
 .TP
-.B hlsProject
+.B hlsVersion
 This sets up an HLS project for the specified XILINX/HLS version. Typically
-one does a \fB$ source setup_hls.sh\fR to make all the commands available, then
-an \fBhlsProject\fR to set the Vitis version.
-   $ hlsProject 2024.2
+one does a
+
+   $ source <path_to>/ruckus/vitis/hlsBs/scripts/setup_hls.sh
+
+to make all the commands available, then an \fBhlsVersion\fR to set the Vitis
+version.
+
+   $ hlsVersion 2024.2
 
 .TP
 .B hlsWs
 Manage the workspace, by \fBcreating\fR, \fBremoving\fR, \fBreplacing\fR,
 \fBlisting\fR and checking its \fBstatus\fR.
+
    $ hlsWs --workspace=<WORKSPACE> [ACTION]
 
 .TP
 .B hlsGui
 Starts the Vitis IDE/GUI in the specified workspace or no workspace.
+
    $ hlsGui --workspace=<WORKSPACE>
 
 .TP
@@ -55,6 +63,7 @@ Starts the Vitis IDE/GUI in the specified workspace or no workspace.
 Manages the configuration files by \fBcreating\fR, \fBcleaning\fR,
 \fBreplacing\fR and \fBlisting\fR and optionally (by default) creating its
 corresponding HLS component during configuration file creation.
+
    $ hlsCfg <COMPONENTS> [OPTIONS]
 
 .TP
@@ -63,6 +72,7 @@ Manages the HLS components \fBcreating\fR, \fBcleaning\fR,
 \fBreplacing\fR and \fBlisting\fR. This is generally used for creating
 the components from existing/legacy configuration files. \fBhlsCfg\fR is the
 usual way of creating the HLS component.
+
    $ hlsComp <COMPONENTS> [OPTIONS]
 
 .TP
@@ -71,6 +81,7 @@ Run any single or combination of the various stages, \fBcsim\fR,
 \fBsynthesis\fR, \fBcosim\fR, \fBpackage\fR, \fBimplementation\fR and
 \fBip\fR on one or more HLS components.  Useful in scripts which act
 on a single component or a collection of HLS components.
+
    $ hlsRun <COMPONENTS> [OPTIONS]
 
 .TP
@@ -78,7 +89,9 @@ on a single component or a collection of HLS components.
 Runs \fBcsim\fR on 1 HLS component. Because it allows easy modification of
 the command line parameters, it is useful to examine/explore different
 combinations of the command line parameters such as different test files.
+
    $ hlsExe <COMPONENT> [CSIM OPTIONS]
+
 
 .TP
 .B hlsGdb
@@ -87,6 +100,7 @@ as \fBhlsExe\fR, it allows easy modification of the command line
 parameters, it is useful in debugging issues with different
 combinations of the command line parameters, e.g. a particular set of
 input data that is causing problems.
+
    $ hlsGdb <COMPONENT> [CSIM OPTIONS]
 
 .TP
@@ -94,12 +108,14 @@ input data that is causing problems.
 This displays all the 'hidden' HLSBS context, in particular its
 environment variables.  Since these environment variables are all of
 the form \fBHLSBS_\fR<what>, they can also be seen by
+
    $ printenv | grep \fBHLSBS_\fR
 
 
-.SH GENERALITIES
+.SH Generalities
 All commands, except \fBhlsWs\fR and \fBhlsGui\fR, take the component name(s)
-as their positional parameters. The component name(s) may be
+as their positional parameters or the \fI--components=\fR optional parameter.
+The component name(s) may be
     a) A single explicit component name
     b) A single wildcarded component name
     c) A list of any combination of explicit and wildcarded component names.
@@ -131,39 +147,45 @@ missing, cruft) but will 'eat' the '*' positional parameter.  The
 safer option is to use --components='*'.  As a bonus by using the '=',
 the single quotes are unnecessary.
 
-
 .SH PRODUCTS and WORKSPACE Only Specification
-Many commands only need the \fBworkspace\fR or the \fBproducts\fR directory.
-For simple projects, this greatly simplifies their usage.
+Some commands need only the \fBworkspace\fR or the \fBproducts\fR directory. For
+simple projects, this greatly simplifies their usage.
 
 The \fBworkspace\fR and the \fBproducts_root\fR can be specified in the
 following ways
    1. In a project file
-      This is the most formal way. A project file is meant for large
-      and/or mature projects.
+      For all but toy projects, it is worth the effort to setup
+      a project file.
+         - the \fBhlsBs Tutorial\fR in the \fBhlsBs-examples\fR repository
+         - the \fBhlsBs Reference Manual\fR \fBruckus\fR repository
+
+      Recommendation: Clone an example in the \fBhlsBs-examples\fR
+      repository as a starting point.
 
       A large project might be a test suite involving multiple
       components, variations of the same component (think different
       implementations to explore resource/performance trade-offs) and
       different test vectors.
 
-      Using a project file with a mature project allows other users to
-      check the code out from the GIT repository and build and run it
-      without detailed knowledge.
+      Using a project file allows other users to check the code out from
+      the GIT repository and build and run it without detailed knowledge.
 
-      By default the project file is the environment variable HLSBS_PROJECT
-      The default can be neutered by \fB\-\-no-product\fR, which is handy for
-      one-off ad hoc experimentation.
+      By default the project file is the value of environment variable
+      \fBHLSBS_PROJECT\fR.
 
-   2. In an indirect file.
-      This is a file containing the \fB\-\-workspace\fR=<\fIWORKSPACE\fR or
-      --products_root=<\fIPRODUCTS>\fR on a single line.  This file is
+      The default can be neutered by \fB\-\-no-project\fR, or modified by
+      \fB\-\-project=<file-spec>\fR, which is handy for one-off ad hoc
+      experimentation.
+
+   2. In a Parmeter File.
+      This is a file containing the \fB\-\-workspace\fR=<\fIWORKSPACE>\fR or
+      --products_root=<\fIPRODUCTS>\fR each on a single line.  This file is
       invoked by specifying it on the command line as
       \fB@FILE\fR. Note any command line option can be placed in this
-      file; it is not limited to just the workspace/products root
+      file; it is not limited to just the workspace/products root.
 
-   3. Directly on the command line as \fB\-\-workspace\fR=<\fIWORKSPACE\fR
-      or as \fB\-\-\PRODUCTS_ROOT\fR
+   3. Directly on the command line as \fB\-\-workspace\fI=<\fIWORKSPACE>\fR
+      and \fB--product\fR=\fI<product-dir>\fR.
 
    4. By the environment variable \fBHLSBS_WORKSPACE\fR and
       \fBHBS_PRODUCTS\fR. This is not recommended except in the
@@ -174,7 +196,7 @@ following ways
 
    5. Finally, if no workspace/products_root is specified, it defaults in
       the following order.
-        a) If HLSBS_PRODUCTS or --products_root is set then
+        a) If HLSBS_PRODUCTS or --products_root is set, then
              ${products_root}/ws/{version}
 
         b) If HLSBS_PRODUCTS and --products_root is not set, then
@@ -183,33 +205,36 @@ following ways
 
         c) If none set --> \fBERROR\fR
 
-.SH INDIRECT FILE
-An indirect file may contain one or more command line options. It
+.SH Paremeter File
+A parameter file may contain one or more command line options. It
 represents a middle ground between the high formality of a project file and the
 ad hoc nature of command line parameters. Giving it a meaningful name allows
 some self-documentation, particularly when doing command recall.
 
-The format is simple, but somewhat unforgiving (no comments, no extra spaces,
-etc), just one option per line. For example
+The format is simple, but somewhat unforgiving, no comments, no extra spaces,
+no blank line, etc., just one option per line. For example
      --workspace=MyWorkspace
      --ntests=40
 
 .SS Caveats
 Also note that while there is no \fBinclude\fR capability in the file, one
-can specify multiple indirect files, allowing a semblance of modularity.
+can specify multiple parameter files as a colon separated list. Assigning such
+a list to an appropriately named environment variable is recommended.
 
 .SH PROJECT FILE
-While this is very formal, it offers the most control and accountability.
-Almost all its complexity is related to creating the \fBHLS\fR configuration
-file and its corresponding component.
+A \fBProject File\fR captures all the information necessary to create the
+\fBHLS\fR configuration file and its corresponding component.
 
-The project file is a Python file with 3 methods
-   1. get_workspace () -- the workspace
-   2. get_root      () -- the package's root directory
-   3. get_products  () -- a description of the product (.cfg/components)
+The project file is a Python file with 6 methods
+   1. \fBget project_root  ()\fR -- the project root, can serve as an anchor directory
+   2. \fBget_products_root ()\fR -- the package's root directory
+   3. \fBget_build_root    ()\fR -- the built products go (workspace, configuration)
+   4. \fBget_workspace     ()\fR -- the workspace`
+   5. \fBget_products      ()\fR -- a description of the product (.cfg/components)
+   6. \fBget_ip            ()\fR -- the modified \fI.zip\fR and \fI.dcp\fR files.
 
-All but \fBget_products\fR are very simple. A manual of how to write
-\fBget_products\fR is in the works.
+All but \fBget_products\fR are very simple and optional; they have reasonable
+defaults.
 
 It is anticipated that many projects will fall into a couple of
 standard forms.  For example, a very simple one building one
@@ -220,20 +245,21 @@ captured in a common file and included in the user's project file.
 The users' project file contains only the specifics, becoming a
 fill-in-a-form exercise.
 
-As an example, an SNL project has a template that limits the user's
-project file to including it and the following
+As an example, the SNL project has a pre-canned method that limits the user's
+project file to importing  \fBSNL.py\fR and specifying the SNL product network
+as follows:
 
-    product = snl.create_product (networks      =     networks,
-                                  fpgas         =        fpgas,
-                                  cfg_template  = cfg_template,
-                                  cmp_template  = '{cfg_name}',
-                                  csim_argv     =    csim_argv,
-                                  cosim_argv    =   cosim_argv,
-                                  package       =      package,
-                                  vivado        =       vivado,
-                                  ip            =           ip)
+    return snl.create_product (networks      =     networks,
+                               fpgas         =        fpgas,
+                               cfg_template  = cfg_template,
+                               cmp_template  = '{cfg_name}',
+                               csim_argv     =    csim_argv,
+                               cosim_argv    =   cosim_argv,
+                               package       =      package,
+                               vivado        =       vivado,
+                               ip            =           ip)
 
-    return product
+
 
 where you just specify
    1. networks     = The SNL network(s) (which may be wildcarded)
@@ -246,6 +272,9 @@ where you just specify
    8. vivado       = The vivado specification
    9. ip           = The ip specification
 
+For a non-SNL project, the example \fBex*\fR project files in
+\fBhlsBs-examples\ git repository are a good starting place.
+
 
 .SH About Command Line Flexibility
 A goal of the \fBhls\fR suite of commands was to provide flexibility in
@@ -256,7 +285,7 @@ file as 'write-once'.
 
 To do this, many of the options specified in the configuration file can be
 overridden when invoking the command by either directly typing the option or
-using an indirect file.
+using an parameter file.
 
 An example of the direct usage might be to alter the number of tests run
 
@@ -266,7 +295,7 @@ or changing an input file
 
     $ hlsExe <component> input=new-input --golden=new-golden
 
-The second example might be better accomplished with an indirect file
+The second example might be better accomplished with an parameter file
 
     $ hlsExe <component> @MyProblemChild
 

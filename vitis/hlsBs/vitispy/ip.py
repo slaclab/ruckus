@@ -48,6 +48,36 @@ class Ip:
     # --------------------------------------------------------------------------
 
     # --------------------------------------------------------------------------
+    class Info:
+        # ----------------------------------------------------------------------
+        def __init__(self, cmp_name, pkg_name, hls_top, fpga) :
+            self.cmp_name = cmp_name
+            self.pkg_name = pkg_name
+            self.hls_top = hls_top
+            self.fpga = fpga
+            return
+        # ----------------------------------------------------------------------
+
+        # ----------------------------------------------------------------------
+        def __str__(self):
+            s = (f"Ip component information\n"
+                 f"     .cmp_name    = {self.cmp_name}\n"
+                 f"     .pkg_name    = {self.pkg_name}\n"
+                 f"     .hls_top     = {self.hls_top}\n"
+                 f" fpga.part        = {self.fpga.part}\n"
+                 f"     .clock       = {self.fpga.clock}\n"
+                 f"     .uncertainty = {self.fpga.uncertainty}")
+            return s
+        # ----------------------------------------------------------------------
+
+        # ----------------------------------------------------------------------
+        def __repr__(self):
+            return f"Ip.Info(cmp_name='{self.cmp_name}', pkg_name={self.pkg_name}, hls_top={self.hls_top}, {self.fpga})"
+
+    # --------------------------------------------------------------------------
+
+
+    # --------------------------------------------------------------------------
     def __init__(self, dir, name, family, cmp_dir, info):
         """
         The IP creator's constructor
@@ -124,7 +154,7 @@ class Ip:
         exists = os.path.isfile(self.hls_zip)
         if not exists:
             self.xil_family = None
-            self.family = None
+            self.family = family
             self.msg = (
                 '''ERROR: The original HLS zip file not found, possibly you have not run --syn and --package''')
 
