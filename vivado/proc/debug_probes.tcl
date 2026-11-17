@@ -80,6 +80,16 @@ proc WriteDebugProbes {ilaName {filePath ""}} {
    if { [VersionCompare 2024.1] >= 0 } {
       write_checkpoint -force $::env(SYN_DIR)/$::env(PROJECT).dcp
 
+      # Versal + Vivado 2026.2 (or later): close the modified design so impl_1
+      # links from the rewritten synth_1 checkpoint. Launching impl_1 from the
+      # open in-memory design fails the debug hub NoC insertion of opt_design
+      # (Common 17-70: Logical master not found for inserted NOC instance).
+      # Not applied to older versions: in Vivado 2026.1 the re-link fails
+      # instead (Constraints 18-5110: Duplicate instance reading BD .nts).
+      if { [isVersal] && [VersionCompare 2026.2] >= 0 } {
+         close_design
+      }
+
    # Check if write_debug_probes is support
    } elseif { [VersionCompare 2017.2] <= 0 } {
       # Write the port map file
